@@ -1,0 +1,2 @@
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/home/albert/Developer/Blockchain/Brian_Project/Alephzero_Marketplace/marketplace/target/ink/release/build/typenum-63c62cb740fdfd27/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/home/albert/Developer/Blockchain/Brian_Project/Alephzero_Marketplace/marketplace/target/ink/release/build/typenum-63c62cb740fdfd27/out/op.rs
