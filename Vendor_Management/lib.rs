@@ -20,12 +20,11 @@ mod Vendor_Management {
             PackedLayout,
             SpreadAllocate,
             SpreadLayout,
-        },
-        Lazy,
+        }
     };
     use scale::Output;
     use ink_prelude::string::String;
-    use ink_storage::lazy::Mapping;
+    use ink_storage::Mapping;
 
     /// Errors that can occur upon calling this contract.
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
