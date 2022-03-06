@@ -26,13 +26,13 @@ mod Collection_Management {
     use ink_prelude::string::String;
     use ink_storage::Mapping;
     
-     /// Errors that can occur upon calling this contract.
-     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-     #[cfg_attr(feature = "std", derive(::scale_info::TypeInfo))]
-     pub enum Error {
-         /// Returned if the address already exists upon registration.
-         AddressAlreadyExists
-     }
+    /// Errors that can occur upon calling this contract.
+    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
+    #[cfg_attr(feature = "std", derive(::scale_info::TypeInfo))]
+    pub enum Error {
+        /// Returned if the address already exists upon registration.
+        AddressAlreadyExists
+    }
 
     /// Type alias for the contract's result type.
     pub type Result<T> = core::result::Result<T, Error>;
@@ -55,21 +55,22 @@ mod Collection_Management {
         name: String,
         description: String,
         image: String,
-        typeCollection: bool,
+        typeCollection: u8,
         isRoyalFee: bool,
         isActive: bool
     }
 
     #[ink(event)]
-        pub struct AddNewCollectionEvent {
-            contractAddress: AccountId,
-            numberCollection: u64,
-            value: Collection
-        }
+    pub struct AddNewCollectionEvent {
+        contractAddress: AccountId,
+        numberCollection: u64,
+        value: Collection
+    }
 
     #[ink(storage)]
     #[derive(SpreadAllocate)]
     pub struct CollectionManagement {
+        admin_address: AccountId,
         numberCollection: u64,
         collections: Mapping<AccountId, Collection>
     }
@@ -79,10 +80,10 @@ mod Collection_Management {
 
         /// Constructor
         #[ink(constructor)]
-        pub fn new(init_value: bool) -> Self {
-            
+        pub fn new(_default_admin_address: AccountId) -> Self {
             ink_lang::codegen::initialize_contract(|contract: &mut Self| {
                 contract.numberCollection = 0;
+                contract.admin_address = _default_admin_address;
             })
         }
 
@@ -93,7 +94,7 @@ mod Collection_Management {
             _name: String,
             _description: String,
             _image: String,
-            _typeCollection: bool,
+            _typeCollection: u8,
             _contractAddress: AccountId,
             _isRoyalFee: bool,
             _isActive: bool
@@ -121,7 +122,26 @@ mod Collection_Management {
             Ok(())
         }
 
-        /// Update description
+        /// Get Admin Address
+        #[ink(message)]
+        pub fn get_admin_address(
+            &mut self
+        ) -> AccountId {
+            return self.admin_address;
+        }
+
+        /// Update Admin Address
+        #[ink(message)]
+        pub fn update_admin_address(
+            &mut self,
+            _admin_address: AccountId
+        ) {
+            self.ensure_from_wallet();
+            self.admin_address = _admin_address;
+            
+        }
+
+        /// Update Name
         #[ink(message)]
         pub fn update_name(
             &mut self,
@@ -133,7 +153,7 @@ mod Collection_Management {
             self.collections.insert(&_contractAddress, &collection);
         }
 
-        /// Update description
+        /// Update Description
         #[ink(message)]
         pub fn update_description(
             &mut self,
@@ -145,7 +165,7 @@ mod Collection_Management {
             self.collections.insert(&_contractAddress, &collection);
         }
 
-        /// Update description
+        /// Update Image
         #[ink(message)]
         pub fn update_image(
             &mut self,
@@ -157,19 +177,19 @@ mod Collection_Management {
             self.collections.insert(&_contractAddress, &collection);
         }
 
-        /// Update description
+        /// Update Type Collection
         #[ink(message)]
         pub fn update_type_collection(
             &mut self,
             _contractAddress: AccountId,
-            _typeCollection: bool
+            _typeCollection: u8
         ) {
             let mut collection = self.collections.get(&_contractAddress).unwrap();
             collection.typeCollection = _typeCollection;
             self.collections.insert(&_contractAddress, &collection);
         }
 
-        /// Update description
+        /// Update Is Royal Fee
         #[ink(message)]
         pub fn update_isRoyalFee(
             &mut self,
@@ -181,16 +201,36 @@ mod Collection_Management {
             self.collections.insert(&_contractAddress, &collection);
         }
         
-        /// Update description
+        /// Update Active Status
         #[ink(message)]
         pub fn update_isActive(
             &mut self,
             _contractAddress: AccountId,
             _isActive: bool
         ) {
+            self.ensure_admin();
             let mut collection = self.collections.get(&_contractAddress).unwrap();
             collection.isActive = _isActive;
             self.collections.insert(&_contractAddress, &collection);
+        }
+
+        /// Get Collection by Address
+        #[ink(message)]
+        pub fn get_colletion_by_address(
+            &mut self,
+            _contractAddress: AccountId
+        ) -> Collection {
+            return self.collections.get(&_contractAddress).unwrap();
+        }
+
+        /// Check address is owner
+        #[ink(message)]
+        pub fn ensure_from_wallet(&self) {
+            assert_eq!(self.env().caller(), self.env().account_id());
+        }
+
+        fn ensure_admin(&self) {
+            assert_eq!(self.env().caller(), self.admin_address);
         }
         
     }
