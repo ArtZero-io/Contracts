@@ -16,3 +16,6 @@ Cargo.lock
 
 # Ignore history files.
 **/.history/**
+contracts/Collection_Management/metadata.json
+contracts/Collection_Management/Collection_Management.contract
+contracts/Collection_Management/Collection_Management.wasm

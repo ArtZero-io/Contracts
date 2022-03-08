@@ -1,7 +1,7 @@
 [package]
-name = "Vendor_Management"
+name = "Collection_Management"
 version = "0.1.0"
-authors = ["[your_name] <[your_email]>"]
+authors = ["ArtZero - support@artzero.io"]
 edition = "2021"
 
 [dependencies]
@@ -16,9 +16,12 @@ scale = { package = "parity-scale-codec", version = "3", default-features = fals
 scale-info = { version = "2", default-features = false, features = ["derive"], optional = true }
 
 [lib]
-name = "erc20"
+name = "Collection_Management"
 path = "lib.rs"
-crate-type = ["cdylib"]
+crate-type = [
+	# Used for normal contract Wasm blobs.
+	"cdylib",
+]
 
 [features]
 default = ["std"]

@@ -1,9 +1,8 @@
 [package]
-name = "Collection_Management"
+name = "Profile_Management"
 version = "0.1.0"
-authors = ["[your_name] <[your_email]>"]
+authors = ["ArtZero - support@artzero.io"]
 edition = "2021"
-rust-version = "1.56.1"
 
 [dependencies]
 ink_primitives = { version = "3.0.0-rc9", path = "../../crates/primitives", default-features = false }
@@ -17,12 +16,9 @@ scale = { package = "parity-scale-codec", version = "3", default-features = fals
 scale-info = { version = "2", default-features = false, features = ["derive"], optional = true }
 
 [lib]
-name = "Collection_Management"
+name = "Profile_Management"
 path = "lib.rs"
-crate-type = [
-	# Used for normal contract Wasm blobs.
-	"cdylib",
-]
+crate-type = ["cdylib"]
 
 [features]
 default = ["std"]
