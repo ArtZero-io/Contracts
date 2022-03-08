@@ -27,10 +27,12 @@ mod Collection_Management {
     pub enum Error {
         /// Returned if the address already exists upon registration.
         AddressAlreadyExists,
+        CollectionNotExist,
         //OnlyOwner can do
         OnlyOwner,
         OnlyAdmin,
-        InvalidCaller
+        InvalidCaller,
+        InvalidFee
     }
 
     /// Type alias for the contract's result type.
@@ -57,6 +59,7 @@ mod Collection_Management {
         image: String,
         typeCollection: u8,
         isRoyalFee: bool,
+        royalFee: u32,          //100 = 1% 10000 = 100%
         isActive: bool
     }
 
@@ -99,11 +102,16 @@ mod Collection_Management {
             _image: String,
             _typeCollection: u8,
             _contractAddress: AccountId,
-            _isRoyalFee: bool
+            _isRoyalFee: bool,
+            _royalFee:u32
         ) -> Result<()> {
 
             if self.collections.get(&_contractAddress).is_some(){
                 return Err(Error::AddressAlreadyExists);
+            }
+            //fee must less than 100%
+            if _royalFee >= 10000 {
+                return Err(Error::InvalidFee);
             }
             //Increase collection_count and save the latest id with _contractAddress - for tracking purpose
             self.collection_count += 1;
@@ -116,6 +124,7 @@ mod Collection_Management {
                 image: _image,
                 typeCollection: _typeCollection,
                 isRoyalFee: _isRoyalFee,
+                royalFee: _royalFee,
                 isActive: false                 //When first created, isActive = false, only Admin can change to true
             };
 
@@ -150,6 +159,7 @@ mod Collection_Management {
             self.admin_address = _admin_address;
             Ok(())
         }
+
         /// Get Admin Address
         #[ink(message)]
         pub fn get_owner_address(
@@ -157,7 +167,7 @@ mod Collection_Management {
         ) -> AccountId {
             return self.owner_address;
         }
-        
+
         /// Update Owner Address
         #[ink(message)]
         pub fn update_owner_address(
@@ -179,6 +189,9 @@ mod Collection_Management {
             _contractAddress: AccountId,
             _name: String
         ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
 
             if  self.env().caller() != collection.owner &&
@@ -198,6 +211,9 @@ mod Collection_Management {
             _contractAddress: AccountId,
             _description: String
         ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
             if  self.env().caller() != collection.owner &&
                 self.env().caller() != self.admin_address {
@@ -215,6 +231,9 @@ mod Collection_Management {
             _contractAddress: AccountId,
             _image: String
         ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
             if  self.env().caller() != collection.owner &&
                 self.env().caller() != self.admin_address {
@@ -232,6 +251,9 @@ mod Collection_Management {
             _contractAddress: AccountId,
             _typeCollection: u8
         ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
             if  self.env().caller() != collection.owner &&
                 self.env().caller() != self.admin_address {
@@ -249,12 +271,43 @@ mod Collection_Management {
             _contractAddress: AccountId,
             _isRoyalFee: bool
         ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
             if  self.env().caller() != collection.owner &&
                 self.env().caller() != self.admin_address {
                  return Err(Error::InvalidCaller);
              }
+
             collection.isRoyalFee = _isRoyalFee;
+            self.collections.insert(&_contractAddress, &collection);
+            Ok(())
+        }
+
+        /// Update RoyalFee
+        #[ink(message)]
+        pub fn update_royal_fee(
+            &mut self,
+            _contractAddress: AccountId,
+            _newFee: u32
+        ) -> Result<()>  {
+            //fee must less than 100%
+            if _royalFee >= 10000 {
+                  return Err(Error::InvalidFee);
+             }
+            if self.collections.get(&_contractAddress).is_none(){
+                 return Err(Error::CollectionNotExist);
+             }
+
+            let mut collection = self.collections.get(&_contractAddress).unwrap();
+
+            if  self.env().caller() != collection.owner &&
+                self.env().caller() != self.admin_address {
+                return Err(Error::InvalidCaller);
+             }
+
+            collection.royalFee = _newFee;
             self.collections.insert(&_contractAddress, &collection);
             Ok(())
         }
@@ -266,6 +319,9 @@ mod Collection_Management {
             _contractAddress: AccountId,
             _isActive: bool
         ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
             if  self.env().caller() != self.admin_address {
                  return Err(Error::OnlyAdmin);
              }
