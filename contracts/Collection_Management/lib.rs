@@ -241,14 +241,15 @@ mod Collection_Management {
             }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
 
-            if  self.env().caller() != collection.owner &&
-                self.env().caller() != self.admin_address {
-                return Err(Error::InvalidCaller);
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.name = _name;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
              }
-
-            collection.name = _name;
-            self.collections.insert(&_contractAddress, &collection);
-            Ok(())
+             else{
+                 return Err(Error::InvalidCaller);
+             }
         }
 
         /// Update Description
@@ -262,13 +263,17 @@ mod Collection_Management {
                 return Err(Error::CollectionNotExist);
             }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
-            if  self.env().caller() != collection.owner &&
-                self.env().caller() != self.admin_address {
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.description = _description;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
+             }
+             else
+             {
                 return Err(Error::InvalidCaller);
              }
-            collection.description = _description;
-            self.collections.insert(&_contractAddress, &collection);
-            Ok(())
+
         }
 
         /// Update Image
@@ -282,13 +287,17 @@ mod Collection_Management {
                 return Err(Error::CollectionNotExist);
             }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
-            if  self.env().caller() != collection.owner &&
-                self.env().caller() != self.admin_address {
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.image = _image;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
+
+             }
+             else{
                  return Err(Error::InvalidCaller);
              }
-            collection.image = _image;
-            self.collections.insert(&_contractAddress, &collection);
-            Ok(())
+
         }
 
         /// Update Type Collection
@@ -302,13 +311,16 @@ mod Collection_Management {
                 return Err(Error::CollectionNotExist);
             }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
-            if  self.env().caller() != collection.owner &&
-                self.env().caller() != self.admin_address {
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.typeCollection = _typeCollection;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
+             }
+             else{
                  return Err(Error::InvalidCaller);
              }
-            collection.typeCollection = _typeCollection;
-            self.collections.insert(&_contractAddress, &collection);
-            Ok(())
+
         }
 
         /// Update Is Royal Fee
@@ -322,14 +334,15 @@ mod Collection_Management {
                 return Err(Error::CollectionNotExist);
             }
             let mut collection = self.collections.get(&_contractAddress).unwrap();
-            if  self.env().caller() != collection.owner &&
-                self.env().caller() != self.admin_address {
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.isRoyalFee = _isRoyalFee;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
+             }
+             else{
                  return Err(Error::InvalidCaller);
              }
-
-            collection.isRoyalFee = _isRoyalFee;
-            self.collections.insert(&_contractAddress, &collection);
-            Ok(())
         }
 
         /// Update RoyalFee
@@ -349,14 +362,15 @@ mod Collection_Management {
 
             let mut collection = self.collections.get(&_contractAddress).unwrap();
 
-            if  self.env().caller() != collection.owner &&
-                self.env().caller() != self.admin_address {
-                return Err(Error::InvalidCaller);
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.royalFee = _newFee;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
              }
-
-            collection.royalFee = _newFee;
-            self.collections.insert(&_contractAddress, &collection);
-            Ok(())
+             else{
+                 return Err(Error::InvalidCaller);
+             }
         }
 
         /// Update Active Status
