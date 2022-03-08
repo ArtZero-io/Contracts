@@ -32,7 +32,9 @@ mod Collection_Management {
         OnlyOwner,
         OnlyAdmin,
         InvalidCaller,
-        InvalidFee
+        InvalidFee,
+        InvalidRoyalFee,
+        NotEnoughBalance
     }
 
     /// Type alias for the contract's result type.
@@ -76,10 +78,10 @@ mod Collection_Management {
         owner_address: AccountId,
         admin_address: AccountId,
         collection_count: u64,
+        adding_fee: Balance,
         collections: Mapping<AccountId, Collection>,    //save collection by contract address
         collections_by_id: Mapping<u64, AccountId>      //save contract address by id
     }
-
 
     impl CollectionManagement {
 
@@ -88,6 +90,7 @@ mod Collection_Management {
         pub fn new(_default_admin_address: AccountId,_default_owner_address: AccountId) -> Self {
             ink_lang::codegen::initialize_contract(|contract: &mut Self| {
                 contract.collection_count = 0;
+                contract.adding_fee = 1 * 10u128.pow(12);       // 1 AZERO = 1 000 000 000 000 pAZERO (smallest unit)
                 contract.owner_address = _default_owner_address;
                 contract.admin_address = _default_admin_address;
             })
@@ -95,6 +98,7 @@ mod Collection_Management {
 
         /// Add new collection
         #[ink(message)]
+        #[ink(payable)]
         pub fn addNewCollection(
             &mut self,
             _name: String,
@@ -105,13 +109,15 @@ mod Collection_Management {
             _isRoyalFee: bool,
             _royalFee:u32
         ) -> Result<()> {
-
+            if self.adding_fee != self.env().transferred_value() {
+                return Err(Error::InvalidFee);
+            }
             if self.collections.get(&_contractAddress).is_some(){
                 return Err(Error::AddressAlreadyExists);
             }
             //fee must less than 100%
             if _royalFee >= 10000 {
-                return Err(Error::InvalidFee);
+                return Err(Error::InvalidRoyalFee);
             }
             //Increase collection_count and save the latest id with _contractAddress - for tracking purpose
             self.collection_count += 1;
@@ -179,6 +185,47 @@ mod Collection_Management {
                 return Err(Error::OnlyOwner);
             }
             self.owner_address = _owner_address;
+            Ok(())
+        }
+        /// Get Admin Address
+        #[ink(message)]
+        pub fn get_adding_fee(
+            &mut self
+        ) -> Balance {
+            return self.adding_fee;
+        }
+
+        /// Update Adding Fee
+        #[ink(message)]
+        pub fn update_adding_fee(
+            &mut self,
+            _fee: Balance
+        )  -> Result<()> {
+            //Only Owner can update
+            if self.env().caller() != self.owner_address{
+                return Err(Error::OnlyOwner);
+            }
+            self.adding_fee = _fee;
+            Ok(())
+        }
+        /// Withdraw Fees
+        #[ink(message)]
+        pub fn withdraw_fee(
+            &mut self,
+            _value: Balance
+        )  -> Result<()> {
+            //Only Owner can update
+            if self.env().caller() != self.owner_address{
+                return Err(Error::OnlyOwner);
+            }
+            if _value > self.env().balance() {
+                return Err(Error::NotEnoughBalance);
+            }
+            if self.env().transfer(self.env().caller(), _value).is_err() {
+                panic!(
+                    "error withdraw_fee"
+                )
+            }
             Ok(())
         }
 

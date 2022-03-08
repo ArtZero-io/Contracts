@@ -7,6 +7,7 @@ pub use self::Vendor_Management::{
 };
 
 #[ink::contract]
+#[allow(non_snake_case)]
 mod Vendor_Management {
 
     use ink_env::call::{
@@ -33,7 +34,7 @@ mod Vendor_Management {
         /// Returned if the address already exists upon registration.
         AddressAlreadyExists
     }
-    
+
     /// Type alias for the contract's result type.
     pub type Result<T> = core::result::Result<T, Error>;
 
@@ -92,7 +93,7 @@ mod Vendor_Management {
             _instagram: String
         ) -> Result<()> {
             let caller = self.env().caller();
-            
+
             if self.vendors.get(&caller).is_some() {
                 return Err(Error::AddressAlreadyExists)
             }
@@ -107,11 +108,11 @@ mod Vendor_Management {
                 telegram: _telegram,
                 instagram: _instagram
             };
-            
+
             self.vendors.insert(&caller, &new_vendor);
             Ok(())
         }
-    
+
         /// Update username
         #[ink(message)]
         pub fn update_username(
