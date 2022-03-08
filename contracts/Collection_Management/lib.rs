@@ -293,7 +293,7 @@ mod Collection_Management {
             _newFee: u32
         ) -> Result<()>  {
             //fee must less than 100%
-            if _royalFee >= 10000 {
+            if _newFee >= 10000 {
                   return Err(Error::InvalidFee);
              }
             if self.collections.get(&_contractAddress).is_none(){
