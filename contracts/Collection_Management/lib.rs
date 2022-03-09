@@ -229,6 +229,29 @@ mod Collection_Management {
             Ok(())
         }
 
+
+        /// Update Owner of Collecion
+        #[ink(message)]
+        pub fn update_collection_owner(
+            &mut self,
+            _contractAddress: AccountId,
+            _owner: AccountId
+        ) -> Result<()>  {
+            if self.collections.get(&_contractAddress).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
+            let mut collection = self.collections.get(&_contractAddress).unwrap();
+
+            if  self.env().caller() == collection.owner ||
+                self.env().caller() == self.admin_address {
+                    collection.owner = _owner;
+                    self.collections.insert(&_contractAddress, &collection);
+                    Ok(())
+             }
+             else{
+                 return Err(Error::InvalidCaller);
+             }
+        }
         /// Update Name
         #[ink(message)]
         pub fn update_name(
