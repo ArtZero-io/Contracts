@@ -17,6 +17,8 @@ mod erc721 {
         },
         Mapping,
     };
+    use ink_prelude::string::String;
+    use ink_prelude::string::ToString;
 
     use scale::{
         Decode,
@@ -258,11 +260,13 @@ mod erc721 {
             id: TokenId
         ) -> String {
             if  !self.exists(id) ||
-                self.baseURI == ""{
-                return "";
+                self.baseURI.is_empty(){
+                return String::from("");
             };
-            
-            return self.baseURI + id + ".json";
+            let mut uri = self.baseURI.to_string();
+            uri.push_str(&id.to_string());
+            uri.push_str(&".json");
+            return uri;
         }
 
         /// Set mint_mode
