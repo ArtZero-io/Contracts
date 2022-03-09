@@ -58,6 +58,8 @@ mod erc721 {
         /// Mapping from owner to operator approvals.
         operator_approvals: Mapping<(AccountId, AccountId), ()>,
         //===== ADDED
+        //baseURI
+        baseURI: String,
         //Total Token number to Mint
         total_tokens: u32,
         //To manage 10K minting
@@ -136,7 +138,7 @@ mod erc721 {
     impl Erc721 {
         /// Creates a new ERC-721 token contract.
         #[ink(constructor)]
-        pub fn new(_admin: AccountId,_fee_1: Balance, _fee_2: Balance, _amount_1: u32) -> Self {
+        pub fn new(_admin: AccountId,_fee_1: Balance, _fee_2: Balance, _amount_1: u32, _baseURI: String) -> Self {
             // This call is required in order to correctly initialize the
             // `Mapping`s of our contract.
             ink_lang::codegen::initialize_contract(|contract: &mut Self| {
@@ -148,6 +150,7 @@ mod erc721 {
                 contract.fee_2 = _fee_2;
                 contract.amount_1 = _amount_1;
                 contract.mint_mode = 0;
+                contract.baseURI = _baseURI;
             })
         }
         /*
@@ -160,7 +163,7 @@ mod erc721 {
             _account: AccountId,
             _whitelist_amount: u32
         ) -> Result<(), Error> {
-            //Only Owner can update
+            //Only Admin can update
             if self.env().caller() != self.admin{
                 return Err(Error::OnlyAdmin);
             }
@@ -235,13 +238,40 @@ mod erc721 {
             return self.whitelist_count;
         }
 
+        /// Set baseURI
+        #[ink(message)]
+        pub fn set_baseURI(
+            &mut self,
+            _baseURI: String
+        ) -> Result<(), Error> {
+            //Only Admin can update
+            if self.env().caller() != self.admin{
+                return Err(Error::OnlyAdmin);
+            }
+            self.baseURI = _baseURI;
+            Ok(())
+        }
+        /// Get tokenURI
+        #[ink(message)]
+        pub fn tokenURI(
+            &mut self,
+            id: TokenId
+        ) -> String {
+            if  !self.exists(id) ||
+                self.baseURI == ""{
+                return "";
+            };
+            
+            return self.baseURI + id + ".json";
+        }
+
         /// Set mint_mode
         #[ink(message)]
         pub fn set_mint_mode(
             &mut self,
             _mint_mode: u8
         ) -> Result<(), Error> {
-            //Only Owner can update
+            //Only Admin can update
             if self.env().caller() != self.admin{
                 return Err(Error::OnlyAdmin);
             }
@@ -353,6 +383,7 @@ mod erc721 {
         /*
             END OF MINT FUNCTIONS =============
         */
+
         /// Returns the balance of the owner.
         ///
         /// This represents the amount of unique tokens the owner has.
