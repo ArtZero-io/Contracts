@@ -16,9 +16,7 @@ Cargo.lock
 
 # Ignore history files.
 **/.history/**
-contracts/Collection_Management/metadata.json
 contracts/Collection_Management/Collection_Management.contract
 contracts/Collection_Management/Collection_Management.wasm
-contracts/ERC721/metadata.json
 contracts/ERC721/erc721.wasm
 contracts/ERC721/erc721.contract
