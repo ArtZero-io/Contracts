@@ -20,3 +20,5 @@ contracts/Collection_Management/Collection_Management.contract
 contracts/Collection_Management/Collection_Management.wasm
 contracts/ERC721/erc721.wasm
 contracts/ERC721/erc721.contract
+contracts/Profile_Management/Profile_Management.wasm
+contracts/Profile_Management/Profile_Management.contract
