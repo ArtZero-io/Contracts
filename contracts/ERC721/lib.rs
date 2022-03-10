@@ -171,7 +171,8 @@ mod erc721 {
             }
 
             //fee must less than total tokens
-            if _whitelist_amount > self.total_tokens {
+            if  _whitelist_amount > self.total_tokens ||
+                _whitelist_amount == 0{
                 return Err(Error::InvalidInput);
             }
             if self.whitelists.get(&_account).is_some(){
@@ -269,6 +270,14 @@ mod erc721 {
             return uri;
         }
 
+        /// Get tokenURI
+        #[ink(message)]
+        pub fn baseURI(
+            &mut self
+        ) -> String {
+            return self.baseURI;
+        }
+
         /// Set mint_mode
         #[ink(message)]
         pub fn set_mint_mode(
@@ -335,8 +344,10 @@ mod erc721 {
                 return Err(Error::ClaimedAll);
             }
             caller_info.claimed_amount += 1;
-            self.token_count += 1;
+            self.whitelists.insert(&_account, &caller_info);
 
+            self.token_count += 1;
+            
             self.add_token_to(&caller, self.token_count)?;
             self.env().emit_event(Transfer {
                 from: Some(AccountId::from([0x0; 32])),
@@ -387,7 +398,26 @@ mod erc721 {
         /*
             END OF MINT FUNCTIONS =============
         */
-
+        /// Get Admin Address
+        #[ink(message)]
+        pub fn set_admin_address(
+            &mut self,
+            _admin: AccountId
+        ) -> Result<(), Error> {
+            //Only Admin can update
+            if self.env().caller() != self.admin{
+                return Err(Error::OnlyAdmin);
+            }
+            self.admin = _admin;
+            Ok(())
+        }
+        /// Get Admin Address
+        #[ink(message)]
+        pub fn get_admin_address(
+            &mut self
+        ) -> AccountId {
+            return self.admin;
+        }
         /// Returns the balance of the owner.
         ///
         /// This represents the amount of unique tokens the owner has.
