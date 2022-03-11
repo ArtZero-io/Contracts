@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xe27b280e369b7baa4f923f86fbce7ac8d9c9ec13eed188a003a7f3b6ec0340c5",
+    "hash": "0x773269443621f3eb4b8606b4befb1072c19dc87d0d215e9d7c7dda2f39d59f37",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -587,7 +587,7 @@
             " Get Collection by Address"
           ],
           "label": "get_colletion_by_address",
-          "mutates": true,
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
@@ -613,7 +613,7 @@
             " Get Collection Contract by ID"
           ],
           "label": "get_contract_by_id",
-          "mutates": true,
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
@@ -629,7 +629,7 @@
             " Get Collection Count"
           ],
           "label": "get_collection_count",
-          "mutates": true,
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
@@ -645,7 +645,7 @@
             "Get Adding Fee"
           ],
           "label": "get_adding_fee",
-          "mutates": true,
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
@@ -661,7 +661,7 @@
             " Get Admin Address"
           ],
           "label": "get_admin_address",
-          "mutates": true,
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
@@ -670,36 +670,6 @@
             "type": 0
           },
           "selector": "0x8938ef71"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 16
-          },
-          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -726,6 +696,36 @@
             "type": 16
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 16
+          },
+          "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
         }
       ]
     },

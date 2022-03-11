@@ -405,14 +405,14 @@ pub mod artzero_collection_manager {
         /* GETTERS */
         /// Get Collection by Address
         #[ink(message)]
-        pub fn get_colletion_by_address(&mut self,nft_contract_address: AccountId) -> Collection {
+        pub fn get_colletion_by_address(&self,nft_contract_address: AccountId) -> Collection {
             return self.collections.get(&nft_contract_address).unwrap();
         }
 
         /// Get Collection Contract by ID
         #[ink(message)]
         pub fn get_contract_by_id(
-            &mut self,
+            &self,
             id: u64
         ) -> AccountId {
             return self.collections_by_id.get(&id).unwrap();
@@ -421,21 +421,21 @@ pub mod artzero_collection_manager {
         /// Get Collection Count
         #[ink(message)]
         pub fn get_collection_count(
-            &mut self
+            &self
         ) -> u64 {
             return self.collection_count;
         }
         ///Get Adding Fee
         #[ink(message)]
         pub fn get_adding_fee(
-            &mut self
+            &self
         ) -> Balance {
             return self.adding_fee;
         }
         /// Get Admin Address
         #[ink(message)]
         pub fn get_admin_address(
-            &mut self
+            &self
         ) -> AccountId {
             return self.admin_address;
         }

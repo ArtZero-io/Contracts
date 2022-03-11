@@ -180,11 +180,8 @@ pub mod artzero_psp34 {
 
         }
 
-
-        /// Set mint_mode - Only Owner
-        /// mint_mode 0: not started
-        /// mint_mode 1: started until amount_1 reached
-        /// mint_mode 2: started until total_supply reached
+        /* SETTERS */
+        /// Set mint_mode - Only Owner - mint_mode 0: not started - mint_mode 1: started until amount_1 reached - mint_mode 2: started until total_supply reached
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_mint_mode(
@@ -195,13 +192,44 @@ pub mod artzero_psp34 {
             Ok(())
         }
 
+        /// set fee_1: Pre_launch Minting Fee - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_fee_1(
+            &mut self,
+            fee_1: Balance
+        ) -> Result<(), Error> {
+            self.fee_1 = fee_1;
+            Ok(())
+        }
+        /// set fee_2: Launch Minting Fee - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_fee_2(
+            &mut self,
+            fee_2: Balance
+        ) -> Result<(), Error> {
+            self.fee_2 = fee_2;
+            Ok(())
+        }
+        /// set amount_1: To what amount the fee_1 is applied, after that fee_2 - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_amount_1(
+            &mut self,
+            amount_1: u32
+        ) -> Result<(), Error> {
+            self.amount_1 = amount_1;
+            Ok(())
+        }
+
         /*
             END OF WHITELIST FUNCTIONS =============
         */
         /*
             MINT FUNCTIONS =============
         */
-        /// Creates a new token.
+        /// Whitelisted User Creates a new token
         #[ink(message)]
         pub fn whitelist_mint(&mut self) -> Result<(), Error> {
 
@@ -269,33 +297,31 @@ pub mod artzero_psp34 {
         */
 
         /* GETTERS */
-        /// mint_mode 0: not started
-        /// mint_mode 1: started until amount_1 reached
-        /// mint_mode 2: started until total_supply reached
+        /// mint_mode 0: not started - mint_mode 1: started until amount_1 reached - mint_mode 2: started until total_supply reached
         #[ink(message)]
-        pub fn getmint_mode(
-            &mut self
+        pub fn get_mint_mode(
+            &self
         ) -> u8 {
             return self.mint_mode;
         }
         /// fee_1: Pre_launch Minting Fee
         #[ink(message)]
         pub fn get_fee_1(
-            &mut self
+            &self
         ) -> Balance {
             return self.fee_1;
         }
         /// fee_2: Launch Minting Fee
         #[ink(message)]
         pub fn get_fee_2(
-            &mut self
+            &self
         ) -> Balance {
             return self.fee_2;
         }
         /// amount_1: To what amount the fee_1 is applied, after that fee_2
         #[ink(message)]
         pub fn get_amount_1(
-            &mut self
+            &self
         ) -> u32 {
             return self.amount_1;
         }
@@ -303,7 +329,7 @@ pub mod artzero_psp34 {
         /// Get Whitelist Account by ID
         #[ink(message)]
         pub fn get_whitelist_account(
-            &mut self,
+            &self,
             id: u32
         ) -> AccountId {
             return self.whitelist_accounts.get(&id).unwrap();
@@ -312,7 +338,7 @@ pub mod artzero_psp34 {
         /// Get Whitelist Information by AccountID
         #[ink(message)]
         pub fn get_whitelist(
-            &mut self,
+            &self,
             account: AccountId
         ) -> Whitelist {
             return self.whitelists.get(&account).unwrap();
@@ -320,7 +346,7 @@ pub mod artzero_psp34 {
         /// Get Whitelist Count
         #[ink(message)]
         pub fn get_whitelist_count(
-            &mut self
+            &self
         ) -> u32 {
             return self.whitelist_count;
         }
