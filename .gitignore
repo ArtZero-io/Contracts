@@ -26,3 +26,5 @@ contracts/OpenBrush-ERC721-PSP34/artzero_nft.contract
 contracts/OpenBrush-ERC721-PSP34/artzero_nft.wasm
 contracts/OpenBrush-Profile-Manager/artzero_profile_manager.contract
 contracts/OpenBrush-Profile-Manager/artzero_profile_manager.wasm
+contracts/OpenBrush-Collection-Manager/artzero_collection_manager.contract
+contracts/OpenBrush-Collection-Manager/artzero_collection_manager.wasm
