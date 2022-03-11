@@ -24,3 +24,5 @@ contracts/Profile_Management/Profile_Management.wasm
 contracts/Profile_Management/Profile_Management.contract
 contracts/OpenBrush-ERC721-PSP34/artzero_nft.contract
 contracts/OpenBrush-ERC721-PSP34/artzero_nft.wasm
+contracts/OpenBrush-Profile-Manager/artzero_profile_manager.contract
+contracts/OpenBrush-Profile-Manager/artzero_profile_manager.wasm
