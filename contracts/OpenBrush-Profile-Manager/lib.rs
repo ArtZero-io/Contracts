@@ -43,13 +43,13 @@ pub mod artzero_profile_manager {
                 instance._init_with_owner(contract_owner);
             })
         }
-
+        /// Set single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn set_profile_attribute(&mut self, attribute: String, value: String) -> Result<(),Error> {
-            self._set_attribute((self.env().caller(),attribute.into_bytes()), value.into_bytes());
+            self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
             Ok(())
         }
-
+        /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             if attributes.len() != values.len() {
@@ -59,12 +59,13 @@ pub mod artzero_profile_manager {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute((self.env().caller(),attribute.into_bytes()), value.into_bytes());
+                self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
             }
 
             Ok(())
         }
 
+        // Get single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn get_attribute(&self, account: AccountId, key: Vec<u8>) -> Option<Vec<u8>> {
             self.attributes.get(&(account,key))
