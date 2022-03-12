@@ -95,7 +95,7 @@ pub mod artzero_collection_manager {
             })
         }
 
-        /// Add new collection - with fee in AZERO - anyone can add
+        /// Add new collection - with fee in AZERO 1% = 100 - anyone can add
         #[ink(message)]
         #[ink(payable)]
         pub fn add_new_collection(
@@ -403,7 +403,7 @@ pub mod artzero_collection_manager {
         }
 
         /* GETTERS */
-        /// Get Collection by Address
+        /// Get Collection Information by Address
         #[ink(message)]
         pub fn get_colletion_by_address(&self,nft_contract_address: AccountId) -> Collection {
             return self.collections.get(&nft_contract_address).unwrap();
