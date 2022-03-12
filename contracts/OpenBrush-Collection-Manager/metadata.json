@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x773269443621f3eb4b8606b4befb1072c19dc87d0d215e9d7c7dda2f39d59f37",
+    "hash": "0x2e986757ba949dc809d995e490a2c2190c5fdcd56bca9528329658f37ba88cf8",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -101,7 +101,7 @@
               }
             },
             {
-              "label": "type_collection",
+              "label": "contract_type",
               "type": {
                 "displayName": [
                   "u8"
@@ -129,7 +129,7 @@
             }
           ],
           "docs": [
-            " Add new collection - with fee in AZERO - anyone can add"
+            " Add new collection - with fee in AZERO 1% = 100 - anyone can add contract_type 1: PSP34 2: PSP1155"
           ],
           "label": "add_new_collection",
           "mutates": true,
@@ -364,7 +364,7 @@
               }
             },
             {
-              "label": "type_collection",
+              "label": "contract_type",
               "type": {
                 "displayName": [
                   "u8"
@@ -376,7 +376,7 @@
           "docs": [
             " Update Type Collection - only Admin can change - 0 - PSP34 ERC721 ; 1 - ERC1155 PSP1155"
           ],
-          "label": "update_type_collection",
+          "label": "update_contract_type",
           "mutates": true,
           "payable": false,
           "returnType": {
@@ -385,7 +385,7 @@
             ],
             "type": 12
           },
-          "selector": "0xd7f313e1"
+          "selector": "0xeb59ea76"
         },
         {
           "args": [
@@ -584,7 +584,59 @@
             }
           ],
           "docs": [
-            " Get Collection by Address"
+            "Get royal fee"
+          ],
+          "label": "get_royal_fee",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u32"
+            ],
+            "type": 9
+          },
+          "selector": "0xa7f2c606"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get is_active"
+          ],
+          "label": "is_active",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "bool"
+            ],
+            "type": 8
+          },
+          "selector": "0xd8d4423e"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Information by Address"
           ],
           "label": "get_colletion_by_address",
           "mutates": false,
@@ -923,7 +975,7 @@
                   "typeName": "Vec<u8>"
                 },
                 {
-                  "name": "type_collection",
+                  "name": "contract_type",
                   "type": 2,
                   "typeName": "u8"
                 },

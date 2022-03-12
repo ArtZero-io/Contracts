@@ -102,16 +102,7 @@ pub mod artzero_staking_nft {
         pub fn get_account_id(&self) -> AccountId {
             self.env().account_id()
         }
-        ///Get get_approved
-        #[ink(message)]
-        pub fn get_approved(&self,token_id:u32) -> AccountId {
-            Psp34Ref::get_approved(&self.nft_contract_address,Id::U32(token_id)).unwrap()
-        }
-        ///Get get_approved
-        #[ink(message)]
-        pub fn get_owner_of(&self,token_id:u32) -> AccountId {
-            Psp34Ref::owner_of(&self.nft_contract_address,Id::U32(token_id)).unwrap()
-        }
+
         ///Get User NFT staked in the contract
         #[ink(message)]
         pub fn get_total_staked_by_account(&self,account: AccountId) -> u32 {
@@ -171,6 +162,8 @@ pub mod artzero_staking_nft {
             let index = staked_ids.iter().position(|&r| r == token_id).unwrap();
             let checked_id = staked_ids[index];
             assert_eq!(staked_ids.remove(index), checked_id);
+
+            self.staking_list.insert(&caller, &staked_ids);
 
             //Step 2 - transfer token to caller
             assert!(Psp34Ref::transfer(&self.nft_contract_address,caller,Id::U32(token_id),Vec::<u8>::new()).is_ok());

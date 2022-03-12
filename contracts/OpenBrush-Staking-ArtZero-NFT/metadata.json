@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xcc3751f47bc72d1a629135f1c51c56c2893d82f874891f18abc3f59cebbd5ca7",
+    "hash": "0x3cc8c6ea4fd4c745b5fe3edb5fab75ac67b05e4774eb20af8afffb88efaa6c91",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -204,58 +204,6 @@
         {
           "args": [
             {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "u32"
-                ],
-                "type": 5
-              }
-            }
-          ],
-          "docs": [
-            "Get get_approved"
-          ],
-          "label": "get_approved",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "AccountId"
-            ],
-            "type": 0
-          },
-          "selector": "0x27592dea"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "u32"
-                ],
-                "type": 5
-              }
-            }
-          ],
-          "docs": [
-            "Get get_approved"
-          ],
-          "label": "get_owner_of",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "AccountId"
-            ],
-            "type": 0
-          },
-          "selector": "0xfc26380e"
-        },
-        {
-          "args": [
-            {
               "label": "account",
               "type": {
                 "displayName": [
@@ -334,21 +282,6 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [],
           "label": "Ownable::renounce_ownership",
           "mutates": true,
           "payable": false,
@@ -386,6 +319,21 @@
             "type": 11
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
         }
       ]
     },

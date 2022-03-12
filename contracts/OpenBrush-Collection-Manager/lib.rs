@@ -63,7 +63,7 @@ pub mod artzero_collection_manager {
         description: Vec<u8>,
         avatar_image: Vec<u8>,           //IPFS Hash
         header_image: Vec<u8>,           //IPFS Hash
-        type_collection: u8,             //0 - PSP34 ERC721 ; 1 - ERC1155 PSP1155 OnlyAdmin
+        contract_type: u8,             //1 - PSP34 ERC721 ; 2 - ERC1155 PSP1155 OnlyAdmin
         is_collect_royal_fee: bool,      //OnlyAdmin can update
         royal_fee: u32,                  //100 = 1% 10000 = 100% OnlyAdmin
         is_active: bool                  // OnlyAdmin can update
@@ -95,7 +95,7 @@ pub mod artzero_collection_manager {
             })
         }
 
-        /// Add new collection - with fee in AZERO 1% = 100 - anyone can add
+        /// Add new collection - with fee in AZERO 1% = 100 - anyone can add contract_type 1: PSP34 2: PSP1155
         #[ink(message)]
         #[ink(payable)]
         pub fn add_new_collection(
@@ -106,7 +106,7 @@ pub mod artzero_collection_manager {
             description: Vec<u8>,
             avatar_image: Vec<u8>,
             header_image: Vec<u8>,
-            type_collection: u8,
+            contract_type: u8,
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
@@ -131,7 +131,7 @@ pub mod artzero_collection_manager {
                 description,
                 avatar_image,
                 header_image,
-                type_collection,
+                contract_type,
                 is_collect_royal_fee,
                 royal_fee,
                 is_active: false
@@ -281,17 +281,17 @@ pub mod artzero_collection_manager {
 
         /// Update Type Collection - only Admin can change - 0 - PSP34 ERC721 ; 1 - ERC1155 PSP1155
         #[ink(message)]
-        pub fn update_type_collection(
+        pub fn update_contract_type(
             &mut self,
             contract_address: AccountId,
-            type_collection: u8
+            contract_type: u8
         ) -> Result<(), Error>  {
             if self.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
             let mut collection = self.collections.get(&contract_address).unwrap();
             if  self.env().caller() == self.admin_address {
-                    collection.type_collection = type_collection;
+                    collection.contract_type = contract_type;
                     self.collections.insert(&contract_address, &collection);
                     Ok(())
              }
@@ -403,6 +403,40 @@ pub mod artzero_collection_manager {
         }
 
         /* GETTERS */
+        ///Get royal fee
+        #[ink(message)]
+        pub fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32 {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return 0;
+             }
+
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            if  !collection.is_collect_royal_fee ||
+                !collection.is_active{
+                return 0;
+            }
+            else{
+                collection.royal_fee
+            }
+        }
+        ///Get is_active
+        #[ink(message)]
+        pub fn is_active(&self,nft_contract_address: AccountId) -> bool {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return false;
+             }
+
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            return collection.is_active;
+        }
+        pub fn get_contract_type(&self,nft_contract_address: AccountId) -> u8 {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return 0;
+             }
+
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            return collection.contract_type;
+        }
         /// Get Collection Information by Address
         #[ink(message)]
         pub fn get_colletion_by_address(&self,nft_contract_address: AccountId) -> Collection {
