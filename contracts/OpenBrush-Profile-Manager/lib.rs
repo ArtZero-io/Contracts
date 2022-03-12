@@ -31,7 +31,7 @@ pub mod artzero_profile_manager {
     pub struct ArtZeroProfileManager{
         #[OwnableStorageField]
         ownable: OwnableData,
-        attributes: Mapping<Vec<u8>, Vec<u8>>
+        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>
     }
 
     impl Ownable for ArtZeroProfileManager {}
@@ -45,14 +45,12 @@ pub mod artzero_profile_manager {
         }
 
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn set_profile_attribute(&mut self, attribute: String, value: String) -> Result<(),Error> {
-            self._set_attribute(attribute.into_bytes(), value.into_bytes());
+            self._set_attribute((self.env().caller(),attribute.into_bytes()), value.into_bytes());
             Ok(())
         }
 
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
@@ -61,19 +59,19 @@ pub mod artzero_profile_manager {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute(attribute.into_bytes(), value.into_bytes());
+                self._set_attribute((self.env().caller(),attribute.into_bytes()), value.into_bytes());
             }
 
             Ok(())
         }
 
         #[ink(message)]
-        pub fn get_attribute(&self, key: Vec<u8>) -> Option<Vec<u8>> {
-            self.attributes.get(&key)
+        pub fn get_attribute(&self, account: AccountId, key: Vec<u8>) -> Option<Vec<u8>> {
+            self.attributes.get(&(account,key))
         }
 
-        fn _set_attribute(&mut self, key: Vec<u8>, value: Vec<u8>) {
-            self.attributes.insert(&key, &value);
+        fn _set_attribute(&mut self, account: AccountId,key: Vec<u8>, value: Vec<u8>) {
+            self.attributes.insert(&(account,key), &value);
         }
     }
 }
