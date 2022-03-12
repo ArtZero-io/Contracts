@@ -17,6 +17,7 @@ pub mod artzero_psp34 {
         },
         Mapping,
     };
+    use ink_prelude::vec::Vec;
 
     #[derive(
         Copy,
@@ -86,7 +87,8 @@ pub mod artzero_psp34 {
         TokenLimitReached,
         TokenLimitReachedMode1,
         InvalidFee,
-        NotMintTime
+        NotMintTime,
+        NotEnoughBalance
     }
 
     impl From<OwnableError> for Error {
@@ -223,6 +225,14 @@ pub mod artzero_psp34 {
             Ok(())
         }
 
+        /// Change baseURI
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
+            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+            Ok(())
+        }
+
         /*
             END OF WHITELIST FUNCTIONS =============
         */
@@ -297,6 +307,18 @@ pub mod artzero_psp34 {
         */
 
         /* GETTERS */
+        /// Get URI from token ID
+        #[ink(message)]
+        pub fn token_uri(
+            &self,
+            token_id: u32
+        ) -> Vec<u8> {
+            let mut token_uri = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes()).unwrap();
+            token_uri.extend(&token_id.to_be_bytes());
+            token_uri.extend(String::from(".json").into_bytes());
+
+            return token_uri;
+        }
         /// mint_mode 0: not started - mint_mode 1: started until amount_1 reached - mint_mode 2: started until total_supply reached
         #[ink(message)]
         pub fn get_mint_mode(
@@ -351,10 +373,18 @@ pub mod artzero_psp34 {
             return self.whitelist_count;
         }
 
+        /// Withdraw Fees - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
-            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+        pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
+            if value > self.env().balance() {
+                return Err(Error::NotEnoughBalance);
+            }
+            if self.env().transfer(self.env().caller(), value).is_err() {
+                panic!(
+                    "error withdraw_fee"
+                )
+            }
             Ok(())
         }
     }
