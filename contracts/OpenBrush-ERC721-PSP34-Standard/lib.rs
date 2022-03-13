@@ -18,7 +18,7 @@ pub mod psp34 {
 
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
     #[ink(storage)]
-    pub struct PSP34_NFT{
+    pub struct Psp34Nft{
         #[PSP34StorageField]
         psp34: PSP34Data,
         #[PSP34MetadataStorageField]
@@ -46,13 +46,13 @@ pub mod psp34 {
         }
     }
 
-    impl Ownable for PSP34_NFT {}
-    impl PSP34 for PSP34_NFT {}
-    impl PSP34Burnable for PSP34_NFT {}
-    impl PSP34Metadata for PSP34_NFT {}
-    impl PSP34Internal for PSP34_NFT {}
+    impl Ownable for Psp34Nft {}
+    impl PSP34 for Psp34Nft {}
+    impl PSP34Burnable for Psp34Nft {}
+    impl PSP34Metadata for Psp34Nft {}
+    impl PSP34Internal for Psp34Nft {}
 
-    impl PSP34_NFT {
+    impl Psp34Nft {
 
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
@@ -85,6 +85,7 @@ pub mod psp34 {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error> {
+            assert!(token_id != Id::U32(0));
             self._set_attribute(token_id.clone(),attribute.into_bytes(), value.into_bytes());
             Ok(())
         }
@@ -92,6 +93,7 @@ pub mod psp34 {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+            assert!(token_id != Id::U32(0));
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
