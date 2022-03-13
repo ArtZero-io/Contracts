@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x2e986757ba949dc809d995e490a2c2190c5fdcd56bca9528329658f37ba88cf8",
+    "hash": "0x4fb406d4d32f7a417a71ee9a3651d3d5a22132d3e60a34620053c700af6b13d7",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -33,6 +33,15 @@
                 ],
                 "type": 0
               }
+            },
+            {
+              "label": "standard_nft_hash",
+              "type": {
+                "displayName": [
+                  "Hash"
+                ],
+                "type": 3
+              }
             }
           ],
           "docs": [],
@@ -44,6 +53,104 @@
       "docs": [],
       "events": [],
       "messages": [
+        {
+          "args": [
+            {
+              "label": "nft_name",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "nft_symbol",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "collection_owner",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "name",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "description",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "avatar_image",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "header_image",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "is_collect_royal_fee",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 9
+              }
+            },
+            {
+              "label": "royal_fee",
+              "type": {
+                "displayName": [
+                  "u32"
+                ],
+                "type": 10
+              }
+            }
+          ],
+          "docs": [
+            "Simple New Collection Creation - Auto create NFT Contract"
+          ],
+          "label": "auto_new_collection",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x05c561cd"
+        },
         {
           "args": [
             {
@@ -70,7 +177,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 7
+                "type": 8
               }
             },
             {
@@ -79,7 +186,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 7
+                "type": 8
               }
             },
             {
@@ -88,7 +195,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 7
+                "type": 8
               }
             },
             {
@@ -97,7 +204,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 7
+                "type": 8
               }
             },
             {
@@ -115,7 +222,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 8
+                "type": 9
               }
             },
             {
@@ -124,12 +231,12 @@
                 "displayName": [
                   "u32"
                 ],
-                "type": 9
+                "type": 10
               }
             }
           ],
           "docs": [
-            " Add new collection - with fee in AZERO 1% = 100 - anyone can add contract_type 1: PSP34 2: PSP1155"
+            " Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - contract_type 1: PSP34 2: PSP1155"
           ],
           "label": "add_new_collection",
           "mutates": true,
@@ -138,7 +245,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x36193f5f"
         },
@@ -173,7 +280,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x5c7d9082"
         },
@@ -208,7 +315,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x6500109f"
         },
@@ -229,7 +336,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 15
+                "type": 13
               }
             }
           ],
@@ -243,7 +350,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x63312534"
         },
@@ -264,7 +371,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 15
+                "type": 13
               }
             }
           ],
@@ -278,7 +385,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x560bf87c"
         },
@@ -299,7 +406,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 15
+                "type": 13
               }
             }
           ],
@@ -313,7 +420,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x7040bc0a"
         },
@@ -334,7 +441,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 15
+                "type": 13
               }
             }
           ],
@@ -348,7 +455,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0xa7b9a9d9"
         },
@@ -383,7 +490,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0xeb59ea76"
         },
@@ -404,7 +511,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 8
+                "type": 9
               }
             }
           ],
@@ -418,7 +525,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x96c46720"
         },
@@ -439,7 +546,7 @@
                 "displayName": [
                   "u32"
                 ],
-                "type": 9
+                "type": 10
               }
             }
           ],
@@ -453,7 +560,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x482ff6b1"
         },
@@ -474,7 +581,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 8
+                "type": 9
               }
             }
           ],
@@ -489,7 +596,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x33ad2887"
         },
@@ -501,7 +608,7 @@
                 "displayName": [
                   "Balance"
                 ],
-                "type": 4
+                "type": 5
               }
             }
           ],
@@ -515,7 +622,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x5655700b"
         },
@@ -541,7 +648,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0xb470cada"
         },
@@ -553,7 +660,7 @@
                 "displayName": [
                   "Balance"
                 ],
-                "type": 4
+                "type": 5
               }
             }
           ],
@@ -567,7 +674,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 12
+            "type": 14
           },
           "selector": "0x07fdb555"
         },
@@ -593,7 +700,7 @@
             "displayName": [
               "u32"
             ],
-            "type": 9
+            "type": 10
           },
           "selector": "0xa7f2c606"
         },
@@ -619,7 +726,7 @@
             "displayName": [
               "bool"
             ],
-            "type": 8
+            "type": 9
           },
           "selector": "0xd8d4423e"
         },
@@ -645,7 +752,7 @@
             "displayName": [
               "Collection"
             ],
-            "type": 6
+            "type": 7
           },
           "selector": "0x41809ed6"
         },
@@ -657,7 +764,7 @@
                 "displayName": [
                   "u64"
                 ],
-                "type": 3
+                "type": 4
               }
             }
           ],
@@ -687,7 +794,7 @@
             "displayName": [
               "u64"
             ],
-            "type": 3
+            "type": 4
           },
           "selector": "0x95c014c7"
         },
@@ -703,7 +810,7 @@
             "displayName": [
               "Balance"
             ],
-            "type": 4
+            "type": 5
           },
           "selector": "0x546e4dbf"
         },
@@ -745,7 +852,7 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 16
+            "type": 17
           },
           "selector": "0x11f43efd"
         },
@@ -760,7 +867,7 @@
               "ownable_external",
               "RenounceOwnershipOutput"
             ],
-            "type": 16
+            "type": 17
           },
           "selector": "0x5e228753"
         },
@@ -806,6 +913,15 @@
             "layout": {
               "cell": {
                 "key": "0x0100000000000000000000000000000000000000000000000000000000000000",
+                "ty": 3
+              }
+            },
+            "name": "standard_nft_hash"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0200000000000000000000000000000000000000000000000000000000000000",
                 "ty": 0
               }
             },
@@ -814,20 +930,11 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0200000000000000000000000000000000000000000000000000000000000000",
-                "ty": 3
-              }
-            },
-            "name": "collection_count"
-          },
-          {
-            "layout": {
-              "cell": {
                 "key": "0x0300000000000000000000000000000000000000000000000000000000000000",
                 "ty": 4
               }
             },
-            "name": "adding_fee"
+            "name": "collection_count"
           },
           {
             "layout": {
@@ -836,13 +943,22 @@
                 "ty": 5
               }
             },
-            "name": "collections"
+            "name": "adding_fee"
           },
           {
             "layout": {
               "cell": {
                 "key": "0x0500000000000000000000000000000000000000000000000000000000000000",
-                "ty": 11
+                "ty": 6
+              }
+            },
+            "name": "collections"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0600000000000000000000000000000000000000000000000000000000000000",
+                "ty": 12
               }
             },
             "name": "collections_by_id"
@@ -894,15 +1010,27 @@
         "id": 3,
         "type": {
           "def": {
-            "primitive": "u64"
-          }
+            "composite": {
+              "fields": [
+                {
+                  "type": 1,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_env",
+            "types",
+            "Hash"
+          ]
         }
       },
       {
         "id": 4,
         "type": {
           "def": {
-            "primitive": "u128"
+            "primitive": "u64"
           }
         }
       },
@@ -910,11 +1038,19 @@
         "id": 5,
         "type": {
           "def": {
+            "primitive": "u128"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": {
+          "def": {
             "composite": {
               "fields": [
                 {
                   "name": "offset_key",
-                  "type": 10,
+                  "type": 11,
                   "typeName": "Key"
                 }
               ]
@@ -927,7 +1063,7 @@
             },
             {
               "name": "V",
-              "type": 6
+              "type": 7
             }
           ],
           "path": [
@@ -939,7 +1075,7 @@
         }
       },
       {
-        "id": 6,
+        "id": 7,
         "type": {
           "def": {
             "composite": {
@@ -956,22 +1092,22 @@
                 },
                 {
                   "name": "name",
-                  "type": 7,
+                  "type": 8,
                   "typeName": "Vec<u8>"
                 },
                 {
                   "name": "description",
-                  "type": 7,
+                  "type": 8,
                   "typeName": "Vec<u8>"
                 },
                 {
                   "name": "avatar_image",
-                  "type": 7,
+                  "type": 8,
                   "typeName": "Vec<u8>"
                 },
                 {
                   "name": "header_image",
-                  "type": 7,
+                  "type": 8,
                   "typeName": "Vec<u8>"
                 },
                 {
@@ -981,17 +1117,17 @@
                 },
                 {
                   "name": "is_collect_royal_fee",
-                  "type": 8,
+                  "type": 9,
                   "typeName": "bool"
                 },
                 {
                   "name": "royal_fee",
-                  "type": 9,
+                  "type": 10,
                   "typeName": "u32"
                 },
                 {
                   "name": "is_active",
-                  "type": 8,
+                  "type": 9,
                   "typeName": "bool"
                 }
               ]
@@ -1005,7 +1141,7 @@
         }
       },
       {
-        "id": 7,
+        "id": 8,
         "type": {
           "def": {
             "sequence": {
@@ -1015,7 +1151,7 @@
         }
       },
       {
-        "id": 8,
+        "id": 9,
         "type": {
           "def": {
             "primitive": "bool"
@@ -1023,7 +1159,7 @@
         }
       },
       {
-        "id": 9,
+        "id": 10,
         "type": {
           "def": {
             "primitive": "u32"
@@ -1031,7 +1167,7 @@
         }
       },
       {
-        "id": 10,
+        "id": 11,
         "type": {
           "def": {
             "composite": {
@@ -1050,14 +1186,14 @@
         }
       },
       {
-        "id": 11,
+        "id": 12,
         "type": {
           "def": {
             "composite": {
               "fields": [
                 {
                   "name": "offset_key",
-                  "type": 10,
+                  "type": 11,
                   "typeName": "Key"
                 }
               ]
@@ -1066,7 +1202,7 @@
           "params": [
             {
               "name": "K",
-              "type": 3
+              "type": 4
             },
             {
               "name": "V",
@@ -1082,52 +1218,10 @@
         }
       },
       {
-        "id": 12,
-        "type": {
-          "def": {
-            "variant": {
-              "variants": [
-                {
-                  "fields": [
-                    {
-                      "type": 13
-                    }
-                  ],
-                  "index": 0,
-                  "name": "Ok"
-                },
-                {
-                  "fields": [
-                    {
-                      "type": 14
-                    }
-                  ],
-                  "index": 1,
-                  "name": "Err"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "T",
-              "type": 13
-            },
-            {
-              "name": "E",
-              "type": 14
-            }
-          ],
-          "path": [
-            "Result"
-          ]
-        }
-      },
-      {
         "id": 13,
         "type": {
           "def": {
-            "tuple": []
+            "primitive": "str"
           }
         }
       },
@@ -1140,7 +1234,57 @@
                 {
                   "fields": [
                     {
-                      "type": 15,
+                      "type": 15
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 16
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 15
+            },
+            {
+              "name": "E",
+              "type": 16
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 15,
+        "type": {
+          "def": {
+            "tuple": []
+          }
+        }
+      },
+      {
+        "id": 16,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 13,
                       "typeName": "String"
                     }
                   ],
@@ -1190,15 +1334,7 @@
         }
       },
       {
-        "id": 15,
-        "type": {
-          "def": {
-            "primitive": "str"
-          }
-        }
-      },
-      {
-        "id": 16,
+        "id": 17,
         "type": {
           "def": {
             "variant": {
@@ -1206,7 +1342,7 @@
                 {
                   "fields": [
                     {
-                      "type": 13
+                      "type": 15
                     }
                   ],
                   "index": 0,
@@ -1215,7 +1351,7 @@
                 {
                   "fields": [
                     {
-                      "type": 17
+                      "type": 18
                     }
                   ],
                   "index": 1,
@@ -1227,11 +1363,11 @@
           "params": [
             {
               "name": "T",
-              "type": 13
+              "type": 15
             },
             {
               "name": "E",
-              "type": 17
+              "type": 18
             }
           ],
           "path": [
@@ -1240,7 +1376,7 @@
         }
       },
       {
-        "id": 17,
+        "id": 18,
         "type": {
           "def": {
             "variant": {

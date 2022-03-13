@@ -124,7 +124,9 @@ pub mod artzero_marketplace_psp34 {
 
     #[brush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
+    #[brush::wrapper]
     pub type StakingRef = dyn ArtZeroStaking;
+    #[brush::wrapper]
     pub type CollectionRef = dyn ArtZeroCollection;
 
     #[ink(event)]

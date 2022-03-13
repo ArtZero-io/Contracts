@@ -1,8 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
+pub use self::psp34_nft::{
+    Psp34Nft,
+    Psp34NftRef,
+};
 
 #[brush::contract]
-pub mod psp34 {
+pub mod psp34_nft {
     use ink_prelude::string::String;
     use brush::contracts::psp34::*;
     use brush::contracts::psp34::extensions::metadata::*;

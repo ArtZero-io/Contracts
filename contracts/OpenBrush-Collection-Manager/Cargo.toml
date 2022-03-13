@@ -17,6 +17,7 @@ scale-info = { version = "2", default-features = false, features = ["derive"], o
 
 # These dependencies
 brush = { tag = "v1.4.0", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable"] }
+psp34_nft = { path = "../OpenBrush-ERC721-PSP34-Standard", default-features = false, features = ["ink-as-dependency"]  }
 
 [lib]
 name = "artzero_collection_manager"
@@ -24,6 +25,7 @@ path = "lib.rs"
 crate-type = [
     # Used for normal contract Wasm blobs.
     "cdylib",
+    "rlib"
 ]
 
 [features]

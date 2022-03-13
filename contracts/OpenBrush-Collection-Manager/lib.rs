@@ -15,6 +15,9 @@ pub mod artzero_collection_manager {
     };
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
+    use psp34_nft::psp34_nft::Psp34NftRef;
+    use ink_lang::ToAccountId;
+
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -75,6 +78,8 @@ pub mod artzero_collection_manager {
         #[OwnableStorageField]
         ownable: OwnableData,
 
+        standard_nft_hash: Hash,
+
         admin_address: AccountId,
         collection_count: u64,
         adding_fee: Balance,
@@ -86,16 +91,79 @@ pub mod artzero_collection_manager {
 
     impl ArtZeroCollectionManager {
         #[ink(constructor)]
-        pub fn new(admin_address: AccountId,owner_address: AccountId) -> Self {
+        pub fn new(admin_address: AccountId,owner_address: AccountId, standard_nft_hash: Hash) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance.collection_count = 0;
                 instance.adding_fee = 1 * 10u128.pow(12);       // 1 AZERO = 1 000 000 000 000 pAZERO (smallest unit)
                 instance._init_with_owner(owner_address);
                 instance.admin_address = admin_address;
+                instance.standard_nft_hash = standard_nft_hash;
             })
         }
 
-        /// Add new collection - with fee in AZERO 1% = 100 - anyone can add contract_type 1: PSP34 2: PSP1155
+        ///Simple New Collection Creation - Auto create NFT Contract
+        #[ink(message)]
+        #[ink(payable)]
+        pub fn auto_new_collection(
+            &mut self,
+            nft_name: String,
+            nft_symbol: String,
+            collection_owner: AccountId,
+            name: Vec<u8>,
+            description: Vec<u8>,
+            avatar_image: Vec<u8>,
+            header_image: Vec<u8>,
+            is_collect_royal_fee: bool,
+            royal_fee:u32
+        ) -> Result<(), Error> {
+
+            if self.adding_fee != self.env().transferred_value() {
+                return Err(Error::InvalidFee);
+            }
+            //fee must less than 5%
+            if royal_fee >= 500 {
+                return Err(Error::InvalidRoyalFee);
+            }
+
+            let (hash, _) =
+                ink_env::random::<ink_env::DefaultEnvironment>(nft_name.as_bytes()).expect("Failed to get salt");
+            let hash = hash.as_ref();
+            let contract = Psp34NftRef::new(collection_owner,nft_name,nft_symbol)
+                .endowment(0)
+                .code_hash(self.standard_nft_hash)
+                .salt_bytes(&hash[..4])
+                .instantiate()
+                .unwrap_or_else(|error| {
+                    panic!(
+                        "failed at instantiating the NFT contract: {:?}",
+                        error
+                    )
+                });
+            let contract_account:AccountId = contract.to_account_id();
+
+            //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
+            self.collection_count += 1;
+            self.collections_by_id.insert(&self.collection_count, &contract_account);
+
+            let new_collection = Collection {
+                collection_owner,
+                nft_contract_address:contract_account,
+                name,
+                description,
+                avatar_image,
+                header_image,
+                contract_type:2,
+                is_collect_royal_fee,
+                royal_fee,
+                is_active: false
+            };
+
+            self.collections.insert(&contract_account, &new_collection);
+
+            Ok(())
+        }
+
+        /// Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - contract_type 1: PSP34 2: PSP1155
         #[ink(message)]
         #[ink(payable)]
         pub fn add_new_collection(
@@ -116,8 +184,8 @@ pub mod artzero_collection_manager {
             if self.collections.get(&nft_contract_address).is_some(){
                 return Err(Error::AddressAlreadyExists);
             }
-            //fee must less than 100%
-            if royal_fee >= 10000 {
+            //fee must less than 5%
+            if royal_fee >= 500 {
                 return Err(Error::InvalidRoyalFee);
             }
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
