@@ -92,6 +92,7 @@ pub mod artzero_marketplace_psp34 {
         ownable: OwnableData,
         collection_contract_address: AccountId,
         staking_contract_address: AccountId,
+        platform_fee: u32,                          //1% = 100
         //List of all tokens for sale in the marketplace,
         // (NFT Contract Address, Token ID) --> Token Sale Information
         market_list: Mapping<(AccountId,Id),ForSaleItem>,
@@ -115,7 +116,9 @@ pub mod artzero_marketplace_psp34 {
     pub trait ArtZeroCollection {
         #[ink(message)]
         fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32;
+        #[ink(message)]
         fn is_active(&self,nft_contract_address: AccountId) -> bool;
+        #[ink(message)]
         fn get_contract_type(&self,nft_contract_address: AccountId) -> u8;
     }
 
@@ -139,11 +142,16 @@ pub mod artzero_marketplace_psp34 {
 
     impl ArtZeroMarketplacePSP34 {
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId,collection_contract_address: AccountId, staking_contract_address: AccountId) -> Self {
+        pub fn new( contract_owner: AccountId,
+                    collection_contract_address: AccountId,
+                    staking_contract_address: AccountId,
+                    platform_fee: u32) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
+                assert!(platform_fee<10000);        //must less than 100%
                 instance._init_with_owner(contract_owner);
                 instance.collection_contract_address = collection_contract_address;
                 instance.staking_contract_address = staking_contract_address;
+                instance.platform_fee = platform_fee;
             })
         }
 
@@ -237,6 +245,50 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
         /// Buy Token at listed price
+        #[ink(message)]
+        #[ink(payable)]
+        pub fn buy(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(),Error>{
+
+            assert!(self.market_list.get(&(nft_contract_address,token_id.clone())).is_some());
+            let mut sale_information = self.market_list.get(&(nft_contract_address,token_id.clone())).unwrap();
+            let caller = self.env().caller();
+            let seller = sale_information.nft_owner;
+            let price = sale_information.price;
+            //General checking to ensure its from valid owner and sale is active
+            assert!(seller != caller);
+            assert!(sale_information.is_for_sale);
+            assert!(price == self.env().transferred_value());
+            assert!(CollectionRef::is_active(&self.collection_contract_address,nft_contract_address));              //collection must be active
+            assert!(CollectionRef::get_contract_type(&self.collection_contract_address,nft_contract_address)==1);   //psp34 only
+
+            //remove from market list
+            sale_information.is_for_sale = false;
+
+            //Step 1: Check if the token is for sale
+            let mut for_sale_token_ids:Vec<Id> = self.sale_tokens_ids.get(&(nft_contract_address,caller)).unwrap();
+            assert!(for_sale_token_ids.contains(&token_id.clone()));
+
+            //remove from sale array
+            let length = for_sale_token_ids.len();
+            for index in 0..length {
+                if for_sale_token_ids[index as usize] == token_id {
+                    for_sale_token_ids.remove(index);
+                    break;
+                }
+            }
+            //Save the information
+            self.sale_tokens_ids.insert(&(nft_contract_address,caller), &for_sale_token_ids);
+            self.market_list.insert(&(nft_contract_address,token_id.clone()), &sale_information);
+
+            //Clear Bidders
+            let bidders = Vec::<BidInformation>::new();
+            self.bidders.insert(&(nft_contract_address,caller,token_id.clone()), &bidders);
+
+            //Calculate fee
+            let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000);
+
+            Ok(())
+        }
 
         // SETTERS
         ///Set new collection contract address - Only Owner
