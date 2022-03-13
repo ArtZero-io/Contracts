@@ -507,7 +507,13 @@ pub mod artzero_collection_manager {
         }
         /// Get Collection Information by Address
         #[ink(message)]
-        pub fn get_colletion_by_address(&self,nft_contract_address: AccountId) -> Collection {
+        pub fn get_collection_owner(&self,nft_contract_address: AccountId) -> AccountId {
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            collection.collection_owner
+        }
+        /// Get Collection Information by Address
+        #[ink(message)]
+        pub fn get_collection_by_address(&self,nft_contract_address: AccountId) -> Collection {
             return self.collections.get(&nft_contract_address).unwrap();
         }
 
