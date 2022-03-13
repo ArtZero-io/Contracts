@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xec37baefc90af0e19dd9aa6070b65933d700034d6809644cd8e7dc85019322e2",
+    "hash": "0x54792bd8b16bf2d16d2f8c2527ad1322a4e363fcb31703a8298dba700cb34315",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -117,12 +117,12 @@
               }
             },
             {
-              "label": "key",
+              "label": "attribute",
               "type": {
                 "displayName": [
-                  "Vec"
+                  "String"
                 ],
-                "type": 5
+                "type": 7
               }
             }
           ],
@@ -132,11 +132,59 @@
           "payable": false,
           "returnType": {
             "displayName": [
-              "Option"
+              "String"
+            ],
+            "type": 7
+          },
+          "selector": "0x97f86da4"
+        },
+        {
+          "args": [
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "attributes",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 11
+              }
+            }
+          ],
+          "docs": [],
+          "label": "get_attributes",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Vec"
+            ],
+            "type": 11
+          },
+          "selector": "0x8d76b3fe"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
             ],
             "type": 12
           },
-          "selector": "0x97f86da4"
+          "selector": "0x5e228753"
         },
         {
           "args": [],
@@ -152,21 +200,6 @@
             "type": 0
           },
           "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 13
-          },
-          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -190,7 +223,7 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 13
+            "type": 12
           },
           "selector": "0x11f43efd"
         }
@@ -442,39 +475,6 @@
             "variant": {
               "variants": [
                 {
-                  "index": 0,
-                  "name": "None"
-                },
-                {
-                  "fields": [
-                    {
-                      "type": 5
-                    }
-                  ],
-                  "index": 1,
-                  "name": "Some"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "T",
-              "type": 5
-            }
-          ],
-          "path": [
-            "Option"
-          ]
-        }
-      },
-      {
-        "id": 13,
-        "type": {
-          "def": {
-            "variant": {
-              "variants": [
-                {
                   "fields": [
                     {
                       "type": 9
@@ -486,7 +486,7 @@
                 {
                   "fields": [
                     {
-                      "type": 14
+                      "type": 13
                     }
                   ],
                   "index": 1,
@@ -502,7 +502,7 @@
             },
             {
               "name": "E",
-              "type": 14
+              "type": 13
             }
           ],
           "path": [
@@ -511,7 +511,7 @@
         }
       },
       {
-        "id": 14,
+        "id": 13,
         "type": {
           "def": {
             "variant": {

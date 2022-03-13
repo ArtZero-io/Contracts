@@ -67,8 +67,21 @@ pub mod artzero_profile_manager {
 
         // Get single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
-        pub fn get_attribute(&self, account: AccountId, key: Vec<u8>) -> Option<Vec<u8>> {
-            self.attributes.get(&(account,key))
+        pub fn get_attribute(&self, account: AccountId, attribute: String) -> String {
+            let value = self.attributes.get(&(account,attribute.into_bytes())).unwrap();
+            String::from_utf8(value).unwrap()
+        }
+        // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        #[ink(message)]
+        pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
+            let length = attributes.len();
+            let mut ret = Vec::<String>::new();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = self.attributes.get(&(account,attribute.into_bytes()));
+                ret.push(String::from_utf8(value.unwrap()).unwrap());
+            }
+            ret
         }
 
         fn _set_attribute(&mut self, account: AccountId,key: Vec<u8>, value: Vec<u8>) {
