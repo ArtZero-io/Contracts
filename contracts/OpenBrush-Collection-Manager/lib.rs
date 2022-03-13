@@ -155,7 +155,7 @@ pub mod artzero_collection_manager {
                 contract_type:2,
                 is_collect_royal_fee,
                 royal_fee,
-                is_active: false
+                is_active: true
             };
 
             self.collections.insert(&contract_account, &new_collection);
