@@ -97,8 +97,10 @@ pub mod artzero_marketplace_psp34 {
         market_list: Mapping<(AccountId,Id),ForSaleItem>,
         //To find (NFT Contract Address, Token ID) quickly
         //the mapping save all tokens for sale in a collection to an array
-        sale_tokens_ids: Mapping<AccountId, Vec<u32>>,
-        bidders: Mapping<(AccountId,Id),Vec<BidInformation>>
+        //(NFT Contract Address, User Address) --> list of all token ids
+        sale_tokens_ids: Mapping<(AccountId,AccountId), Vec<Id>>,
+        //(NFT Contract Address, User Address, token ID)
+        bidders: Mapping<(AccountId,AccountId,Id),Vec<BidInformation>>
     }
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
@@ -151,6 +153,7 @@ pub mod artzero_marketplace_psp34 {
         pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance) -> Result<(),Error>{
             //Step 1: Check if the callet is the owner of the token
             let caller = self.env().caller();
+
             let token_owner = Psp34Ref::owner_of(&nft_contract_address,token_id.clone()).unwrap();
             assert!(caller == token_owner);
 
@@ -160,16 +163,16 @@ pub mod artzero_marketplace_psp34 {
 
             {
                 //Check the sale token ids list
-                if self.sale_tokens_ids.get(&nft_contract_address).is_some(){
-                    let mut token_ids:Vec<Id> = self.sale_tokens_ids.get(&nft_contract_address).unwrap();
+                if self.sale_tokens_ids.get(&(nft_contract_address,caller)).is_some(){
+                    let mut token_ids:Vec<Id> = self.sale_tokens_ids.get(&(nft_contract_address,caller)).unwrap();
                     token_ids.push(token_id.clone());
-                    self.sale_tokens_ids.insert(&nft_contract_address, Id::U32(&token_ids));
+                    self.sale_tokens_ids.insert(&(nft_contract_address,caller), &token_ids);
                 }
                 else{
                     //new listing
                     let mut token_ids = Vec::<Id>::new();
                     token_ids.push(token_id.clone());
-                    self.sale_tokens_ids.insert(&nft_contract_address, Id::U32(&token_ids));
+                    self.sale_tokens_ids.insert(&(nft_contract_address,caller), &token_ids);
                 }
 
                 let new_sale = ForSaleItem {
@@ -199,36 +202,42 @@ pub mod artzero_marketplace_psp34 {
         /// Delist the token from the marketplace - FREE
         #[ink(message)]
         pub fn delist(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(),Error>{
-            //Step 1: Check if the token is for sale and belongs to caller
+
+            assert!(self.market_list.get(&(nft_contract_address,token_id.clone())).is_some());
+            let mut sale_information = self.market_list.get(&(nft_contract_address,token_id.clone())).unwrap();
             let caller = self.env().caller();
-            let mut for_sale_token_ids:Vec<u32> = self.sale_tokens_ids.get(&nft_contract_address).unwrap();
-            assert!(for_sale_token_ids.contains(&Id::U32(token_id.clone())));
+            //General checking to ensure its from valid owner and sale is active
 
-            //remove from sale array
-            let index = for_sale_token_ids.iter().position(|&r| r == Id::U32(token_id.clone())).unwrap();
-            let checked_id = for_sale_token_ids[index];
-            assert_eq!(for_sale_token_ids.remove(index), checked_id);
-
-            self.sale_tokens_ids.insert(&nft_contract_address, &for_sale_token_ids);
+            assert!(sale_information.nft_owner == caller);
+            assert!(sale_information.is_for_sale);
 
             //remove from market list
-            if self.market_list.get(&(nft_contract_address,token_id.clone())).is_some(){
-                let mut token_sale_info:ForSaleItem = self.market_list.get(&(nft_contract_address,token_id.clone())).unwrap();
-                assert!(token_sale_info.nft_owner == caller);
+            sale_information.is_for_sale = false;
 
-                token_sale_info.is_for_sale = false;
-                self.market_list.insert(&(nft_contract_address,token_id.clone()), &token_sale_info);
+            //Step 1: Check if the token is for sale
+            let mut for_sale_token_ids:Vec<Id> = self.sale_tokens_ids.get(&(nft_contract_address,caller)).unwrap();
+            assert!(for_sale_token_ids.contains(&token_id.clone()));
+
+            //remove from sale array
+            let length = for_sale_token_ids.len();
+            for index in 0..length {
+                if for_sale_token_ids[index as usize] == token_id {
+                    for_sale_token_ids.remove(index);
+                    break;
+                }
             }
-            else{
-                return Err(Error::NotListed);
-            }
+            //Save the information
+            self.sale_tokens_ids.insert(&(nft_contract_address,caller), &for_sale_token_ids);
+            self.market_list.insert(&(nft_contract_address,token_id.clone()), &sale_information);
 
             //Clear Bidders
             let bidders = Vec::<BidInformation>::new();
-            self.bidders.insert(&(nft_contract_address,token_id.clone()), &bidders);
+            self.bidders.insert(&(nft_contract_address,caller,token_id.clone()), &bidders);
 
             Ok(())
         }
+        /// Buy Token at listed price
+
         // SETTERS
         ///Set new collection contract address - Only Owner
         #[ink(message)]
@@ -251,15 +260,20 @@ pub mod artzero_marketplace_psp34 {
         pub fn get_nft_sale_info(&self,nft_contract_address:AccountId, token_id: Id) -> ForSaleItem {
             self.market_list.get(&(nft_contract_address,token_id)).unwrap()
         }
-        ///Get all token ids currently for sale for a collection (nft_contract_address)
+        ///Get all token ids currently for sale for a collection (nft_contract_address,user_account)
         #[ink(message)]
-        pub fn get_for_sale_token_ids(&self,nft_contract_address:AccountId) -> Vec<Id> {
-            self.sale_tokens_ids.get(&nft_contract_address).unwrap()
+        pub fn get_for_sale_token_ids(&self,nft_contract_address:AccountId, user_account:AccountId) -> Vec<Id> {
+            self.sale_tokens_ids.get(&(nft_contract_address,user_account)).unwrap()
         }
-        ///Get all token ids currently for sale by a collection (nft_contract_address)
+        ///Get all token ids currently for sale by a collection (nft_contract_address,user_account)
         #[ink(message)]
-        pub fn total_tokens_for_sale(&self,nft_contract_address:AccountId) -> u64 {
-            self.sale_tokens_ids.get(&nft_contract_address).unwrap().len() as u64
+        pub fn total_tokens_for_sale(&self,nft_contract_address:AccountId, user_account:AccountId) -> u64 {
+            self.sale_tokens_ids.get(&(nft_contract_address,user_account)).unwrap().len() as u64
+        }
+        ///Get all bids from (NFT Contract Address, User Address, token ID)
+        #[ink(message)]
+        pub fn get_all_bids(&self,nft_contract_address:AccountId, user_account:AccountId, token_id: Id) -> Vec<BidInformation> {
+            self.bidders.get(&(nft_contract_address,user_account, token_id)).unwrap()
         }
 
         ///Get collection contract address

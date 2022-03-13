@@ -87,7 +87,7 @@ pub mod artzero_staking_nft {
         pub fn get_artzero_nft_contract(&self) -> AccountId {
             self.nft_contract_address
         }
-        ///Get staked ids by AccountId
+        ///Get staked token ids by AccountId
         #[ink(message)]
         pub fn get_staked_ids(&self,account: AccountId) -> Vec<u32> {
             self.staking_list.get(&account).unwrap()
@@ -97,7 +97,7 @@ pub mod artzero_staking_nft {
         pub fn get_total_staked(&self) -> u32 {
             self.total_staked
         }
-        ///Get contact account_id
+        ///Get contract account_id
         #[ink(message)]
         pub fn get_account_id(&self) -> AccountId {
             self.env().account_id()
@@ -149,7 +149,6 @@ pub mod artzero_staking_nft {
             Ok(())
 
         }
-
         /// unStake NFT
         #[ink(message)]
         pub fn unstake(&mut self,token_id:u32) -> Result<(), Error> {
@@ -174,5 +173,7 @@ pub mod artzero_staking_nft {
             });
             Ok(())
         }
+
+        //TOTO: Multiple tokens to Stake and Unstake
     }
 }
