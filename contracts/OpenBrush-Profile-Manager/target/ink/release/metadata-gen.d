@@ -1,1 +1,0 @@
-/home/albert/Developer/Blockchain/Brian_Project/Alephzero_Marketplace/Contracts/contracts/OpenBrush-Profile-Manager/target/ink/release/metadata-gen: /home/albert/Developer/Blockchain/Brian_Project/Alephzero_Marketplace/Contracts/contracts/OpenBrush-Profile-Manager/lib.rs /tmp/cargo-contract_6Mtm2J/.ink/metadata_gen/main.rs
