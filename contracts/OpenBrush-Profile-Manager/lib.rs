@@ -68,8 +68,14 @@ pub mod artzero_profile_manager {
         // Get single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn get_attribute(&self, account: AccountId, attribute: String) -> String {
-            let value = self.attributes.get(&(account,attribute.into_bytes())).unwrap();
-            String::from_utf8(value).unwrap()
+            let value = self.attributes.get(&(account,attribute.into_bytes()));
+            if value.is_some() {
+                String::from_utf8(value.unwrap()).unwrap()
+            }
+            else{
+                String::from("")
+            }
+
         }
         // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
@@ -79,7 +85,14 @@ pub mod artzero_profile_manager {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = self.attributes.get(&(account,attribute.into_bytes()));
-                ret.push(String::from_utf8(value.unwrap()).unwrap());
+                if value.is_some() {
+                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+                }
+                else{
+                    ret.push(String::from(""));
+                }
+
+
             }
             ret
         }
