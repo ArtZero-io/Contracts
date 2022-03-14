@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x54792bd8b16bf2d16d2f8c2527ad1322a4e363fcb31703a8298dba700cb34315",
+    "hash": "0x264a66bef18f4cfea317f9103319674d96cb20a07d45e4279cb2b86e30260ce7",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -172,36 +172,6 @@
           "selector": "0x8d76b3fe"
         },
         {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 12
-          },
-          "selector": "0x5e228753"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
           "args": [
             {
               "label": "new_owner",
@@ -226,6 +196,36 @@
             "type": 12
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 12
+          },
+          "selector": "0x5e228753"
         }
       ]
     },
