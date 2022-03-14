@@ -170,10 +170,10 @@ pub mod artzero_collection_manager {
             &mut self,
             collection_owner: AccountId,
             nft_contract_address: AccountId,
-            name: Vec<u8>,
-            description: Vec<u8>,
-            avatar_image: Vec<u8>,
-            header_image: Vec<u8>,
+            collection_name: String,
+            collection_description: String,
+            collection_avatar_image: String,
+            collection_header_image: String,
             contract_type: u8,
             is_collect_royal_fee: bool,
             royal_fee:u32
@@ -191,7 +191,10 @@ pub mod artzero_collection_manager {
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
             self.collection_count += 1;
             self.collections_by_id.insert(&self.collection_count, &nft_contract_address);
-
+            let name = collection_name.into_bytes();
+            let description = collection_description.into_bytes();
+            let avatar_image = collection_avatar_image.into_bytes();
+            let header_image = collection_header_image.into_bytes();
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address,

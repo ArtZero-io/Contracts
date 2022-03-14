@@ -1,0 +1,1 @@
+/home/albert/Developer/Blockchain/Brian_Project/Alephzero_Marketplace/Contracts/contracts/OpenBrush-Profile-Manager/target/ink/wasm32-unknown-unknown/release/artzero_profile_manager.wasm: /home/albert/Developer/Blockchain/Brian_Project/Alephzero_Marketplace/Contracts/contracts/OpenBrush-Profile-Manager/lib.rs

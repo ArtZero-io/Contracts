@@ -1,0 +1,1432 @@
+{
+  "source": {
+    "hash": "0xd065f94f10b29aba636dc0a7a986f35576c5cb5785661c618a7132096ce2a491",
+    "language": "ink! 3.0.0-rc9",
+    "compiler": "rustc 1.61.0-nightly"
+  },
+  "contract": {
+    "name": "artzero_collection_manager",
+    "version": "1.0.0",
+    "authors": [
+      "ArtZero <admin@artzero.io>"
+    ]
+  },
+  "V3": {
+    "spec": {
+      "constructors": [
+        {
+          "args": [
+            {
+              "label": "admin_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "owner_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "standard_nft_hash",
+              "type": {
+                "displayName": [
+                  "Hash"
+                ],
+                "type": 3
+              }
+            }
+          ],
+          "docs": [],
+          "label": "new",
+          "payable": false,
+          "selector": "0x9bae9d5e"
+        }
+      ],
+      "docs": [],
+      "events": [],
+      "messages": [
+        {
+          "args": [
+            {
+              "label": "nft_name",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "nft_symbol",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "collection_owner",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "name",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "description",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "avatar_image",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "header_image",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "is_collect_royal_fee",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 9
+              }
+            },
+            {
+              "label": "royal_fee",
+              "type": {
+                "displayName": [
+                  "u32"
+                ],
+                "type": 10
+              }
+            }
+          ],
+          "docs": [
+            "Simple New Collection Creation - Auto create NFT Contract"
+          ],
+          "label": "auto_new_collection",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x05c561cd"
+        },
+        {
+          "args": [
+            {
+              "label": "collection_owner",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "collection_name",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "collection_description",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "collection_avatar_image",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "collection_header_image",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            },
+            {
+              "label": "contract_type",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "label": "is_collect_royal_fee",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 9
+              }
+            },
+            {
+              "label": "royal_fee",
+              "type": {
+                "displayName": [
+                  "u32"
+                ],
+                "type": 10
+              }
+            }
+          ],
+          "docs": [
+            " Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - contract_type 1: PSP34 2: PSP1155"
+          ],
+          "label": "add_new_collection",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x36193f5f"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Update Owner of Collecion - Only Admin can change"
+          ],
+          "label": "update_collection_owner",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x5c7d9082"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Update nft_contract_address - Only Admin can change"
+          ],
+          "label": "update_nft_contract_address",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x6500109f"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "name",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            }
+          ],
+          "docs": [
+            " Update Name - admin and collection owner can change"
+          ],
+          "label": "update_name",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x63312534"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "description",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            }
+          ],
+          "docs": [
+            " Update Description - admin and collection owner can change"
+          ],
+          "label": "update_description",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x560bf87c"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "avatar_image",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            }
+          ],
+          "docs": [
+            " Update Avatar Image - admin and collection owner can change"
+          ],
+          "label": "update_avatar_image",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x7040bc0a"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "header_image",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 13
+              }
+            }
+          ],
+          "docs": [
+            " Update header Image - admin and collection owner can change"
+          ],
+          "label": "update_header_image",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0xa7b9a9d9"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "contract_type",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "docs": [
+            " Update Type Collection - only Admin can change - 0 - PSP34 ERC721 ; 1 - ERC1155 PSP1155"
+          ],
+          "label": "update_contract_type",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0xeb59ea76"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "is_collect_royal_fee",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 9
+              }
+            }
+          ],
+          "docs": [
+            " Update Is Royal Fee - Only Admin can change"
+          ],
+          "label": "update_is_collect_royal_fee",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x96c46720"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "new_fee",
+              "type": {
+                "displayName": [
+                  "u32"
+                ],
+                "type": 10
+              }
+            }
+          ],
+          "docs": [
+            " Update royal_fee - Only Admin can change"
+          ],
+          "label": "update_royal_fee",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x482ff6b1"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "is_active",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 9
+              }
+            }
+          ],
+          "docs": [
+            " Update Active Status - only Admin can change",
+            " When its active, collection will be shown on the UI and will be tradable"
+          ],
+          "label": "update_is_active",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x33ad2887"
+        },
+        {
+          "args": [
+            {
+              "label": "new_fee",
+              "type": {
+                "displayName": [
+                  "Balance"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "docs": [
+            " Update Adding Collection Fee - only Owner"
+          ],
+          "label": "update_adding_fee",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x5655700b"
+        },
+        {
+          "args": [
+            {
+              "label": "admin_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Update Admin Address - only Owner"
+          ],
+          "label": "update_admin_address",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0xb470cada"
+        },
+        {
+          "args": [
+            {
+              "label": "value",
+              "type": {
+                "displayName": [
+                  "Balance"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "docs": [
+            " Withdraw Fees - only Owner"
+          ],
+          "label": "withdraw_fee",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x07fdb555"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get royal fee"
+          ],
+          "label": "get_royal_fee",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u32"
+            ],
+            "type": 10
+          },
+          "selector": "0xa7f2c606"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get is_active"
+          ],
+          "label": "is_active",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "bool"
+            ],
+            "type": 9
+          },
+          "selector": "0xd8d4423e"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Information by Address"
+          ],
+          "label": "get_collection_owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "AccountId"
+            ],
+            "type": 0
+          },
+          "selector": "0x510aa8d9"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Information by Address"
+          ],
+          "label": "get_collection_by_address",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Collection"
+            ],
+            "type": 7
+          },
+          "selector": "0x786d1a79"
+        },
+        {
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "u64"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Contract by ID"
+          ],
+          "label": "get_contract_by_id",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "AccountId"
+            ],
+            "type": 0
+          },
+          "selector": "0x672b1346"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get Collection Count"
+          ],
+          "label": "get_collection_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u64"
+            ],
+            "type": 4
+          },
+          "selector": "0x95c014c7"
+        },
+        {
+          "args": [],
+          "docs": [
+            "Get Adding Fee"
+          ],
+          "label": "get_adding_fee",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Balance"
+            ],
+            "type": 5
+          },
+          "selector": "0x546e4dbf"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get Admin Address"
+          ],
+          "label": "get_admin_address",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "AccountId"
+            ],
+            "type": 0
+          },
+          "selector": "0x8938ef71"
+        },
+        {
+          "args": [
+            {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "ownable_external",
+                  "TransferOwnershipInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 17
+          },
+          "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 17
+          },
+          "selector": "0x5e228753"
+        }
+      ]
+    },
+    "storage": {
+      "struct": {
+        "fields": [
+          {
+            "layout": {
+              "struct": {
+                "fields": [
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "ty": 0
+                      }
+                    },
+                    "name": "owner"
+                  }
+                ]
+              }
+            },
+            "name": "ownable"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0100000000000000000000000000000000000000000000000000000000000000",
+                "ty": 3
+              }
+            },
+            "name": "standard_nft_hash"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0200000000000000000000000000000000000000000000000000000000000000",
+                "ty": 0
+              }
+            },
+            "name": "admin_address"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0300000000000000000000000000000000000000000000000000000000000000",
+                "ty": 4
+              }
+            },
+            "name": "collection_count"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0400000000000000000000000000000000000000000000000000000000000000",
+                "ty": 5
+              }
+            },
+            "name": "adding_fee"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0500000000000000000000000000000000000000000000000000000000000000",
+                "ty": 6
+              }
+            },
+            "name": "collections"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0600000000000000000000000000000000000000000000000000000000000000",
+                "ty": 12
+              }
+            },
+            "name": "collections_by_id"
+          }
+        ]
+      }
+    },
+    "types": [
+      {
+        "id": 0,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 1,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_env",
+            "types",
+            "AccountId"
+          ]
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "def": {
+            "array": {
+              "len": 32,
+              "type": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "def": {
+            "primitive": "u8"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 1,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_env",
+            "types",
+            "Hash"
+          ]
+        }
+      },
+      {
+        "id": 4,
+        "type": {
+          "def": {
+            "primitive": "u64"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "type": {
+          "def": {
+            "primitive": "u128"
+          }
+        }
+      },
+      {
+        "id": 6,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "offset_key",
+                  "type": 11,
+                  "typeName": "Key"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "K",
+              "type": 0
+            },
+            {
+              "name": "V",
+              "type": 7
+            }
+          ],
+          "path": [
+            "ink_storage",
+            "lazy",
+            "mapping",
+            "Mapping"
+          ]
+        }
+      },
+      {
+        "id": 7,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "collection_owner",
+                  "type": 0,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "nft_contract_address",
+                  "type": 0,
+                  "typeName": "AccountId"
+                },
+                {
+                  "name": "name",
+                  "type": 8,
+                  "typeName": "Vec<u8>"
+                },
+                {
+                  "name": "description",
+                  "type": 8,
+                  "typeName": "Vec<u8>"
+                },
+                {
+                  "name": "avatar_image",
+                  "type": 8,
+                  "typeName": "Vec<u8>"
+                },
+                {
+                  "name": "header_image",
+                  "type": 8,
+                  "typeName": "Vec<u8>"
+                },
+                {
+                  "name": "contract_type",
+                  "type": 2,
+                  "typeName": "u8"
+                },
+                {
+                  "name": "is_collect_royal_fee",
+                  "type": 9,
+                  "typeName": "bool"
+                },
+                {
+                  "name": "royal_fee",
+                  "type": 10,
+                  "typeName": "u32"
+                },
+                {
+                  "name": "is_active",
+                  "type": 9,
+                  "typeName": "bool"
+                }
+              ]
+            }
+          },
+          "path": [
+            "artzero_collection_manager",
+            "artzero_collection_manager",
+            "Collection"
+          ]
+        }
+      },
+      {
+        "id": 8,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "type": {
+          "def": {
+            "primitive": "bool"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "type": {
+          "def": {
+            "primitive": "u32"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 1,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_primitives",
+            "Key"
+          ]
+        }
+      },
+      {
+        "id": 12,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "offset_key",
+                  "type": 11,
+                  "typeName": "Key"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "K",
+              "type": 4
+            },
+            {
+              "name": "V",
+              "type": 0
+            }
+          ],
+          "path": [
+            "ink_storage",
+            "lazy",
+            "mapping",
+            "Mapping"
+          ]
+        }
+      },
+      {
+        "id": 13,
+        "type": {
+          "def": {
+            "primitive": "str"
+          }
+        }
+      },
+      {
+        "id": 14,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 15
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 16
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 15
+            },
+            {
+              "name": "E",
+              "type": 16
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 15,
+        "type": {
+          "def": {
+            "tuple": []
+          }
+        }
+      },
+      {
+        "id": 16,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 13,
+                      "typeName": "String"
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Custom"
+                },
+                {
+                  "index": 1,
+                  "name": "AddressAlreadyExists"
+                },
+                {
+                  "index": 2,
+                  "name": "CollectionNotExist"
+                },
+                {
+                  "index": 3,
+                  "name": "OnlyOwner"
+                },
+                {
+                  "index": 4,
+                  "name": "OnlyAdmin"
+                },
+                {
+                  "index": 5,
+                  "name": "InvalidCaller"
+                },
+                {
+                  "index": 6,
+                  "name": "InvalidFee"
+                },
+                {
+                  "index": 7,
+                  "name": "InvalidRoyalFee"
+                },
+                {
+                  "index": 8,
+                  "name": "NotEnoughBalance"
+                }
+              ]
+            }
+          },
+          "path": [
+            "artzero_collection_manager",
+            "artzero_collection_manager",
+            "Error"
+          ]
+        }
+      },
+      {
+        "id": 17,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 15
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 18
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 15
+            },
+            {
+              "name": "E",
+              "type": 18
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 18,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "CallerIsNotOwner"
+                },
+                {
+                  "index": 1,
+                  "name": "NewOwnerIsZero"
+                }
+              ]
+            }
+          },
+          "path": [
+            "contracts",
+            "traits",
+            "errors",
+            "ownable",
+            "OwnableError"
+          ]
+        }
+      }
+    ]
+  }
+}
