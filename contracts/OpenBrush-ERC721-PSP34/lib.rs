@@ -372,6 +372,36 @@ pub mod artzero_psp34 {
         ) -> u32 {
             return self.whitelist_count;
         }
+        ///Only Owner can set multiple attributes to a token
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+            assert!(token_id != Id::U32(0));
+            if attributes.len() != values.len() {
+                return Err(Error::Custom(String::from("Inputs not same length")));
+            }
+            let length = attributes.len();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = values[i].clone();
+                self._set_attribute(token_id.clone(),attribute.into_bytes(), value.into_bytes());
+            }
+
+            Ok(())
+        }
+
+        // Get multiple  attributes
+        #[ink(message)]
+        pub fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
+            let length = attributes.len();
+            let mut ret = Vec::<String>::new();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
+                ret.push(String::from_utf8(value.unwrap()).unwrap());
+            }
+            ret
+        }
 
         /// Withdraw Fees - only Owner
         #[ink(message)]
