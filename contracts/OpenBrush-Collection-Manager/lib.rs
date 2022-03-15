@@ -66,10 +66,11 @@ pub mod artzero_collection_manager {
         description: Vec<u8>,
         avatar_image: Vec<u8>,           //IPFS Hash
         header_image: Vec<u8>,           //IPFS Hash
-        contract_type: u8,             //1 - PSP34 ERC721 ; 2 - ERC1155 PSP1155 OnlyAdmin
+        contract_type: u8,               //1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
         is_collect_royal_fee: bool,      //OnlyAdmin can update
         royal_fee: u32,                  //100 = 1% 10000 = 100% OnlyAdmin
-        is_active: bool                  // OnlyAdmin can update
+        is_active: bool,                 // OnlyAdmin can update
+        show_on_chain_metadata: bool
     }
 
     #[derive(Default, SpreadAllocate, OwnableStorage)]
@@ -101,7 +102,7 @@ pub mod artzero_collection_manager {
             })
         }
 
-        ///Simple New Collection Creation - Auto create NFT Contract
+        ///Simple New Collection Creation - Auto create NFT Contract - Collection_Owner is owner of NFT contract and receive royal fee
         #[ink(message)]
         #[ink(payable)]
         pub fn auto_new_collection(
@@ -120,8 +121,8 @@ pub mod artzero_collection_manager {
             if self.adding_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
-            //fee must less than 5%
-            if royal_fee >= 500 {
+            //fee must equal or less than 5%
+            if royal_fee > 500 {
                 return Err(Error::InvalidRoyalFee);
             }
 
@@ -155,7 +156,8 @@ pub mod artzero_collection_manager {
                 contract_type:2,
                 is_collect_royal_fee,
                 royal_fee,
-                is_active: true
+                is_active: true,
+                show_on_chain_metadata: true
             };
 
             self.collections.insert(&contract_account, &new_collection);
@@ -163,7 +165,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - contract_type 1: PSP34 2: PSP1155
+        /// Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - Collection_Owner is owner of NFT contract and receive royal fee
         #[ink(message)]
         #[ink(payable)]
         pub fn add_new_collection(
@@ -183,8 +185,8 @@ pub mod artzero_collection_manager {
             if self.collections.get(&nft_contract_address).is_some(){
                 return Err(Error::AddressAlreadyExists);
             }
-            //fee must less than 5%
-            if royal_fee >= 500 {
+            //fee must equal or less than 5%
+            if royal_fee > 500 {
                 return Err(Error::InvalidRoyalFee);
             }
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
@@ -201,7 +203,8 @@ pub mod artzero_collection_manager {
                 contract_type:1,
                 is_collect_royal_fee,
                 royal_fee,
-                is_active: false
+                is_active: false,
+                show_on_chain_metadata: false
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
@@ -209,7 +212,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
         /* SETTERS */
-        /// Update Owner of Collecion - Only Admin can change
+        /// Update Owner of Collecion - who receive royal fee - Only Admin can change
         #[ink(message)]
         pub fn update_collection_owner(
             &mut self,
@@ -396,8 +399,8 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             new_fee: u32
         ) -> Result<(), Error>  {
-            //fee must less than 100%
-            if new_fee >= 10000 {
+            //fee must equal or less than 5%
+            if new_fee > 500 {
                   return Err(Error::InvalidFee);
              }
             if self.collections.get(&contract_address).is_none(){
@@ -408,6 +411,33 @@ pub mod artzero_collection_manager {
 
             if  self.env().caller() == self.admin_address {
                     collection.royal_fee = new_fee;
+                    self.collections.insert(&contract_address, &collection);
+                    Ok(())
+             }
+             else{
+                 return Err(Error::OnlyAdmin);
+             }
+        }
+
+        /// Update show_on_chain_metadata - Only Admin can change
+        #[ink(message)]
+        pub fn update_show_on_chain_metadata(
+            &mut self,
+            contract_address: AccountId,
+            show_on_chain_metadata: bool
+        ) -> Result<(), Error>  {
+            //fee must equal or less than 5%
+            if new_fee > 500 {
+                  return Err(Error::InvalidFee);
+             }
+            if self.collections.get(&contract_address).is_none(){
+                 return Err(Error::CollectionNotExist);
+             }
+
+            let mut collection = self.collections.get(&contract_address).unwrap();
+
+            if  self.env().caller() == self.admin_address {
+                    collection.show_on_chain_metadata = show_on_chain_metadata;
                     self.collections.insert(&contract_address, &collection);
                     Ok(())
              }
@@ -546,8 +576,6 @@ pub mod artzero_collection_manager {
         ) -> AccountId {
             return self.admin_address;
         }
-
-
 
     }
 }
