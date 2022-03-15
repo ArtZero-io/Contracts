@@ -174,7 +174,6 @@ pub mod artzero_collection_manager {
             description: Vec<u8>,
             avatar_image: Vec<u8>,
             header_image: Vec<u8>,
-            contract_type: u8,
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
@@ -199,7 +198,7 @@ pub mod artzero_collection_manager {
                 description,
                 avatar_image,
                 header_image,
-                contract_type,
+                contract_type:1,
                 is_collect_royal_fee,
                 royal_fee,
                 is_active: false

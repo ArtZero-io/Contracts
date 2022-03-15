@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x264a66bef18f4cfea317f9103319674d96cb20a07d45e4279cb2b86e30260ce7",
+    "hash": "0x8cad794f147308e4c0854a82ba0b4a539159ed1aef4975e1b2aceba18ca0244a",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.60.0-nightly"
   },
@@ -172,32 +172,6 @@
           "selector": "0x8d76b3fe"
         },
         {
-          "args": [
-            {
-              "label": "new_owner",
-              "type": {
-                "displayName": [
-                  "ownable_external",
-                  "TransferOwnershipInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [],
-          "label": "Ownable::transfer_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "TransferOwnershipOutput"
-            ],
-            "type": 12
-          },
-          "selector": "0x11f43efd"
-        },
-        {
           "args": [],
           "docs": [],
           "label": "Ownable::owner",
@@ -226,6 +200,32 @@
             "type": 12
           },
           "selector": "0x5e228753"
+        },
+        {
+          "args": [
+            {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "ownable_external",
+                  "TransferOwnershipInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 12
+          },
+          "selector": "0x11f43efd"
         }
       ]
     },

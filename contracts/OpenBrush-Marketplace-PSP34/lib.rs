@@ -186,6 +186,9 @@ pub mod artzero_marketplace_psp34 {
             let approved_account = Psp34Ref::get_approved(&nft_contract_address,token_id.clone()).unwrap();
             assert!(approved_account == self.env().account_id());
 
+            //Check Collection active
+            assert!(CollectionRef::is_active(&self.collection_contract_address,nft_contract_address));
+
             {
                 //Check the sale token ids list
                 if self.sale_tokens_ids.get(&(nft_contract_address,caller)).is_some(){
