@@ -5,7 +5,6 @@
 pub mod artzero_profile_manager {
     use ink_prelude::string::String;
     use brush::contracts::ownable::*;
-    use brush::modifiers;
     use ink_storage::traits::SpreadAllocate;
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
