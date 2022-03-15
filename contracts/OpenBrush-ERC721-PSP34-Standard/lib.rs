@@ -29,9 +29,7 @@ pub mod psp34_nft {
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
         ownable: OwnableData,
-
-        token_count: u32,
-
+        token_count: u64,
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -81,7 +79,7 @@ pub mod psp34_nft {
         pub fn mint(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
             self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U32(self.token_count)).is_ok());
+            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
             Ok(())
         }
 
@@ -89,7 +87,7 @@ pub mod psp34_nft {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error> {
-            assert!(token_id != Id::U32(0));
+            assert!(token_id != Id::U64(0));
             self._set_attribute(token_id.clone(),attribute.into_bytes(), value.into_bytes());
             Ok(())
         }
@@ -97,7 +95,7 @@ pub mod psp34_nft {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
-            assert!(token_id != Id::U32(0));
+            assert!(token_id != Id::U64(0));
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
@@ -128,7 +126,7 @@ pub mod psp34_nft {
         #[ink(message)]
         pub fn token_uri(
             &self,
-            token_id: u32
+            token_id: u64
         ) -> Vec<u8> {
             let mut token_uri = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes()).unwrap();
             token_uri.extend(&token_id.to_be_bytes());

@@ -426,10 +426,6 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             show_on_chain_metadata: bool
         ) -> Result<(), Error>  {
-            //fee must equal or less than 5%
-            if new_fee > 500 {
-                  return Err(Error::InvalidFee);
-             }
             if self.collections.get(&contract_address).is_none(){
                  return Err(Error::CollectionNotExist);
              }
