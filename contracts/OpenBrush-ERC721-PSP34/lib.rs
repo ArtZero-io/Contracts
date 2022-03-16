@@ -52,11 +52,14 @@ pub mod artzero_psp34 {
         //Max Total Token number to Mint
         total_supply: u32,
         token_count: u32,
+        attribute_count: u32,
+        attribute_names: Mapping<u32,Vec<u8>>,
 
         //Who got free mint
         whitelists: Mapping<AccountId,Whitelist>,
         whitelist_count: u32,
         whitelist_accounts: Mapping<u32,AccountId>,
+        whitelist_mint_total_amount: u32,
         //Pre_launch Minting Fee
         fee_1: Balance,
         //Launch Minting Fee
@@ -88,7 +91,8 @@ pub mod artzero_psp34 {
         TokenLimitReachedMode1,
         InvalidFee,
         NotMintTime,
-        NotEnoughBalance
+        NotEnoughBalance,
+        InvalidMintAmount
     }
 
     impl From<OwnableError> for Error {
@@ -136,15 +140,16 @@ pub mod artzero_psp34 {
         pub fn add_whitelist(
             &mut self,
             account: AccountId,
-            _whitelist_amount: u32
+            whitelist_amount: u32
         ) -> Result<(), Error> {
 
             //fee must less than total tokens
-            if  _whitelist_amount > self.total_supply ||
-                _whitelist_amount == 0{
+            if  whitelist_amount > self.total_supply ||
+                whitelist_amount == 0{
                 return Err(Error::InvalidInput);
             }
-            if self.whitelists.get(&account).is_some(){
+            if  self.whitelists.get(&account).is_some() ||
+                self.whitelist_mint_total_amount.checked_add(whitelist_amount).unwrap() > self.amount_1{
                 return Err(Error::InvalidInput);
             }
 
@@ -152,11 +157,12 @@ pub mod artzero_psp34 {
             self.whitelist_accounts.insert(&self.whitelist_count, &account);
 
             let whitelist = Whitelist {
-                whitelist_amount: _whitelist_amount,
+                whitelist_amount: whitelist_amount,
                 claimed_amount: 0
             };
 
             self.whitelists.insert(&account, &whitelist);
+            self.whitelist_mint_total_amount = self.whitelist_mint_total_amount.checked_add(whitelist_amount).unwrap();
 
             Ok(())
         }
@@ -167,7 +173,7 @@ pub mod artzero_psp34 {
         pub fn update_whitelist_amount(
             &mut self,
             account: AccountId,
-            _whitelist_amount: u32
+            whitelist_amount: u32
         ) -> Result<(), Error>  {
 
             if self.whitelists.get(&account).is_none(){
@@ -175,8 +181,17 @@ pub mod artzero_psp34 {
              }
 
             let mut whitelist = self.whitelists.get(&account).unwrap();
+            if whitelist_amount >= whitelist.whitelist_amount {
+                self.whitelist_mint_total_amount = self.whitelist_mint_total_amount.checked_add(whitelist_amount - whitelist.whitelist_amount).unwrap();
+            }
+            else{
+                self.whitelist_mint_total_amount = self.whitelist_mint_total_amount.checked_sub(whitelist.whitelist_amount - whitelist_amount).unwrap();
+            }
+            if self.whitelist_mint_total_amount > self.amount_1{
+                return Err(Error::InvalidInput);
+            }
 
-            whitelist.whitelist_amount = _whitelist_amount;
+            whitelist.whitelist_amount = whitelist_amount;
             self.whitelists.insert(&account, &whitelist);
             Ok(())
 
@@ -221,6 +236,9 @@ pub mod artzero_psp34 {
             &mut self,
             amount_1: u32
         ) -> Result<(), Error> {
+            if amount_1 < self.whitelist_mint_total_amount{
+                return Err(Error::InvalidInput);
+            }
             self.amount_1 = amount_1;
             Ok(())
         }
@@ -241,7 +259,7 @@ pub mod artzero_psp34 {
         */
         /// Whitelisted User Creates a new token
         #[ink(message)]
-        pub fn whitelist_mint(&mut self) -> Result<(), Error> {
+        pub fn whitelist_mint_one(&mut self) -> Result<(), Error> {
 
             if self.mint_mode == 0 {
                 return Err(Error::NotMintTime);
@@ -269,6 +287,42 @@ pub mod artzero_psp34 {
             Ok(())
         }
 
+        /// Whitelisted User Creates multiple
+        #[ink(message)]
+        pub fn whitelist_mint_multiple(&mut self, mint_amount: u32) -> Result<(), Error> {
+
+            if self.mint_mode == 0 {
+                return Err(Error::NotMintTime);
+            }
+
+            let caller = self.env().caller();
+
+            if self.whitelists.get(&caller).is_none(){
+                 return Err(Error::InvalidInput);
+             }
+
+             if self.token_count >= self.total_supply {
+                 return Err(Error::TokenLimitReached);
+             }
+
+            let mut caller_info = self.whitelists.get(&caller).unwrap();
+            if caller_info.whitelist_amount <= caller_info.claimed_amount {
+                return Err(Error::ClaimedAll);
+            }
+            if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap() {
+                return Err(Error::InvalidMintAmount);
+            }
+            caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
+            self.whitelists.insert(&caller, &caller_info);
+
+            for _i in 0..mint_amount {
+                self.token_count += 1;
+                assert!(self._mint_to(caller, Id::U32(self.token_count)).is_ok());
+            }
+
+            Ok(())
+        }
+
         #[ink(message)]
         #[ink(payable)]
         pub fn paid_mint(&mut self) -> Result<(), Error> {
@@ -279,7 +333,7 @@ pub mod artzero_psp34 {
             }
             //Mode 1 - mint till amount_1 reached
             if  self.mint_mode == 1 &&
-                self.token_count >= self.amount_1
+                self.token_count > self.amount_1.checked_sub(self.whitelist_mint_total_amount).unwrap()
             {
                 return Err(Error::TokenLimitReachedMode1);
             }
@@ -373,6 +427,14 @@ pub mod artzero_psp34 {
             return self.whitelist_count;
         }
 
+        ///Get total tokens can be mint by whitelisted accounts
+        #[ink(message)]
+        pub fn get_whitelist_mint_total_amount(
+            &self
+        ) -> u32 {
+            return self.whitelist_mint_total_amount;
+        }
+
         ///Only Owner can set attribute to a token
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -412,7 +474,22 @@ pub mod artzero_psp34 {
             }
             ret
         }
-
+        ///Get Attribute Count
+        #[ink(message)]
+        pub fn get_attribute_count(&self) -> u32 {
+            self.attribute_count
+        }
+        ///Get Attribute Count
+        #[ink(message)]
+        pub fn get_attribute_name(&self, index:u32) -> String {
+            let attribute = self.attribute_names.get(&index);
+            if attribute.is_some() {
+                String::from_utf8(attribute.unwrap()).unwrap()
+            }
+            else{
+                String::from("")
+            }
+        }
         /// Withdraw Fees - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]

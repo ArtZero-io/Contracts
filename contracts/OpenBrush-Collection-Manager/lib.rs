@@ -85,7 +85,8 @@ pub mod artzero_collection_manager {
         collection_count: u64,
         adding_fee: Balance,
         collections: Mapping<AccountId, Collection>,    //save collection by contract address
-        collections_by_id: Mapping<u64, AccountId>      //save contract address by id
+        collections_by_id: Mapping<u64, AccountId>,      //save contract address by id
+        max_royal_fee_rate: u32
     }
 
     impl Ownable for ArtZeroCollectionManager {}
@@ -99,6 +100,7 @@ pub mod artzero_collection_manager {
                 instance._init_with_owner(owner_address);
                 instance.admin_address = admin_address;
                 instance.standard_nft_hash = standard_nft_hash;
+                instance.max_royal_fee_rate = 500;
             })
         }
 
@@ -122,7 +124,7 @@ pub mod artzero_collection_manager {
                 return Err(Error::InvalidFee);
             }
             //fee must equal or less than 5%
-            if royal_fee > 500 {
+            if royal_fee > self.max_royal_fee_rate {
                 return Err(Error::InvalidRoyalFee);
             }
 
@@ -186,7 +188,7 @@ pub mod artzero_collection_manager {
                 return Err(Error::AddressAlreadyExists);
             }
             //fee must equal or less than 5%
-            if royal_fee > 500 {
+            if royal_fee > self.max_royal_fee_rate {
                 return Err(Error::InvalidRoyalFee);
             }
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
@@ -400,7 +402,7 @@ pub mod artzero_collection_manager {
             new_fee: u32
         ) -> Result<(), Error>  {
             //fee must equal or less than 5%
-            if new_fee > 500 {
+            if new_fee > self.max_royal_fee_rate {
                   return Err(Error::InvalidFee);
              }
             if self.collections.get(&contract_address).is_none(){
@@ -468,6 +470,13 @@ pub mod artzero_collection_manager {
         #[modifiers(only_owner)]
         pub fn update_adding_fee(&mut self,new_fee: Balance)  -> Result<(), Error> {
             self.adding_fee = new_fee;
+            Ok(())
+        }
+        /// Update Max Royal Fee Rate - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_max_royal_fee_rate(&mut self,max_royal_fee_rate: u32)  -> Result<(), Error> {
+            self.max_royal_fee_rate = max_royal_fee_rate;
             Ok(())
         }
         /// Update Admin Address - only Owner
