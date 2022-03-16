@@ -333,7 +333,7 @@ pub mod artzero_psp34 {
             }
             //Mode 1 - mint till amount_1 reached
             if  self.mint_mode == 1 &&
-                self.token_count > self.amount_1.checked_sub(self.whitelist_mint_total_amount).unwrap()
+                self.token_count >= self.amount_1
             {
                 return Err(Error::TokenLimitReachedMode1);
             }
