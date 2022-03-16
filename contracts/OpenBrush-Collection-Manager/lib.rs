@@ -421,7 +421,7 @@ pub mod artzero_collection_manager {
              }
         }
 
-        /// Update show_on_chain_metadata - Only Admin can change
+        /// Update show_on_chain_metadata - admin and collection owner can change
         #[ink(message)]
         pub fn update_show_on_chain_metadata(
             &mut self,
@@ -434,7 +434,8 @@ pub mod artzero_collection_manager {
 
             let mut collection = self.collections.get(&contract_address).unwrap();
 
-            if  self.env().caller() == self.admin_address {
+            if  self.env().caller() == collection.collection_owner ||
+                self.env().caller() == self.admin_address {
                     collection.show_on_chain_metadata = show_on_chain_metadata;
                     self.collections.insert(&contract_address, &collection);
                     Ok(())

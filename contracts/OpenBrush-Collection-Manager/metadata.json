@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xa5c92a65ab9f2217da20df1478694d509038ebe5fb524169d8f8340f965bef02",
+    "hash": "0x59f9618faa8bd05948c831c86ba816ca6f13103856cf06ce2913be8836e188e7",
     "language": "ink! 3.0.0-rc9",
-    "compiler": "rustc 1.60.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_collection_manager",
@@ -138,7 +138,7 @@
             }
           ],
           "docs": [
-            "Simple New Collection Creation - Auto create NFT Contract"
+            "Simple New Collection Creation - Auto create NFT Contract - Collection_Owner is owner of NFT contract and receive royal fee"
           ],
           "label": "auto_new_collection",
           "mutates": true,
@@ -208,15 +208,6 @@
               }
             },
             {
-              "label": "contract_type",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            },
-            {
               "label": "is_collect_royal_fee",
               "type": {
                 "displayName": [
@@ -236,7 +227,7 @@
             }
           ],
           "docs": [
-            " Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - contract_type 1: PSP34 2: PSP1155"
+            " Advanced Add new collection - with fee in AZERO 1% = 100 - anyone can add Existing contract - Collection_Owner is owner of NFT contract and receive royal fee"
           ],
           "label": "add_new_collection",
           "mutates": true,
@@ -271,7 +262,7 @@
             }
           ],
           "docs": [
-            " Update Owner of Collecion - Only Admin can change"
+            " Update Owner of Collecion - who receive royal fee - Only Admin can change"
           ],
           "label": "update_collection_owner",
           "mutates": true,
@@ -576,6 +567,41 @@
               }
             },
             {
+              "label": "show_on_chain_metadata",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 9
+              }
+            }
+          ],
+          "docs": [
+            " Update show_on_chain_metadata - admin and collection owner can change"
+          ],
+          "label": "update_show_on_chain_metadata",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0x0fb1f1cf"
+        },
+        {
+          "args": [
+            {
+              "label": "contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
               "label": "is_active",
               "type": {
                 "displayName": [
@@ -625,6 +651,32 @@
             "type": 14
           },
           "selector": "0x5655700b"
+        },
+        {
+          "args": [
+            {
+              "label": "max_royal_fee_rate",
+              "type": {
+                "displayName": [
+                  "u32"
+                ],
+                "type": 10
+              }
+            }
+          ],
+          "docs": [
+            " Update Max Royal Fee Rate - only Owner"
+          ],
+          "label": "update_max_royal_fee_rate",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 14
+          },
+          "selector": "0xa4dfde0d"
         },
         {
           "args": [
@@ -859,17 +911,17 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "ownable_external",
-              "OwnerOutput"
+              "RenounceOwnershipOutput"
             ],
-            "type": 0
+            "type": 17
           },
-          "selector": "0x4fa43c8c"
+          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -900,17 +952,17 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
+          "label": "Ownable::owner",
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "ownable_external",
-              "RenounceOwnershipOutput"
+              "OwnerOutput"
             ],
-            "type": 17
+            "type": 0
           },
-          "selector": "0x5e228753"
+          "selector": "0x4fa43c8c"
         }
       ]
     },
@@ -988,6 +1040,15 @@
               }
             },
             "name": "collections_by_id"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0700000000000000000000000000000000000000000000000000000000000000",
+                "ty": 10
+              }
+            },
+            "name": "max_royal_fee_rate"
           }
         ]
       }
@@ -1153,6 +1214,11 @@
                 },
                 {
                   "name": "is_active",
+                  "type": 9,
+                  "typeName": "bool"
+                },
+                {
+                  "name": "show_on_chain_metadata",
                   "type": 9,
                   "typeName": "bool"
                 }
