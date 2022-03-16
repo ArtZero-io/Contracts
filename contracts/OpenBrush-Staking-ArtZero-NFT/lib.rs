@@ -116,8 +116,10 @@ pub mod artzero_staking_nft {
             let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U32(token_id)).unwrap();
             assert!(caller == token_owner);
             //Step 2 - Check if this contract has been approved
-            let approved_account = Psp34Ref::get_approved(&self.nft_contract_address,Id::U32(token_id)).unwrap();
-            assert!(approved_account == self.env().account_id());
+            if !Psp34Ref::is_approved_for_all(&self.nft_contract_address,caller,self.env().account_id()){
+                let approved_account = Psp34Ref::get_approved(&self.nft_contract_address,Id::U32(token_id)).unwrap();
+                assert!(approved_account == self.env().account_id());
+            }
 
             self.total_staked += 1;
             if self.staking_list.get(&caller).is_some()
@@ -174,6 +176,89 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
-        //TOTO: Multiple tokens to Stake and Unstake
+        /// Stake multiple NFTs - Make sure approve this contract can send token on owner behalf
+        #[ink(message)]
+        pub fn multiple_stake(&mut self,token_ids:Vec<u32>) -> Result<(), Error> {
+
+            let caller = self.env().caller();
+            let leng = token_ids.len();
+            let is_approve_all = Psp34Ref::is_approved_for_all(&self.nft_contract_address,caller,self.env().account_id());
+            for i in 0..leng{
+                //Step 1 - Check if the token is belong to caller
+                let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U32(token_ids[i])).unwrap();
+                assert!(caller == token_owner);
+                if !is_approve_all{
+                    //Step 2 - Check if this contract has been approved
+                    let approved_account = Psp34Ref::get_approved(&self.nft_contract_address,Id::U32(token_ids[i])).unwrap();
+                    assert!(approved_account == self.env().account_id());
+                }
+            }
+
+            self.total_staked = self.total_staked.checked_add(leng as u32).unwrap();
+
+            if self.staking_list.get(&caller).is_some()
+            {
+                let mut staked_ids:Vec<u32> = self.staking_list.get(&caller).unwrap();
+                for i in 0..leng{
+                    staked_ids.push(token_ids[i]);
+                }
+                self.staking_list.insert(&caller, &staked_ids);
+            }
+            else{
+                let mut new_staked_ids = Vec::<u32>::new();
+                for i in 0..leng{
+                    new_staked_ids.push(token_ids[i]);
+                }
+                self.staking_list.insert(&caller, &new_staked_ids);
+            }
+            for i in 0..leng {
+                //Step 3 - Transfer Token from Caller to Staking Contract
+                if !PSP34Ref::transfer_from_builder(&self.nft_contract_address, caller, self.env().account_id(), Id::U32(token_ids[i]), Vec::<u8>::new())
+                .call_flags(CallFlags::default().set_allow_reentry(true))
+                .fire().is_ok() {
+                    return Err(Error::CannotTransfer);
+                }
+                self.env().emit_event(NewStakeEvent {
+                    staker:Some(caller),
+                    token_id:token_ids[i]
+                });
+            }
+            Ok(())
+        }
+
+        /// unStake multiple NFTs
+        #[ink(message)]
+        pub fn multiple_unstake(&mut self,token_ids:Vec<u32>) -> Result<(), Error> {
+            //Step 1 - Check if the token is belong to caller
+            let caller = self.env().caller();
+            let leng = token_ids.len();
+
+            self.total_staked = self.total_staked.checked_sub(leng as u32).unwrap();
+            let mut token_indexes = Vec::<usize>::new();
+            let mut staked_ids:Vec<u32> = self.staking_list.get(&caller).unwrap();
+
+            for i in 0..leng{
+                assert!(staked_ids.contains(&token_ids[i]));
+                token_indexes.push(staked_ids.iter().position(|&r| r == token_ids[i]).unwrap());
+            }
+
+            token_indexes.sort();
+            token_indexes.reverse();
+            for r in token_indexes {
+                staked_ids.remove(r);
+            }
+            self.staking_list.insert(&caller, &staked_ids);
+
+            for i in 0..leng{
+                //Step 2 - transfer token to caller
+                assert!(Psp34Ref::transfer(&self.nft_contract_address,caller,Id::U32(token_ids[i]),Vec::<u8>::new()).is_ok());
+
+                self.env().emit_event(UnstakeEvent {
+                    staker:Some(caller),
+                    token_id:token_ids[i]
+                });
+            }
+            Ok(())
+        }
     }
 }
