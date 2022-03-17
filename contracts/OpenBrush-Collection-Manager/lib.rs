@@ -86,6 +86,7 @@ pub mod artzero_collection_manager {
         adding_fee: Balance,
         collections: Mapping<AccountId, Collection>,    //save collection by contract address
         collections_by_id: Mapping<u64, AccountId>,      //save contract address by id
+        collections_by_owner: Mapping<AccountId, Vec<AccountId>>,      //save contract address by owner ID
         max_royal_fee_rate: u32
     }
 
@@ -148,6 +149,18 @@ pub mod artzero_collection_manager {
             self.collection_count += 1;
             self.collections_by_id.insert(&self.collection_count, &contract_account);
 
+            let collections_by_owner = self.collections_by_owner.get(&collection_owner);
+            if collections_by_owner.is_none(){
+                let mut collections = Vec::<AccountId>::new();
+                collections.push(contract_account);
+                self.collections_by_owner.insert(&collection_owner, &collections);
+            }
+            else{
+                let mut collections = collections_by_owner.unwrap();
+                collections.push(contract_account);
+                self.collections_by_owner.insert(&collection_owner, &collections);
+            }
+
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address:contract_account,
@@ -194,6 +207,18 @@ pub mod artzero_collection_manager {
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
             self.collection_count += 1;
             self.collections_by_id.insert(&self.collection_count, &nft_contract_address);
+
+            let collections_by_owner = self.collections_by_owner.get(&collection_owner);
+            if collections_by_owner.is_none(){
+                let mut collections = Vec::<AccountId>::new();
+                collections.push(nft_contract_address);
+                self.collections_by_owner.insert(&collection_owner, &collections);
+            }
+            else{
+                let mut collections = collections_by_owner.unwrap();
+                collections.push(nft_contract_address);
+                self.collections_by_owner.insert(&collection_owner, &collections);
+            }
 
             let new_collection = Collection {
                 collection_owner,
@@ -506,7 +531,7 @@ pub mod artzero_collection_manager {
         }
 
         /* GETTERS */
-        ///Get royal fee
+        ///Get royal fee of the Collection
         #[ink(message)]
         pub fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32 {
             if self.collections.get(&nft_contract_address).is_none(){
@@ -522,7 +547,7 @@ pub mod artzero_collection_manager {
                 collection.royal_fee
             }
         }
-        ///Get is_active
+        ///Check if the Collection is active not
         #[ink(message)]
         pub fn is_active(&self,nft_contract_address: AccountId) -> bool {
             if self.collections.get(&nft_contract_address).is_none(){
@@ -540,7 +565,7 @@ pub mod artzero_collection_manager {
             let collection = self.collections.get(&nft_contract_address).unwrap();
             return collection.contract_type;
         }
-        /// Get Collection Information by Address
+        /// Get Collection Owner by Collection Address (NFT address)
         #[ink(message)]
         pub fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId> {
             if self.collections.get(&nft_contract_address).is_none(){
@@ -549,10 +574,15 @@ pub mod artzero_collection_manager {
             let collection = self.collections.get(&nft_contract_address).unwrap();
             Some(collection.collection_owner)
         }
-        /// Get Collection Information by Address
+        /// Get Collection Information by Collection Address (NFT address)
         #[ink(message)]
         pub fn get_collection_by_address(&self,nft_contract_address: AccountId) -> Option<Collection> {
             return self.collections.get(&nft_contract_address);
+        }
+        /// Get All Collection Addresses by Owner Address
+        #[ink(message)]
+        pub fn get_collections_by_owner(&self,owner_address: AccountId) -> Option<Vec<AccountId>> {
+            return self.collections_by_owner.get(&owner_address);
         }
 
         /// Get Collection Contract by ID
@@ -585,6 +615,7 @@ pub mod artzero_collection_manager {
         ) -> AccountId {
             return self.admin_address;
         }
+
 
     }
 }

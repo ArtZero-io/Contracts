@@ -328,7 +328,8 @@ pub mod artzero_marketplace_psp34 {
                     )
                 }
             }
-            let seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee).unwrap();
+            let mut seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee).unwrap();
+            //seller_fee = self.apply_discount(caller, );
             if seller_fee  > 0{
                 if self.env().transfer(seller, seller_fee).is_err() {
                     panic!(
@@ -517,8 +518,6 @@ pub mod artzero_marketplace_psp34 {
                     }
                 }
 
-
-
                 //Return all money to other lost bidders
 
                 //Clear Bidders
@@ -599,7 +598,27 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
-        fn apply_discount(&self, stakers:AccountId, input_fee:Balance) -> Balance {
+        fn apply_discount(staker:AccountId, input_fee:Balance) -> Balance {
+            let staked_amount = StakingRef::get_total_staked_by_account(&self.collection_contract_address,staker);
+
+            if staked_amount == 0 {
+                input_fee
+            }
+            else if staked_amount < 5 {
+                input_fee * 30 / 100
+            }
+            else if staked_amount < 7 {
+                input_fee * 50 / 100
+            }
+            else if staked_amount < 9 {
+                input_fee * 34 / 100
+            }
+            else if staked_amount < 20 {
+                input_fee * 80 / 100
+            }
+            else if staked_amount >= 20 {
+                input_fee * 90 / 100
+            }
 
         }
 
