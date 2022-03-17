@@ -551,23 +551,26 @@ pub mod artzero_marketplace_psp34 {
         // GETTERS
         /// Get market list information using NFT Collection and token ID
         #[ink(message)]
-        pub fn get_nft_sale_info(&self,nft_contract_address:AccountId, token_id: Id) -> ForSaleItem {
-            self.market_list.get(&(nft_contract_address,token_id)).unwrap()
+        pub fn get_nft_sale_info(&self,nft_contract_address:AccountId, token_id: Id) -> Option<ForSaleItem> {
+            self.market_list.get(&(nft_contract_address,token_id))
         }
         ///Get all token ids currently for sale for a collection (nft_contract_address,user_account)
         #[ink(message)]
-        pub fn get_for_sale_token_ids(&self,nft_contract_address:AccountId, user_account:AccountId) -> Vec<Id> {
-            self.sale_tokens_ids.get(&(nft_contract_address,user_account)).unwrap()
+        pub fn get_for_sale_token_ids(&self,nft_contract_address:AccountId, user_account:AccountId) -> Option<Vec<Id>> {
+            self.sale_tokens_ids.get(&(nft_contract_address,user_account))
         }
         ///Get all token ids currently for sale by a collection (nft_contract_address,user_account)
         #[ink(message)]
         pub fn total_tokens_for_sale(&self,nft_contract_address:AccountId, user_account:AccountId) -> u64 {
+            if self.sale_tokens_ids.get(&(nft_contract_address,user_account)).is_none() {
+                return 0;
+            }
             self.sale_tokens_ids.get(&(nft_contract_address,user_account)).unwrap().len() as u64
         }
         ///Get all bids from (NFT Contract Address, User Address, token ID)
         #[ink(message)]
-        pub fn get_all_bids(&self,nft_contract_address:AccountId, user_account:AccountId, token_id: Id) -> Vec<BidInformation> {
-            self.bidders.get(&(nft_contract_address,user_account, token_id)).unwrap()
+        pub fn get_all_bids(&self,nft_contract_address:AccountId, user_account:AccountId, token_id: Id) -> Option<Vec<BidInformation>> {
+            self.bidders.get(&(nft_contract_address,user_account, token_id))
         }
 
         ///Get collection contract address
@@ -594,6 +597,10 @@ pub mod artzero_marketplace_psp34 {
                 )
             }
             Ok(())
+        }
+
+        fn apply_discount(&self, stakers:AccountId, input_fee:Balance) -> Balance {
+
         }
 
     }

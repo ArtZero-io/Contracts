@@ -125,7 +125,12 @@ pub mod psp34_nft {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
-                ret.push(String::from_utf8(value.unwrap()).unwrap());
+                if value.is_some() {
+                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+                }
+                else{
+                    ret.push(String::from(""));
+                }
             }
             ret
         }

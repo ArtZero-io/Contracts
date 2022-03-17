@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x4666d5b3d1a8465ffde22b568767d9636113d1947e00495fc3a628046c05bf3c",
+    "hash": "0xad1830bdabf3ed68dfdc188724e1ba79a6673a9a5e1194513146d96e62886d6e",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -53,7 +53,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 13
+                "type": 14
               }
             },
             {
@@ -81,7 +81,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 13
+                "type": 14
               }
             },
             {
@@ -163,9 +163,9 @@
           "payable": false,
           "returnType": {
             "displayName": [
-              "Vec"
+              "Option"
             ],
-            "type": 4
+            "type": 11
           },
           "selector": "0x2815abda"
         },
@@ -184,22 +184,6 @@
             "type": 5
           },
           "selector": "0x02c779a5"
-        },
-        {
-          "args": [],
-          "docs": [
-            "Get contract account_id"
-          ],
-          "label": "get_account_id",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "AccountId"
-            ],
-            "type": 0
-          },
-          "selector": "0x79718546"
         },
         {
           "args": [
@@ -357,7 +341,7 @@
               "ownable_external",
               "RenounceOwnershipOutput"
             ],
-            "type": 11
+            "type": 12
           },
           "selector": "0x5e228753"
         },
@@ -383,7 +367,7 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 11
+            "type": 12
           },
           "selector": "0x11f43efd"
         }
@@ -652,6 +636,39 @@
             "variant": {
               "variants": [
                 {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 4
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 4
+            }
+          ],
+          "path": [
+            "Option"
+          ]
+        }
+      },
+      {
+        "id": 12,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
                   "fields": [
                     {
                       "type": 8
@@ -663,7 +680,7 @@
                 {
                   "fields": [
                     {
-                      "type": 12
+                      "type": 13
                     }
                   ],
                   "index": 1,
@@ -679,7 +696,7 @@
             },
             {
               "name": "E",
-              "type": 12
+              "type": 13
             }
           ],
           "path": [
@@ -688,7 +705,7 @@
         }
       },
       {
-        "id": 12,
+        "id": 13,
         "type": {
           "def": {
             "variant": {
@@ -714,7 +731,7 @@
         }
       },
       {
-        "id": 13,
+        "id": 14,
         "type": {
           "def": {
             "variant": {

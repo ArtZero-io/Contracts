@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x59f9618faa8bd05948c831c86ba816ca6f13103856cf06ce2913be8836e188e7",
+    "hash": "0x7b92351bad3421d157f4da3af17ce47f4260d1402fc7c6938c80fb183899b0f5",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -802,9 +802,9 @@
           "payable": false,
           "returnType": {
             "displayName": [
-              "AccountId"
+              "Option"
             ],
-            "type": 0
+            "type": 17
           },
           "selector": "0x510aa8d9"
         },
@@ -828,9 +828,9 @@
           "payable": false,
           "returnType": {
             "displayName": [
-              "Collection"
+              "Option"
             ],
-            "type": 7
+            "type": 18
           },
           "selector": "0x786d1a79"
         },
@@ -854,9 +854,9 @@
           "payable": false,
           "returnType": {
             "displayName": [
-              "AccountId"
+              "Option"
             ],
-            "type": 0
+            "type": 17
           },
           "selector": "0x672b1346"
         },
@@ -909,21 +909,6 @@
           "selector": "0x8938ef71"
         },
         {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 17
-          },
-          "selector": "0x5e228753"
-        },
-        {
           "args": [
             {
               "label": "new_owner",
@@ -945,9 +930,24 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 19
+          },
+          "selector": "0x5e228753"
         },
         {
           "args": [],
@@ -1432,6 +1432,72 @@
             "variant": {
               "variants": [
                 {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 0
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 0
+            }
+          ],
+          "path": [
+            "Option"
+          ]
+        }
+      },
+      {
+        "id": 18,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 7
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 7
+            }
+          ],
+          "path": [
+            "Option"
+          ]
+        }
+      },
+      {
+        "id": 19,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
                   "fields": [
                     {
                       "type": 15
@@ -1443,7 +1509,7 @@
                 {
                   "fields": [
                     {
-                      "type": 18
+                      "type": 20
                     }
                   ],
                   "index": 1,
@@ -1459,7 +1525,7 @@
             },
             {
               "name": "E",
-              "type": 18
+              "type": 20
             }
           ],
           "path": [
@@ -1468,7 +1534,7 @@
         }
       },
       {
-        "id": 18,
+        "id": 20,
         "type": {
           "def": {
             "variant": {

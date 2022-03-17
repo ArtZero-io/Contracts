@@ -542,14 +542,17 @@ pub mod artzero_collection_manager {
         }
         /// Get Collection Information by Address
         #[ink(message)]
-        pub fn get_collection_owner(&self,nft_contract_address: AccountId) -> AccountId {
+        pub fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId> {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return None;
+             }
             let collection = self.collections.get(&nft_contract_address).unwrap();
-            collection.collection_owner
+            Some(collection.collection_owner)
         }
         /// Get Collection Information by Address
         #[ink(message)]
-        pub fn get_collection_by_address(&self,nft_contract_address: AccountId) -> Collection {
-            return self.collections.get(&nft_contract_address).unwrap();
+        pub fn get_collection_by_address(&self,nft_contract_address: AccountId) -> Option<Collection> {
+            return self.collections.get(&nft_contract_address);
         }
 
         /// Get Collection Contract by ID
@@ -557,8 +560,8 @@ pub mod artzero_collection_manager {
         pub fn get_contract_by_id(
             &self,
             id: u64
-        ) -> AccountId {
-            return self.collections_by_id.get(&id).unwrap();
+        ) -> Option<AccountId> {
+            return self.collections_by_id.get(&id);
         }
 
         /// Get Collection Count

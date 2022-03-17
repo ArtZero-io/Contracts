@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x1c45b4e1d99e51355289f75daac8a2a26c078c50cc352251a9adb4a0d13c7a65",
+    "hash": "0xe0dd18fe543ac505c5c0474b5ed3429fbba0fb9cc06810b37036de501a558ca3",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -315,6 +315,21 @@
         {
           "args": [],
           "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 23
+          },
+          "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [],
           "label": "Ownable::owner",
           "mutates": false,
           "payable": false,
@@ -330,79 +345,17 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 23
-          },
-          "selector": "0x5e228753"
-        },
-        {
-          "args": [
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "GetApprovedInput1"
-                ],
-                "type": 1
-              }
-            }
-          ],
-          "docs": [],
-          "label": "PSP34::get_approved",
+          "label": "PSP34::total_supply",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "GetApprovedOutput"
+              "TotalSupplyOutput"
             ],
-            "type": 25
+            "type": 6
           },
-          "selector": "0x82db011d"
-        },
-        {
-          "args": [
-            {
-              "label": "to",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput2"
-                ],
-                "type": 1
-              }
-            }
-          ],
-          "docs": [],
-          "label": "PSP34::approve",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "ApproveOutput"
-            ],
-            "type": 26
-          },
-          "selector": "0x1932a8b0"
+          "selector": "0x628413fe"
         },
         {
           "args": [
@@ -446,60 +399,9 @@
               "psp34_external",
               "TransferOutput"
             ],
-            "type": 26
+            "type": 25
           },
           "selector": "0x3128d61b"
-        },
-        {
-          "args": [
-            {
-              "label": "operator",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "SetApprovalForAllInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "approved",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "SetApprovalForAllInput2"
-                ],
-                "type": 14
-              }
-            }
-          ],
-          "docs": [],
-          "label": "PSP34::set_approval_for_all",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "SetApprovalForAllOutput"
-            ],
-            "type": 26
-          },
-          "selector": "0xf8938214"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "PSP34::total_supply",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "TotalSupplyOutput"
-            ],
-            "type": 6
-          },
-          "selector": "0x628413fe"
         },
         {
           "args": [],
@@ -515,42 +417,6 @@
             "type": 1
           },
           "selector": "0xffa27a5f"
-        },
-        {
-          "args": [
-            {
-              "label": "owner",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "IsApprovedForAllInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "operator",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "IsApprovedForAllInput2"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [],
-          "label": "PSP34::is_approved_for_all",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "IsApprovedForAllOutput"
-            ],
-            "type": 14
-          },
-          "selector": "0x53e20ef5"
         },
         {
           "args": [
@@ -574,7 +440,7 @@
               "psp34_external",
               "OwnerOfOutput"
             ],
-            "type": 25
+            "type": 27
           },
           "selector": "0x1168624d"
         },
@@ -630,7 +496,7 @@
               "psp34_external",
               "TransferFromOutput"
             ],
-            "type": 26
+            "type": 25
           },
           "selector": "0x718fd38b"
         },
@@ -659,6 +525,140 @@
             "type": 4
           },
           "selector": "0xcde7e55f"
+        },
+        {
+          "args": [
+            {
+              "label": "operator",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "SetApprovalForAllInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "approved",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "SetApprovalForAllInput2"
+                ],
+                "type": 14
+              }
+            }
+          ],
+          "docs": [],
+          "label": "PSP34::set_approval_for_all",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "SetApprovalForAllOutput"
+            ],
+            "type": 25
+          },
+          "selector": "0xf8938214"
+        },
+        {
+          "args": [
+            {
+              "label": "to",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "ApproveInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "ApproveInput2"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [],
+          "label": "PSP34::approve",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "ApproveOutput"
+            ],
+            "type": 25
+          },
+          "selector": "0x1932a8b0"
+        },
+        {
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "GetApprovedInput1"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [],
+          "label": "PSP34::get_approved",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "GetApprovedOutput"
+            ],
+            "type": 27
+          },
+          "selector": "0x82db011d"
+        },
+        {
+          "args": [
+            {
+              "label": "owner",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "IsApprovedForAllInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "operator",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "IsApprovedForAllInput2"
+                ],
+                "type": 8
+              }
+            }
+          ],
+          "docs": [],
+          "label": "PSP34::is_approved_for_all",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "IsApprovedForAllOutput"
+            ],
+            "type": 14
+          },
+          "selector": "0x53e20ef5"
         },
         {
           "args": [
@@ -692,7 +692,7 @@
               "psp34burnable_external",
               "BurnOutput"
             ],
-            "type": 26
+            "type": 25
           },
           "selector": "0x63c9877a"
         },
@@ -1399,39 +1399,6 @@
             "variant": {
               "variants": [
                 {
-                  "index": 0,
-                  "name": "None"
-                },
-                {
-                  "fields": [
-                    {
-                      "type": 8
-                    }
-                  ],
-                  "index": 1,
-                  "name": "Some"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "T",
-              "type": 8
-            }
-          ],
-          "path": [
-            "Option"
-          ]
-        }
-      },
-      {
-        "id": 26,
-        "type": {
-          "def": {
-            "variant": {
-              "variants": [
-                {
                   "fields": [
                     {
                       "type": 20
@@ -1443,7 +1410,7 @@
                 {
                   "fields": [
                     {
-                      "type": 27
+                      "type": 26
                     }
                   ],
                   "index": 1,
@@ -1459,7 +1426,7 @@
             },
             {
               "name": "E",
-              "type": 27
+              "type": 26
             }
           ],
           "path": [
@@ -1468,7 +1435,7 @@
         }
       },
       {
-        "id": 27,
+        "id": 26,
         "type": {
           "def": {
             "variant": {
@@ -1518,6 +1485,39 @@
             "errors",
             "psp34",
             "PSP34Error"
+          ]
+        }
+      },
+      {
+        "id": 27,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 8
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 8
+            }
+          ],
+          "path": [
+            "Option"
           ]
         }
       },

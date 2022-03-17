@@ -89,23 +89,21 @@ pub mod artzero_staking_nft {
         }
         ///Get staked token ids by AccountId
         #[ink(message)]
-        pub fn get_staked_ids(&self,account: AccountId) -> Vec<u32> {
-            self.staking_list.get(&account).unwrap()
+        pub fn get_staked_ids(&self,account: AccountId) -> Option<Vec<u32>> {
+            self.staking_list.get(&account)
         }
         ///Get total NFT staked in the contract
         #[ink(message)]
         pub fn get_total_staked(&self) -> u32 {
             self.total_staked
         }
-        ///Get contract account_id
-        #[ink(message)]
-        pub fn get_account_id(&self) -> AccountId {
-            self.env().account_id()
-        }
 
         ///Get User NFT staked in the contract
         #[ink(message)]
         pub fn get_total_staked_by_account(&self,account: AccountId) -> u32 {
+            if self.staking_list.get(&account).is_none() {
+                return 0;
+            }
             self.staking_list.get(&account).unwrap().len() as u32
         }
         /// Stake NFT - Make sure approve this contract can send token on owner behalf
