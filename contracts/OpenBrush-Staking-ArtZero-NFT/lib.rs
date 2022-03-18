@@ -61,6 +61,12 @@ pub mod artzero_staking_nft {
     }
     impl Ownable for ArtZeroStakingNFT {}
 
+    #[brush::trait_definition]
+    pub trait CrossArtZeroStaking {
+        #[ink(message)]
+        fn get_total_staked_by_account(&self,account: AccountId) -> u32;
+    }
+
     #[brush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
 
@@ -98,14 +104,6 @@ pub mod artzero_staking_nft {
             self.total_staked
         }
 
-        ///Get User NFT staked in the contract
-        #[ink(message)]
-        pub fn get_total_staked_by_account(&self,account: AccountId) -> u32 {
-            if self.staking_list.get(&account).is_none() {
-                return 0;
-            }
-            self.staking_list.get(&account).unwrap().len() as u32
-        }
         /// Stake NFT - Make sure approve this contract can send token on owner behalf
         #[ink(message)]
         pub fn stake(&mut self,token_id:u32) -> Result<(), Error> {
@@ -257,6 +255,18 @@ pub mod artzero_staking_nft {
                 });
             }
             Ok(())
+        }
+    }
+
+    impl CrossArtZeroStaking for ArtZeroStakingNFT{
+        /* GETTERS */
+        ///Get User NFT staked in the contract
+        #[ink(message)]
+        fn get_total_staked_by_account(&self,account: AccountId) -> u32 {
+            if self.staking_list.get(&account).is_none() {
+                return 0;
+            }
+            self.staking_list.get(&account).unwrap().len() as u32
         }
     }
 }

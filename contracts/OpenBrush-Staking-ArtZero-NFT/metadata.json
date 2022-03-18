@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xad1830bdabf3ed68dfdc188724e1ba79a6673a9a5e1194513146d96e62886d6e",
+    "hash": "0x03835ffcaac8df80add8f2c42aea394e3ff00ad34646e422a54f18ec8c5a81af",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -188,32 +188,6 @@
         {
           "args": [
             {
-              "label": "account",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            "Get User NFT staked in the contract"
-          ],
-          "label": "get_total_staked_by_account",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "u32"
-            ],
-            "type": 5
-          },
-          "selector": "0x84726e23"
-        },
-        {
-          "args": [
-            {
               "label": "token_id",
               "type": {
                 "displayName": [
@@ -370,6 +344,34 @@
             "type": 12
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "crossartzerostaking_external",
+                  "GetTotalStakedByAccountInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get User NFT staked in the contract"
+          ],
+          "label": "CrossArtZeroStaking::get_total_staked_by_account",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerostaking_external",
+              "GetTotalStakedByAccountOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0x487f1cac"
         }
       ]
     },

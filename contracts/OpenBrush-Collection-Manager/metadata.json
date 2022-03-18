@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x4ce1591ad4e877b16c5c80306b2599c3d36213361dd189cf98e746c8b9122134",
+    "hash": "0x31ac752b2297776fd25285950e9e8a82f082b1c7a55a5756fc02ddc00d1d6f4c",
     "language": "ink! 3.0.0-rc9",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -743,84 +743,6 @@
             }
           ],
           "docs": [
-            "Get royal fee of the Collection"
-          ],
-          "label": "get_royal_fee",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "u32"
-            ],
-            "type": 10
-          },
-          "selector": "0xa7f2c606"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            "Check if the Collection is active not"
-          ],
-          "label": "is_active",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "bool"
-            ],
-            "type": 9
-          },
-          "selector": "0xd8d4423e"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            " Get Collection Owner by Collection Address (NFT address)"
-          ],
-          "label": "get_collection_owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Option"
-            ],
-            "type": 19
-          },
-          "selector": "0x510aa8d9"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
             " Get Collection Information by Collection Address (NFT address)"
           ],
           "label": "get_collection_by_address",
@@ -830,7 +752,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 20
+            "type": 19
           },
           "selector": "0x786d1a79"
         },
@@ -856,7 +778,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 21
+            "type": 20
           },
           "selector": "0x83091e54"
         },
@@ -882,7 +804,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 19
+            "type": 21
           },
           "selector": "0x672b1346"
         },
@@ -935,6 +857,21 @@
           "selector": "0x8938ef71"
         },
         {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 22
+          },
+          "selector": "0x5e228753"
+        },
+        {
           "args": [
             {
               "label": "new_owner",
@@ -963,21 +900,6 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 22
-          },
-          "selector": "0x5e228753"
-        },
-        {
-          "args": [],
-          "docs": [],
           "label": "Ownable::owner",
           "mutates": false,
           "payable": false,
@@ -989,6 +911,118 @@
             "type": 0
           },
           "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "GetRoyalFeeInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get royal fee of the Collection"
+          ],
+          "label": "CrossArtZeroCollection::get_royal_fee",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "GetRoyalFeeOutput"
+            ],
+            "type": 10
+          },
+          "selector": "0xfa0f936e"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "IsActiveInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Check if the Collection is active not"
+          ],
+          "label": "CrossArtZeroCollection::is_active",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "IsActiveOutput"
+            ],
+            "type": 9
+          },
+          "selector": "0x74687faf"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "GetCollectionOwnerInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Owner by Collection Address (NFT address)"
+          ],
+          "label": "CrossArtZeroCollection::get_collection_owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "GetCollectionOwnerOutput"
+            ],
+            "type": 21
+          },
+          "selector": "0xb1f1e401"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "GetContractTypeInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get NFT Contract Type 1 or 2 for PSP34"
+          ],
+          "label": "CrossArtZeroCollection::get_contract_type",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "GetContractTypeOutput"
+            ],
+            "type": 2
+          },
+          "selector": "0x81fa82e9"
         }
       ]
     },
@@ -1515,39 +1549,6 @@
                 {
                   "fields": [
                     {
-                      "type": 0
-                    }
-                  ],
-                  "index": 1,
-                  "name": "Some"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "T",
-              "type": 0
-            }
-          ],
-          "path": [
-            "Option"
-          ]
-        }
-      },
-      {
-        "id": 20,
-        "type": {
-          "def": {
-            "variant": {
-              "variants": [
-                {
-                  "index": 0,
-                  "name": "None"
-                },
-                {
-                  "fields": [
-                    {
                       "type": 7
                     }
                   ],
@@ -1569,7 +1570,7 @@
         }
       },
       {
-        "id": 21,
+        "id": 20,
         "type": {
           "def": {
             "variant": {
@@ -1594,6 +1595,39 @@
             {
               "name": "T",
               "type": 14
+            }
+          ],
+          "path": [
+            "Option"
+          ]
+        }
+      },
+      {
+        "id": 21,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 0
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 0
             }
           ],
           "path": [

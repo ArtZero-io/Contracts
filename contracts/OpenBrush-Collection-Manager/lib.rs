@@ -92,6 +92,18 @@ pub mod artzero_collection_manager {
 
     impl Ownable for ArtZeroCollectionManager {}
 
+    #[brush::trait_definition]
+    pub trait CrossArtZeroCollection {
+        #[ink(message)]
+        fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32;
+        #[ink(message)]
+        fn is_active(&self,nft_contract_address: AccountId) -> bool;
+        #[ink(message)]
+        fn get_contract_type(&self,nft_contract_address: AccountId) -> u8;
+        #[ink(message)]
+        fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId>;
+    }
+
     impl ArtZeroCollectionManager {
         #[ink(constructor)]
         pub fn new(admin_address: AccountId,owner_address: AccountId, standard_nft_hash: Hash) -> Self {
@@ -531,49 +543,7 @@ pub mod artzero_collection_manager {
         }
 
         /* GETTERS */
-        ///Get royal fee of the Collection
-        #[ink(message)]
-        pub fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32 {
-            if self.collections.get(&nft_contract_address).is_none(){
-                 return 0;
-             }
 
-            let collection = self.collections.get(&nft_contract_address).unwrap();
-            if  !collection.is_collect_royal_fee ||
-                !collection.is_active{
-                return 0;
-            }
-            else{
-                collection.royal_fee
-            }
-        }
-        ///Check if the Collection is active not
-        #[ink(message)]
-        pub fn is_active(&self,nft_contract_address: AccountId) -> bool {
-            if self.collections.get(&nft_contract_address).is_none(){
-                 return false;
-             }
-
-            let collection = self.collections.get(&nft_contract_address).unwrap();
-            return collection.is_active;
-        }
-        pub fn get_contract_type(&self,nft_contract_address: AccountId) -> u8 {
-            if self.collections.get(&nft_contract_address).is_none(){
-                 return 0;
-             }
-
-            let collection = self.collections.get(&nft_contract_address).unwrap();
-            return collection.contract_type;
-        }
-        /// Get Collection Owner by Collection Address (NFT address)
-        #[ink(message)]
-        pub fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId> {
-            if self.collections.get(&nft_contract_address).is_none(){
-                 return None;
-             }
-            let collection = self.collections.get(&nft_contract_address).unwrap();
-            Some(collection.collection_owner)
-        }
         /// Get Collection Information by Collection Address (NFT address)
         #[ink(message)]
         pub fn get_collection_by_address(&self,nft_contract_address: AccountId) -> Option<Collection> {
@@ -617,5 +587,55 @@ pub mod artzero_collection_manager {
         }
 
 
+    }
+
+    impl CrossArtZeroCollection for ArtZeroCollectionManager{
+        ///Get royal fee of the Collection
+        #[ink(message)]
+        fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32 {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return 0;
+             }
+
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            if  !collection.is_collect_royal_fee ||
+                !collection.is_active{
+                return 0;
+            }
+            else{
+                collection.royal_fee
+            }
+        }
+        ///Check if the Collection is active not
+        #[ink(message)]
+        fn is_active(&self,nft_contract_address: AccountId) -> bool {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return false;
+             }
+
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            return collection.is_active;
+        }
+
+        ///Get NFT Contract Type 1 or 2 for PSP34
+        #[ink(message)]
+        fn get_contract_type(&self,nft_contract_address: AccountId) -> u8 {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return 0;
+             }
+
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            return collection.contract_type;
+        }
+
+        /// Get Collection Owner by Collection Address (NFT address)
+        #[ink(message)]
+        fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId> {
+            if self.collections.get(&nft_contract_address).is_none(){
+                 return None;
+             }
+            let collection = self.collections.get(&nft_contract_address).unwrap();
+            Some(collection.collection_owner)
+        }
     }
 }

@@ -109,14 +109,20 @@ pub mod artzero_marketplace_psp34 {
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
 
+    #[brush::wrapper]
+    pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
+    #[brush::wrapper]
+    pub type CollectionRef = dyn CrossArtZeroCollection;
+    #[brush::wrapper]
+    pub type StakingRef = dyn CrossArtZeroStaking;
+
     #[brush::trait_definition]
-    pub trait ArtZeroStaking {
+    pub trait CrossArtZeroStaking {
         #[ink(message)]
         fn get_total_staked_by_account(&self,account: AccountId) -> u32;
     }
-
     #[brush::trait_definition]
-    pub trait ArtZeroCollection {
+    pub trait CrossArtZeroCollection {
         #[ink(message)]
         fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32;
         #[ink(message)]
@@ -124,16 +130,8 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         fn get_contract_type(&self,nft_contract_address: AccountId) -> u8;
         #[ink(message)]
-        fn get_collection_owner(&self,nft_contract_address: AccountId) -> AccountId;
+        fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId>;
     }
-
-    #[brush::wrapper]
-    pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
-    #[brush::wrapper]
-    pub type StakingRef = dyn ArtZeroStaking;
-    #[brush::wrapper]
-    pub type CollectionRef = dyn ArtZeroCollection;
-
     #[ink(event)]
     pub struct NewListEvent {
         trader: Option<AccountId>,
@@ -171,11 +169,17 @@ pub mod artzero_marketplace_psp34 {
                 instance.platform_fee = platform_fee;
             })
         }
-
+        #[ink(message)]
+        pub fn Test(&self, nft_contract_address: AccountId) -> bool {
+            let is_active = CollectionRef::is_active(&self.collection_contract_address,nft_contract_address);
+            is_active
+        }
         /* MARKETPLACE FUNCTIONS */
         /// List the token on the marketplace - FREE
         #[ink(message)]
         pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance) -> Result<(),Error>{
+
+            assert!(price>0);
             //Step 1: Check if the callet is the owner of the token
             let caller = self.env().caller();
 
@@ -183,11 +187,13 @@ pub mod artzero_marketplace_psp34 {
             assert!(caller == token_owner);
 
             //Step 2 - Check if this contract has been approved
-            let approved_account = Psp34Ref::get_approved(&nft_contract_address,token_id.clone()).unwrap();
-            assert!(approved_account == self.env().account_id());
+            if !Psp34Ref::is_approved_for_all(&nft_contract_address,caller,self.env().account_id()){
+                let approved_account = Psp34Ref::get_approved(&nft_contract_address,token_id.clone()).unwrap();
+                assert!(approved_account == self.env().account_id());
+            }
 
-            //Check Collection active
-            assert!(CollectionRef::is_active(&self.collection_contract_address,nft_contract_address));
+            let is_active = CollectionRef::is_active(&self.collection_contract_address,nft_contract_address);
+            assert!(is_active);
 
             {
                 //Check the sale token ids list
@@ -313,27 +319,39 @@ pub mod artzero_marketplace_psp34 {
             let bidders = Vec::<BidInformation>::new();
             self.bidders.insert(&(nft_contract_address,caller,token_id.clone()), &bidders);
 
-            //TODO: Add discount from Staking Amount
             //Calculate fee
             let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
+            //Fee after Staking discount
+            let platform_fee_after_discount = Self::apply_discount(self.collection_contract_address,caller, platform_fee);
+
             let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
             let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
 
-            //Send AZERO to seller / platform and collection owner
+            //Send AZERO to collection owner
             let collection_owner = CollectionRef::get_collection_owner(&self.collection_contract_address,nft_contract_address);
+            assert!(collection_owner != None);
             if royal_fee > 0{
-                if self.env().transfer(collection_owner, royal_fee).is_err() {
+                if self.env().transfer(collection_owner.unwrap(), royal_fee).is_err() {
                     panic!(
                         "error royal_fee"
                     )
                 }
             }
-            let mut seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee).unwrap();
+            //Send AZERO to seller
+            let seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee_after_discount).unwrap();
             //seller_fee = self.apply_discount(caller, );
             if seller_fee  > 0{
                 if self.env().transfer(seller, seller_fee).is_err() {
                     panic!(
                         "error seller_fee"
+                    )
+                }
+            }
+            //Send AZERO cashback to buyer
+            if platform_fee > platform_fee_after_discount {
+                if self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_err() {
+                    panic!(
+                        "error cashback"
                     )
                 }
             }
@@ -501,12 +519,46 @@ pub mod artzero_marketplace_psp34 {
                     if index == bid_index as usize {
                         //Send NFT to bidder
                         assert!(Psp34Ref::transfer(&nft_contract_address,bidders[index].bidder,token_id.clone(),Vec::<u8>::new()).is_ok());
-                        //SEnd Azero to seller
-                        if self.env().transfer(caller, bidders[index].bid_value).is_err() {
-                            panic!(
-                                "error"
-                            )
+
+                        let price = bidders[index].bid_value;
+                        //Calculate fee
+                        let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
+                        //Fee after Staking discount
+                        let platform_fee_after_discount = Self::apply_discount(self.collection_contract_address,caller, platform_fee);
+
+                        let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
+                        let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
+
+                        //Send AZERO to collection owner
+                        let collection_owner = CollectionRef::get_collection_owner(&self.collection_contract_address,nft_contract_address);
+                        assert!(collection_owner != None);
+
+                        if royal_fee > 0{
+                            if self.env().transfer(collection_owner.unwrap(), royal_fee).is_err() {
+                                panic!(
+                                    "error royal_fee"
+                                )
+                            }
                         }
+                        //Send AZERO to seller
+                        let seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee_after_discount).unwrap();
+                        //seller_fee = self.apply_discount(caller, );
+                        if seller_fee  > 0{
+                            if self.env().transfer(seller, seller_fee).is_err() {
+                                panic!(
+                                    "error seller_fee"
+                                )
+                            }
+                        }
+                        //Send AZERO cashback to buyer
+                        if platform_fee > platform_fee_after_discount {
+                            if self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_err() {
+                                panic!(
+                                    "error cashback"
+                                )
+                            }
+                        }
+
                     }
                     else{
                         //SEnd AZero back to lost bidder
@@ -598,27 +650,28 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
-        fn apply_discount(staker:AccountId, input_fee:Balance) -> Balance {
-            let staked_amount = StakingRef::get_total_staked_by_account(&self.collection_contract_address,staker);
-
-            if staked_amount == 0 {
-                input_fee
-            }
-            else if staked_amount < 5 {
-                input_fee * 30 / 100
-            }
-            else if staked_amount < 7 {
-                input_fee * 50 / 100
-            }
-            else if staked_amount < 9 {
-                input_fee * 34 / 100
-            }
-            else if staked_amount < 20 {
-                input_fee * 80 / 100
-            }
-            else if staked_amount >= 20 {
-                input_fee * 90 / 100
-            }
+        fn apply_discount(collection_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
+            // let staked_amount = StakingRef::get_total_staked_by_account(&collection_contract_address,staker);
+            //
+            // if staked_amount == 0 {
+            //     return input_fee;
+            // }
+            // else if staked_amount < 5 {
+            //     return input_fee * 30 / 100;
+            // }
+            // else if staked_amount < 7 {
+            //     return input_fee * 50 / 100;
+            // }
+            // else if staked_amount < 9 {
+            //     return input_fee * 34 / 100;
+            // }
+            // else if staked_amount < 20 {
+            //     return input_fee * 80 / 100;
+            // }
+            // else if staked_amount >= 20 {
+            //     return input_fee * 90 / 100;
+            // }
+            return 0;
 
         }
 
