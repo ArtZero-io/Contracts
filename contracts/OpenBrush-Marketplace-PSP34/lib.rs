@@ -187,10 +187,8 @@ pub mod artzero_marketplace_psp34 {
             assert!(caller == token_owner);
 
             //Step 2 - Check if this contract has been approved
-            if !Psp34Ref::is_approved_for_all(&nft_contract_address,caller,self.env().account_id()){
-                let approved_account = Psp34Ref::get_approved(&nft_contract_address,token_id.clone()).unwrap();
-                assert!(approved_account == self.env().account_id());
-            }
+            let allowance = Psp34Ref::allowance(&self.collection_contract_address,caller, self.env().account_id(), Some(token_id.clone()));
+            assert!(allowance);
 
             let is_active = CollectionRef::is_active(&self.collection_contract_address,nft_contract_address);
             assert!(is_active);
@@ -220,7 +218,7 @@ pub mod artzero_marketplace_psp34 {
             }
 
             //Step 3 - Transfer Token from Caller to Marketplace Contract
-            if !PSP34Ref::transfer_from_builder(&nft_contract_address, caller, self.env().account_id(), token_id.clone(), Vec::<u8>::new())
+            if !PSP34Ref::transfer_builder(&nft_contract_address, self.env().account_id(), token_id.clone(), Vec::<u8>::new())
             .call_flags(CallFlags::default().set_allow_reentry(true))
             .fire().is_ok() {
                 return Err(Error::CannotTransfer);

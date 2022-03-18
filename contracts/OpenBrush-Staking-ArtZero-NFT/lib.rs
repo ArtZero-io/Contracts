@@ -111,11 +111,10 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U32(token_id)).unwrap();
             assert!(caller == token_owner);
+
             //Step 2 - Check if this contract has been approved
-            if !Psp34Ref::is_approved_for_all(&self.nft_contract_address,caller,self.env().account_id()){
-                let approved_account = Psp34Ref::get_approved(&self.nft_contract_address,Id::U32(token_id)).unwrap();
-                assert!(approved_account == self.env().account_id());
-            }
+            let allowance = Psp34Ref::allowance(&self.nft_contract_address,caller, self.env().account_id(), Some(Id::U32(token_id)));
+            assert!(allowance);
 
             self.total_staked += 1;
             if self.staking_list.get(&caller).is_some()
@@ -134,7 +133,7 @@ pub mod artzero_staking_nft {
             // if !Psp34Ref::transfer_from(&self.nft_contract_address,caller,self.env().account_id(),Id::U32(token_id),Vec::<u8>::new()).is_ok(){
             //     return Err(Error::CannotTransfer);
             // }
-            if !PSP34Ref::transfer_from_builder(&self.nft_contract_address, caller, self.env().account_id(), Id::U32(token_id), Vec::<u8>::new())
+            if !PSP34Ref::transfer_builder(&self.nft_contract_address, self.env().account_id(), Id::U32(token_id), Vec::<u8>::new())
             .call_flags(CallFlags::default().set_allow_reentry(true))
             .fire().is_ok() {
                 return Err(Error::CannotTransfer);
@@ -178,16 +177,16 @@ pub mod artzero_staking_nft {
 
             let caller = self.env().caller();
             let leng = token_ids.len();
-            let is_approve_all = Psp34Ref::is_approved_for_all(&self.nft_contract_address,caller,self.env().account_id());
+
             for i in 0..leng{
                 //Step 1 - Check if the token is belong to caller
                 let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U32(token_ids[i])).unwrap();
                 assert!(caller == token_owner);
-                if !is_approve_all{
-                    //Step 2 - Check if this contract has been approved
-                    let approved_account = Psp34Ref::get_approved(&self.nft_contract_address,Id::U32(token_ids[i])).unwrap();
-                    assert!(approved_account == self.env().account_id());
-                }
+
+                //Step 2 - Check if this contract has been approved
+                let allowance = Psp34Ref::allowance(&self.nft_contract_address,caller, self.env().account_id(), Some(Id::U32(token_ids[i])));
+                assert!(allowance);
+
             }
 
             self.total_staked = self.total_staked.checked_add(leng as u32).unwrap();
@@ -209,7 +208,7 @@ pub mod artzero_staking_nft {
             }
             for i in 0..leng {
                 //Step 3 - Transfer Token from Caller to Staking Contract
-                if !PSP34Ref::transfer_from_builder(&self.nft_contract_address, caller, self.env().account_id(), Id::U32(token_ids[i]), Vec::<u8>::new())
+                if !PSP34Ref::transfer_builder(&self.nft_contract_address, self.env().account_id(), Id::U32(token_ids[i]), Vec::<u8>::new())
                 .call_flags(CallFlags::default().set_allow_reentry(true))
                 .fire().is_ok() {
                     return Err(Error::CannotTransfer);
