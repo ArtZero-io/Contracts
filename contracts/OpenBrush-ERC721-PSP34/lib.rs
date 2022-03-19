@@ -484,7 +484,7 @@ pub mod artzero_psp34 {
         pub fn get_attribute_count(&self) -> u32 {
             self.attribute_count
         }
-        ///Get Attribute Count
+        ///Get Attribute Name
         #[ink(message)]
         pub fn get_attribute_name(&self, index:u32) -> String {
             let attribute = self.attribute_names.get(&index);

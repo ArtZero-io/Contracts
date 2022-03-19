@@ -57,6 +57,25 @@ pub mod psp34_nft {
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Internal for Psp34Nft {}
 
+    #[brush::trait_definition]
+    pub trait Psp34Traits {
+        #[ink(message)]
+        fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
+        #[ink(message)]
+        fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error>;
+        #[ink(message)]
+        fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error>;
+        #[ink(message)]
+        fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String>;
+        #[ink(message)]
+        fn get_attribute_count(&self) -> u32;
+        #[ink(message)]
+        fn get_attribute_name(&self, index:u32) -> String;
+        #[ink(message)]
+        fn token_uri(&self,token_id: u64) -> Vec<u8>;
+
+    }
+
     impl Psp34Nft {
 
         #[ink(constructor)]
@@ -67,15 +86,6 @@ pub mod psp34_nft {
                 instance._init_with_owner(contract_owner);
             })
         }
-
-        /// Change baseURI
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
-            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
-            Ok(())
-        }
-
         ///Only Owner can mint new token
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -86,10 +96,38 @@ pub mod psp34_nft {
             Ok(())
         }
 
+        fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
+            let mut exist:bool = false;
+            for index in 0..self.attribute_count {
+                let attribute_name = self.attribute_names.get(&index);
+                if attribute_name.is_some(){
+                    if attribute_name.unwrap() == attribute_input{
+                        exist = true;
+                        break;
+                    }
+                }
+            }
+            if !exist {
+                self.attribute_count += 1;
+                self.attribute_names.insert(&self.attribute_count, &attribute_input);
+            }
+        }
+
+    }
+
+    impl Psp34Traits for Psp34Nft{
+        /// Change baseURI
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
+            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+            Ok(())
+        }
+
         ///Only Owner can set attribute to a token
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error> {
+        fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error> {
             assert!(token_id != Id::U64(0));
             let byte_attribute = attribute.into_bytes();
             self.add_attribute_name(byte_attribute.clone());
@@ -99,7 +137,7 @@ pub mod psp34_nft {
         ///Only Owner can set multiple attributes to a token
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+        fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             assert!(token_id != Id::U64(0));
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
@@ -119,7 +157,7 @@ pub mod psp34_nft {
 
         /// Get multiple  attributes
         #[ink(message)]
-        pub fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
+        fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();
             let mut ret = Vec::<String>::new();
             for i in 0..length {
@@ -137,12 +175,12 @@ pub mod psp34_nft {
 
         ///Get Attribute Count
         #[ink(message)]
-        pub fn get_attribute_count(&self) -> u32 {
+        fn get_attribute_count(&self) -> u32 {
             self.attribute_count
         }
-        ///Get Attribute Count
+        ///Get Attribute Name
         #[ink(message)]
-        pub fn get_attribute_name(&self, index:u32) -> String {
+        fn get_attribute_name(&self, index:u32) -> String {
             let attribute = self.attribute_names.get(&index);
             if attribute.is_some() {
                 String::from_utf8(attribute.unwrap()).unwrap()
@@ -153,7 +191,7 @@ pub mod psp34_nft {
         }
         /// Get URI from token ID
         #[ink(message)]
-        pub fn token_uri(
+        fn token_uri(
             &self,
             token_id: u64
         ) -> Vec<u8> {
@@ -162,23 +200,6 @@ pub mod psp34_nft {
             token_uri.extend(String::from(".json").into_bytes());
 
             return token_uri;
-        }
-
-        fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
-            let mut exist:bool = false;
-            for index in 0..self.attribute_count {
-                let attribute_name = self.attribute_names.get(&index);
-                if attribute_name.is_some(){
-                    if attribute_name.unwrap() == attribute_input{
-                        exist = true;
-                        break;
-                    }
-                }
-            }
-            if !exist {
-                self.attribute_count += 1;
-                self.attribute_names.insert(&self.attribute_count, &attribute_input);
-            }
         }
 
     }
