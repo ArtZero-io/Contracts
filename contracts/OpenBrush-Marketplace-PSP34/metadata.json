@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x13568e97494147f21e3f18d0aa952b6f260cace8f2eeae6f37769fb71a12f313",
+    "hash": "0x7230c3ebde5596b7db82b4697a592c41204d32146958c3d7f0f39d0aa57b146e",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -314,9 +314,9 @@
             }
           ],
           "docs": [
-            " Delist the token from the marketplace - FREE"
+            " Unlist the token from the marketplace - FREE"
           ],
-          "label": "delist",
+          "label": "unlist",
           "mutates": true,
           "payable": false,
           "returnType": {
@@ -325,7 +325,7 @@
             ],
             "type": 22
           },
-          "selector": "0x7e4c26c6"
+          "selector": "0x5aeeb315"
         },
         {
           "args": [
@@ -736,6 +736,32 @@
           "selector": "0x07fdb555"
         },
         {
+          "args": [
+            {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "ownable_external",
+                  "TransferOwnershipInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 28
+          },
+          "selector": "0x11f43efd"
+        },
+        {
           "args": [],
           "docs": [],
           "label": "Ownable::owner",
@@ -764,32 +790,6 @@
             "type": 28
           },
           "selector": "0x5e228753"
-        },
-        {
-          "args": [
-            {
-              "label": "new_owner",
-              "type": {
-                "displayName": [
-                  "ownable_external",
-                  "TransferOwnershipInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [],
-          "label": "Ownable::transfer_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "TransferOwnershipOutput"
-            ],
-            "type": 28
-          },
-          "selector": "0x11f43efd"
         }
       ]
     },

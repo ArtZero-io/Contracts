@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xd0caeb1f398446c0a6fe2519b459530c22b4436403a232e90658fdd20ed78b98",
+    "hash": "0x641ad3f5aca5dde856e540fd5432e9185fc2a09af516f6e96f6bf7a930f8377b",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -38,47 +38,12 @@
         {
           "args": [
             {
-              "label": "attribute",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "value",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [
-            " Set single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram"
-          ],
-          "label": "set_profile_attribute",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 9
-          },
-          "selector": "0x231feccc"
-        },
-        {
-          "args": [
-            {
               "label": "attributes",
               "type": {
                 "displayName": [
                   "Vec"
                 ],
-                "type": 11
+                "type": 8
               }
             },
             {
@@ -87,7 +52,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 11
+                "type": 8
               }
             }
           ],
@@ -101,7 +66,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 9
+            "type": 10
           },
           "selector": "0x8119d25e"
         },
@@ -117,45 +82,12 @@
               }
             },
             {
-              "label": "attribute",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [],
-          "label": "get_attribute",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "String"
-            ],
-            "type": 8
-          },
-          "selector": "0x97f86da4"
-        },
-        {
-          "args": [
-            {
-              "label": "account",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            },
-            {
               "label": "attributes",
               "type": {
                 "displayName": [
                   "Vec"
                 ],
-                "type": 11
+                "type": 8
               }
             }
           ],
@@ -167,9 +99,24 @@
             "displayName": [
               "Vec"
             ],
-            "type": 11
+            "type": 8
           },
           "selector": "0x8d76b3fe"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 12
+          },
+          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -196,21 +143,6 @@
             "type": 12
           },
           "selector": "0x11f43efd"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 12
-          },
-          "selector": "0x5e228753"
         },
         {
           "args": [],
@@ -412,12 +344,22 @@
         "id": 8,
         "type": {
           "def": {
-            "primitive": "str"
+            "sequence": {
+              "type": 9
+            }
           }
         }
       },
       {
         "id": 9,
+        "type": {
+          "def": {
+            "primitive": "str"
+          }
+        }
+      },
+      {
+        "id": 10,
         "type": {
           "def": {
             "variant": {
@@ -434,7 +376,7 @@
                 {
                   "fields": [
                     {
-                      "type": 10
+                      "type": 11
                     }
                   ],
                   "index": 1,
@@ -450,7 +392,7 @@
             },
             {
               "name": "E",
-              "type": 10
+              "type": 11
             }
           ],
           "path": [
@@ -459,7 +401,7 @@
         }
       },
       {
-        "id": 10,
+        "id": 11,
         "type": {
           "def": {
             "variant": {
@@ -467,7 +409,7 @@
                 {
                   "fields": [
                     {
-                      "type": 8,
+                      "type": 9,
                       "typeName": "String"
                     }
                   ],
@@ -482,16 +424,6 @@
             "artzero_profile_manager",
             "Error"
           ]
-        }
-      },
-      {
-        "id": 11,
-        "type": {
-          "def": {
-            "sequence": {
-              "type": 8
-            }
-          }
         }
       },
       {

@@ -42,12 +42,7 @@ pub mod artzero_profile_manager {
                 instance._init_with_owner(contract_owner);
             })
         }
-        /// Set single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
-        #[ink(message)]
-        pub fn set_profile_attribute(&mut self, attribute: String, value: String) -> Result<(),Error> {
-            self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
-            Ok(())
-        }
+        
         /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
@@ -64,18 +59,6 @@ pub mod artzero_profile_manager {
             Ok(())
         }
 
-        // Get single profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
-        #[ink(message)]
-        pub fn get_attribute(&self, account: AccountId, attribute: String) -> String {
-            let value = self.attributes.get(&(account,attribute.into_bytes()));
-            if value.is_some() {
-                String::from_utf8(value.unwrap()).unwrap()
-            }
-            else{
-                String::from("")
-            }
-
-        }
         // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {

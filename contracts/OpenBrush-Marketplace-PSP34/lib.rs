@@ -231,9 +231,9 @@ pub mod artzero_marketplace_psp34 {
 
             Ok(())
         }
-        /// Delist the token from the marketplace - FREE
+        /// Unlist the token from the marketplace - FREE
         #[ink(message)]
-        pub fn delist(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(),Error>{
+        pub fn unlist(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(),Error>{
 
             assert!(self.market_list.get(&(nft_contract_address,token_id.clone())).is_some());
             let mut sale_information = self.market_list.get(&(nft_contract_address,token_id.clone())).unwrap();

@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x0764deaf23f02bd0dea3ab6cb1a59607aeda1cbe7801c779f156b8e8f280238e",
+    "hash": "0x20b0bb14e9ae828801a21889efa80cc917ef96051ee60fa4a9b549d422f25bb7",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -188,58 +188,6 @@
         {
           "args": [
             {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "u32"
-                ],
-                "type": 6
-              }
-            }
-          ],
-          "docs": [
-            " Stake NFT - Make sure approve this contract can send token on owner behalf"
-          ],
-          "label": "stake",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 8
-          },
-          "selector": "0x5adb38de"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "u32"
-                ],
-                "type": 6
-              }
-            }
-          ],
-          "docs": [
-            " unStake NFT"
-          ],
-          "label": "unstake",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 8
-          },
-          "selector": "0x82364901"
-        },
-        {
-          "args": [
-            {
               "label": "token_ids",
               "type": {
                 "displayName": [
@@ -252,7 +200,7 @@
           "docs": [
             " Stake multiple NFTs - Make sure approve this contract can send token on owner behalf"
           ],
-          "label": "multiple_stake",
+          "label": "stake",
           "mutates": true,
           "payable": false,
           "returnType": {
@@ -261,7 +209,7 @@
             ],
             "type": 8
           },
-          "selector": "0x4f846af7"
+          "selector": "0x5adb38de"
         },
         {
           "args": [
@@ -278,7 +226,7 @@
           "docs": [
             " unStake multiple NFTs"
           ],
-          "label": "multiple_unstake",
+          "label": "unstake",
           "mutates": true,
           "payable": false,
           "returnType": {
@@ -287,7 +235,7 @@
             ],
             "type": 8
           },
-          "selector": "0x7d5f2033"
+          "selector": "0x82364901"
         },
         {
           "args": [],
@@ -303,21 +251,6 @@
             "type": 0
           },
           "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 12
-          },
-          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -344,6 +277,21 @@
             "type": 12
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 12
+          },
+          "selector": "0x5e228753"
         },
         {
           "args": [

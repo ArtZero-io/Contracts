@@ -62,8 +62,6 @@ pub mod psp34_nft {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
         #[ink(message)]
-        fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error>;
-        #[ink(message)]
         fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error>;
         #[ink(message)]
         fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String>;
@@ -124,16 +122,6 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        ///Only Owner can set attribute to a token
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error> {
-            assert!(token_id != Id::U64(0));
-            let byte_attribute = attribute.into_bytes();
-            self.add_attribute_name(byte_attribute.clone());
-            self._set_attribute(token_id.clone(),byte_attribute.clone(), value.into_bytes());
-            Ok(())
-        }
         ///Only Owner can set multiple attributes to a token
         #[ink(message)]
         #[modifiers(only_owner)]

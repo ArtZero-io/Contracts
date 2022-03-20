@@ -434,16 +434,7 @@ pub mod artzero_psp34 {
         ) -> u32 {
             return self.whitelist_mint_total_amount;
         }
-
-        ///Only Owner can set attribute to a token
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_attribute(&mut self, token_id:Id, attribute: String, value: String) -> Result<(),Error> {
-            assert!(token_id != Id::U64(0));
-            self._set_attribute(token_id.clone(),attribute.into_bytes(), value.into_bytes());
-            Ok(())
-        }
-
+        
         ///Only Owner can set multiple attributes to a token
         #[ink(message)]
         #[modifiers(only_owner)]
