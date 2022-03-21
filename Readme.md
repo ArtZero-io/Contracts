@@ -1,0 +1,16 @@
+Contract Addresses:
+
+# Profile Contract
+5HkBnxrsZ1RfguKC669KCzZoJmhnUocW3N6vtpgxzJHWWHcU
+
+# ArtZero NFT Contract / Mint
+5FarkyYRSR2EH9UGhdshFFwSqJL99QtGL1QkeENHLUXW4XkA
+
+# ArtZero NFT Staking Contract
+5CAmTgzZj9rDjqqisBzPcGB2uG7DgBmGje2NsWYuwsZNSXxR
+
+# Collection Manager
+5GBBXatBR3F9jEcThxu8sTLQo9HHj99yNYLZKod4bVX9p8dz
+
+# Marketplace Contract
+5CwLB4BHHfbQTzUG2mUMVDsJsDpc3cbA8psWcw4ogZvjmH6k
