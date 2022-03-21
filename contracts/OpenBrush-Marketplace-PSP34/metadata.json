@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x1362e457a61d52982aa4c79b707f36c594a9fe2d1c930160a65f3e55a76b0293",
+    "hash": "0x39034d4e3bd18f159a59e99b0ffa32ddd359c59dc4b5479d96efa10980cd4918",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -71,7 +71,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -82,7 +82,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -110,7 +110,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -121,7 +121,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -149,7 +149,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -160,7 +160,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -171,7 +171,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -232,7 +232,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -243,7 +243,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -254,7 +254,7 @@
                 "displayName": [
                   "Option"
                 ],
-                "type": 32
+                "type": 33
               }
             },
             {
@@ -347,7 +347,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x832a283f"
         },
@@ -382,7 +382,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x5aeeb315"
         },
@@ -417,7 +417,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x15d62801"
         },
@@ -452,7 +452,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x668d28a7"
         },
@@ -487,7 +487,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x412b6e0f"
         },
@@ -531,7 +531,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x1856538b"
         },
@@ -557,7 +557,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0xe84bde5a"
         },
@@ -583,9 +583,44 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0xcf051612"
+        },
+        {
+          "args": [
+            {
+              "label": "criteria",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 11
+              }
+            },
+            {
+              "label": "rates",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 23
+              }
+            }
+          ],
+          "docs": [
+            "Set criteria and discount rate - Only Owner 2 vectors same size"
+          ],
+          "label": "set_discount",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 24
+          },
+          "selector": "0x693e798c"
         },
         {
           "args": [
@@ -618,7 +653,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 26
+            "type": 27
           },
           "selector": "0xfd066a27"
         },
@@ -653,7 +688,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 27
+            "type": 28
           },
           "selector": "0xa549a5df"
         },
@@ -732,7 +767,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 28
+            "type": 29
           },
           "selector": "0xb36025ae"
         },
@@ -806,7 +841,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 29
+            "type": 30
           },
           "selector": "0xc4fd2cdc"
         },
@@ -832,39 +867,9 @@
             "displayName": [
               "Result"
             ],
-            "type": 23
+            "type": 24
           },
           "selector": "0x07fdb555"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 30
-          },
-          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -888,9 +893,39 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 30
+            "type": 31
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 31
+          },
+          "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
         }
       ]
     },
@@ -1021,6 +1056,24 @@
               }
             },
             "name": "volume_by_user"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
+                "ty": 11
+              }
+            },
+            "name": "staking_discount_criteria"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0a00000000000000000000000000000000000000000000000000000000000000",
+                "ty": 23
+              }
+            },
+            "name": "staking_discount_rate"
           }
         ]
       }
@@ -1473,6 +1526,16 @@
         "id": 23,
         "type": {
           "def": {
+            "sequence": {
+              "type": 8
+            }
+          }
+        }
+      },
+      {
+        "id": 24,
+        "type": {
+          "def": {
             "variant": {
               "variants": [
                 {
@@ -1487,7 +1550,7 @@
                 {
                   "fields": [
                     {
-                      "type": 24
+                      "type": 25
                     }
                   ],
                   "index": 1,
@@ -1503,7 +1566,7 @@
             },
             {
               "name": "E",
-              "type": 24
+              "type": 25
             }
           ],
           "path": [
@@ -1512,7 +1575,7 @@
         }
       },
       {
-        "id": 24,
+        "id": 25,
         "type": {
           "def": {
             "variant": {
@@ -1520,7 +1583,7 @@
                 {
                   "fields": [
                     {
-                      "type": 25,
+                      "type": 26,
                       "typeName": "String"
                     }
                   ],
@@ -1566,7 +1629,7 @@
         }
       },
       {
-        "id": 25,
+        "id": 26,
         "type": {
           "def": {
             "primitive": "str"
@@ -1574,7 +1637,7 @@
         }
       },
       {
-        "id": 26,
+        "id": 27,
         "type": {
           "def": {
             "variant": {
@@ -1607,7 +1670,7 @@
         }
       },
       {
-        "id": 27,
+        "id": 28,
         "type": {
           "def": {
             "variant": {
@@ -1640,7 +1703,7 @@
         }
       },
       {
-        "id": 28,
+        "id": 29,
         "type": {
           "def": {
             "variant": {
@@ -1673,7 +1736,7 @@
         }
       },
       {
-        "id": 29,
+        "id": 30,
         "type": {
           "def": {
             "variant": {
@@ -1706,7 +1769,7 @@
         }
       },
       {
-        "id": 30,
+        "id": 31,
         "type": {
           "def": {
             "variant": {
@@ -1723,7 +1786,7 @@
                 {
                   "fields": [
                     {
-                      "type": 31
+                      "type": 32
                     }
                   ],
                   "index": 1,
@@ -1739,7 +1802,7 @@
             },
             {
               "name": "E",
-              "type": 31
+              "type": 32
             }
           ],
           "path": [
@@ -1748,7 +1811,7 @@
         }
       },
       {
-        "id": 31,
+        "id": 32,
         "type": {
           "def": {
             "variant": {
@@ -1774,7 +1837,7 @@
         }
       },
       {
-        "id": 32,
+        "id": 33,
         "type": {
           "def": {
             "variant": {
