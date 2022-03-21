@@ -110,6 +110,10 @@ pub mod artzero_marketplace_psp34 {
         total_volume: Balance,
         volume_by_collection: Mapping<AccountId, Balance>,
         volume_by_user: Mapping<AccountId, Balance>,
+
+        //Platform discount
+        staking_discount_criteria: Vec<u8>,
+        staking_discount_rate: Vec<u16>,
     }
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
@@ -182,6 +186,20 @@ pub mod artzero_marketplace_psp34 {
                 instance.collection_contract_address = collection_contract_address;
                 instance.staking_contract_address = staking_contract_address;
                 instance.platform_fee = platform_fee;
+                let mut criteria = Vec::<u8>::new();
+                criteria.push(20);
+                criteria.push(9);
+                criteria.push(7);
+                criteria.push(5);
+                criteria.push(1);
+                let mut rate = Vec::<u16>::new();
+                rate.push(9000);
+                rate.push(8000);
+                rate.push(6600);
+                rate.push(5000);
+                rate.push(3000);
+                instance.staking_discount_criteria = criteria;
+                instance.staking_discount_rate = rate;
             })
         }
 
@@ -331,11 +349,16 @@ pub mod artzero_marketplace_psp34 {
             //Calculate fee
             let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
             //Fee after Staking discount
-            let platform_fee_after_discount = Self::apply_discount(self.collection_contract_address,caller, platform_fee);
+            let platform_fee_after_discount = Self::apply_discount(
+                self.staking_discount_criteria.clone(),
+                self.staking_discount_rate.clone(),
+                self.collection_contract_address,
+                caller,
+                platform_fee
+            );
 
             let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
             let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
-
 
             //Send AZERO to collection owner
             let collection_owner = CollectionRef::get_collection_owner(&self.collection_contract_address,nft_contract_address);
@@ -559,7 +582,13 @@ pub mod artzero_marketplace_psp34 {
                         //Calculate fee
                         let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
                         //Fee after Staking discount
-                        let platform_fee_after_discount = Self::apply_discount(self.collection_contract_address,caller, platform_fee);
+                        let platform_fee_after_discount = Self::apply_discount(
+                            self.staking_discount_criteria.clone(),
+                            self.staking_discount_rate.clone(),
+                            self.collection_contract_address,
+                            caller,
+                            platform_fee
+                        );
 
                         let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
                         let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
@@ -665,6 +694,19 @@ pub mod artzero_marketplace_psp34 {
             self.staking_contract_address = staking_contract_address;
             Ok(())
         }
+        ///Set criteria and discount rate - Only Owner 2 vectors same size
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_discount(&mut self, criteria:Vec<u8>,rates:Vec<u16>) -> Result<(),Error> {
+            assert!(criteria.len() == rates.len());
+            let length = criteria.len();
+            for index in 0..length {
+                assert!(rates[index] <= 10000);
+            }
+            self.staking_discount_criteria = criteria;
+            self.staking_discount_rate = rates;
+            Ok(())
+        }
 
         // GETTERS
         /// Get market list information using NFT Collection and token ID
@@ -728,28 +770,17 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
-        fn apply_discount(collection_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
+        fn apply_discount(criteria: Vec<u8>, rates: Vec<u16>,collection_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
             let staked_amount = StakingRef::get_total_staked_by_account(&collection_contract_address,staker);
+            let length = criteria.len();
 
-            if staked_amount == 0 {
-                return input_fee;
+            for index in 0..length {
+                if staked_amount >= criteria[index] as u32 {
+                    return input_fee * ((10000 - rates[index])/10000) as u128;
+                }
             }
-            else if staked_amount < 5 {
-                return input_fee * 30 / 100;
-            }
-            else if staked_amount < 7 {
-                return input_fee * 50 / 100;
-            }
-            else if staked_amount < 9 {
-                return input_fee * 34 / 100;
-            }
-            else if staked_amount < 20 {
-                return input_fee * 80 / 100;
-            }
-            else if staked_amount >= 20 {
-                return input_fee * 90 / 100;
-            }
-            return 0;
+
+            return input_fee;
 
         }
 
