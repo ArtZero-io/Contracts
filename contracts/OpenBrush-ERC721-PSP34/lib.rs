@@ -257,39 +257,10 @@ pub mod artzero_psp34 {
         /*
             MINT FUNCTIONS =============
         */
-        /// Whitelisted User Creates a new token
-        #[ink(message)]
-        pub fn whitelist_mint_one(&mut self) -> Result<(), Error> {
-
-            if self.mint_mode == 0 {
-                return Err(Error::NotMintTime);
-            }
-
-            let caller = self.env().caller();
-
-            if self.whitelists.get(&caller).is_none(){
-                 return Err(Error::InvalidInput);
-             }
-
-             if self.token_count >= self.total_supply {
-                 return Err(Error::TokenLimitReached);
-             }
-
-            let mut caller_info = self.whitelists.get(&caller).unwrap();
-            if caller_info.whitelist_amount <= caller_info.claimed_amount {
-                return Err(Error::ClaimedAll);
-            }
-            caller_info.claimed_amount += 1;
-            self.whitelists.insert(&caller, &caller_info);
-
-            self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U32(self.token_count)).is_ok());
-            Ok(())
-        }
 
         /// Whitelisted User Creates multiple
         #[ink(message)]
-        pub fn whitelist_mint_multiple(&mut self, mint_amount: u32) -> Result<(), Error> {
+        pub fn whitelist_mint(&mut self, mint_amount: u32) -> Result<(), Error> {
 
             if self.mint_mode == 0 {
                 return Err(Error::NotMintTime);
@@ -434,7 +405,7 @@ pub mod artzero_psp34 {
         ) -> u32 {
             return self.whitelist_mint_total_amount;
         }
-        
+
         ///Only Owner can set multiple attributes to a token
         #[ink(message)]
         #[modifiers(only_owner)]
