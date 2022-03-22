@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x39034d4e3bd18f159a59e99b0ffa32ddd359c59dc4b5479d96efa10980cd4918",
+    "hash": "0x75ebb39901b702bd1d427f553d99660838dfb6c5df9551b63bae867cd386e6d3",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -641,6 +641,50 @@
                 ],
                 "type": 7
               }
+            },
+            {
+              "label": "receiver",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Transfer NFT token"
+          ],
+          "label": "tranfer_nft",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 24
+          },
+          "selector": "0xd34ab274"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 0
+              }
+            },
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "Id"
+                ],
+                "type": 7
+              }
             }
           ],
           "docs": [
@@ -900,21 +944,6 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 31
-          },
-          "selector": "0x5e228753"
-        },
-        {
-          "args": [],
-          "docs": [],
           "label": "Ownable::owner",
           "mutates": false,
           "payable": false,
@@ -926,6 +955,21 @@
             "type": 0
           },
           "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 31
+          },
+          "selector": "0x5e228753"
         }
       ]
     },

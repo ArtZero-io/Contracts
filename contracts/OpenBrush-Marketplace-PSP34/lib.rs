@@ -209,14 +209,14 @@ pub mod artzero_marketplace_psp34 {
         pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance) -> Result<(),Error>{
 
             assert!(price>0);
-            //Step 1: Check if the callet is the owner of the token
+            //Step 1: Check if the caller is the owner of the token
             let caller = self.env().caller();
 
             let token_owner = Psp34Ref::owner_of(&nft_contract_address,token_id.clone()).unwrap();
             assert!(caller == token_owner);
 
             //Step 2 - Check if this contract has been approved
-            let allowance = Psp34Ref::allowance(&self.collection_contract_address,caller, self.env().account_id(), Some(token_id.clone()));
+            let allowance = Psp34Ref::allowance(&nft_contract_address,caller, self.env().account_id(), Some(token_id.clone()));
             assert!(allowance);
 
             let is_active = CollectionRef::is_active(&self.collection_contract_address,nft_contract_address);
@@ -340,23 +340,38 @@ pub mod artzero_marketplace_psp34 {
                 }
             }
             //Save the information
-            self.sale_tokens_ids.insert(&(nft_contract_address,caller), &for_sale_token_ids);
+            self.sale_tokens_ids.insert(&(nft_contract_address,seller), &for_sale_token_ids);
 
             //Clear Bidders
-            let bidders = Vec::<BidInformation>::new();
-            self.bidders.insert(&(nft_contract_address,caller,token_id.clone()), &bidders);
+            //Return all bidders AZERO
+            if self.bidders.get(&(nft_contract_address,seller,token_id.clone())).is_some(){
+                let bidders:Vec<BidInformation> = self.bidders.get(&(nft_contract_address,seller,token_id.clone())).unwrap();
+
+                let bidders_length = bidders.len();
+                for index in 0..bidders_length {
+                    //SEnd AZero back to lost bidder
+                    if self.env().transfer(bidders[index].bidder, bidders[index].bid_value).is_err() {
+                        panic!(
+                            "error"
+                        )
+                    }
+                }
+                let clear_bidders = Vec::<BidInformation>::new();
+                self.bidders.insert(&(nft_contract_address,seller,token_id.clone()), &clear_bidders);
+            }
+
 
             //Calculate fee
             let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
             //Fee after Staking discount
-            let platform_fee_after_discount = Self::apply_discount(
+            let platform_fee_after_discount = self.apply_discount(
                 self.staking_discount_criteria.clone(),
                 self.staking_discount_rate.clone(),
-                self.collection_contract_address,
+                self.staking_contract_address,
                 caller,
                 platform_fee
             );
-
+            //TODO: Check Royal fee is true first
             let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
             let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
 
@@ -413,11 +428,7 @@ pub mod artzero_marketplace_psp34 {
 
             //Send NFT to Buyer
             assert!(Psp34Ref::transfer(&nft_contract_address,caller,token_id.clone(),Vec::<u8>::new()).is_ok());
-            self.env().emit_event(UnListEvent {
-                trader:Some(caller),
-                nft_contract_address: Some(nft_contract_address),
-                token_id:token_id.clone()
-            });
+
             self.env().emit_event(PurchaseEvent {
                buyer: Some(caller),
                seller: Some(seller),
@@ -481,7 +492,6 @@ pub mod artzero_marketplace_psp34 {
 
             Ok(())
         }
-
         /// Remove Bid From Active Sale
         #[ink(message)]
         pub fn remove_bid(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(),Error>{
@@ -582,10 +592,10 @@ pub mod artzero_marketplace_psp34 {
                         //Calculate fee
                         let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
                         //Fee after Staking discount
-                        let platform_fee_after_discount = Self::apply_discount(
+                        let platform_fee_after_discount = self.apply_discount(
                             self.staking_discount_criteria.clone(),
                             self.staking_discount_rate.clone(),
-                            self.collection_contract_address,
+                            self.staking_contract_address,
                             caller,
                             platform_fee
                         );
@@ -708,6 +718,14 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
+        ///Transfer NFT token
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn tranfer_nft(&mut self, nft_contract_address: AccountId, token_id: Id, receiver: AccountId) -> Result<(),Error> {
+            assert!(Psp34Ref::transfer(&nft_contract_address,receiver,token_id.clone(),Vec::<u8>::new()).is_ok());
+            Ok(())
+        }
+
         // GETTERS
         /// Get market list information using NFT Collection and token ID
         #[ink(message)]
@@ -770,16 +788,16 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
-        fn apply_discount(criteria: Vec<u8>, rates: Vec<u16>,collection_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
-            let staked_amount = StakingRef::get_total_staked_by_account(&collection_contract_address,staker);
-            let length = criteria.len();
+        fn apply_discount(&self, criteria: Vec<u8>, rates: Vec<u16>,staking_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
+            let staked_amount = StakingRef::get_total_staked_by_account(&staking_contract_address,staker);
+
+            let length = self.staking_discount_rate.len();
 
             for index in 0..length {
-                if staked_amount >= criteria[index] as u32 {
-                    return input_fee * ((10000 - rates[index])/10000) as u128;
+                if staked_amount >= self.staking_discount_criteria[index] as u32 {
+                    return (input_fee * (10000 - self.staking_discount_rate[index] as u128))/10000;
                 }
             }
-
             return input_fee;
 
         }
