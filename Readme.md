@@ -13,4 +13,4 @@ Contract Addresses:
 5GBBXatBR3F9jEcThxu8sTLQo9HHj99yNYLZKod4bVX9p8dz
 
 # Marketplace Contract
-5EEJ3334RvpVAvSgKgqbveGpgFrMbHcdawouSC9618tdAMcM
+5GdY4WfQZ3kEDo8zSk618bHbfr1jgQJCdMtHMb58WnTt4GTS
