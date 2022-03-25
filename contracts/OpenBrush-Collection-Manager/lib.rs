@@ -125,10 +125,10 @@ pub mod artzero_collection_manager {
             nft_name: String,
             nft_symbol: String,
             collection_owner: AccountId,
-            name: Vec<u8>,
-            description: Vec<u8>,
-            avatar_image: Vec<u8>,
-            header_image: Vec<u8>,
+            name: String,
+            description: String,
+            avatar_image: String,
+            header_image: String,
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
@@ -176,10 +176,10 @@ pub mod artzero_collection_manager {
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address:contract_account,
-                name,
-                description,
-                avatar_image,
-                header_image,
+                name: name.into_bytes(),
+                description: description.into_bytes(),
+                avatar_image: avatar_image.into_bytes(),
+                header_image: header_image.into_bytes(),
                 contract_type:2,
                 is_collect_royal_fee,
                 royal_fee,
@@ -199,10 +199,10 @@ pub mod artzero_collection_manager {
             &mut self,
             collection_owner: AccountId,
             nft_contract_address: AccountId,
-            name: Vec<u8>,
-            description: Vec<u8>,
-            avatar_image: Vec<u8>,
-            header_image: Vec<u8>,
+            name: String,
+            description: String,
+            avatar_image: String,
+            header_image: String,
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
@@ -231,14 +231,14 @@ pub mod artzero_collection_manager {
                 collections.push(nft_contract_address);
                 self.collections_by_owner.insert(&collection_owner, &collections);
             }
-
+            
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address,
-                name,
-                description,
-                avatar_image,
-                header_image,
+                name: name.into_bytes(),
+                description: description.into_bytes(),
+                avatar_image: avatar_image.into_bytes(),
+                header_image: header_image.into_bytes(),
                 contract_type:1,
                 is_collect_royal_fee,
                 royal_fee,
