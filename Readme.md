@@ -10,7 +10,7 @@ Contract Addresses:
 5GL6jcGgcjBEKhXQhwFtm7BhPGQZZneBjoEeNqRNofCPQE3G
 
 # Collection Manager
-5GBBXatBR3F9jEcThxu8sTLQo9HHj99yNYLZKod4bVX9p8dz
+5HX6Kxvr3rJnbnxHAyiCjK6kmZw1fbo88cqZEY7q2cnSbXjL
 
 # Marketplace Contract
 5GdY4WfQZ3kEDo8zSk618bHbfr1jgQJCdMtHMb58WnTt4GTS
