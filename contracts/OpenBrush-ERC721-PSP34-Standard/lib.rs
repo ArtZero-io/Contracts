@@ -20,7 +20,8 @@ pub mod psp34_nft {
     };
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
-
+    use ink_prelude::string::ToString;
+    
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
     #[ink(storage)]
     pub struct Psp34Nft{
@@ -183,10 +184,9 @@ pub mod psp34_nft {
             &self,
             token_id: u64
         ) -> String {
-            let mut token_uri = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes()).unwrap();
-            token_uri.extend(&token_id.to_be_bytes());
-            token_uri.extend(String::from(".json"));
-
+            let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
+            let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
+            token_uri = token_uri + &token_id.to_string() + &String::from(".json");
             return token_uri;
         }
 

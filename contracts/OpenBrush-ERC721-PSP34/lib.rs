@@ -18,6 +18,7 @@ pub mod artzero_psp34 {
         Mapping,
     };
     use ink_prelude::vec::Vec;
+    use ink_prelude::string::ToString;
 
     #[derive(
         Copy,
@@ -338,10 +339,9 @@ pub mod artzero_psp34 {
             &self,
             token_id: u32
         ) -> String {
-            let mut token_uri = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes()).unwrap();
-            token_uri.extend(&token_id.to_be_bytes());
-            token_uri.extend(String::from(".json"));
-
+            let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
+            let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
+            token_uri = token_uri + &token_id.to_string() + &String::from(".json");
             return token_uri;
         }
         /// mint_mode 0: not started - mint_mode 1: started until amount_1 reached - mint_mode 2: started until total_supply reached
