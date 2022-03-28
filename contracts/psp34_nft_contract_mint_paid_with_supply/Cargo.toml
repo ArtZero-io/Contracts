@@ -1,5 +1,5 @@
 [package]
-name = "psp34_nft"
+name = "psp34_nft_contract_mint_paid"
 version = "1.0.0"
 authors = ["ArtZero <admin@artzero.io>"]
 edition = "2021"

@@ -34,7 +34,7 @@ pub mod psp34_nft {
         token_count: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32,Vec<u8>>,
-        total_supply: u32,
+        total_supply: u64,
         mint_fee: Balance,
     }
 
@@ -63,7 +63,7 @@ pub mod psp34_nft {
     impl PSP34Internal for Psp34Nft {}
 
     #[brush::trait_definition]
-    pub trait Psp34MintPaidTraits {
+    pub trait Psp34Traits {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
         #[ink(message)]
@@ -79,10 +79,10 @@ pub mod psp34_nft {
 
     }
 
-    impl Psp34NftMintPaid {
+    impl Psp34Nft {
 
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId, name: String, symbol: String, total_supply: u32, mint_fee: Balance) -> Self {
+        pub fn new(contract_owner: AccountId, name: String, symbol: String, total_supply: u64, mint_fee: Balance) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
                 instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
@@ -91,6 +91,7 @@ pub mod psp34_nft {
                 instance.mint_fee = mint_fee;
             })
         }
+        
         ///Only Owner can mint new token
         #[ink(message)]
         #[ink(payable)]
@@ -140,7 +141,7 @@ pub mod psp34_nft {
         /// Change total supply - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn set_total_supply(&mut self, total_supply: u32) -> Result<(), Error> {
+        pub fn set_total_supply(&mut self, total_supply: u64) -> Result<(), Error> {
             self.total_supply = total_supply;
             Ok(())
         }
@@ -165,13 +166,13 @@ pub mod psp34_nft {
         }
 
         #[ink(message)]
-        pub fn get_total_supply(&self) -> u32 {
+        pub fn get_total_supply(&self) -> u64 {
             return self.total_supply;
         }
 
     }
 
-    impl Psp34MintPaidTraits for Psp34NftMintPaid{
+    impl Psp34Traits for Psp34Nft{
         /// Change baseURI
         #[ink(message)]
         #[modifiers(only_owner)]
