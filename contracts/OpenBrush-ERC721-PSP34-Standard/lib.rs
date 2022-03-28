@@ -70,7 +70,7 @@ pub mod psp34_nft {
         #[ink(message)]
         fn get_attribute_name(&self, index:u32) -> String;
         #[ink(message)]
-        fn token_uri(&self,token_id: u64) -> Vec<u8>;
+        fn token_uri(&self,token_id: u64) -> String;
 
     }
 
@@ -182,10 +182,10 @@ pub mod psp34_nft {
         fn token_uri(
             &self,
             token_id: u64
-        ) -> Vec<u8> {
+        ) -> String {
             let mut token_uri = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes()).unwrap();
             token_uri.extend(&token_id.to_be_bytes());
-            token_uri.extend(String::from(".json").into_bytes());
+            token_uri.extend(String::from(".json"));
 
             return token_uri;
         }

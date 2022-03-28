@@ -337,10 +337,10 @@ pub mod artzero_psp34 {
         pub fn token_uri(
             &self,
             token_id: u32
-        ) -> Vec<u8> {
+        ) -> String {
             let mut token_uri = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes()).unwrap();
             token_uri.extend(&token_id.to_be_bytes());
-            token_uri.extend(String::from(".json").into_bytes());
+            token_uri.extend(String::from(".json"));
 
             return token_uri;
         }
