@@ -99,6 +99,12 @@ pub mod psp34_nft {
             Ok(())
         }
 
+        ///Get Token Count
+        #[ink(message)]
+        pub fn get_token_count(&self) -> u64 {
+            return self.token_count;
+        }
+
         fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
             let mut exist:bool = false;
             for index in 0..self.attribute_count {
