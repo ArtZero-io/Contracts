@@ -181,8 +181,17 @@ pub mod artzero_collection_manager {
             };
             
             self.collections.insert(&contract_account, &new_collection);
-            let attributeKeys = ["name", "description", "avatar_image", "header_image"];
-            let attributeVals = [name.into_bytes(), description.into_bytes(), avatar_image.into_bytes(), header_image.into_bytes()];
+
+            let mut attributeKeys: Vec<String> = Vec::new();
+            attributeKeys.push("name");
+            attributeKeys.push("description");
+            attributeKeys.push("avatar_image");
+            attributeKeys.push("header_image");
+            let mut attributeVals: Vec<String> = Vec::new();
+            attributeVals.push(name);
+            attributeVals.push(description);
+            attributeVals.push(avatar_image);
+            attributeVals.push(header_image);
             self.set_multiple_attributes(attributeKeys, attributeVals);
             Ok(())
         }
@@ -238,8 +247,16 @@ pub mod artzero_collection_manager {
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
-            let attributeKeys = ["name", "description", "avatar_image", "header_image"];
-            let attributeVals = [name.into_bytes(), description.into_bytes(), avatar_image.into_bytes(), header_image.into_bytes()];
+            let mut attributeKeys: Vec<String> = Vec::new();
+            attributeKeys.push("name");
+            attributeKeys.push("description");
+            attributeKeys.push("avatar_image");
+            attributeKeys.push("header_image");
+            let mut attributeVals: Vec<String> = Vec::new();
+            attributeVals.push(name);
+            attributeVals.push(description);
+            attributeVals.push(avatar_image);
+            attributeVals.push(header_image);
             self.set_multiple_attributes(attributeKeys, attributeVals);
             Ok(())
         }
