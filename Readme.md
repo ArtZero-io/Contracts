@@ -14,3 +14,12 @@ Contract Addresses:
 
 # Marketplace Contract
 5GdY4WfQZ3kEDo8zSk618bHbfr1jgQJCdMtHMb58WnTt4GTS
+
+
+Deploy Steps:
+1. Deploy profile Contract
+2. Deploy Artzero NFT Contract
+3. Deploy NFT Standard Contract
+4. Deploy Collection Contract
+5. Deploy Staking Contract
+6. Deploy Marketplace Contract

@@ -7,6 +7,7 @@ pub mod artzero_psp34 {
     use brush::contracts::psp34::*;
     use brush::contracts::psp34::extensions::metadata::*;
     use brush::contracts::psp34::extensions::burnable::*;
+    use brush::contracts::psp34::extensions::enumerable::*;
     use brush::contracts::ownable::*;
     use brush::modifiers;
     use ink_storage::{
@@ -40,7 +41,7 @@ pub mod artzero_psp34 {
         claimed_amount: u32
     }
 
-    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
     #[ink(storage)]
     pub struct ArtZeroNFT{
         #[PSP34StorageField]
@@ -49,6 +50,8 @@ pub mod artzero_psp34 {
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
         ownable: OwnableData,
+        #[PSP34EnumerableStorageField]
+        enumdata: PSP34EnumerableData,
 
         //Max Total Token number to Mint
         total_supply: u32,
@@ -110,6 +113,7 @@ pub mod artzero_psp34 {
     impl PSP34Burnable for ArtZeroNFT {}
     impl PSP34Metadata for ArtZeroNFT {}
     impl PSP34Internal for ArtZeroNFT {}
+    impl PSP34Enumerable for ArtZeroNFT {}
 
     impl ArtZeroNFT {
         /// fee_1: Pre_launch Minting Fee

@@ -497,6 +497,7 @@ pub mod artzero_marketplace_psp34 {
                 let mut bidders:Vec<BidInformation> = self.bidders.get(&(nft_contract_address,seller,token_id.clone())).unwrap();
                 //Check if Bid already in the list --> not allow, have to remove bid and add new bid
                 let length = bidders.len();
+                //TODO: make 30 variable
                 assert!(length<=30); //Only allow max 30 bids per token sale
 
                 for index in 0..length {
