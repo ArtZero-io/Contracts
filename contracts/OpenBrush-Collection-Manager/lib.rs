@@ -28,6 +28,8 @@ pub mod artzero_collection_manager {
         /// Returned if the address already exists upon registration.
         AddressAlreadyExists,
         CollectionNotExist,
+        //Collection Owner and Admin Contract can do
+        CollectionOWnerAndAdmin,
         //OnlyOwner can do
         OnlyOwner,
         OnlyAdmin,
@@ -123,10 +125,8 @@ pub mod artzero_collection_manager {
             nft_name: String,
             nft_symbol: String,
             collection_owner: AccountId,
-            name: String,
-            description: String,
-            avatar_image: String,
-            header_image: String,
+            attributes: Vec<String>,
+            attribute_vals: Vec<String>,
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
@@ -183,10 +183,8 @@ pub mod artzero_collection_manager {
             };
             
             self.collections.insert(&contract_account, &new_collection);
-            let attribute_keys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let attribute_vals = vec![name, description, avatar_image, header_image];
             
-            self.set_multiple_attributes(contract_account, attribute_keys, attribute_vals);
+            self.set_multiple_attributes(contract_account, attributes, attribute_vals);
             Ok(())
         }
 
@@ -197,10 +195,8 @@ pub mod artzero_collection_manager {
             &mut self,
             collection_owner: AccountId,
             nft_contract_address: AccountId,
-            name: String,
-            description: String,
-            avatar_image: String,
-            header_image: String,
+            attributes: Vec<String>,
+            attribute_vals: Vec<String>,
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
@@ -244,7 +240,7 @@ pub mod artzero_collection_manager {
             let attribute_keys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
             let attribute_vals = vec![name, description, avatar_image, header_image];
             
-            self.set_multiple_attributes(nft_contract_address, attribute_keys, attribute_vals);
+            self.set_multiple_attributes(nft_contract_address, attributes, attribute_vals);
             Ok(())
         }
         /* SETTERS */
@@ -293,15 +289,23 @@ pub mod artzero_collection_manager {
 
         /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
-        pub fn set_multiple_attributes(&mut self, nft_contract_address: AccountId, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+        pub fn set_multiple_attributes(&mut self, contract_address: AccountId, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
+            if self.collections.get(&contract_address).is_none(){
+                return Err(Error::CollectionNotExist);
+            }
+            let mut collection = self.collections.get(&contract_address).unwrap();
+            if collection.collection_owner != self.env().caller() && self.admin_address != self.env().caller() {
+                return Err(Error::CollectionOWnerAndAdmin);
+            }            
+
             let length = attributes.len();
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute(nft_contract_address, attribute.into_bytes(), value.into_bytes());
+                self._set_attribute(contract_address, attribute.into_bytes(), value.into_bytes());
             }
 
             Ok(())
@@ -442,7 +446,7 @@ pub mod artzero_collection_manager {
                  return Err(Error::OnlyAdmin);
              }
             let mut collection = self.collections.get(&contract_address).unwrap();
-            assert_eq!(is_active, collection.is_active);
+            assert!(is_active != collection.is_active);
             collection.is_active = is_active;
 
             if is_active == true {
