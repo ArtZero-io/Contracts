@@ -183,10 +183,10 @@ pub mod artzero_collection_manager {
             };
             
             self.collections.insert(&contract_account, &new_collection);
-            let attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let attributeVals = vec![name, description, avatar_image, header_image];
+            let attribute_keys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
+            let attribute_vals = vec![name, description, avatar_image, header_image];
             
-            self.set_multiple_attributes(&contract_account, attributeKeys, attributeVals);
+            self.set_multiple_attributes(contract_account, attribute_keys, attribute_vals);
             Ok(())
         }
 
@@ -241,10 +241,10 @@ pub mod artzero_collection_manager {
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
-            let attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let attributeVals = vec![name, description, avatar_image, header_image];
+            let attribute_keys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
+            let attribute_vals = vec![name, description, avatar_image, header_image];
             
-            self.set_multiple_attributes(&contract_account, attributeKeys, attributeVals);
+            self.set_multiple_attributes(nft_contract_address, attribute_keys, attribute_vals);
             Ok(())
         }
         /* SETTERS */

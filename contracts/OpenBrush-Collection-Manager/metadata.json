@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xc6ed251ce0ab96600964e3a6859365f2a8297ac7fcdcce6a68405fe0af05da43",
+    "hash": "0x74e0eaa2d8fde5bc2a6f7a588f2f882a4447e32eb88f00d5a89ae2f1c951602c",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -61,7 +61,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -70,7 +70,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -88,7 +88,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -97,7 +97,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -106,7 +106,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -115,7 +115,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -124,7 +124,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 10
+                "type": 9
               }
             },
             {
@@ -133,7 +133,7 @@
                 "displayName": [
                   "u32"
                 ],
-                "type": 11
+                "type": 10
               }
             }
           ],
@@ -147,7 +147,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x05c561cd"
         },
@@ -177,7 +177,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -186,7 +186,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -195,7 +195,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -204,7 +204,7 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 16
+                "type": 18
               }
             },
             {
@@ -213,7 +213,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 10
+                "type": 9
               }
             },
             {
@@ -222,7 +222,7 @@
                 "displayName": [
                   "u32"
                 ],
-                "type": 11
+                "type": 10
               }
             }
           ],
@@ -236,7 +236,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x36193f5f"
         },
@@ -271,7 +271,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x5c7d9082"
         },
@@ -306,14 +306,14 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x6500109f"
         },
         {
           "args": [
             {
-              "label": "contract_address",
+              "label": "nft_contract_address",
               "type": {
                 "displayName": [
                   "AccountId"
@@ -322,33 +322,42 @@
               }
             },
             {
-              "label": "name",
+              "label": "attributes",
               "type": {
                 "displayName": [
-                  "String"
+                  "Vec"
                 ],
-                "type": 16
+                "type": 21
+              }
+            },
+            {
+              "label": "values",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 21
               }
             }
           ],
           "docs": [
-            " Update Name - admin and collection owner can change"
+            " Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram"
           ],
-          "label": "update_name",
+          "label": "set_multiple_attributes",
           "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
-          "selector": "0x63312534"
+          "selector": "0x8119d25e"
         },
         {
           "args": [
             {
-              "label": "contract_address",
+              "label": "account",
               "type": {
                 "displayName": [
                   "AccountId"
@@ -357,98 +366,26 @@
               }
             },
             {
-              "label": "description",
+              "label": "attributes",
               "type": {
                 "displayName": [
-                  "String"
+                  "Vec"
                 ],
-                "type": 16
+                "type": 21
               }
             }
           ],
-          "docs": [
-            " Update Description - admin and collection owner can change"
-          ],
-          "label": "update_description",
-          "mutates": true,
+          "docs": [],
+          "label": "get_attributes",
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
-              "Result"
+              "Vec"
             ],
-            "type": 17
+            "type": 21
           },
-          "selector": "0x560bf87c"
-        },
-        {
-          "args": [
-            {
-              "label": "contract_address",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            },
-            {
-              "label": "avatar_image",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 16
-              }
-            }
-          ],
-          "docs": [
-            " Update Avatar Image - admin and collection owner can change"
-          ],
-          "label": "update_avatar_image",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 17
-          },
-          "selector": "0x7040bc0a"
-        },
-        {
-          "args": [
-            {
-              "label": "contract_address",
-              "type": {
-                "displayName": [
-                  "AccountId"
-                ],
-                "type": 0
-              }
-            },
-            {
-              "label": "header_image",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 16
-              }
-            }
-          ],
-          "docs": [
-            " Update header Image - admin and collection owner can change"
-          ],
-          "label": "update_header_image",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 17
-          },
-          "selector": "0xa7b9a9d9"
+          "selector": "0x8d76b3fe"
         },
         {
           "args": [
@@ -472,7 +409,7 @@
             }
           ],
           "docs": [
-            " Update Type Collection - only Admin can change - 0 - PSP34 ERC721 ; 1 - ERC1155 PSP1155"
+            " Update Type Collection - only Admin can change - 1: Manual 2: Auto"
           ],
           "label": "update_contract_type",
           "mutates": true,
@@ -481,7 +418,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0xeb59ea76"
         },
@@ -502,7 +439,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 10
+                "type": 9
               }
             }
           ],
@@ -516,7 +453,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x96c46720"
         },
@@ -537,7 +474,7 @@
                 "displayName": [
                   "u32"
                 ],
-                "type": 11
+                "type": 10
               }
             }
           ],
@@ -551,7 +488,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x482ff6b1"
         },
@@ -572,7 +509,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 10
+                "type": 9
               }
             }
           ],
@@ -586,7 +523,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x0fb1f1cf"
         },
@@ -607,7 +544,7 @@
                 "displayName": [
                   "bool"
                 ],
-                "type": 10
+                "type": 9
               }
             }
           ],
@@ -622,7 +559,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x33ad2887"
         },
@@ -648,7 +585,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x5655700b"
         },
@@ -660,7 +597,7 @@
                 "displayName": [
                   "u32"
                 ],
-                "type": 11
+                "type": 10
               }
             }
           ],
@@ -674,7 +611,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0xa4dfde0d"
         },
@@ -700,7 +637,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0xb470cada"
         },
@@ -726,7 +663,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 17
+            "type": 19
           },
           "selector": "0x07fdb555"
         },
@@ -752,7 +689,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 19
+            "type": 22
           },
           "selector": "0x786d1a79"
         },
@@ -778,7 +715,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 20
+            "type": 23
           },
           "selector": "0x83091e54"
         },
@@ -804,7 +741,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 21
+            "type": 24
           },
           "selector": "0x672b1346"
         },
@@ -823,6 +760,22 @@
             "type": 5
           },
           "selector": "0x95c014c7"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get Collection Count"
+          ],
+          "label": "get_active_collection_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u64"
+            ],
+            "type": 5
+          },
+          "selector": "0xe149966a"
         },
         {
           "args": [],
@@ -857,21 +810,6 @@
           "selector": "0x8938ef71"
         },
         {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 22
-          },
-          "selector": "0x5e228753"
-        },
-        {
           "args": [
             {
               "label": "new_owner",
@@ -893,9 +831,24 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 22
+            "type": 25
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 25
+          },
+          "selector": "0x5e228753"
         },
         {
           "args": [],
@@ -911,34 +864,6 @@
             "type": 0
           },
           "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "crossartzerocollection_external",
-                  "IsActiveInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            "Check if the Collection is active not"
-          ],
-          "label": "CrossArtZeroCollection::is_active",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "crossartzerocollection_external",
-              "IsActiveOutput"
-            ],
-            "type": 10
-          },
-          "selector": "0x74687faf"
         },
         {
           "args": [
@@ -964,9 +889,37 @@
               "crossartzerocollection_external",
               "GetRoyalFeeOutput"
             ],
-            "type": 11
+            "type": 10
           },
           "selector": "0xfa0f936e"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "GetCollectionOwnerInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Owner by Collection Address (NFT address)"
+          ],
+          "label": "CrossArtZeroCollection::get_collection_owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "GetCollectionOwnerOutput"
+            ],
+            "type": 24
+          },
+          "selector": "0xb1f1e401"
         },
         {
           "args": [
@@ -1003,26 +956,26 @@
               "type": {
                 "displayName": [
                   "crossartzerocollection_external",
-                  "GetCollectionOwnerInput1"
+                  "IsActiveInput1"
                 ],
                 "type": 0
               }
             }
           ],
           "docs": [
-            " Get Collection Owner by Collection Address (NFT address)"
+            "Check if the Collection is active not"
           ],
-          "label": "CrossArtZeroCollection::get_collection_owner",
+          "label": "CrossArtZeroCollection::is_active",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "crossartzerocollection_external",
-              "GetCollectionOwnerOutput"
+              "IsActiveOutput"
             ],
-            "type": 21
+            "type": 9
           },
-          "selector": "0xb1f1e401"
+          "selector": "0x74687faf"
         }
       ]
     },
@@ -1122,7 +1075,7 @@
             "layout": {
               "cell": {
                 "key": "0x0500000000000000000000000000000000000000000000000000000000000000",
-                "ty": 13
+                "ty": 12
               }
             },
             "name": "collections_by_id"
@@ -1131,7 +1084,7 @@
             "layout": {
               "cell": {
                 "key": "0x0600000000000000000000000000000000000000000000000000000000000000",
-                "ty": 14
+                "ty": 13
               }
             },
             "name": "collections_by_owner"
@@ -1140,10 +1093,28 @@
             "layout": {
               "cell": {
                 "key": "0x0700000000000000000000000000000000000000000000000000000000000000",
-                "ty": 11
+                "ty": 10
               }
             },
             "name": "max_royal_fee_rate"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0800000000000000000000000000000000000000000000000000000000000000",
+                "ty": 5
+              }
+            },
+            "name": "active_collection_count"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
+                "ty": 15
+              }
+            },
+            "name": "attributes"
           }
         ]
       }
@@ -1240,7 +1211,7 @@
               "fields": [
                 {
                   "name": "offset_key",
-                  "type": 12,
+                  "type": 11,
                   "typeName": "Key"
                 }
               ]
@@ -1281,48 +1252,28 @@
                   "typeName": "AccountId"
                 },
                 {
-                  "name": "name",
-                  "type": 9,
-                  "typeName": "Vec<u8>"
-                },
-                {
-                  "name": "description",
-                  "type": 9,
-                  "typeName": "Vec<u8>"
-                },
-                {
-                  "name": "avatar_image",
-                  "type": 9,
-                  "typeName": "Vec<u8>"
-                },
-                {
-                  "name": "header_image",
-                  "type": 9,
-                  "typeName": "Vec<u8>"
-                },
-                {
                   "name": "contract_type",
                   "type": 2,
                   "typeName": "u8"
                 },
                 {
                   "name": "is_collect_royal_fee",
-                  "type": 10,
+                  "type": 9,
                   "typeName": "bool"
                 },
                 {
                   "name": "royal_fee",
-                  "type": 11,
+                  "type": 10,
                   "typeName": "u32"
                 },
                 {
                   "name": "is_active",
-                  "type": 10,
+                  "type": 9,
                   "typeName": "bool"
                 },
                 {
                   "name": "show_on_chain_metadata",
-                  "type": 10,
+                  "type": 9,
                   "typeName": "bool"
                 }
               ]
@@ -1339,9 +1290,7 @@
         "id": 9,
         "type": {
           "def": {
-            "sequence": {
-              "type": 2
-            }
+            "primitive": "bool"
           }
         }
       },
@@ -1349,20 +1298,12 @@
         "id": 10,
         "type": {
           "def": {
-            "primitive": "bool"
-          }
-        }
-      },
-      {
-        "id": 11,
-        "type": {
-          "def": {
             "primitive": "u32"
           }
         }
       },
       {
-        "id": 12,
+        "id": 11,
         "type": {
           "def": {
             "composite": {
@@ -1381,14 +1322,14 @@
         }
       },
       {
-        "id": 13,
+        "id": 12,
         "type": {
           "def": {
             "composite": {
               "fields": [
                 {
                   "name": "offset_key",
-                  "type": 12,
+                  "type": 11,
                   "typeName": "Key"
                 }
               ]
@@ -1413,14 +1354,14 @@
         }
       },
       {
-        "id": 14,
+        "id": 13,
         "type": {
           "def": {
             "composite": {
               "fields": [
                 {
                   "name": "offset_key",
-                  "type": 12,
+                  "type": 11,
                   "typeName": "Key"
                 }
               ]
@@ -1433,7 +1374,7 @@
             },
             {
               "name": "V",
-              "type": 15
+              "type": 14
             }
           ],
           "path": [
@@ -1445,7 +1386,7 @@
         }
       },
       {
-        "id": 15,
+        "id": 14,
         "type": {
           "def": {
             "sequence": {
@@ -1455,7 +1396,60 @@
         }
       },
       {
+        "id": 15,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "name": "offset_key",
+                  "type": 11,
+                  "typeName": "Key"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "K",
+              "type": 16
+            },
+            {
+              "name": "V",
+              "type": 17
+            }
+          ],
+          "path": [
+            "ink_storage",
+            "lazy",
+            "mapping",
+            "Mapping"
+          ]
+        }
+      },
+      {
         "id": 16,
+        "type": {
+          "def": {
+            "tuple": [
+              0,
+              17
+            ]
+          }
+        }
+      },
+      {
+        "id": 17,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 18,
         "type": {
           "def": {
             "primitive": "str"
@@ -1463,7 +1457,7 @@
         }
       },
       {
-        "id": 17,
+        "id": 19,
         "type": {
           "def": {
             "variant": {
@@ -1480,7 +1474,7 @@
                 {
                   "fields": [
                     {
-                      "type": 18
+                      "type": 20
                     }
                   ],
                   "index": 1,
@@ -1496,7 +1490,7 @@
             },
             {
               "name": "E",
-              "type": 18
+              "type": 20
             }
           ],
           "path": [
@@ -1505,7 +1499,7 @@
         }
       },
       {
-        "id": 18,
+        "id": 20,
         "type": {
           "def": {
             "variant": {
@@ -1513,7 +1507,7 @@
                 {
                   "fields": [
                     {
-                      "type": 16,
+                      "type": 18,
                       "typeName": "String"
                     }
                   ],
@@ -1563,7 +1557,17 @@
         }
       },
       {
-        "id": 19,
+        "id": 21,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 18
+            }
+          }
+        }
+      },
+      {
+        "id": 22,
         "type": {
           "def": {
             "variant": {
@@ -1596,7 +1600,7 @@
         }
       },
       {
-        "id": 20,
+        "id": 23,
         "type": {
           "def": {
             "variant": {
@@ -1608,7 +1612,7 @@
                 {
                   "fields": [
                     {
-                      "type": 15
+                      "type": 14
                     }
                   ],
                   "index": 1,
@@ -1620,7 +1624,7 @@
           "params": [
             {
               "name": "T",
-              "type": 15
+              "type": 14
             }
           ],
           "path": [
@@ -1629,7 +1633,7 @@
         }
       },
       {
-        "id": 21,
+        "id": 24,
         "type": {
           "def": {
             "variant": {
@@ -1662,7 +1666,7 @@
         }
       },
       {
-        "id": 22,
+        "id": 25,
         "type": {
           "def": {
             "variant": {
@@ -1679,7 +1683,7 @@
                 {
                   "fields": [
                     {
-                      "type": 23
+                      "type": 26
                     }
                   ],
                   "index": 1,
@@ -1695,7 +1699,7 @@
             },
             {
               "name": "E",
-              "type": 23
+              "type": 26
             }
           ],
           "path": [
@@ -1704,7 +1708,7 @@
         }
       },
       {
-        "id": 23,
+        "id": 26,
         "type": {
           "def": {
             "variant": {
