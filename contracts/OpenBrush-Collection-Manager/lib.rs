@@ -17,7 +17,9 @@ pub mod artzero_collection_manager {
     use ink_storage::Mapping;
     use psp34_nft::psp34_nft::Psp34NftRef;
     use ink_lang::ToAccountId;
-
+    use ink_prelude::vec;
+    use ink_prelude::string::ToString;
+    
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
@@ -181,10 +183,10 @@ pub mod artzero_collection_manager {
             };
             
             self.collections.insert(&contract_account, &new_collection);
-            let mut attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let mut attributeVals = vec![name, description, avatar_image, header_image];
+            let attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
+            let attributeVals = vec![name, description, avatar_image, header_image];
             
-            self.set_multiple_attributes(attributeKeys, attributeVals);
+            self.set_multiple_attributes(&contract_account, attributeKeys, attributeVals);
             Ok(())
         }
 
@@ -239,10 +241,10 @@ pub mod artzero_collection_manager {
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
-            let mut attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let mut attributeVals = vec![name, description, avatar_image, header_image];
+            let attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
+            let attributeVals = vec![name, description, avatar_image, header_image];
             
-            self.set_multiple_attributes(attributeKeys, attributeVals);
+            self.set_multiple_attributes(&contract_account, attributeKeys, attributeVals);
             Ok(())
         }
         /* SETTERS */
@@ -291,7 +293,7 @@ pub mod artzero_collection_manager {
 
         /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
-        pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+        pub fn set_multiple_attributes(&mut self, nft_contract_address: AccountId, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
@@ -299,7 +301,7 @@ pub mod artzero_collection_manager {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
+                self._set_attribute(nft_contract_address, attribute.into_bytes(), value.into_bytes());
             }
 
             Ok(())
@@ -521,6 +523,15 @@ pub mod artzero_collection_manager {
         ) -> u64 {
             return self.collection_count;
         }
+        
+        /// Get Collection Count
+        #[ink(message)]
+        pub fn get_active_collection_count(
+            &self
+        ) -> u64 {
+            return self.active_collection_count;
+        }
+
         ///Get Adding Fee
         #[ink(message)]
         pub fn get_adding_fee(
