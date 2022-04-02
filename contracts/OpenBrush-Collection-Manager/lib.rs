@@ -183,7 +183,7 @@ pub mod artzero_collection_manager {
             self.collections.insert(&contract_account, &new_collection);
             let attributeKeys = ["name", "description", "avatar_image", "header_image"];
             let attributeVals = [name.into_bytes(), description.into_bytes(), avatar_image.into_bytes(), header_image.into_bytes()];
-            self.set_multiple_attributes(contract_account, attributeKeys, attributeVals);
+            self.set_multiple_attributes(attributeKeys, attributeVals);
             Ok(())
         }
 
@@ -240,7 +240,7 @@ pub mod artzero_collection_manager {
             self.collections.insert(&nft_contract_address, &new_collection);
             let attributeKeys = ["name", "description", "avatar_image", "header_image"];
             let attributeVals = [name.into_bytes(), description.into_bytes(), avatar_image.into_bytes(), header_image.into_bytes()];
-            self.set_multiple_attributes(contract_account, attributeKeys, attributeVals);
+            self.set_multiple_attributes(attributeKeys, attributeVals);
             Ok(())
         }
         /* SETTERS */
