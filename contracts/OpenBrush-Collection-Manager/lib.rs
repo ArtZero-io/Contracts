@@ -17,7 +17,7 @@ pub mod artzero_collection_manager {
     use ink_storage::Mapping;
     use psp34_nft::psp34_nft::Psp34NftRef;
     use ink_lang::ToAccountId;
-
+    use ink_storage::Mapping;
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
