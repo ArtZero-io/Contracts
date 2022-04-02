@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x74e0eaa2d8fde5bc2a6f7a588f2f882a4447e32eb88f00d5a89ae2f1c951602c",
+    "hash": "0xafbe271ac93f3db164ef5c40eed8ce6b8166c0ab295bf54dc9a0a4252f97b9fc",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -83,39 +83,21 @@
               }
             },
             {
-              "label": "name",
+              "label": "attributes",
               "type": {
                 "displayName": [
-                  "String"
+                  "Vec"
                 ],
-                "type": 18
+                "type": 19
               }
             },
             {
-              "label": "description",
+              "label": "attribute_vals",
               "type": {
                 "displayName": [
-                  "String"
+                  "Vec"
                 ],
-                "type": 18
-              }
-            },
-            {
-              "label": "avatar_image",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 18
-              }
-            },
-            {
-              "label": "header_image",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 18
+                "type": 19
               }
             },
             {
@@ -147,7 +129,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x05c561cd"
         },
@@ -172,39 +154,21 @@
               }
             },
             {
-              "label": "name",
+              "label": "attributes",
               "type": {
                 "displayName": [
-                  "String"
+                  "Vec"
                 ],
-                "type": 18
+                "type": 19
               }
             },
             {
-              "label": "description",
+              "label": "attribute_vals",
               "type": {
                 "displayName": [
-                  "String"
+                  "Vec"
                 ],
-                "type": 18
-              }
-            },
-            {
-              "label": "avatar_image",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 18
-              }
-            },
-            {
-              "label": "header_image",
-              "type": {
-                "displayName": [
-                  "String"
-                ],
-                "type": 18
+                "type": 19
               }
             },
             {
@@ -236,7 +200,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x36193f5f"
         },
@@ -271,7 +235,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x5c7d9082"
         },
@@ -306,14 +270,14 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x6500109f"
         },
         {
           "args": [
             {
-              "label": "nft_contract_address",
+              "label": "contract_address",
               "type": {
                 "displayName": [
                   "AccountId"
@@ -327,7 +291,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 21
+                "type": 19
               }
             },
             {
@@ -336,7 +300,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 21
+                "type": 19
               }
             }
           ],
@@ -350,7 +314,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x8119d25e"
         },
@@ -371,7 +335,7 @@
                 "displayName": [
                   "Vec"
                 ],
-                "type": 21
+                "type": 19
               }
             }
           ],
@@ -383,7 +347,7 @@
             "displayName": [
               "Vec"
             ],
-            "type": 21
+            "type": 19
           },
           "selector": "0x8d76b3fe"
         },
@@ -418,7 +382,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0xeb59ea76"
         },
@@ -453,7 +417,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x96c46720"
         },
@@ -488,7 +452,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x482ff6b1"
         },
@@ -523,7 +487,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x0fb1f1cf"
         },
@@ -559,7 +523,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x33ad2887"
         },
@@ -585,7 +549,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x5655700b"
         },
@@ -611,7 +575,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0xa4dfde0d"
         },
@@ -637,7 +601,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0xb470cada"
         },
@@ -663,7 +627,7 @@
             "displayName": [
               "Result"
             ],
-            "type": 19
+            "type": 20
           },
           "selector": "0x07fdb555"
         },
@@ -810,32 +774,6 @@
           "selector": "0x8938ef71"
         },
         {
-          "args": [
-            {
-              "label": "new_owner",
-              "type": {
-                "displayName": [
-                  "ownable_external",
-                  "TransferOwnershipInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [],
-          "label": "Ownable::transfer_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "TransferOwnershipOutput"
-            ],
-            "type": 25
-          },
-          "selector": "0x11f43efd"
-        },
-        {
           "args": [],
           "docs": [],
           "label": "Ownable::renounce_ownership",
@@ -868,30 +806,56 @@
         {
           "args": [
             {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "ownable_external",
+                  "TransferOwnershipInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 25
+          },
+          "selector": "0x11f43efd"
+        },
+        {
+          "args": [
+            {
               "label": "nft_contract_address",
               "type": {
                 "displayName": [
                   "crossartzerocollection_external",
-                  "GetRoyalFeeInput1"
+                  "IsActiveInput1"
                 ],
                 "type": 0
               }
             }
           ],
           "docs": [
-            "Get royal fee of the Collection"
+            "Check if the Collection is active not"
           ],
-          "label": "CrossArtZeroCollection::get_royal_fee",
+          "label": "CrossArtZeroCollection::is_active",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "crossartzerocollection_external",
-              "GetRoyalFeeOutput"
+              "IsActiveOutput"
             ],
-            "type": 10
+            "type": 9
           },
-          "selector": "0xfa0f936e"
+          "selector": "0x74687faf"
         },
         {
           "args": [
@@ -956,26 +920,26 @@
               "type": {
                 "displayName": [
                   "crossartzerocollection_external",
-                  "IsActiveInput1"
+                  "GetRoyalFeeInput1"
                 ],
                 "type": 0
               }
             }
           ],
           "docs": [
-            "Check if the Collection is active not"
+            "Get royal fee of the Collection"
           ],
-          "label": "CrossArtZeroCollection::is_active",
+          "label": "CrossArtZeroCollection::get_royal_fee",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "crossartzerocollection_external",
-              "IsActiveOutput"
+              "GetRoyalFeeOutput"
             ],
-            "type": 9
+            "type": 10
           },
-          "selector": "0x74687faf"
+          "selector": "0xfa0f936e"
         }
       ]
     },
@@ -1460,6 +1424,16 @@
         "id": 19,
         "type": {
           "def": {
+            "sequence": {
+              "type": 18
+            }
+          }
+        }
+      },
+      {
+        "id": 20,
+        "type": {
+          "def": {
             "variant": {
               "variants": [
                 {
@@ -1474,7 +1448,7 @@
                 {
                   "fields": [
                     {
-                      "type": 20
+                      "type": 21
                     }
                   ],
                   "index": 1,
@@ -1490,7 +1464,7 @@
             },
             {
               "name": "E",
-              "type": 20
+              "type": 21
             }
           ],
           "path": [
@@ -1499,7 +1473,7 @@
         }
       },
       {
-        "id": 20,
+        "id": 21,
         "type": {
           "def": {
             "variant": {
@@ -1524,26 +1498,30 @@
                 },
                 {
                   "index": 3,
-                  "name": "OnlyOwner"
+                  "name": "CollectionOwnerAndAdmin"
                 },
                 {
                   "index": 4,
-                  "name": "OnlyAdmin"
+                  "name": "OnlyOwner"
                 },
                 {
                   "index": 5,
-                  "name": "InvalidCaller"
+                  "name": "OnlyAdmin"
                 },
                 {
                   "index": 6,
-                  "name": "InvalidFee"
+                  "name": "InvalidCaller"
                 },
                 {
                   "index": 7,
-                  "name": "InvalidRoyalFee"
+                  "name": "InvalidFee"
                 },
                 {
                   "index": 8,
+                  "name": "InvalidRoyalFee"
+                },
+                {
+                  "index": 9,
                   "name": "NotEnoughBalance"
                 }
               ]
@@ -1554,16 +1532,6 @@
             "artzero_collection_manager",
             "Error"
           ]
-        }
-      },
-      {
-        "id": 21,
-        "type": {
-          "def": {
-            "sequence": {
-              "type": 18
-            }
-          }
         }
       },
       {
