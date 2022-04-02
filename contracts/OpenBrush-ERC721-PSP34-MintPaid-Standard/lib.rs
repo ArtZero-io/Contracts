@@ -11,6 +11,7 @@ pub mod psp34_nft {
     use brush::contracts::psp34::*;
     use brush::contracts::psp34::extensions::metadata::*;
     use brush::contracts::psp34::extensions::burnable::*;
+    use brush::contracts::psp34::extensions::enumerable::*;
     use brush::contracts::ownable::*;
     use brush::modifiers;
     use ink_storage::{
@@ -22,7 +23,7 @@ pub mod psp34_nft {
     use ink_storage::Mapping;
     use ink_prelude::string::ToString;
     
-    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
     #[ink(storage)]
     pub struct Psp34Nft{
         #[PSP34StorageField]
@@ -36,6 +37,8 @@ pub mod psp34_nft {
         attribute_names: Mapping<u32,Vec<u8>>,
         total_supply: u64,
         mint_fee: Balance,
+        #[PSP34EnumerableStorageField]
+        enumdata: PSP34EnumerableData
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -61,7 +64,8 @@ pub mod psp34_nft {
     impl PSP34Burnable for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Internal for Psp34Nft {}
-
+    impl PSP34Enumerable for Psp34Nft {}
+    
     #[brush::trait_definition]
     pub trait Psp34Traits {
         #[ink(message)]
