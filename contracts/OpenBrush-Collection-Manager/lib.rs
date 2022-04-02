@@ -388,7 +388,7 @@ pub mod artzero_collection_manager {
 
         }
 
-        /// Update Type Collection - only Admin can change - 0 - PSP34 ERC721 ; 1 - ERC1155 PSP1155
+        /// Update Type Collection - only Admin can change - 1: Manual 2: Auto
         #[ink(message)]
         pub fn update_contract_type(
             &mut self,
