@@ -62,10 +62,7 @@ pub mod artzero_collection_manager {
     pub struct Collection {
         collection_owner: AccountId,                //to receive Royal Fee - OnlyAdmin can update
         nft_contract_address: AccountId,            //OnlyAdmin can update
-        name: Vec<u8>,
-        description: Vec<u8>,
-        avatar_image: Vec<u8>,           //IPFS Hash
-        header_image: Vec<u8>,           //IPFS Hash
+        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
         contract_type: u8,               //1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
         is_collect_royal_fee: bool,      //OnlyAdmin can update
         royal_fee: u32,                  //100 = 1% 10000 = 100% OnlyAdmin
@@ -78,16 +75,15 @@ pub mod artzero_collection_manager {
     pub struct ArtZeroCollectionManager{
         #[OwnableStorageField]
         ownable: OwnableData,
-
         standard_nft_hash: Hash,
-
         admin_address: AccountId,
         collection_count: u64,
         adding_fee: Balance,
         collections: Mapping<AccountId, Collection>,    //save collection by contract address
         collections_by_id: Mapping<u64, AccountId>,      //save contract address by id
         collections_by_owner: Mapping<AccountId, Vec<AccountId>>,      //save contract address by owner ID
-        max_royal_fee_rate: u32
+        max_royal_fee_rate: u32,
+        active_collection_count: u64
     }
 
     impl Ownable for ArtZeroCollectionManager {}
@@ -109,6 +105,7 @@ pub mod artzero_collection_manager {
         pub fn new(admin_address: AccountId,owner_address: AccountId, standard_nft_hash: Hash) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance.collection_count = 0;
+                instance.active_collection_count = 0;
                 instance.adding_fee = 1 * 10u128.pow(12);       // 1 AZERO = 1 000 000 000 000 pAZERO (smallest unit)
                 instance._init_with_owner(owner_address);
                 instance.admin_address = admin_address;
@@ -159,6 +156,7 @@ pub mod artzero_collection_manager {
 
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
             self.collection_count += 1;
+            self.active_collection_count += 1;
             self.collections_by_id.insert(&self.collection_count, &contract_account);
 
             let collections_by_owner = self.collections_by_owner.get(&collection_owner);
@@ -176,19 +174,17 @@ pub mod artzero_collection_manager {
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address:contract_account,
-                name: name.into_bytes(),
-                description: description.into_bytes(),
-                avatar_image: avatar_image.into_bytes(),
-                header_image: header_image.into_bytes(),
                 contract_type:2,
                 is_collect_royal_fee,
                 royal_fee,
                 is_active: true,
                 show_on_chain_metadata: true
             };
-
+            
             self.collections.insert(&contract_account, &new_collection);
-
+            let attributeKeys = ["name", "description", "avatar_image", "header_image"];
+            let attributeVals = [name.into_bytes(), description.into_bytes(), avatar_image.into_bytes(), header_image.into_bytes()];
+            self.set_multiple_attributes(contract_account, attributeKeys, attributeVals);
             Ok(())
         }
 
@@ -235,10 +231,6 @@ pub mod artzero_collection_manager {
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address,
-                name: name.into_bytes(),
-                description: description.into_bytes(),
-                avatar_image: avatar_image.into_bytes(),
-                header_image: header_image.into_bytes(),
                 contract_type:1,
                 is_collect_royal_fee,
                 royal_fee,
@@ -247,7 +239,9 @@ pub mod artzero_collection_manager {
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
-
+            let attributeKeys = ["name", "description", "avatar_image", "header_image"];
+            let attributeVals = [name.into_bytes(), description.into_bytes(), avatar_image.into_bytes(), header_image.into_bytes()];
+            self.set_multiple_attributes(contract_account, attributeKeys, attributeVals);
             Ok(())
         }
         /* SETTERS */
@@ -293,100 +287,47 @@ pub mod artzero_collection_manager {
                  return Err(Error::OnlyAdmin);
              }
         }
-        /// Update Name - admin and collection owner can change
-        #[ink(message)]
-        pub fn update_name(
-            &mut self,
-            contract_address: AccountId,
-            name: String
-        ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
-                return Err(Error::CollectionNotExist);
-            }
-            let mut collection = self.collections.get(&contract_address).unwrap();
 
-            if  self.env().caller() == collection.collection_owner ||
-                self.env().caller() == self.admin_address {
-                    collection.name = name.into_bytes();
-                    self.collections.insert(&contract_address, &collection);
-                    Ok(())
-             }
-             else{
-                 return Err(Error::InvalidCaller);
-             }
+        /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        #[ink(message)]
+        pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+            if attributes.len() != values.len() {
+                return Err(Error::Custom(String::from("Inputs not same length")));
+            }
+            let length = attributes.len();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = values[i].clone();
+                self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
+            }
+
+            Ok(())
         }
 
-        /// Update Description - admin and collection owner can change
+        // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
-        pub fn update_description(
-            &mut self,
-            contract_address: AccountId,
-            description: String
-        ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
-                return Err(Error::CollectionNotExist);
-            }
-            let mut collection = self.collections.get(&contract_address).unwrap();
-            if  self.env().caller() == collection.collection_owner ||
-                self.env().caller() == self.admin_address {
-                    collection.description = description.into_bytes();
-                    self.collections.insert(&contract_address, &collection);
-                    Ok(())
-             }
-             else
-             {
-                return Err(Error::InvalidCaller);
-             }
+        pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
+            let length = attributes.len();
+            let mut ret = Vec::<String>::new();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = self.attributes.get(&(account,attribute.into_bytes()));
+                if value.is_some() {
+                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+                }
+                else{
+                    ret.push(String::from(""));
+                }
 
+
+            }
+            ret
         }
 
-        /// Update Avatar Image - admin and collection owner can change
-        #[ink(message)]
-        pub fn update_avatar_image(
-            &mut self,
-            contract_address: AccountId,
-            avatar_image: String
-        ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
-                return Err(Error::CollectionNotExist);
-            }
-            let mut collection = self.collections.get(&contract_address).unwrap();
-            if  self.env().caller() == collection.collection_owner ||
-                self.env().caller() == self.admin_address {
-                    collection.avatar_image = avatar_image.into_bytes();
-                    self.collections.insert(&contract_address, &collection);
-                    Ok(())
-
-             }
-             else{
-                 return Err(Error::InvalidCaller);
-             }
-
+        fn _set_attribute(&mut self, account: AccountId,key: Vec<u8>, value: Vec<u8>) {
+            self.attributes.insert(&(account,key), &value);
         }
 
-        /// Update header Image - admin and collection owner can change
-        #[ink(message)]
-        pub fn update_header_image(
-            &mut self,
-            contract_address: AccountId,
-            header_image: String
-        ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
-                return Err(Error::CollectionNotExist);
-            }
-            let mut collection = self.collections.get(&contract_address).unwrap();
-            if  self.env().caller() == collection.collection_owner ||
-                self.env().caller() == self.admin_address {
-                    collection.header_image = header_image.into_bytes();
-                    self.collections.insert(&contract_address, &collection);
-                    Ok(())
-
-             }
-             else{
-                 return Err(Error::InvalidCaller);
-             }
-
-        }
 
         /// Update Type Collection - only Admin can change - 1: Manual 2: Auto
         #[ink(message)]
@@ -490,6 +431,7 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_active: bool
         ) -> Result<(), Error>  {
+            assert_eq!(is_active, collection.is_active);
             if self.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
@@ -498,6 +440,11 @@ pub mod artzero_collection_manager {
              }
             let mut collection = self.collections.get(&contract_address).unwrap();
             collection.is_active = is_active;
+            if (is_active == true) {
+                self.active_collection_count += 1;
+            } else {
+                self.active_collection_count -= 1;
+            }
             self.collections.insert(&contract_address, &collection);
             Ok(())
         }
