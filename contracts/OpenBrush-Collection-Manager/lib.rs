@@ -182,7 +182,7 @@ pub mod artzero_collection_manager {
             
             self.collections.insert(&contract_account, &new_collection);
             let mut attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let mut attributeKeys = vec![name, description, avatar_image, header_image];
+            let mut attributeVals = vec![name, description, avatar_image, header_image];
             
             self.set_multiple_attributes(attributeKeys, attributeVals);
             Ok(())
@@ -240,7 +240,7 @@ pub mod artzero_collection_manager {
 
             self.collections.insert(&nft_contract_address, &new_collection);
             let mut attributeKeys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let mut attributeKeys = vec![name, description, avatar_image, header_image];
+            let mut attributeVals = vec![name, description, avatar_image, header_image];
             
             self.set_multiple_attributes(attributeKeys, attributeVals);
             Ok(())
@@ -432,7 +432,7 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_active: bool
         ) -> Result<(), Error>  {
-            assert_eq!(is_active, collection.is_active);
+            
             if self.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
@@ -440,11 +440,13 @@ pub mod artzero_collection_manager {
                  return Err(Error::OnlyAdmin);
              }
             let mut collection = self.collections.get(&contract_address).unwrap();
+            assert_eq!(is_active, collection.is_active);
             collection.is_active = is_active;
-            if (is_active == true) {
-                self.active_collection_count += 1;
+
+            if is_active == true {
+                self.active_collection_count = self.active_collection_count.checked_add(1).unwrap();
             } else {
-                self.active_collection_count -= 1;
+                self.active_collection_count = self.active_collection_count.checked_sub(1).unwrap();
             }
             self.collections.insert(&contract_address, &collection);
             Ok(())
