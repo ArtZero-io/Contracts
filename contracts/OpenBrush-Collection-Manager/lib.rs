@@ -450,9 +450,9 @@ pub mod artzero_collection_manager {
             collection.is_active = is_active;
 
             if is_active == true {
-                self.active_collection_count += 1;
+                self.active_collection_count = self.active_collection_count.checked_add(1).unwrap();
             } else {
-                self.active_collection_count -= 1;
+                self.active_collection_count = self.active_collection_count.checked_sub(1).unwrap();
             }
             self.collections.insert(&contract_address, &collection);
             Ok(())
