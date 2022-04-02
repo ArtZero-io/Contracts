@@ -29,7 +29,7 @@ pub mod artzero_collection_manager {
         AddressAlreadyExists,
         CollectionNotExist,
         //Collection Owner and Admin Contract can do
-        CollectionOWnerAndAdmin,
+        CollectionOwnerAndAdmin,
         //OnlyOwner can do
         OnlyOwner,
         OnlyAdmin,
@@ -237,8 +237,6 @@ pub mod artzero_collection_manager {
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
-            let attribute_keys = vec!["name".to_string(), "description".to_string(), "avatar_image".to_string(), "header_image".to_string()];
-            let attribute_vals = vec![name, description, avatar_image, header_image];
             
             self.set_multiple_attributes(nft_contract_address, attributes, attribute_vals);
             Ok(())
@@ -297,18 +295,20 @@ pub mod artzero_collection_manager {
                 return Err(Error::CollectionNotExist);
             }
             let mut collection = self.collections.get(&contract_address).unwrap();
-            if collection.collection_owner != self.env().caller() && self.admin_address != self.env().caller() {
-                return Err(Error::CollectionOWnerAndAdmin);
-            }            
+            if collection.collection_owner == self.env().caller() || self.admin_address == self.env().caller() {
+                let length = attributes.len();
+                for i in 0..length {
+                    let attribute = attributes[i].clone();
+                    let value = values[i].clone();
+                    self._set_attribute(contract_address, attribute.into_bytes(), value.into_bytes());
+                }
 
-            let length = attributes.len();
-            for i in 0..length {
-                let attribute = attributes[i].clone();
-                let value = values[i].clone();
-                self._set_attribute(contract_address, attribute.into_bytes(), value.into_bytes());
-            }
+                Ok(())
+            }   else {
+                return Err(Error::CollectionOwnerAndAdmin);
+            }          
 
-            Ok(())
+           
         }
 
         // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
@@ -450,9 +450,9 @@ pub mod artzero_collection_manager {
             collection.is_active = is_active;
 
             if is_active == true {
-                self.active_collection_count = self.active_collection_count.checked_add(1).unwrap();
+                self.active_collection_count += 1;
             } else {
-                self.active_collection_count = self.active_collection_count.checked_sub(1).unwrap();
+                self.active_collection_count -= 1;
             }
             self.collections.insert(&contract_address, &collection);
             Ok(())
