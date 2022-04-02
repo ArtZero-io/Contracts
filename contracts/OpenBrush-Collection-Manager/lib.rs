@@ -17,7 +17,6 @@ pub mod artzero_collection_manager {
     use ink_storage::Mapping;
     use psp34_nft::psp34_nft::Psp34NftRef;
     use ink_lang::ToAccountId;
-    use ink_storage::Mapping;
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -62,7 +61,6 @@ pub mod artzero_collection_manager {
     pub struct Collection {
         collection_owner: AccountId,                //to receive Royal Fee - OnlyAdmin can update
         nft_contract_address: AccountId,            //OnlyAdmin can update
-        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
         contract_type: u8,               //1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
         is_collect_royal_fee: bool,      //OnlyAdmin can update
         royal_fee: u32,                  //100 = 1% 10000 = 100% OnlyAdmin
@@ -83,7 +81,8 @@ pub mod artzero_collection_manager {
         collections_by_id: Mapping<u64, AccountId>,      //save contract address by id
         collections_by_owner: Mapping<AccountId, Vec<AccountId>>,      //save contract address by owner ID
         max_royal_fee_rate: u32,
-        active_collection_count: u64
+        active_collection_count: u64,
+        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
     }
 
     impl Ownable for ArtZeroCollectionManager {}
