@@ -22,7 +22,7 @@ pub mod psp34_nft {
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
     use ink_prelude::string::ToString;
-    
+
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
     #[ink(storage)]
     pub struct Psp34Nft{
@@ -65,7 +65,7 @@ pub mod psp34_nft {
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Internal for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
-    
+
     #[brush::trait_definition]
     pub trait Psp34Traits {
         #[ink(message)]
@@ -95,8 +95,8 @@ pub mod psp34_nft {
                 instance.mint_fee = mint_fee;
             })
         }
-        
-        ///Only Owner can mint new token
+
+        ///Everyone can Mint with Fee as defined in mint_fee
         #[ink(message)]
         #[ink(payable)]
         pub fn mint(&mut self) -> Result<(), Error> {
@@ -111,7 +111,7 @@ pub mod psp34_nft {
             assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
             Ok(())
         }
-        
+
         ///Owner can mint new token
         #[ink(message)]
         #[modifiers(only_owner)]
