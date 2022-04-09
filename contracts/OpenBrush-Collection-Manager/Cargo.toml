@@ -16,7 +16,7 @@ scale = { package = "parity-scale-codec", version = "3", default-features = fals
 scale-info = { version = "2", default-features = false, features = ["derive"], optional = true }
 
 # These dependencies
-brush = { tag = "v1.5.0", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable"] }
+brush = { tag = "v1.6.0", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable"] }
 psp34_nft = { path = "../OpenBrush-ERC721-PSP34-Standard", default-features = false, features = ["ink-as-dependency"]  }
 
 [lib]
