@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x641ad3f5aca5dde856e540fd5432e9185fc2a09af516f6e96f6bf7a930f8377b",
+    "hash": "0xbf921a05c836b00b977b701152cc71bd017bf2fb38e6a1b6d689bb78c712b119",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -106,6 +106,21 @@
         {
           "args": [],
           "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [],
           "label": "Ownable::renounce_ownership",
           "mutates": true,
           "payable": false,
@@ -143,21 +158,6 @@
             "type": 12
           },
           "selector": "0x11f43efd"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
         }
       ]
     },

@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x362f94189f333b2b850d44c8ae8282cff2bffa1f35202deb81ca59f0e01aeb95",
+    "hash": "0x6d2578b8d30a67a0b646a784dd15d9fb22c853934f03e750d6a559bc30a319ae",
     "language": "ink! 3.0.0",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -74,7 +74,7 @@
         {
           "args": [],
           "docs": [
-            "Only Owner can mint new token"
+            "Everyone can Mint with Fee as defined in mint_fee"
           ],
           "label": "mint",
           "mutates": true,
@@ -188,21 +188,6 @@
         {
           "args": [],
           "docs": [],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 8
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [],
           "label": "Ownable::renounce_ownership",
           "mutates": true,
           "payable": false,
@@ -214,6 +199,21 @@
             "type": 27
           },
           "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 8
+          },
+          "selector": "0x4fa43c8c"
         },
         {
           "args": [
@@ -329,6 +329,67 @@
           "selector": "0x1932a8b0"
         },
         {
+          "args": [],
+          "docs": [],
+          "label": "PSP34::collection_id",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "CollectionIdOutput"
+            ],
+            "type": 1
+          },
+          "selector": "0xffa27a5f"
+        },
+        {
+          "args": [
+            {
+              "label": "owner",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "AllowanceInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "operator",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "AllowanceInput2"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "AllowanceInput3"
+                ],
+                "type": 14
+              }
+            }
+          ],
+          "docs": [],
+          "label": "PSP34::allowance",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "AllowanceOutput"
+            ],
+            "type": 29
+          },
+          "selector": "0x4790f55a"
+        },
+        {
           "args": [
             {
               "label": "to",
@@ -399,67 +460,6 @@
             "type": 21
           },
           "selector": "0x1168624d"
-        },
-        {
-          "args": [
-            {
-              "label": "owner",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "AllowanceInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "operator",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "AllowanceInput2"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "AllowanceInput3"
-                ],
-                "type": 14
-              }
-            }
-          ],
-          "docs": [],
-          "label": "PSP34::allowance",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "AllowanceOutput"
-            ],
-            "type": 29
-          },
-          "selector": "0x4790f55a"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "PSP34::collection_id",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "CollectionIdOutput"
-            ],
-            "type": 1
-          },
-          "selector": "0xffa27a5f"
         },
         {
           "args": [
@@ -536,32 +536,6 @@
         {
           "args": [
             {
-              "label": "index",
-              "type": {
-                "displayName": [
-                  "psp34enumerable_external",
-                  "TokenByIndexInput1"
-                ],
-                "type": 6
-              }
-            }
-          ],
-          "docs": [],
-          "label": "PSP34Enumerable::token_by_index",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34enumerable_external",
-              "TokenByIndexOutput"
-            ],
-            "type": 33
-          },
-          "selector": "0xcd0340d0"
-        },
-        {
-          "args": [
-            {
               "label": "owner",
               "type": {
                 "displayName": [
@@ -601,27 +575,25 @@
               "label": "index",
               "type": {
                 "displayName": [
-                  "psp34traits_external",
-                  "GetAttributeNameInput1"
+                  "psp34enumerable_external",
+                  "TokenByIndexInput1"
                 ],
-                "type": 4
+                "type": 6
               }
             }
           ],
-          "docs": [
-            "Get Attribute Name"
-          ],
-          "label": "Psp34Traits::get_attribute_name",
+          "docs": [],
+          "label": "PSP34Enumerable::token_by_index",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
-              "psp34traits_external",
-              "GetAttributeNameOutput"
+              "psp34enumerable_external",
+              "TokenByIndexOutput"
             ],
-            "type": 24
+            "type": 33
           },
-          "selector": "0xfcfe34de"
+          "selector": "0xcd0340d0"
         },
         {
           "args": [],
@@ -643,30 +615,30 @@
         {
           "args": [
             {
-              "label": "uri",
+              "label": "token_id",
               "type": {
                 "displayName": [
                   "psp34traits_external",
-                  "SetBaseUriInput1"
+                  "TokenUriInput1"
                 ],
-                "type": 24
+                "type": 5
               }
             }
           ],
           "docs": [
-            " Change baseURI"
+            " Get URI from token ID"
           ],
-          "label": "Psp34Traits::set_base_uri",
-          "mutates": true,
+          "label": "Psp34Traits::token_uri",
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34traits_external",
-              "SetBaseUriOutput"
+              "TokenUriOutput"
             ],
-            "type": 25
+            "type": 24
           },
-          "selector": "0x4de6850b"
+          "selector": "0x249dfd4f"
         },
         {
           "args": [
@@ -719,6 +691,34 @@
         {
           "args": [
             {
+              "label": "index",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "GetAttributeNameInput1"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [
+            "Get Attribute Name"
+          ],
+          "label": "Psp34Traits::get_attribute_name",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetAttributeNameOutput"
+            ],
+            "type": 24
+          },
+          "selector": "0xfcfe34de"
+        },
+        {
+          "args": [
+            {
               "label": "token_id",
               "type": {
                 "displayName": [
@@ -757,30 +757,30 @@
         {
           "args": [
             {
-              "label": "token_id",
+              "label": "uri",
               "type": {
                 "displayName": [
                   "psp34traits_external",
-                  "TokenUriInput1"
+                  "SetBaseUriInput1"
                 ],
-                "type": 5
+                "type": 24
               }
             }
           ],
           "docs": [
-            " Get URI from token ID"
+            " Change baseURI"
           ],
-          "label": "Psp34Traits::token_uri",
-          "mutates": false,
+          "label": "Psp34Traits::set_base_uri",
+          "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34traits_external",
-              "TokenUriOutput"
+              "SetBaseUriOutput"
             ],
-            "type": 24
+            "type": 25
           },
-          "selector": "0x249dfd4f"
+          "selector": "0x4de6850b"
         }
       ]
     },

@@ -410,6 +410,14 @@ pub mod artzero_psp34 {
             return self.whitelist_mint_total_amount;
         }
 
+        ///Get total supply
+        #[ink(message)]
+        pub fn get_total_supply(
+            &self
+        ) -> u32 {
+            return self.total_supply;
+        }
+
         ///Only Owner can set multiple attributes to a token
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -475,5 +483,7 @@ pub mod artzero_psp34 {
             }
             Ok(())
         }
+
+
     }
 }
