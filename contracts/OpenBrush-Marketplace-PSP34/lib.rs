@@ -807,6 +807,8 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
+        //TODO: platform fee - discount fee
+
         fn apply_discount(&self, staking_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
             let staked_amount = StakingRef::get_total_staked_by_account(&staking_contract_address,staker);
 

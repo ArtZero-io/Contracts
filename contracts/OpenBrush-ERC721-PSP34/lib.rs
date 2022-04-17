@@ -37,8 +37,8 @@ pub mod artzero_psp34 {
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Whitelist {
-        whitelist_amount: u32,
-        claimed_amount: u32
+        whitelist_amount: u64,
+        claimed_amount: u64
     }
 
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
@@ -54,22 +54,22 @@ pub mod artzero_psp34 {
         enumdata: PSP34EnumerableData,
 
         //Max Total Token number to Mint
-        total_supply: u32,
-        token_count: u32,
-        attribute_count: u32,
-        attribute_names: Mapping<u32,Vec<u8>>,
+        total_supply: u64,
+        token_count: u64,
+        attribute_count: u64,
+        attribute_names: Mapping<u64,Vec<u8>>,
 
         //Who got free mint
         whitelists: Mapping<AccountId,Whitelist>,
-        whitelist_count: u32,
-        whitelist_accounts: Mapping<u32,AccountId>,
-        whitelist_mint_total_amount: u32,
+        whitelist_count: u64,
+        whitelist_accounts: Mapping<u64,AccountId>,
+        whitelist_mint_total_amount: u64,
         //Pre_launch Minting Fee
         fee_1: Balance,
         //Launch Minting Fee
         fee_2: Balance,
         //To what amount the fee_1 is applied, after that fee_2
-        amount_1: u32,
+        amount_1: u64,
         //is Minting started
         // 0: not started
         // 1: started until amount_1 reached
@@ -124,7 +124,7 @@ pub mod artzero_psp34 {
         /// mint_mode 2: started until total_supply reached
         /// total_supply: total_supply
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId, name: String, symbol: String, total_supply: u32, fee_1: Balance, fee_2: Balance, amount_1: u32) -> Self {
+        pub fn new(contract_owner: AccountId, name: String, symbol: String, total_supply: u64, fee_1: Balance, fee_2: Balance, amount_1: u64) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
                 instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
@@ -145,7 +145,7 @@ pub mod artzero_psp34 {
         pub fn add_whitelist(
             &mut self,
             account: AccountId,
-            whitelist_amount: u32
+            whitelist_amount: u64
         ) -> Result<(), Error> {
 
             //fee must less than total tokens
@@ -178,7 +178,7 @@ pub mod artzero_psp34 {
         pub fn update_whitelist_amount(
             &mut self,
             account: AccountId,
-            whitelist_amount: u32
+            whitelist_amount: u64
         ) -> Result<(), Error>  {
 
             if self.whitelists.get(&account).is_none(){
@@ -239,7 +239,7 @@ pub mod artzero_psp34 {
         #[modifiers(only_owner)]
         pub fn set_amount_1(
             &mut self,
-            amount_1: u32
+            amount_1: u64
         ) -> Result<(), Error> {
             if amount_1 < self.whitelist_mint_total_amount{
                 return Err(Error::InvalidInput);
@@ -265,7 +265,7 @@ pub mod artzero_psp34 {
 
         /// Whitelisted User Creates multiple
         #[ink(message)]
-        pub fn whitelist_mint(&mut self, mint_amount: u32) -> Result<(), Error> {
+        pub fn whitelist_mint(&mut self, mint_amount: u64) -> Result<(), Error> {
 
             if self.mint_mode == 0 {
                 return Err(Error::NotMintTime);
@@ -293,7 +293,7 @@ pub mod artzero_psp34 {
 
             for _i in 0..mint_amount {
                 self.token_count += 1;
-                assert!(self._mint_to(caller, Id::U32(self.token_count)).is_ok());
+                assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
             }
 
             Ok(())
@@ -328,7 +328,7 @@ pub mod artzero_psp34 {
                 return Err(Error::TokenLimitReached);
             }
             self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U32(self.token_count)).is_ok());
+            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
 
             Ok(())
         }
@@ -341,7 +341,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn token_uri(
             &self,
-            token_id: u32
+            token_id: u64
         ) -> String {
             let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
             let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
@@ -373,7 +373,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn get_amount_1(
             &self
-        ) -> u32 {
+        ) -> u64 {
             return self.amount_1;
         }
 
@@ -381,7 +381,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn get_whitelist_account(
             &self,
-            id: u32
+            id: u64
         ) -> AccountId {
             return self.whitelist_accounts.get(&id).unwrap();
         }
@@ -398,7 +398,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn get_whitelist_count(
             &self
-        ) -> u32 {
+        ) -> u64 {
             return self.whitelist_count;
         }
 
@@ -406,7 +406,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn get_whitelist_mint_total_amount(
             &self
-        ) -> u32 {
+        ) -> u64 {
             return self.whitelist_mint_total_amount;
         }
 
@@ -414,7 +414,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn get_total_supply(
             &self
-        ) -> u32 {
+        ) -> u64 {
             return self.total_supply;
         }
 
@@ -422,7 +422,7 @@ pub mod artzero_psp34 {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
-            assert!(token_id != Id::U32(0));
+            assert!(token_id != Id::U64(0));
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
@@ -455,12 +455,12 @@ pub mod artzero_psp34 {
         }
         ///Get Attribute Count
         #[ink(message)]
-        pub fn get_attribute_count(&self) -> u32 {
+        pub fn get_attribute_count(&self) -> u64 {
             self.attribute_count
         }
         ///Get Attribute Name
         #[ink(message)]
-        pub fn get_attribute_name(&self, index:u32) -> String {
+        pub fn get_attribute_name(&self, index:u64) -> String {
             let attribute = self.attribute_names.get(&index);
             if attribute.is_some() {
                 String::from_utf8(attribute.unwrap()).unwrap()
