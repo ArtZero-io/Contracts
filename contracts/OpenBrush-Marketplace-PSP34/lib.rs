@@ -148,6 +148,12 @@ pub mod artzero_marketplace_psp34 {
         sale_tokens_ids_last_index: Mapping<(Option<AccountId>,Option<AccountId>), u128>,
         //(NFT Contract Address, Seller Address, token ID)
         bidders: Mapping<(AccountId,AccountId,Id),Vec<BidInformation>>,
+        
+        //(Collection Contract Address)
+        // Number Listed Token 
+        listed_token_number_by_collection_address: Mapping<AccountId, u64>,
+        // Floor Price Token
+        floor_price_by_collection_address: Mapping<AccountId, Balance>,
 
         //Platform Statistics
         total_volume: Balance,
@@ -281,6 +287,8 @@ pub mod artzero_marketplace_psp34 {
                     is_for_sale: true
                 };
                 self.market_list.insert(&(nft_contract_address,token_id.clone()), &new_sale);
+                self.update_listed_token_by_collection_address(nft_contract_address, true);
+                self.update_floor_price_by_collection_address(nft_contract_address, price);
 
             }
 
@@ -330,7 +338,7 @@ pub mod artzero_marketplace_psp34 {
 
             //Send NFT back to caller
             assert!(Psp34Ref::transfer(&nft_contract_address,caller,token_id.clone(),Vec::<u8>::new()).is_ok());
-
+            self.update_listed_token_by_collection_address(nft_contract_address, false);
             self.env().emit_event(UnListEvent {
                 trader:Some(caller),
                 nft_contract_address: Some(nft_contract_address),
@@ -715,6 +723,43 @@ pub mod artzero_marketplace_psp34 {
             self.collection_contract_address = collection_contract_address;
             Ok(())
         }
+
+        //Set listed token
+        #[ink(message)]
+        pub fn update_listed_token_by_collection_address(&mut self, nft_contract_address: AccountId, mode: bool) {
+            let listed_token_count = self.listed_token_number_by_collection_address.get(&nft_contract_address);
+            let mut listed_token_count_unwarp = 0;
+            if listed_token_count.is_some() {
+                listed_token_count_unwarp = listed_token_count.unwrap();
+                if mode == true {
+                    listed_token_count_unwarp = listed_token_count_unwarp.checked_add(1).unwrap();
+                } else {
+                    listed_token_count_unwarp = listed_token_count_unwarp.checked_sub(1).unwrap();
+                }
+                self.listed_token_number_by_collection_address.insert(&nft_contract_address, &listed_token_count_unwarp);
+            } else {
+                if mode == true {
+                    listed_token_count_unwarp = listed_token_count_unwarp.checked_add(1).unwrap();
+                    self.listed_token_number_by_collection_address.insert(&nft_contract_address, &listed_token_count_unwarp);
+                }
+            }
+        }
+        
+        //Set listed token
+        #[ink(message)]
+        pub fn update_floor_price_by_collection_address(&mut self, nft_contract_address: AccountId, price: Balance) {
+            let floor_price = self.floor_price_by_collection_address.get(&nft_contract_address);
+            
+            if floor_price.is_some() {
+                let floor_price_unwarp = floor_price.unwrap();
+                if price <= floor_price_unwarp {
+                    self.floor_price_by_collection_address.insert(&nft_contract_address, &price);
+                }
+            } else {
+                self.floor_price_by_collection_address.insert(&nft_contract_address, &price);
+            }
+        }
+
         ///Set new staking contract address - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -750,6 +795,19 @@ pub mod artzero_marketplace_psp34 {
         pub fn get_nft_sale_info(&self,nft_contract_address:AccountId, token_id: Id) -> Option<ForSaleItem> {
             self.market_list.get(&(nft_contract_address,token_id))
         }
+
+        /// Get listed token count by collection address
+        #[ink(message)]
+        pub fn get_listed_token_count_by_collection_address(&self, collection_contract_address: AccountId) -> Option<u64> {
+            self.listed_token_number_by_collection_address.get(&collection_contract_address)
+        }
+
+        /// Get floor price by collection address
+        #[ink(message)]
+        pub fn get_floor_price_by_collection_address(&self, collection_contract_address: AccountId) -> Option<Balance> {
+            self.floor_price_by_collection_address.get(&collection_contract_address)
+        }
+
         ///Get all token ids currently for sale for a collection (nft_contract_address,user_account)
         #[ink(message)]
         pub fn get_for_sale_token_id(&self,nft_contract_address:AccountId, user_account:AccountId, index: u128) -> Id {
