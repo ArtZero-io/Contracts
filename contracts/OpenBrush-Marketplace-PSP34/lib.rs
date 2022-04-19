@@ -286,6 +286,7 @@ pub mod artzero_marketplace_psp34 {
                 };
                 //Update listed token
                 self.market_list.insert(&(nft_contract_address,token_id.clone()), &new_sale);
+                self.update_listed_token_by_collection_address(nft_contract_address, true);
             }
 
             //Step 3 - Transfer Token from Caller to Marketplace Contract
@@ -778,8 +779,12 @@ pub mod artzero_marketplace_psp34 {
 
         /// Get listed token count by collection address
         #[ink(message)]
-        pub fn get_listed_token_count_by_collection_address(&self, collection_contract_address: AccountId) -> Option<u64> {
-            self.listed_token_number_by_collection_address.get(&collection_contract_address)
+        pub fn get_listed_token_count_by_collection_address(&self, collection_contract_address: AccountId) -> u64 {
+            let listed_token_number = self.listed_token_number_by_collection_address.get(&collection_contract_address);
+            if listed_token_number.is_some(){
+                return listed_token_number.unwrap();
+            }
+            return 0;
         }
 
         ///Get all token ids currently for sale for a collection (nft_contract_address,user_account)
