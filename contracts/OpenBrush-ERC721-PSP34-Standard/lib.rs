@@ -99,6 +99,21 @@ pub mod psp34_nft {
             Ok(())
         }
 
+        ///Only Owner can mint new token and add attributes for it
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn mint_with_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error> {
+            let caller = self.env().caller();
+            self.token_count += 1;
+            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+            if self.set_multiple_attributes(Id::U64(self.token_count), attributes, values).is_err() {
+                panic!(
+                    "error set_multiple_attributes"
+                )
+            };
+            Ok(())
+        }
+
         ///Get Token Count
         #[ink(message)]
         pub fn get_token_count(&self) -> u64 {
