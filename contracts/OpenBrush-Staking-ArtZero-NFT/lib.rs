@@ -60,6 +60,10 @@ pub mod artzero_staking_nft {
         pub fn get_by_index(&self, owner: &Option<AccountId>, index: &u64) -> Result<u64, PSP34Error> {
             self.index_to_id.get((owner, index)).ok_or(PSP34Error::TokenNotExists)
         }
+
+        pub fn get_by_id(&self, owner: &Option<AccountId>, id: &u64) -> Result<u64, PSP34Error> {
+            self.id_to_index.get((owner, id)).ok_or(PSP34Error::TokenNotExists)
+        }
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -112,6 +116,9 @@ pub mod artzero_staking_nft {
     pub trait CrossArtZeroStaking {
         #[ink(message)]
         fn get_total_staked_by_account(&self,account: AccountId) -> u64;
+
+        #[ink(message)]
+        fn get_total_pending_unstaked_by_account(&self,account: AccountId) -> u64;
     }
 
     #[brush::wrapper]
@@ -161,6 +168,13 @@ pub mod artzero_staking_nft {
         pub fn get_staked_id(&self,account: AccountId, index: u64) -> u64 {
             self.staking_list.get_by_index(&Some(account),&index).unwrap()
         }
+
+        ///Get pending unstaked token ids by AccountId
+        #[ink(message)]
+        pub fn get_pending_unstaked_id(&self,account: AccountId, index: u64) -> u64 {
+            self.pending_unstaking_list_token_index.get_by_index(&Some(account),&index).unwrap()
+        }
+
         ///Get total NFT staked in the contract
         #[ink(message)]
         pub fn get_total_staked(&self) -> u64 {
@@ -223,14 +237,16 @@ pub mod artzero_staking_nft {
             }
 
             for i in 0..leng {
-                //Step 1: Check owner token
+                //Step 1 - Check owner token is Contract Staking
                 let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U64(token_ids[i])).unwrap();
-                assert!(caller == token_owner);
+                assert!(self.env().account_id() == token_owner);
 
-                
-                //Step 2 - Check if this contract has been approved
-                let allowance = Psp34Ref::allowance(&self.nft_contract_address,caller, self.env().account_id(), Some(Id::U64(token_ids[i])));
-                assert!(allowance);
+                //Setp 2 - Check staker
+                if self.staking_list.get_by_id(&Some(caller), &token_ids[i]).is_err() {
+                    panic!(
+                        "error: not exist staked"
+                    )
+                };
 
                 //Step 3 - Remove token on staking_list
                 assert!(self.staking_list.remove(&Some(caller),&token_ids[i],&last_index).is_ok());
@@ -245,6 +261,45 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
+        /// Cancel Request
+        #[ink(message)]
+        pub fn cancel_request_unstake(&mut self, token_ids:Vec<u64>) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let leng = token_ids.len();
+
+            let mut last_index = 0;
+            if self.staking_list_last_index.get(Some(caller)).is_some() {
+                last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
+            }
+
+            assert!(self.pending_unstaking_list_token_last_index.get(Some(caller)).is_some());
+            let mut pending_unstaking_last_index = self.pending_unstaking_list_token_last_index.get(Some(caller)).unwrap();
+
+            for i in 0..leng {
+                //Step 1 - Check owner token is Contract Staking
+                let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U64(token_ids[i])).unwrap();
+                assert!(self.env().account_id() == token_owner);
+
+                //Setp 2 - Check staker
+                if self.staking_list.get_by_id(&Some(caller), &token_ids[i]).is_err() {
+                    panic!(
+                        "error: not exist staked"
+                    )
+                };
+
+                //Step 3 - Add token on staking_list
+                self.staking_list.insert(&Some(caller),&token_ids[i],&(last_index+(i as u64)+1));
+                last_index = last_index.checked_add(1).unwrap();
+
+                //Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
+                assert!(self.pending_unstaking_list_token_index.remove(&Some(caller),&token_ids[i],&pending_unstaking_last_index).is_ok());
+                pending_unstaking_last_index = pending_unstaking_last_index.checked_sub(1).unwrap();
+            }
+            self.pending_unstaking_list_token_last_index.insert(Some(caller), &(pending_unstaking_last_index));
+            self.staking_list_last_index.insert(Some(caller),&(last_index));
+            Ok(())
+        }
+
         /// unStake multiple NFTs
         #[ink(message)]
         pub fn unstake(&mut self,token_ids:Vec<u64>) -> Result<(), Error> {
@@ -252,14 +307,20 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let leng = token_ids.len();
 
-            assert!(self.staking_list_last_index.get(Some(caller)).is_some());
-
+            assert!(self.pending_unstaking_list_token_last_index.get(Some(caller)).is_some());
             // let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
             let mut pending_unstaking_last_index = self.pending_unstaking_list_token_last_index.get(Some(caller)).unwrap();
 
             self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
 
             for i in 0..leng{
+
+                //Setp 2 - Check request unstaked
+                if self.pending_unstaking_list_token_index.get_by_id(&Some(caller), &token_ids[i]).is_err() {
+                    panic!(
+                        "error: not exist request unstaked"
+                    )
+                };
 
                 //Step 2 - transfer token to caller Check request unstake
                 assert!(self.get_request_unstake(caller, token_ids[i]).is_some());
@@ -317,6 +378,16 @@ pub mod artzero_staking_nft {
         #[ink(message)]
         fn get_total_staked_by_account(&self,account: AccountId) -> u64 {
             let last_index = self.staking_list_last_index.get(Some(account));
+            if last_index.is_some(){
+                return last_index.unwrap();
+            }
+            return 0;
+        }
+
+        ///Get User NFT staked in the contract
+        #[ink(message)]
+        fn get_total_pending_unstaked_by_account(&self,account: AccountId) -> u64 {
+            let last_index = self.pending_unstaking_list_token_last_index.get(Some(account));
             if last_index.is_some(){
                 return last_index.unwrap();
             }
