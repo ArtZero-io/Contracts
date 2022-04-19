@@ -90,8 +90,10 @@ pub mod artzero_staking_nft {
         staking_list_last_index: Mapping<Option<AccountId>, u64>,
         nft_contract_address: AccountId,
         total_staked: u64,
+        limit_unstake_time: u64, // minutes
         pending_unstaking_list: Mapping<(AccountId, u64), u64>,
-        limit_unstake_time: u64 // minutes
+        pending_unstaking_list_token_index: EnumerableMapping,
+        pending_unstaking_list_token_last_index: Mapping<Option<AccountId>, u64>
     }
 
     #[ink(event)]
@@ -211,11 +213,35 @@ pub mod artzero_staking_nft {
         pub fn request_unstake(&mut self, token_ids:Vec<u64>) -> Result<(), Error> {
             let caller = self.env().caller();
             let leng = token_ids.len();
+
             assert!(self.staking_list_last_index.get(Some(caller)).is_some());
+            let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
+
+            let mut pending_unstaking_last_index = 0;
+            if self.pending_unstaking_list_token_last_index.get(Some(caller)).is_some() {
+                pending_unstaking_last_index = self.pending_unstaking_list_token_last_index.get(Some(caller)).unwrap();
+            }
+
             for i in 0..leng {
+                //Step 1: Check owner token
+                let token_owner = Psp34Ref::owner_of(&self.nft_contract_address,Id::U64(token_ids[i])).unwrap();
+                assert!(caller == token_owner);
+
+                
+                //Step 2 - Check if this contract has been approved
+                let allowance = Psp34Ref::allowance(&self.nft_contract_address,caller, self.env().account_id(), Some(Id::U64(token_ids[i])));
+                assert!(allowance);
+
+                //Step 3 - Remove token on staking_list
+                assert!(self.staking_list.remove(&Some(caller),&token_ids[i],&last_index).is_ok());
+                last_index = last_index.checked_sub(1).unwrap();
+
+                //Step 3 - Add token to pending unstaking list and pending_unstaking_list_token_index
                 let current_time = Self::env().block_timestamp();
                 self.pending_unstaking_list.insert(&(caller, token_ids[i]), &current_time);
+                self.pending_unstaking_list_token_index.insert(&Some(caller),&token_ids[i],&(pending_unstaking_last_index+(i as u64)+1));
             }
+            self.staking_list_last_index.insert(Some(caller),&last_index);
             Ok(())
         }
 
@@ -228,11 +254,14 @@ pub mod artzero_staking_nft {
 
             assert!(self.staking_list_last_index.get(Some(caller)).is_some());
 
-            let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
+            // let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
+            let mut pending_unstaking_last_index = self.pending_unstaking_list_token_last_index.get(Some(caller)).unwrap();
 
             self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
 
             for i in 0..leng{
+
+                //Step 2 - transfer token to caller Check request unstake
                 assert!(self.get_request_unstake(caller, token_ids[i]).is_some());
                 let request_unstake_time = self.get_request_unstake(caller, token_ids[i]).unwrap();
                 let current_time = Self::env().block_timestamp();
@@ -240,17 +269,22 @@ pub mod artzero_staking_nft {
                 if request_unstake_time + (self.limit_unstake_time * 60) > current_time {
                     return Err(Error::Custom(String::from("Not Enough Time Request Unstake")));
                 }
-                assert!(self.staking_list.remove(&Some(caller),&token_ids[i],&last_index).is_ok());
-                last_index = last_index.checked_sub(1).unwrap();
-                //Step 2 - transfer token to caller
+                // assert!(self.staking_list.remove(&Some(caller),&token_ids[i],&last_index).is_ok());
+                // last_index = last_index.checked_sub(1).unwrap();
+                //Step 3 - transfer token to caller
                 assert!(Psp34Ref::transfer(&self.nft_contract_address,caller,Id::U64(token_ids[i]),Vec::<u8>::new()).is_ok());
+
+                //Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
+                assert!(self.pending_unstaking_list_token_index.remove(&Some(caller),&token_ids[i],&pending_unstaking_last_index).is_ok());
+                pending_unstaking_last_index = pending_unstaking_last_index.checked_sub(1).unwrap();
+                // self.pending_unstaking_list.insert(&(caller, token_ids[i]), 0);
 
                 self.env().emit_event(UnstakeEvent {
                     staker:Some(caller),
                     token_id:token_ids[i]
                 });
             }
-            self.staking_list_last_index.insert(Some(caller),&last_index);
+            self.pending_unstaking_list_token_last_index.insert(Some(caller),&pending_unstaking_last_index);
 
             Ok(())
         }
