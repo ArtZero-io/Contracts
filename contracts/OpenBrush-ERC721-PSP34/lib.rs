@@ -430,7 +430,10 @@ pub mod artzero_psp34 {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute(token_id.clone(),attribute.into_bytes(), value.into_bytes());
+                let byte_attribute = attribute.into_bytes();
+                self.add_attribute_name(byte_attribute.clone());
+                self._set_attribute(token_id.clone(),byte_attribute.clone(), value.into_bytes());
+
             }
 
             Ok(())
@@ -484,6 +487,22 @@ pub mod artzero_psp34 {
             Ok(())
         }
 
+        fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
+            let mut exist:bool = false;
+            for index in 0..self.attribute_count {
+                let attribute_name = self.attribute_names.get(&index);
+                if attribute_name.is_some(){
+                    if attribute_name.unwrap() == attribute_input{
+                        exist = true;
+                        break;
+                    }
+                }
+            }
+            if !exist {
+                self.attribute_count += 1;
+                self.attribute_names.insert(&self.attribute_count, &attribute_input);
+            }
+        }
 
     }
 }

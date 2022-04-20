@@ -157,9 +157,9 @@ pub mod artzero_staking_nft {
             self.nft_contract_address
         }
 
-        ///Get request unstake multiple NFTs
+        ///Get request unstake Time
         #[ink(message)]
-        pub fn get_request_unstake(&self, account: AccountId, token_id: u64) -> Option<u64> {
+        pub fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> Option<u64> {
             self.pending_unstaking_list.get(&(account, token_id))
         }
 
@@ -314,8 +314,6 @@ pub mod artzero_staking_nft {
             // let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
             let mut pending_unstaking_last_index = self.pending_unstaking_list_token_last_index.get(Some(caller)).unwrap();
 
-            self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
-
             for i in 0..leng{
 
                 //Setp 2 - Check request unstaked
@@ -326,11 +324,11 @@ pub mod artzero_staking_nft {
                 };
 
                 //Step 2 - transfer token to caller Check request unstake
-                assert!(self.get_request_unstake(caller, token_ids[i]).is_some());
-                let request_unstake_time = self.get_request_unstake(caller, token_ids[i]).unwrap();
+                assert!(self.get_request_unstake_time(caller, token_ids[i]).is_some());
+                let request_unstake_time = self.get_request_unstake_time(caller, token_ids[i]).unwrap();
                 let current_time = Self::env().block_timestamp();
-                
-                if request_unstake_time + (self.limit_unstake_time * 60) > current_time {
+
+                if request_unstake_time + (self.limit_unstake_time * 60000) > current_time {
                     return Err(Error::Custom(String::from("Not Enough Time Request Unstake")));
                 }
                 // assert!(self.staking_list.remove(&Some(caller),&token_ids[i],&last_index).is_ok());
@@ -358,7 +356,7 @@ pub mod artzero_staking_nft {
         #[modifiers(only_owner)]
         pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
             assert!( value <= self.env().balance());
-            
+
             if self.env().transfer(self.env().caller(), value).is_err() {
                 panic!(
                     "error withdraw_fee"

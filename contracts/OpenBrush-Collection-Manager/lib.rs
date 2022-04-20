@@ -17,9 +17,7 @@ pub mod artzero_collection_manager {
     use ink_storage::Mapping;
     use psp34_nft::psp34_nft::Psp34NftRef;
     use ink_lang::ToAccountId;
-    use ink_prelude::vec;
-    use ink_prelude::string::ToString;
-    
+
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
@@ -181,10 +179,15 @@ pub mod artzero_collection_manager {
                 is_active: true,
                 show_on_chain_metadata: true
             };
-            
+
             self.collections.insert(&contract_account, &new_collection);
-            
-            self.set_multiple_attributes(contract_account, attributes, attribute_vals);
+
+            if self.set_multiple_attributes(contract_account, attributes, attribute_vals).is_err() {
+                panic!(
+                    "error set_multiple_attributes"
+                )
+            };
+
             Ok(())
         }
 
@@ -225,7 +228,7 @@ pub mod artzero_collection_manager {
                 collections.push(nft_contract_address);
                 self.collections_by_owner.insert(&collection_owner, &collections);
             }
-            
+
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address,
@@ -237,8 +240,13 @@ pub mod artzero_collection_manager {
             };
 
             self.collections.insert(&nft_contract_address, &new_collection);
-            
-            self.set_multiple_attributes(nft_contract_address, attributes, attribute_vals);
+
+            if self.set_multiple_attributes(nft_contract_address, attributes, attribute_vals).is_err() {
+                panic!(
+                    "error set_multiple_attributes"
+                )
+            };
+
             Ok(())
         }
         /* SETTERS */
@@ -294,7 +302,7 @@ pub mod artzero_collection_manager {
             if self.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            let mut collection = self.collections.get(&contract_address).unwrap();
+            let collection = self.collections.get(&contract_address).unwrap();
             if collection.collection_owner == self.env().caller() || self.admin_address == self.env().caller() {
                 let length = attributes.len();
                 for i in 0..length {
@@ -306,9 +314,9 @@ pub mod artzero_collection_manager {
                 Ok(())
             }   else {
                 return Err(Error::CollectionOwnerAndAdmin);
-            }          
+            }
 
-           
+
         }
 
         // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
@@ -438,7 +446,7 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_active: bool
         ) -> Result<(), Error>  {
-            
+
             if self.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
@@ -527,7 +535,7 @@ pub mod artzero_collection_manager {
         ) -> u64 {
             return self.collection_count;
         }
-        
+
         /// Get Collection Count
         #[ink(message)]
         pub fn get_active_collection_count(
