@@ -259,7 +259,7 @@ pub mod artzero_staking_nft {
             }
             self.staking_list_last_index.insert(Some(caller),&last_index);
             self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
-            self.pending_unstaking_last_index.insert(Some(caller),&(pending_unstaking_last_index+leng as u64));
+            self.pending_unstaking_list_token_last_index.insert(Some(caller),&(pending_unstaking_last_index+leng as u64));
             Ok(())
         }
 
