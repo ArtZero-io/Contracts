@@ -777,6 +777,22 @@ pub mod artzero_marketplace_psp34 {
             self.market_list.get(&(nft_contract_address,token_id))
         }
 
+        /// Get platform fee
+        #[ink(message)]
+        pub fn get_platform_fee(&self) -> u32 {
+            self.platform_fee
+        }
+
+        /// Get Staking Discount Criteria
+        pub fn get_staking_discount_criteria(&self) -> Vec<u8> {
+            self.staking_discount_criteria
+        }
+
+        /// Get Staking Discount Rates
+        pub fn get_staking_discount_rate(&self) -> Vec<u16> {
+            self.staking_discount_rate
+        }
+
         /// Get listed token count by collection address
         #[ink(message)]
         pub fn get_listed_token_count_by_collection_address(&self, collection_contract_address: AccountId) -> u64 {
