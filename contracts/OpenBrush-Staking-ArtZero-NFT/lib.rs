@@ -258,6 +258,8 @@ pub mod artzero_staking_nft {
                 self.pending_unstaking_list_token_index.insert(&Some(caller),&token_ids[i],&(pending_unstaking_last_index+(i as u64)+1));
             }
             self.staking_list_last_index.insert(Some(caller),&last_index);
+            self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
+            self.pending_unstaking_last_index.insert(Some(caller),&(pending_unstaking_last_index+leng as u64));
             Ok(())
         }
 
@@ -281,9 +283,9 @@ pub mod artzero_staking_nft {
                 assert!(self.env().account_id() == token_owner);
 
                 //Setp 2 - Check staker
-                if self.staking_list.get_by_id(&Some(caller), &token_ids[i]).is_err() {
+                if self.pending_unstaking_list_token_index.get_by_id(&Some(caller), &token_ids[i]).is_err() {
                     panic!(
-                        "error: not exist staked"
+                        "error: not exist request unstaked"
                     )
                 };
 
@@ -295,6 +297,7 @@ pub mod artzero_staking_nft {
                 assert!(self.pending_unstaking_list_token_index.remove(&Some(caller),&token_ids[i],&pending_unstaking_last_index).is_ok());
                 pending_unstaking_last_index = pending_unstaking_last_index.checked_sub(1).unwrap();
             }
+            self.total_staked = self.total_staked.checked_add(leng as u64).unwrap();
             self.pending_unstaking_list_token_last_index.insert(Some(caller), &(pending_unstaking_last_index));
             self.staking_list_last_index.insert(Some(caller),&(last_index));
             Ok(())
