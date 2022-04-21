@@ -784,13 +784,15 @@ pub mod artzero_marketplace_psp34 {
         }
 
         /// Get Staking Discount Criteria
+        #[ink(message)]
         pub fn get_staking_discount_criteria(&self) -> Vec<u8> {
-            self.staking_discount_criteria
+            self.staking_discount_criteria.clone()
         }
 
         /// Get Staking Discount Rates
+        #[ink(message)]
         pub fn get_staking_discount_rate(&self) -> Vec<u16> {
-            self.staking_discount_rate
+            self.staking_discount_rate.clone()
         }
 
         /// Get listed token count by collection address
