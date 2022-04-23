@@ -148,15 +148,18 @@ pub mod artzero_marketplace_psp34 {
         sale_tokens_ids_last_index: Mapping<(Option<AccountId>,Option<AccountId>), u128>,
         //(NFT Contract Address, Seller Address, token ID)
         bidders: Mapping<(AccountId,AccountId,Id),Vec<BidInformation>>,
-        
+
         //(Collection Contract Address)
-        // Number Listed Token 
+        // Number Listed Token
         listed_token_number_by_collection_address: Mapping<AccountId, u64>,
 
         //Platform Statistics
         total_volume: Balance,
         volume_by_collection: Mapping<AccountId, Balance>,
         volume_by_user: Mapping<AccountId, Balance>,
+
+        total_profit: Balance,
+        current_profit: Balance,
 
         //Platform discount
         staking_discount_criteria: Vec<u8>,
@@ -402,6 +405,10 @@ pub mod artzero_marketplace_psp34 {
                 caller,
                 platform_fee
             );
+            //Save profit
+            self.total_profit = self.total_profit.checked_add(platform_fee_after_discount).unwrap();
+            self.current_profit = self.current_profit.checked_add(platform_fee_after_discount).unwrap();
+
             //TODO: Check Royal fee is true first
             let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
             let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
@@ -622,6 +629,10 @@ pub mod artzero_marketplace_psp34 {
                             caller,
                             platform_fee
                         );
+
+                        //Save profit
+                        self.total_profit = self.total_profit.checked_add(platform_fee_after_discount).unwrap();
+                        self.current_profit = self.current_profit.checked_add(platform_fee_after_discount).unwrap();
 
                         let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
                         let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
@@ -847,6 +858,17 @@ pub mod artzero_marketplace_psp34 {
             self.volume_by_collection.get(&collection_contract_address)
         }
 
+        ///Get platform total Profit
+        #[ink(message)]
+        pub fn get_total_profit(&self) -> Balance {
+            self.total_profit
+        }
+        ///Get platform current available profit
+        #[ink(message)]
+        pub fn get_current_profit(&self) -> Balance {
+            self.current_profit
+        }
+
         /// Withdraw Fees - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -857,6 +879,26 @@ pub mod artzero_marketplace_psp34 {
             if self.env().transfer(self.env().caller(), value).is_err() {
                 panic!(
                     "error withdraw_fee"
+                )
+            }
+            Ok(())
+        }
+
+        /// Withdraw Profit - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn withdraw_profit(&mut self,value: Balance, reciever: AccountId)  -> Result<(), Error> {
+            if value > self.env().balance() {
+                return Err(Error::NotEnoughBalance);
+            }
+            if value > self.current_profit {
+                return Err(Error::NotEnoughBalance);
+            }
+            self.current_profit = self.current_profit.checked_sub(value).unwrap();
+
+            if self.env().transfer(reciever, value).is_err() {
+                panic!(
+                    "error withdraw_profit"
                 )
             }
             Ok(())
