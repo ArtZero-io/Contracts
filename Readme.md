@@ -13,7 +13,7 @@ Contract Addresses:
 5H4QBBnQTsBMwZajsEncvLnxJZ3rFQ7ADXN4VbqEdUUpzLkJ
 
 # Marketplace Contract
-5F5MA9JmzTC5nmgvA4zASh9LthpaX1TF2fUEWaKnrUw3Xsns
+5GmMzFJJnnHRMmSXFC1cobEouobSsRREUjoN9o1HRckn71AM
 
 
 Deploy Steps:
