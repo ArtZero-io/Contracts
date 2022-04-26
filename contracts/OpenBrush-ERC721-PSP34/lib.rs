@@ -56,8 +56,8 @@ pub mod artzero_psp34 {
         //Max Total Token number to Mint
         total_supply: u64,
         token_count: u64,
-        attribute_count: u64,
-        attribute_names: Mapping<u64,Vec<u8>>,
+        attribute_count: u32,
+        attribute_names: Mapping<u32,Vec<u8>>,
 
         //Who got free mint
         whitelists: Mapping<AccountId,Whitelist>,
@@ -114,6 +114,23 @@ pub mod artzero_psp34 {
     impl PSP34Metadata for ArtZeroNFT {}
     impl PSP34Internal for ArtZeroNFT {}
     impl PSP34Enumerable for ArtZeroNFT {}
+
+    #[brush::trait_definition]
+    pub trait Psp34Traits {
+        #[ink(message)]
+        fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
+        #[ink(message)]
+        fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error>;
+        #[ink(message)]
+        fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String>;
+        #[ink(message)]
+        fn get_attribute_count(&self) -> u32;
+        #[ink(message)]
+        fn get_attribute_name(&self, index:u32) -> String;
+        #[ink(message)]
+        fn token_uri(&self,token_id: u64) -> String;
+
+    }
 
     impl ArtZeroNFT {
         /// fee_1: Pre_launch Minting Fee
@@ -248,14 +265,6 @@ pub mod artzero_psp34 {
             Ok(())
         }
 
-        /// Change baseURI
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
-            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
-            Ok(())
-        }
-
         /*
             END OF WHITELIST FUNCTIONS =============
         */
@@ -337,17 +346,6 @@ pub mod artzero_psp34 {
         */
 
         /* GETTERS */
-        /// Get URI from token ID
-        #[ink(message)]
-        pub fn token_uri(
-            &self,
-            token_id: u64
-        ) -> String {
-            let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
-            let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
-            token_uri = token_uri + &token_id.to_string() + &String::from(".json");
-            return token_uri;
-        }
         /// mint_mode 0: not started - mint_mode 1: started until amount_1 reached - mint_mode 2: started until total_supply reached
         #[ink(message)]
         pub fn get_mint_mode(
@@ -425,60 +423,6 @@ pub mod artzero_psp34 {
             return self.total_supply;
         }
 
-        ///Only Owner can set multiple attributes to a token
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
-            assert!(token_id != Id::U64(0));
-            if attributes.len() != values.len() {
-                return Err(Error::Custom(String::from("Inputs not same length")));
-            }
-            let length = attributes.len();
-            for i in 0..length {
-                let attribute = attributes[i].clone();
-                let value = values[i].clone();
-                let byte_attribute = attribute.into_bytes();
-                self.add_attribute_name(byte_attribute.clone());
-                self._set_attribute(token_id.clone(),byte_attribute.clone(), value.into_bytes());
-
-            }
-
-            Ok(())
-        }
-
-        // Get multiple  attributes
-        #[ink(message)]
-        pub fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
-            let length = attributes.len();
-            let mut ret = Vec::<String>::new();
-            for i in 0..length {
-                let attribute = attributes[i].clone();
-                let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
-                if value.is_some() {
-                    ret.push(String::from_utf8(value.unwrap()).unwrap());
-                }
-                else{
-                    ret.push(String::from(""));
-                }
-            }
-            ret
-        }
-        ///Get Attribute Count
-        #[ink(message)]
-        pub fn get_attribute_count(&self) -> u64 {
-            self.attribute_count
-        }
-        ///Get Attribute Name
-        #[ink(message)]
-        pub fn get_attribute_name(&self, index:u64) -> String {
-            let attribute = self.attribute_names.get(&index);
-            if attribute.is_some() {
-                String::from_utf8(attribute.unwrap()).unwrap()
-            }
-            else{
-                String::from("")
-            }
-        }
         /// Withdraw Fees - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -511,5 +455,84 @@ pub mod artzero_psp34 {
             }
         }
 
+    }
+
+    impl Psp34Traits for ArtZeroNFT {
+        /// Change baseURI
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
+            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+            Ok(())
+        }
+
+        ///Only Owner can set multiple attributes to a token
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+            assert!(token_id != Id::U64(0));
+            if attributes.len() != values.len() {
+                return Err(Error::Custom(String::from("Inputs not same length")));
+            }
+            let length = attributes.len();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = values[i].clone();
+                let byte_attribute = attribute.into_bytes();
+                self.add_attribute_name(byte_attribute.clone());
+                self._set_attribute(token_id.clone(),byte_attribute.clone(), value.into_bytes());
+
+            }
+
+            Ok(())
+        }
+
+        // Get multiple  attributes
+        #[ink(message)]
+        fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
+            let length = attributes.len();
+            let mut ret = Vec::<String>::new();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
+                if value.is_some() {
+                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+                }
+                else{
+                    ret.push(String::from(""));
+                }
+            }
+            ret
+        }
+
+        ///Get Attribute Count
+        #[ink(message)]
+        fn get_attribute_count(&self) -> u32 {
+            self.attribute_count
+        }
+
+        ///Get Attribute Name
+        #[ink(message)]
+        fn get_attribute_name(&self, index:u32) -> String {
+            let attribute = self.attribute_names.get(&index);
+            if attribute.is_some() {
+                String::from_utf8(attribute.unwrap()).unwrap()
+            }
+            else{
+                String::from("")
+            }
+        }
+
+        /// Get URI from token ID
+        #[ink(message)]
+        fn token_uri(
+            &self,
+            token_id: u64
+        ) -> String {
+            let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
+            let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
+            token_uri = token_uri + &token_id.to_string() + &String::from(".json");
+            return token_uri;
+        }
     }
 }
