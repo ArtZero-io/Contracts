@@ -4,16 +4,16 @@ Contract Addresses:
 5HkBnxrsZ1RfguKC669KCzZoJmhnUocW3N6vtpgxzJHWWHcU
 
 # ArtZero NFT Contract / Mint
-5Fh3mCpEwqbSRp6maQdu4fCsDCNXnpk7Yj124vBg9ntTK5wM
+5EY8p1EZcP45iJdXvBvoAp7dsxCE8jusnXKda1BtsVPuDRMF
 
 # ArtZero NFT Staking Contract
-5CTGWni1zPFZ3sAhTjWy6nxARj11UQntML9AZemDaqV5NB4N
+5HnWKVJW1GjRrYQSgTw4jFJ6Jfr11shX1unioxbFaVQwjEZN
 
 # Collection Manager
-5H4QBBnQTsBMwZajsEncvLnxJZ3rFQ7ADXN4VbqEdUUpzLkJ
+5Cr2TwaWftgZ5v3WYXaSjxaL4hjr8mw1nfGjqX1dNay9gyeq
 
 # Marketplace Contract
-5GmMzFJJnnHRMmSXFC1cobEouobSsRREUjoN9o1HRckn71AM
+5CctxTKm5kwvwE1s59YwhCTasrbRcDoZKHSNmkJbTfQfPWJ8
 
 
 Deploy Steps:
