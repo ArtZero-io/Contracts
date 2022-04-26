@@ -369,6 +369,13 @@ pub mod artzero_psp34 {
         ) -> Balance {
             return self.fee_2;
         }
+        /// token_count: get token count
+        #[ink(message)]
+        pub fn get_token_count(
+            &self
+        ) -> u64 {
+            return self.token_count;
+        }
         /// amount_1: To what amount the fee_1 is applied, after that fee_2
         #[ink(message)]
         pub fn get_amount_1(
