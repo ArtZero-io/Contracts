@@ -854,8 +854,12 @@ pub mod artzero_marketplace_psp34 {
         }
         /// Get total Collection volume
         #[ink(message)]
-        pub fn get_volume_by_collection(&self, collection_contract_address: AccountId) -> Option<Balance> {
-            self.volume_by_collection.get(&collection_contract_address)
+        pub fn get_volume_by_collection(&self, collection_contract_address: AccountId) -> Balance {
+            let volume = self.volume_by_collection.get(&collection_contract_address);
+            if volume.is_some(){
+                return volume.unwrap();
+            }
+            return 0;
         }
 
         ///Get platform total Profit
