@@ -159,8 +159,13 @@ pub mod artzero_staking_nft {
 
         ///Get request unstake Time
         #[ink(message)]
-        pub fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> Option<u64> {
-            self.pending_unstaking_list.get(&(account, token_id))
+        pub fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64 {
+            let ret = self.pending_unstaking_list.get(&(account, token_id));
+            if (ret.is_some()){
+                return ret
+            }
+            else
+                return 0;
         }
 
         ///Get staked token ids by AccountId
@@ -179,6 +184,11 @@ pub mod artzero_staking_nft {
         #[ink(message)]
         pub fn get_total_staked(&self) -> u64 {
             self.total_staked
+        }
+
+        #[ink(message)]
+        pub fn get_limit_unstake_time(&self) -> u64 {
+            self.limit_unstake_time
         }
 
         /// Stake multiple NFTs - Make sure approve this contract can send token on owner behalf
