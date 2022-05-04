@@ -559,6 +559,13 @@ pub mod artzero_collection_manager {
             return self.admin_address;
         }
 
+        /// Get Royal Max Fee
+        #[ink(message)]
+        pub fn get_max_royal_fee_rate(
+            &self
+        ) -> AccountId {
+            return self.max_royal_fee_rate;
+        }
 
     }
 
