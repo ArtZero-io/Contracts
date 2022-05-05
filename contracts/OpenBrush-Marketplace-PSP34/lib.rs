@@ -92,11 +92,9 @@ pub mod artzero_marketplace_psp34 {
     pub struct EnumerableMapping {
         /// Mapping from index to `Id`.
         ///
-        /// ** Note ** Owner can be `None` that means it is a contract.
         id_to_index: Mapping<(Option<AccountId>, Option<AccountId>, Id), u128>,
         /// Mapping from owner's index to `Id`.
         ///
-        /// ** Note ** Owner can be `None` that means it is a contract.
         index_to_id: Mapping<(Option<AccountId>, Option<AccountId>, u128), Id>,
     }
 
@@ -293,11 +291,10 @@ pub mod artzero_marketplace_psp34 {
             }
 
             //Step 3 - Transfer Token from Caller to Marketplace Contract
-            if !PSP34Ref::transfer_builder(&nft_contract_address, self.env().account_id(), token_id.clone(), Vec::<u8>::new())
+            assert!(PSP34Ref::transfer_builder(&nft_contract_address, self.env().account_id(), token_id.clone(), Vec::<u8>::new())
             .call_flags(CallFlags::default().set_allow_reentry(true))
-            .fire().is_ok() {
-                return Err(Error::CannotTransfer);
-            }
+            .fire().is_ok() );
+            
             self.env().emit_event(NewListEvent {
                 trader:Some(caller),
                 nft_contract_address: Some(nft_contract_address),
@@ -347,6 +344,7 @@ pub mod artzero_marketplace_psp34 {
 
             Ok(())
         }
+
         /// Buy Token at listed price
         #[ink(message)]
         #[ink(payable)]
@@ -386,22 +384,16 @@ pub mod artzero_marketplace_psp34 {
                 let bidders_length = bidders.len();
                 for index in 0..bidders_length {
                     //SEnd AZero back to lost bidder
-                    if self.env().transfer(bidders[index].bidder, bidders[index].bid_value).is_err() {
-                        panic!(
-                            "error"
-                        )
-                    }
+                    assert!(self.env().transfer(bidders[index].bidder, bidders[index].bid_value).is_ok());
                 }
                 let clear_bidders = Vec::<BidInformation>::new();
                 self.bidders.insert(&(nft_contract_address,seller,token_id.clone()), &clear_bidders);
             }
 
-
             //Calculate fee
             let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
             //Fee after Staking discount
             let platform_fee_after_discount = self.apply_discount(
-                self.staking_contract_address,
                 caller,
                 platform_fee
             );
@@ -409,7 +401,6 @@ pub mod artzero_marketplace_psp34 {
             self.total_profit = self.total_profit.checked_add(platform_fee_after_discount).unwrap();
             self.current_profit = self.current_profit.checked_add(platform_fee_after_discount).unwrap();
 
-            //TODO: Check Royal fee is true first
             let royal_fee_rate = CollectionRef::get_royal_fee(&self.collection_contract_address,nft_contract_address);
             let royal_fee = price.checked_mul(royal_fee_rate as u128).unwrap().checked_div(10000).unwrap();
 
@@ -417,21 +408,13 @@ pub mod artzero_marketplace_psp34 {
             let collection_owner = CollectionRef::get_collection_owner(&self.collection_contract_address,nft_contract_address);
             assert!(collection_owner != None);
             if royal_fee > 0{
-                if self.env().transfer(collection_owner.unwrap(), royal_fee).is_err() {
-                    panic!(
-                        "error royal_fee"
-                    )
-                }
+                assert!(self.env().transfer(collection_owner.unwrap(), royal_fee).is_ok());
             }
             //Send AZERO to seller
             let seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee_after_discount).unwrap();
             //seller_fee = self.apply_discount(caller, );
             if seller_fee  > 0{
-                if self.env().transfer(seller, seller_fee).is_err() {
-                    panic!(
-                        "error seller_fee"
-                    )
-                }
+                assert!(self.env().transfer(seller, seller_fee).is_ok());
             }
             let collection_volume = self.volume_by_collection.get(&nft_contract_address);
             let user_volume = self.volume_by_user.get(&seller);
@@ -442,15 +425,11 @@ pub mod artzero_marketplace_psp34 {
                 collection_volume_unwarp = collection_volume.unwrap();
             }
             if user_volume.is_some() {
-                user_volume_unwrap = collection_volume.unwrap();
+                user_volume_unwrap = user_volume.unwrap();
             }
             //Send AZERO cashback to buyer
             if platform_fee > platform_fee_after_discount {
-                if self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_err() {
-                    panic!(
-                        "error cashback"
-                    )
-                }
+                assert!(self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_ok());
                 let volume = price.checked_sub(platform_fee.checked_sub(platform_fee_after_discount).unwrap()).unwrap();
                 self.total_volume = self.total_volume.checked_add(volume).unwrap();
                 collection_volume_unwarp = collection_volume_unwarp.checked_add(volume).unwrap();
@@ -463,6 +442,8 @@ pub mod artzero_marketplace_psp34 {
             }
             self.volume_by_collection.insert(&nft_contract_address,&collection_volume_unwarp);
             self.volume_by_user.insert(&seller,&user_volume_unwrap);
+
+            self.update_listed_token_by_collection_address(nft_contract_address, false);
 
             //Send NFT to Buyer
             assert!(Psp34Ref::transfer(&nft_contract_address,caller,token_id.clone(),Vec::<u8>::new()).is_ok());
@@ -569,11 +550,7 @@ pub mod artzero_marketplace_psp34 {
                 self.bidders.insert(&(nft_contract_address,seller,token_id.clone()), &bidders);
 
                 //Send bid_value back to caller
-                if self.env().transfer(caller, bid_value).is_err() {
-                    panic!(
-                        "error seller_fee"
-                    )
-                }
+                assert!(self.env().transfer(caller, bid_value).is_ok());
 
             }
             else{
@@ -615,6 +592,7 @@ pub mod artzero_marketplace_psp34 {
                 let bidders:Vec<BidInformation> = self.bidders.get(&(nft_contract_address,seller,token_id.clone())).unwrap();
 
                 let bidders_length = bidders.len();
+                assert!(bid_index < bidders_length as u32);
                 for index in 0..bidders_length {
                     if index == bid_index as usize {
                         //Send NFT to bidder
@@ -625,7 +603,6 @@ pub mod artzero_marketplace_psp34 {
                         let platform_fee = price.checked_mul(self.platform_fee as u128).unwrap().checked_div(10000).unwrap();
                         //Fee after Staking discount
                         let platform_fee_after_discount = self.apply_discount(
-                            self.staking_contract_address,
                             caller,
                             platform_fee
                         );
@@ -642,21 +619,13 @@ pub mod artzero_marketplace_psp34 {
                         assert!(collection_owner != None);
 
                         if royal_fee > 0{
-                            if self.env().transfer(collection_owner.unwrap(), royal_fee).is_err() {
-                                panic!(
-                                    "error royal_fee"
-                                )
-                            }
+                            assert!(self.env().transfer(collection_owner.unwrap(), royal_fee).is_ok());
                         }
                         //Send AZERO to seller
                         let seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee_after_discount).unwrap();
                         //seller_fee = self.apply_discount(caller, );
                         if seller_fee  > 0{
-                            if self.env().transfer(seller, seller_fee).is_err() {
-                                panic!(
-                                    "error seller_fee"
-                                )
-                            }
+                            assert!(self.env().transfer(seller, seller_fee).is_ok());
                         }
                         let collection_volume = self.volume_by_collection.get(&nft_contract_address);
                         let user_volume = self.volume_by_user.get(&seller);
@@ -667,15 +636,11 @@ pub mod artzero_marketplace_psp34 {
                             collection_volume_unwarp = collection_volume.unwrap();
                         }
                         if user_volume.is_some() {
-                            user_volume_unwrap = collection_volume.unwrap();
+                            user_volume_unwrap = user_volume.unwrap();
                         }
                         //Send AZERO cashback to buyer
                         if platform_fee > platform_fee_after_discount {
-                            if self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_err() {
-                                panic!(
-                                    "error cashback"
-                                )
-                            }
+                            assert!(self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_ok());
                             let volume = price.checked_sub(platform_fee.checked_sub(platform_fee_after_discount).unwrap()).unwrap();
                             self.total_volume = self.total_volume.checked_add(volume).unwrap();
                             collection_volume_unwarp = collection_volume_unwarp.checked_add(volume).unwrap();
@@ -688,6 +653,8 @@ pub mod artzero_marketplace_psp34 {
                         }
                         self.volume_by_collection.insert(&nft_contract_address,&collection_volume_unwarp);
                         self.volume_by_user.insert(&seller,&user_volume_unwrap);
+
+                        self.update_listed_token_by_collection_address(nft_contract_address, false);
 
                         self.env().emit_event(BidWinEvent {
                            bidder: Some(bidders[index].bidder),
@@ -702,11 +669,7 @@ pub mod artzero_marketplace_psp34 {
                     }
                     else{
                         //SEnd AZero back to lost bidder
-                        if self.env().transfer(bidders[index].bidder, bidders[index].bid_value).is_err() {
-                            panic!(
-                                "error"
-                            )
-                        }
+                        assert!(self.env().transfer(bidders[index].bidder, bidders[index].bid_value).is_ok());
                     }
                 }
 
@@ -880,11 +843,7 @@ pub mod artzero_marketplace_psp34 {
             if value > self.env().balance() {
                 return Err(Error::NotEnoughBalance);
             }
-            if self.env().transfer(self.env().caller(), value).is_err() {
-                panic!(
-                    "error withdraw_fee"
-                )
-            }
+            assert!(self.env().transfer(self.env().caller(), value).is_ok());
             Ok(())
         }
 
@@ -900,18 +859,12 @@ pub mod artzero_marketplace_psp34 {
             }
             self.current_profit = self.current_profit.checked_sub(value).unwrap();
 
-            if self.env().transfer(reciever, value).is_err() {
-                panic!(
-                    "error withdraw_profit"
-                )
-            }
+            assert!(self.env().transfer(reciever, value).is_ok());
             Ok(())
         }
 
-        //TODO: platform fee - discount fee
-
-        fn apply_discount(&self, staking_contract_address: AccountId, staker: AccountId, input_fee: Balance) -> Balance {
-            let staked_amount = StakingRef::get_total_staked_by_account(&staking_contract_address,staker);
+        fn apply_discount(&self, staker: AccountId, input_fee: Balance) -> Balance {
+            let staked_amount = StakingRef::get_total_staked_by_account(&self.staking_contract_address,staker);
 
             let length = self.staking_discount_rate.len();
 

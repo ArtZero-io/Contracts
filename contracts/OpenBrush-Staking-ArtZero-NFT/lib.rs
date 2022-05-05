@@ -161,11 +161,12 @@ pub mod artzero_staking_nft {
         #[ink(message)]
         pub fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64 {
             let ret = self.pending_unstaking_list.get(&(account, token_id));
-            if (ret.is_some()){
-                return ret
+            if ret.is_some(){
+                return ret.unwrap()
             }
-            else
-                return 0;
+            else{
+                return 0
+            }
         }
 
         ///Get staked token ids by AccountId
@@ -334,8 +335,8 @@ pub mod artzero_staking_nft {
                 };
 
                 //Step 2 - transfer token to caller Check request unstake
-                assert!(self.get_request_unstake_time(caller, token_ids[i]).is_some());
-                let request_unstake_time = self.get_request_unstake_time(caller, token_ids[i]).unwrap();
+                let request_unstake_time = self.get_request_unstake_time(caller, token_ids[i]);
+                assert!(request_unstake_time>0);
                 let current_time = Self::env().block_timestamp();
 
                 if request_unstake_time + (self.limit_unstake_time * 60000) > current_time {

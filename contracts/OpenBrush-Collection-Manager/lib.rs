@@ -563,7 +563,7 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         pub fn get_max_royal_fee_rate(
             &self
-        ) -> AccountId {
+        ) -> u32 {
             return self.max_royal_fee_rate;
         }
 
