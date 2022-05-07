@@ -16,7 +16,7 @@ scale = { package = "parity-scale-codec", version = "3", default-features = fals
 scale-info = { version = "2", default-features = false, features = ["derive"], optional = true }
 
 # These dependencies
-brush = { tag = "v1.6.1", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable","psp34"] }
+brush = { commit = "4de98129a216e94bac59bd575fadc8c66c6cf67e", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable","psp34"] }
 
 [lib]
 name = "psp34_nft"
