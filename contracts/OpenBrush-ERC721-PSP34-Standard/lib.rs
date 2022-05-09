@@ -22,7 +22,7 @@ pub mod psp34_nft {
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
     use ink_prelude::string::ToString;
-    
+
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
     #[ink(storage)]
     pub struct Psp34Nft{
@@ -61,7 +61,7 @@ pub mod psp34_nft {
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Internal for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
-    
+
     #[brush::trait_definition]
     pub trait Psp34Traits {
         #[ink(message)]
@@ -156,14 +156,26 @@ pub mod psp34_nft {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
-            let length = attributes.len();
+            //Check Duplication
+            let mut sorted_attributes = attributes.clone();
+            sorted_attributes.sort();
+            let length = sorted_attributes.len();
+
             for i in 0..length {
-                let attribute = attributes[i].clone();
-                let value = values[i].clone();
+                let attribute = sorted_attributes[i].clone();
                 let byte_attribute = attribute.into_bytes();
+
+                if i + 1 < length {
+                    let next_attribute = sorted_attributes[i + 1].clone();
+                    let byte_next_attribute = next_attribute.into_bytes();
+                    if byte_attribute == byte_next_attribute{
+                        return Err(Error::Custom(String::from("Duplicated Attributes")));
+                    }
+                }
+                let value = values[i].clone();
+
                 self.add_attribute_name(byte_attribute.clone());
                 self._set_attribute(token_id.clone(),byte_attribute.clone(), value.into_bytes());
-
             }
 
             Ok(())
