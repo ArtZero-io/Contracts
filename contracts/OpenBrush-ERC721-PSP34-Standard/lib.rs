@@ -123,7 +123,7 @@ pub mod psp34_nft {
         fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
             let mut exist:bool = false;
             for index in 0..self.attribute_count {
-                let attribute_name = self.attribute_names.get(&index);
+                let attribute_name = self.attribute_names.get(&(index+1));
                 if attribute_name.is_some(){
                     if attribute_name.unwrap() == attribute_input{
                         exist = true;
@@ -172,12 +172,13 @@ pub mod psp34_nft {
                         return Err(Error::Custom(String::from("Duplicated Attributes")));
                     }
                 }
-                
+
                 let unsorted_attribute = attributes[i].clone();
+                let byte_unsorted_attribute = unsorted_attribute.into_bytes();
                 let value = values[i].clone();
 
-                self.add_attribute_name(byte_attribute.clone());
-                self._set_attribute(token_id.clone(),unsorted_attribute.into_bytes().clone(), value.into_bytes());
+                self.add_attribute_name(byte_unsorted_attribute.clone());
+                self._set_attribute(token_id.clone(),byte_unsorted_attribute.clone(), value.into_bytes());
             }
 
             Ok(())
