@@ -209,15 +209,16 @@ pub mod psp34_nft {
                         return Err(Error::Custom(String::from("Duplicated Attributes")));
                     }
                 }
+
+                let unsorted_attribute = attributes[i].clone();
                 let value = values[i].clone();
 
                 self.add_attribute_name(byte_attribute.clone());
-                self._set_attribute(token_id.clone(),byte_attribute.clone(), value.into_bytes());
+                self._set_attribute(token_id.clone(),unsorted_attribute.into_bytes().clone(), value.into_bytes());
             }
 
             Ok(())
         }
-
         /// Get multiple  attributes
         #[ink(message)]
         fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
