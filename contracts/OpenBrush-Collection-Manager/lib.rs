@@ -78,7 +78,8 @@ pub mod artzero_collection_manager {
         standard_nft_hash: Hash,
         admin_address: AccountId,
         collection_count: u64,
-        adding_fee: Balance,
+        simple_mode_adding_fee: Balance,
+        advance_mode_adding_fee: Balance,
         collections: Mapping<AccountId, Collection>,    //save collection by contract address
         collections_by_id: Mapping<u64, AccountId>,      //save contract address by id
         collections_by_owner: Mapping<AccountId, Vec<AccountId>>,      //save contract address by owner ID
@@ -103,11 +104,18 @@ pub mod artzero_collection_manager {
 
     impl ArtZeroCollectionManager {
         #[ink(constructor)]
-        pub fn new(admin_address: AccountId,owner_address: AccountId, standard_nft_hash: Hash) -> Self {
+        pub fn new(
+            admin_address: AccountId, 
+            owner_address: AccountId,
+            standard_nft_hash: Hash,
+            simple_mode_adding_fee: Balance,
+            advance_mode_adding_fee: Balance
+        ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance.collection_count = 0;
                 instance.active_collection_count = 0;
-                instance.adding_fee = 1 * 10u128.pow(12);       // 1 AZERO = 1 000 000 000 000 pAZERO (smallest unit)
+                instance.simple_mode_adding_fee = simple_mode_adding_fee;
+                instance.advance_mode_adding_fee = advance_mode_adding_fee;
                 instance._init_with_owner(owner_address);
                 instance.admin_address = admin_address;
                 instance.standard_nft_hash = standard_nft_hash;
@@ -129,7 +137,7 @@ pub mod artzero_collection_manager {
             royal_fee:u32
         ) -> Result<(), Error> {
 
-            if self.adding_fee != self.env().transferred_value() {
+            if self.simple_mode_adding_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
             //fee must equal or less than 5%
@@ -203,7 +211,7 @@ pub mod artzero_collection_manager {
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
-            if self.adding_fee != self.env().transferred_value() {
+            if self.advance_mode_adding_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
             if self.collections.get(&nft_contract_address).is_some(){
@@ -467,13 +475,22 @@ pub mod artzero_collection_manager {
         }
 
         /* OWNER FUNCTIONS */
-        /// Update Adding Collection Fee - only Owner
+        /// Update Simple Mode Adding Collection Fee - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn update_adding_fee(&mut self,new_fee: Balance)  -> Result<(), Error> {
-            self.adding_fee = new_fee;
+        pub fn update_simple_mode_adding_fee(&mut self,simple_mode_adding_fee: Balance)  -> Result<(), Error> {
+            self.simple_mode_adding_fee = simple_mode_adding_fee;
             Ok(())
         }
+
+        /// Update Advance Mode Adding Collection Fee - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_advance_mode_adding_fee(&mut self,advance_mode_adding_fee: Balance)  -> Result<(), Error> {
+            self.advance_mode_adding_fee = advance_mode_adding_fee;
+            Ok(())
+        }
+
         /// Update Max Royal Fee Rate - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -544,13 +561,22 @@ pub mod artzero_collection_manager {
             return self.active_collection_count;
         }
 
-        ///Get Adding Fee
+        ///Get Simple Mode Adding Fee
         #[ink(message)]
-        pub fn get_adding_fee(
+        pub fn get_simple_mode_adding_fee(
             &self
         ) -> Balance {
-            return self.adding_fee;
+            return self.simple_mode_adding_fee;
         }
+        
+        ///Get Advance Mode Adding Fee
+        #[ink(message)]
+        pub fn get_advance_mode_adding_fee(
+            &self
+        ) -> Balance {
+            return self.advance_mode_adding_fee;
+        }
+
         /// Get Admin Address
         #[ink(message)]
         pub fn get_admin_address(
