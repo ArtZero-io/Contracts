@@ -193,7 +193,8 @@ pub mod artzero_marketplace_psp34 {
     pub struct NewListEvent {
         trader: Option<AccountId>,
         nft_contract_address: Option<AccountId>,
-        token_id: Id
+        token_id: Id,
+        price: Balance
     }
     #[ink(event)]
     pub struct UnListEvent {
@@ -294,11 +295,12 @@ pub mod artzero_marketplace_psp34 {
             assert!(PSP34Ref::transfer_builder(&nft_contract_address, self.env().account_id(), token_id.clone(), Vec::<u8>::new())
             .call_flags(CallFlags::default().set_allow_reentry(true))
             .fire().is_ok() );
-            
+
             self.env().emit_event(NewListEvent {
                 trader:Some(caller),
                 nft_contract_address: Some(nft_contract_address),
-                token_id:token_id.clone()
+                token_id:token_id.clone(),
+                price
             });
 
             Ok(())
