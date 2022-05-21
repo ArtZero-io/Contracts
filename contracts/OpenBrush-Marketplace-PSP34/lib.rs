@@ -223,6 +223,25 @@ pub mod artzero_marketplace_psp34 {
         royal_fee: Balance
     }
 
+    #[ink(event)]
+    pub struct BidEvent {
+        bidder: Option<AccountId>,
+        seller: Option<AccountId>,
+        nft_contract_address: Option<AccountId>,
+        token_id: Id,
+        price: Balance,
+        bid_value: Balance
+    }
+
+    #[ink(event)]
+    pub struct RemoveBidEvent {
+        bidder: Option<AccountId>,
+        seller: Option<AccountId>,
+        nft_contract_address: Option<AccountId>,
+        token_id: Id,
+        bid_value: Balance
+    }
+
     impl ArtZeroMarketplacePSP34 {
         #[ink(constructor)]
         pub fn new( contract_owner: AccountId,
@@ -511,6 +530,15 @@ pub mod artzero_marketplace_psp34 {
                 self.bidders.insert(&(nft_contract_address,seller,token_id.clone()), &bidders);
             }
 
+            self.env().emit_event(BidEvent {
+                bidder: Some(caller),
+                seller: Some(seller),
+                nft_contract_address: Some(nft_contract_address),
+                token_id: token_id.clone(),
+                price,
+                bid_value
+            });
+
             Ok(())
         }
         /// Remove Bid From Active Sale
@@ -553,7 +581,14 @@ pub mod artzero_marketplace_psp34 {
 
                 //Send bid_value back to caller
                 assert!(self.env().transfer(caller, bid_value).is_ok());
-
+                
+                self.env().emit_event(RemoveBidEvent {
+                    bidder: Some(caller),
+                    seller: Some(seller),
+                    nft_contract_address: Some(nft_contract_address),
+                    token_id: token_id.clone(),
+                    bid_value: bid_value
+                });
             }
             else{
                 return Err(Error::BidNotExist);
