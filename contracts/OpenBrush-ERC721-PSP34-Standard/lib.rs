@@ -37,6 +37,8 @@ pub mod psp34_nft {
         attribute_names: Mapping<u32,Vec<u8>>,
         #[PSP34EnumerableStorageField]
         enumdata: PSP34EnumerableData,
+        locked_tokens: Mapping<u64, u8>,
+        locked_token_count: u64
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -56,6 +58,8 @@ pub mod psp34_nft {
     }
 
     impl Ownable for Psp34Nft {}
+    #[brush::wrapper]
+    pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
     impl PSP34 for Psp34Nft {}
     impl PSP34Burnable for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
@@ -76,7 +80,6 @@ pub mod psp34_nft {
         fn get_attribute_name(&self, index:u32) -> String;
         #[ink(message)]
         fn token_uri(&self,token_id: u64) -> String;
-
     }
 
     impl Psp34Nft {
@@ -89,6 +92,7 @@ pub mod psp34_nft {
                 instance._init_with_owner(contract_owner);
             })
         }
+
         ///Only Owner can mint new token
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -137,9 +141,20 @@ pub mod psp34_nft {
             }
         }
 
+        #[ink(message)]
+        pub fn lock(&mut self, token_id: Id) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let token_owner = self.owner_of(token_id).unwrap();
+            assert!(caller == token_owner);
+            self.locked_token_count += 1;
+            self.locked_tokens.insert(&token_id.unwrap(), &1);
+            Ok(())
+        }
+
     }
 
     impl Psp34Traits for Psp34Nft{
+
         /// Change baseURI
         #[ink(message)]
         #[modifiers(only_owner)]

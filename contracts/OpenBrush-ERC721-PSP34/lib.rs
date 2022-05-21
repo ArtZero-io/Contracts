@@ -264,7 +264,7 @@ pub mod artzero_psp34 {
             &mut self,
             public_sale_amount: u64
         ) -> Result<(), Error> {
-            if public_sale_amount < self.total_supply{
+            if public_sale_amount > self.total_supply{
                 return Err(Error::InvalidInput);
             }
             self.public_sale_amount = public_sale_amount;
