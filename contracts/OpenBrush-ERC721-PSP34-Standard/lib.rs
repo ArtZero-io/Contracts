@@ -37,7 +37,7 @@ pub mod psp34_nft {
         attribute_names: Mapping<u32,Vec<u8>>,
         #[PSP34EnumerableStorageField]
         enumdata: PSP34EnumerableData,
-        locked_tokens: Mapping<u64, u8>,
+        locked_tokens: Mapping<Id, u8>,
         locked_token_count: u64
     }
 
@@ -141,14 +141,30 @@ pub mod psp34_nft {
             }
         }
 
+        /// Lock nft - Only owner token
         #[ink(message)]
         pub fn lock(&mut self, token_id: Id) -> Result<(), Error> {
             let caller = self.env().caller();
-            let token_owner = self.owner_of(token_id).unwrap();
+            let token_owner = self.owner_of(token_id.clone()).unwrap();
             assert!(caller == token_owner);
             self.locked_token_count += 1;
-            self.locked_tokens.insert(&token_id.unwrap(), &1);
+            self.locked_tokens.insert(&token_id, &1);
             Ok(())
+        }
+
+        /// Check token is locked or not
+        #[ink(message)]
+        pub fn is_locked_nft(&self, token_id: Id) -> bool {
+            if self.locked_tokens.get(&token_id).is_some() {
+                return true;
+            }
+            return false;
+        }
+
+        ///Get Locked Token Count
+        #[ink(message)]
+        pub fn get_locked_token_count(&self) -> u64 {
+            return self.locked_token_count;
         }
 
     }
@@ -168,6 +184,11 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             assert!(token_id != Id::U64(0));
+
+            if !self.is_locked_nft(token_id.clone()) {
+                return Err(Error::Custom(String::from("Token is locked")));
+            }
+
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
