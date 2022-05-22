@@ -102,6 +102,15 @@ pub mod artzero_collection_manager {
         fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId>;
     }
 
+    #[ink(event)]
+    pub struct AddNewCollectionEvent {
+        collection_owner: Option<AccountId>,
+        nft_contract_address: Option<AccountId>,
+        contract_type: u8,
+        is_active: bool,
+        show_on_chain_metadata: bool
+    }
+
     impl ArtZeroCollectionManager {
         #[ink(constructor)]
         pub fn new(
@@ -196,6 +205,14 @@ pub mod artzero_collection_manager {
                 )
             };
 
+            self.env().emit_event(AddNewCollectionEvent {
+                collection_owner: Some(collection_owner),
+                nft_contract_address: Some(contract_account),
+                contract_type: 2,
+                is_active: true,
+                show_on_chain_metadata: true
+            });
+
             Ok(())
         }
 
@@ -254,6 +271,14 @@ pub mod artzero_collection_manager {
                     "error set_multiple_attributes"
                 )
             };
+
+            self.env().emit_event(AddNewCollectionEvent {
+                collection_owner: Some(collection_owner),
+                nft_contract_address: Some(nft_contract_address),
+                contract_type: 1,
+                is_active: false,
+                show_on_chain_metadata: false
+            });
 
             Ok(())
         }

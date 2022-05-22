@@ -110,6 +110,17 @@ pub mod artzero_staking_nft {
         staker: Option<AccountId>,
         token_id: u64
     }
+    #[ink(event)]
+    pub struct RequestUnstakeEvent {
+        staker: Option<AccountId>,
+        token_id: u64
+    }
+    #[ink(event)]
+    pub struct CancelRequestUnstakeEvent {
+        staker: Option<AccountId>,
+        token_id: u64
+    }
+
     impl Ownable for ArtZeroStakingNFT {}
 
     #[brush::trait_definition]
@@ -267,6 +278,11 @@ pub mod artzero_staking_nft {
                 let current_time = Self::env().block_timestamp();
                 self.pending_unstaking_list.insert(&(caller, token_ids[i]), &current_time);
                 self.pending_unstaking_list_token_index.insert(&Some(caller),&token_ids[i],&(pending_unstaking_last_index+(i as u64)+1));
+                
+                self.env().emit_event(RequestUnstakeEvent {
+                    staker:Some(caller),
+                    token_id:token_ids[i]
+                });
             }
             self.staking_list_last_index.insert(Some(caller),&last_index);
             self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
@@ -307,6 +323,11 @@ pub mod artzero_staking_nft {
                 //Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
                 assert!(self.pending_unstaking_list_token_index.remove(&Some(caller),&token_ids[i],&pending_unstaking_last_index).is_ok());
                 pending_unstaking_last_index = pending_unstaking_last_index.checked_sub(1).unwrap();
+
+                self.env().emit_event(CancelRequestUnstakeEvent {
+                    staker:Some(caller),
+                    token_id:token_ids[i]
+                });
             }
             self.total_staked = self.total_staked.checked_add(leng as u64).unwrap();
             self.pending_unstaking_list_token_last_index.insert(Some(caller), &(pending_unstaking_last_index));
