@@ -32,7 +32,7 @@ pub mod psp34_nft {
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
         ownable: OwnableData,
-        token_count: u64,
+        last_token_id: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32,Vec<u8>>,
         total_supply: u64,
@@ -103,12 +103,12 @@ pub mod psp34_nft {
             if  self.mint_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
-            if self.token_count >= self.total_supply {
+            if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
             let caller = self.env().caller();
-            self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+            self.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
             Ok(())
         }
 
@@ -116,12 +116,12 @@ pub mod psp34_nft {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn owner_mint(&mut self) -> Result<(), Error> {
-            if self.token_count >= self.total_supply {
+            if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
             let caller = self.env().caller();
-            self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+            self.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
             Ok(())
         }
 

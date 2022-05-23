@@ -32,7 +32,7 @@ pub mod psp34_nft {
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
         ownable: OwnableData,
-        token_count: u64,
+        last_token_id: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32,Vec<u8>>,
         #[PSP34EnumerableStorageField]
@@ -98,8 +98,8 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         pub fn mint(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
-            self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+            self.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
             Ok(())
         }
 
@@ -108,9 +108,9 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         pub fn mint_with_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error> {
             let caller = self.env().caller();
-            self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
-            if self.set_multiple_attributes(Id::U64(self.token_count), attributes, values).is_err() {
+            self.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+            if self.set_multiple_attributes(Id::U64(self.last_token_id), attributes, values).is_err() {
                 panic!(
                     "error set_multiple_attributes"
                 )
@@ -120,8 +120,8 @@ pub mod psp34_nft {
 
         ///Get Token Count
         #[ink(message)]
-        pub fn get_token_count(&self) -> u64 {
-            return self.token_count;
+        pub fn get_last_token_id(&self) -> u64 {
+            return self.last_token_id;
         }
 
         fn add_attribute_name(&mut self, attribute_input:Vec<u8>){

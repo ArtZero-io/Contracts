@@ -55,7 +55,7 @@ pub mod artzero_psp34 {
         admin_address: AccountId,
         //Max Total Token number to Mint
         total_supply: u64,
-        token_count: u64,
+        last_token_id: u64,
         whitelist_minted_count: u64,
         public_sale_minted_count: u64,
         attribute_count: u32,
@@ -284,12 +284,12 @@ pub mod artzero_psp34 {
         pub fn standard_mint(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
 
-            if self.token_count >= self.total_supply {
+            if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
             
-            self.token_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+            self.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
 
             Ok(())
         }
@@ -308,7 +308,7 @@ pub mod artzero_psp34 {
                 return Err(Error::InvalidInput);
             }
 
-            if self.token_count >= self.total_supply {
+            if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
             
@@ -328,8 +328,8 @@ pub mod artzero_psp34 {
             self.whitelists.insert(&caller, &caller_info);
 
             for _i in 0..mint_amount {
-                self.token_count += 1;
-                assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+                self.last_token_id += 1;
+                assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
             }
             self.whitelist_minted_count = self.whitelist_minted_count.checked_add(mint_amount).unwrap();
 
@@ -360,13 +360,13 @@ pub mod artzero_psp34 {
                 return Err(Error::InvalidFee);
             }
 
-            if self.token_count >= self.total_supply {
+            if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
             
-            self.token_count += 1;
+            self.last_token_id += 1;
             self.public_sale_minted_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.token_count)).is_ok());
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
 
             Ok(())
         }
@@ -391,12 +391,12 @@ pub mod artzero_psp34 {
             return self.mint_mode;
         }
 
-        /// token_count: get token count
+        /// last_token_id: get last token id
         #[ink(message)]
-        pub fn get_token_count(
+        pub fn get_last_token_id(
             &self
         ) -> u64 {
-            return self.token_count;
+            return self.last_token_id;
         }
 
         /// whitelist_minted_count: get the whitelist minted amount
