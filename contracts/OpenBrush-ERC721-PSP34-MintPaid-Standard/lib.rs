@@ -91,12 +91,25 @@ pub mod psp34_nft {
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String, total_supply: u64, mint_fee: Balance) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
-                instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
                 instance._init_with_owner(contract_owner);
-                instance.mint_fee = mint_fee;
-                instance.total_supply = total_supply;
+                instance.initialize(name, symbol, total_supply, mint_fee);
             })
+        }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn initialize(
+            &mut self,
+            name: String, 
+            symbol: String, 
+            total_supply: u64, 
+            mint_fee: Balance
+        ) -> Result<(), OwnableError> {
+            self._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
+            self._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
+            self.mint_fee = mint_fee;
+            self.total_supply = total_supply;
+            Ok(())
         }
 
         ///Everyone can Mint with Fee as defined in mint_fee

@@ -118,18 +118,33 @@ pub mod artzero_collection_manager {
             owner_address: AccountId,
             standard_nft_hash: Hash,
             simple_mode_adding_fee: Balance,
-            advance_mode_adding_fee: Balance
+            advance_mode_adding_fee: Balance,
+            max_royal_fee_rate: u32
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance.collection_count = 0;
-                instance.active_collection_count = 0;
-                instance.simple_mode_adding_fee = simple_mode_adding_fee;
-                instance.advance_mode_adding_fee = advance_mode_adding_fee;
                 instance._init_with_owner(owner_address);
-                instance.admin_address = admin_address;
-                instance.standard_nft_hash = standard_nft_hash;
-                instance.max_royal_fee_rate = 500;
+                initialize(admin_address, standard_nft_hash, simple_mode_adding_fee, advance_mode_adding_fee, max_royal_fee_rate);
             })
+        }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn initialize(
+            &mut self,
+            admin_address: AccountId,
+            standard_nft_hash: Hash,
+            simple_mode_adding_fee: Balance,
+            advance_mode_adding_fee: Balance,
+            max_royal_fee_rate: u32
+        ) -> Result<(), OwnableError> {
+            self.collection_count = 0;
+            self.active_collection_count = 0;
+            self.simple_mode_adding_fee = simple_mode_adding_fee;
+            self.advance_mode_adding_fee = advance_mode_adding_fee;
+            self.admin_address = admin_address;
+            self.standard_nft_hash = standard_nft_hash;
+            self.max_royal_fee_rate = max_royal_fee_rate;
+            Ok(())
         }
 
         ///Simple New Collection Creation - Auto create NFT Contract - Collection_Owner is owner of NFT contract and receive royal fee

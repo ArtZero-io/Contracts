@@ -137,13 +137,29 @@ pub mod artzero_staking_nft {
 
     impl ArtZeroStakingNFT {
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId,artzero_nft_contract: AccountId, limit_unstake_time: u64) -> Self {
+        pub fn new(
+            contract_owner: AccountId,
+            artzero_nft_contract: AccountId, 
+            limit_unstake_time: u64
+        ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
-                instance.nft_contract_address = artzero_nft_contract;
-                instance.limit_unstake_time = limit_unstake_time;
+                instance.initialize(artzero_nft_contract, limit_unstake_time);
             })
         }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn initialize(
+            &mut self,
+            artzero_nft_contract: AccountId,
+            limit_unstake_time: u64
+        ) -> Result<(), OwnableError> {
+            self.nft_contract_address = artzero_nft_contract;
+            self.limit_unstake_time = limit_unstake_time;
+            Ok(())
+        }        
+
         // SETTERS
         ///Set new NFT contract address - Only Owner
         #[ink(message)]

@@ -244,31 +244,45 @@ pub mod artzero_marketplace_psp34 {
 
     impl ArtZeroMarketplacePSP34 {
         #[ink(constructor)]
-        pub fn new( contract_owner: AccountId,
-                    collection_contract_address: AccountId,
-                    staking_contract_address: AccountId,
-                    platform_fee: u32) -> Self {
+        pub fn new(
+            contract_owner: AccountId,
+            collection_contract_address: AccountId,
+            staking_contract_address: AccountId,
+            platform_fee: u32
+        ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 assert!(platform_fee<10000);        //must less than 100%
                 instance._init_with_owner(contract_owner);
-                instance.collection_contract_address = collection_contract_address;
-                instance.staking_contract_address = staking_contract_address;
-                instance.platform_fee = platform_fee;
-                let mut criteria = Vec::<u8>::new();
-                criteria.push(20);
-                criteria.push(9);
-                criteria.push(7);
-                criteria.push(5);
-                criteria.push(1);
-                let mut rate = Vec::<u16>::new();
-                rate.push(9000);
-                rate.push(8000);
-                rate.push(6600);
-                rate.push(5000);
-                rate.push(3000);
-                instance.staking_discount_criteria = criteria;
-                instance.staking_discount_rate = rate;
+                instance.initialize(collection_contract_address, staking_contract_address, platform_fee);
             })
+        }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn initialize(
+            &mut self,
+            collection_contract_address: AccountId,
+            staking_contract_address: AccountId,
+            platform_fee: u32
+        ) -> Result<(), OwnableError> {
+            self.collection_contract_address = collection_contract_address;
+            self.staking_contract_address = staking_contract_address;
+            self.platform_fee = platform_fee;
+            let mut criteria = Vec::<u8>::new();
+            criteria.push(20);
+            criteria.push(9);
+            criteria.push(7);
+            criteria.push(5);
+            criteria.push(1);
+            let mut rate = Vec::<u16>::new();
+            rate.push(9000);
+            rate.push(8000);
+            rate.push(6600);
+            rate.push(5000);
+            rate.push(3000);
+            self.staking_discount_criteria = criteria;
+            self.staking_discount_rate = rate;
+            Ok(())
         }
 
         /* MARKETPLACE FUNCTIONS */

@@ -148,15 +148,31 @@ pub mod artzero_psp34 {
             public_sale_amount: u64
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
-                instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
-                instance.total_supply = total_supply;
                 instance._init_with_owner(contract_owner);
-                instance.admin_address = admin_address;
-                instance.minting_fee = minting_fee;
-                instance.public_sale_amount = public_sale_amount;
+                instance.initialize(admin_address, name, symbol, total_supply, minting_fee, public_sale_amount);
             })
         }
+
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn initialize(
+            &mut self,
+            admin_address: AccountId, 
+            name: String, 
+            symbol: String, 
+            total_supply: u64,
+            minting_fee: Balance,
+            public_sale_amount: u64
+        ) -> Result<(), OwnableError> {
+            self._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
+            self._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
+            self.total_supply = total_supply;
+            self.admin_address = admin_address;
+            self.minting_fee = minting_fee;
+            self.public_sale_amount = public_sale_amount;
+            Ok(())
+        }
+
         /*
             WHITELIST FUNCTIONS =============
         */
