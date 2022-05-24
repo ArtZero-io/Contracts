@@ -19,7 +19,7 @@ scale-info = { version = "2", default-features = false, features = ["derive"], o
 brush = { commit = "4de98129a216e94bac59bd575fadc8c66c6cf67e", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable","psp34"] }
 
 [lib]
-name = "psp34_nft"
+name = "psp34_nft_contract_mint_paid"
 path = "lib.rs"
 crate-type = [
     # Used for normal contract Wasm blobs.
