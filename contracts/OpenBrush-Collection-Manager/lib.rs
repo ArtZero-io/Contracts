@@ -123,7 +123,7 @@ pub mod artzero_collection_manager {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(owner_address);
-                initialize(admin_address, standard_nft_hash, simple_mode_adding_fee, advance_mode_adding_fee, max_royal_fee_rate);
+                instance.initialize(admin_address, standard_nft_hash, simple_mode_adding_fee, advance_mode_adding_fee, max_royal_fee_rate).ok().unwrap();
             })
         }
 

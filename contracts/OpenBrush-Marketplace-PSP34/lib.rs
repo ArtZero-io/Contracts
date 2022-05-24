@@ -253,7 +253,7 @@ pub mod artzero_marketplace_psp34 {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 assert!(platform_fee<10000);        //must less than 100%
                 instance._init_with_owner(contract_owner);
-                instance.initialize(collection_contract_address, staking_contract_address, platform_fee);
+                instance.initialize(collection_contract_address, staking_contract_address, platform_fee).ok().unwrap();
             })
         }
 

@@ -144,7 +144,7 @@ pub mod artzero_staking_nft {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
-                instance.initialize(artzero_nft_contract, limit_unstake_time);
+                instance.initialize(artzero_nft_contract, limit_unstake_time).ok().unwrap();
             })
         }
 

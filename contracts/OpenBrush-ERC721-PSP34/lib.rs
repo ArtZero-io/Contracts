@@ -149,7 +149,7 @@ pub mod artzero_psp34 {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
-                instance.initialize(admin_address, name, symbol, total_supply, minting_fee, public_sale_amount);
+                instance.initialize(admin_address, name, symbol, total_supply, minting_fee, public_sale_amount).ok().unwrap();
             })
         }
 
