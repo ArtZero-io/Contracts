@@ -523,6 +523,14 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
+        /// Update Standard NFT Hash - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_standard_nft_hash(&mut self,standard_nft_hash: Hash)  -> Result<(), Error> {
+            self.standard_nft_hash = standard_nft_hash;
+            Ok(())
+        }
+
         /// Update Advance Mode Adding Collection Fee - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -574,6 +582,13 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         pub fn get_collections_by_owner(&self,owner_address: AccountId) -> Option<Vec<AccountId>> {
             return self.collections_by_owner.get(&owner_address);
+        }
+
+        /// Get Standard Nft Hash
+        pub fn get_standard_nft_hash(
+            &self
+        ) -> Hash {
+            return self.standard_nft_hash;
         }
 
         /// Get Collection Contract by ID

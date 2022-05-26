@@ -88,7 +88,7 @@ pub mod psp34_nft {
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
-                instance.initialize(name, symbol).ok().unwrap();
+                instance.initialize(name, symbol).ok().unwrap()
             })
         }
 
