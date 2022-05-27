@@ -87,21 +87,10 @@ pub mod psp34_nft {
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
+                instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
+                instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
                 instance._init_with_owner(contract_owner);
-                instance.initialize(name, symbol).ok().unwrap()
             })
-        }
-
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn initialize(
-            &mut self,
-            name: String,
-            symbol: String
-        ) -> Result<(), OwnableError> {
-            self._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
-            self._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
-            Ok(())
         }
 
         ///Only Owner can mint new token
