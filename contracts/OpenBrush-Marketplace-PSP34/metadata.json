@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xc050b4a0a0b4286d4ba641d602cebe61664f8dfc72a45beaf82fcd1d31080c1f",
+    "hash": "0x739a1212bc1b2607b20f8c890cb2dc6624225039f646e5973aae56dc2e4fefb4",
     "language": "ink! 3.0.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_marketplace_psp34",
@@ -1252,32 +1252,6 @@
           "selector": "0x8bb87aca"
         },
         {
-          "args": [
-            {
-              "label": "new_owner",
-              "type": {
-                "displayName": [
-                  "ownable_external",
-                  "TransferOwnershipInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [],
-          "label": "Ownable::transfer_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "TransferOwnershipOutput"
-            ],
-            "type": 29
-          },
-          "selector": "0x11f43efd"
-        },
-        {
           "args": [],
           "docs": [],
           "label": "Ownable::owner",
@@ -1306,6 +1280,32 @@
             "type": 29
           },
           "selector": "0x5e228753"
+        },
+        {
+          "args": [
+            {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "ownable_external",
+                  "TransferOwnershipInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [],
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 29
+          },
+          "selector": "0x11f43efd"
         }
       ]
     },

@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x41a93b2599f091b66f17bab72f1da72120b1ba3a73ad6c4a616a7c8833bc6b4c",
+    "hash": "0x36c07e1412d09017df7dd934941918e70f9017ed69393bcf15a830b3a469ad38",
     "language": "ink! 3.0.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_staking_nft",
@@ -570,6 +570,21 @@
         {
           "args": [],
           "docs": [],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 12
+          },
+          "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [],
           "label": "Ownable::owner",
           "mutates": false,
           "payable": false,
@@ -607,21 +622,6 @@
             "type": 12
           },
           "selector": "0x11f43efd"
-        },
-        {
-          "args": [],
-          "docs": [],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 12
-          },
-          "selector": "0x5e228753"
         },
         {
           "args": [

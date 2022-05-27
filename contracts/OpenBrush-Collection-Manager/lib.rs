@@ -585,6 +585,7 @@ pub mod artzero_collection_manager {
         }
 
         /// Get Standard Nft Hash
+        #[ink(message)]
         pub fn get_standard_nft_hash(
             &self
         ) -> Hash {
