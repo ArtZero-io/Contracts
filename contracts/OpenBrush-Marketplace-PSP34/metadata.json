@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x645cf713d92936f51026b54e2e0df46007e26602a0e7b6f5064dd964d106eb17",
+    "hash": "0xc050b4a0a0b4286d4ba641d602cebe61664f8dfc72a45beaf82fcd1d31080c1f",
     "language": "ink! 3.0.1",
-    "compiler": "rustc 1.61.0-nightly"
+    "compiler": "rustc 1.63.0-nightly"
   },
   "contract": {
     "name": "artzero_marketplace_psp34",
