@@ -185,7 +185,7 @@ pub mod psp34_nft {
         fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             assert!(token_id != Id::U64(0));
 
-            if !self.is_locked_nft(token_id.clone()) {
+            if self.is_locked_nft(token_id.clone()) {
                 return Err(Error::Custom(String::from("Token is locked")));
             }
 
