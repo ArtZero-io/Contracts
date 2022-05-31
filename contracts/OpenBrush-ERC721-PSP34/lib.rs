@@ -453,9 +453,13 @@ pub mod artzero_psp34 {
         pub fn get_whitelist(
             &self,
             account: AccountId
-        ) -> Whitelist {
-            return self.whitelists.get(&account).unwrap();
+        ) -> Option<Whitelist> {
+            if self.whitelists.get(&account).is_none() {
+                return None;
+            }
+            return Some(self.whitelists.get(&account).unwrap());
         }
+        
         /// Get Whitelist Count
         #[ink(message)]
         pub fn get_whitelist_count(

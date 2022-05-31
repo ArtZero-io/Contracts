@@ -746,6 +746,18 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
+        /// Set Platform fee - only owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn set_platform_fee(
+            &mut self,
+            platform_fee: u32
+        ) -> Result<(), Error> {
+            assert!(platform_fee < 10000);        //must less than 100%
+            self.platform_fee = platform_fee;
+            Ok(())
+        }
+
         //Set listed token
         pub fn update_listed_token_by_collection_address(&mut self, nft_contract_address: AccountId, mode: bool) {
             let listed_token_count = self.listed_token_number_by_collection_address.get(&nft_contract_address);
