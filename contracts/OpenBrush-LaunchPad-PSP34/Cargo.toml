@@ -17,6 +17,7 @@ scale-info = { version = "2", default-features = false, features = ["derive"], o
 
 # These dependencies
 brush = { tag = "v1.6.1", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["ownable"] }
+launchpad_psp34_nft_standard = { path = "../OpenBrush-LaunchPad-ERC721-PSP34-Standard", default-features = false, features = ["ink-as-dependency"]  }
 
 [lib]
 name = "artzero_launchpad_psp34"
