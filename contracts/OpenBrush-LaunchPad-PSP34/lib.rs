@@ -25,9 +25,10 @@ pub mod artzero_launchpad_psp34 {
         OnlyOwner,
         OnlyAdmin,
         InvalidCaller,
-        InvalidFee,
-        InvalidRoyalFee,
-        NotEnoughBalance
+        NotEnoughBalance,
+        ProjectNotExist,
+        ProjectOwnerAndAdmin,
+        InvalidStartTimeAndEndTime
     }
 
     impl From<OwnableError> for Error {
@@ -39,6 +40,19 @@ pub mod artzero_launchpad_psp34 {
         }
     }
 
+    #[derive(
+        Clone,
+        Debug,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        Default,
+        PackedLayout,
+        SpreadLayout,
+        scale::Encode,
+        scale::Decode,
+    )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct RoadMap {
         name: AccountId,
@@ -46,6 +60,19 @@ pub mod artzero_launchpad_psp34 {
         estimated_time: Timestamp
     }
 
+    #[derive(
+        Clone,
+        Debug,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        Default,
+        PackedLayout,
+        SpreadLayout,
+        scale::Encode,
+        scale::Decode,
+    )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct TeamMemberInformation {
         name: AccountId,
@@ -53,14 +80,26 @@ pub mod artzero_launchpad_psp34 {
         social_links: Vec<u8>
     }
 
+    #[derive(
+        Clone,
+        Debug,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        Default,
+        PackedLayout,
+        SpreadLayout,
+        scale::Encode,
+        scale::Decode,
+    )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Project {
         project_type: u8, // 1 is Live Project, 2 is Ended Project
         project_owner: AccountId,
         total_supply: u64,
         start_time: Timestamp,
-        end_time: Timestamp,
-        attributes: Mapping<Vec<u8>, Vec<u8>>
+        end_time: Timestamp
     }
 
     #[ink(storage)]
@@ -73,7 +112,8 @@ pub mod artzero_launchpad_psp34 {
         project_count: u64,
         projects: Mapping<AccountId, Project>,
         projects_by_id: Mapping<u64, AccountId>,
-        projects_by_owner: Mapping<AccountId, Vec<AccountId>>
+        projects_by_owner: Mapping<AccountId, Vec<AccountId>>,
+        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
     }
 
     impl Ownable for ArtZeroLaunchPadPSP34 {}
@@ -119,6 +159,10 @@ pub mod artzero_launchpad_psp34 {
             attributes: Vec<String>,
             attribute_vals: Vec<String> 
         ) -> Result<(), Error> {
+            if start_time > end_time {
+                return Err(Error::InvalidStartTimeAndEndTime);
+            }
+
             let (hash, _) =
                 ink_env::random::<ink_env::DefaultEnvironment>(name.as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
@@ -138,7 +182,7 @@ pub mod artzero_launchpad_psp34 {
             self.projects_by_id.insert(&self.project_count, &contract_account);
             let projects_by_owner = self.projects_by_owner.get(&project_owner);
 
-            let projects_by_owner = self.projects_by_owner.get(&collection_owner);
+            let projects_by_owner = self.projects_by_owner.get(&project_owner);
             if projects_by_owner.is_none() {
                 let mut projects = Vec::<AccountId>::new();
                 projects.push(contract_account);
@@ -146,16 +190,29 @@ pub mod artzero_launchpad_psp34 {
             } else {
                 let mut projects = projects_by_owner.unwrap();
                 projects.push(contract_account);
-                self.projects_by_owner.insert(&project_owner, &collections);
+                self.projects_by_owner.insert(&project_owner, &projects);
+            }
+
+            let mut project_type = 1;
+
+            if end_time <= Self::env().block_timestamp() {
+                project_type = 2;
             }
 
             let new_project = Project {
-                project_type: 1, // 1 is Live Project, 2 is Ended Project
+                project_type: project_type, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
                 total_supply: total_supply,
                 start_time: start_time,
-                end_time: end_time,
-                attributes: Mapping<Vec<u8>, Vec<u8>>
+                end_time: end_time
+            };
+
+            self.projects.insert(&contract_account, &new_project);
+
+            if self.set_multiple_attributes(contract_account, attributes, attribute_vals).is_err() {
+                panic!(
+                    "error set_multiple_attributes"
+                )
             };
 
             Ok(())
@@ -187,6 +244,46 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
+        fn _set_attribute(
+            &mut self, 
+            account: AccountId,
+            key: Vec<u8>, 
+            value: Vec<u8>
+        ) {
+            self.attributes.insert(&(account,key), &value);
+        }
+
+        /// Set multiple attributes type string - Only admin - project owner
+        #[ink(message)]
+        pub fn set_multiple_attributes(
+            &mut self, 
+            contract_address: AccountId, 
+            attributes: Vec<String>, 
+            values: Vec<String>
+        ) -> Result<(),Error> {
+            if attributes.len() != values.len() {
+                return Err(Error::Custom(String::from("Inputs not same length")));
+            }
+            if self.projects.get(&contract_address).is_none() {
+                return Err(Error::ProjectNotExist);
+            }
+            let project = self.projects.get(&contract_address).unwrap();
+            if project.project_owner == self.env().caller() || self.admin_address == self.env().caller() {
+                let length = attributes.len();
+                for i in 0..length {
+                    let attribute = attributes[i].clone();
+                    let value = values[i].clone();
+                    self._set_attribute(contract_address, attribute.into_bytes(), value.into_bytes());
+                }
+
+                Ok(())
+            } else {
+                return Err(Error::ProjectOwnerAndAdmin);
+            }
+
+
+        }
+
         /* END SETTERS */
         
         /* GETTERS */
@@ -213,6 +310,36 @@ pub mod artzero_launchpad_psp34 {
             &self
         ) -> Hash {
             return self.standard_nft_hash;
+        }
+
+        // Get multi attributes
+        #[ink(message)]
+        pub fn get_attributes(
+            &self, 
+            account: AccountId, 
+            attributes: Vec<String>
+        ) -> Vec<String> {
+            let length = attributes.len();
+            let mut ret = Vec::<String>::new();
+            for i in 0..length {
+                let attribute = attributes[i].clone();
+                let value = self.attributes.get(&(account,attribute.into_bytes()));
+                if value.is_some() {
+                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+                } else{
+                    ret.push(String::from(""));
+                }
+            }
+            ret
+        }
+
+        // Get project by id
+        #[ink(message)]
+        pub fn get_project_by_id(
+            &self,
+            id: u64
+        ) -> Option<AccountId> {
+            return self.projects_by_id.get(&id);
         }
 
         /* END GETTERS*/

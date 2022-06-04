@@ -444,8 +444,11 @@ pub mod artzero_psp34 {
         pub fn get_whitelist_account(
             &self,
             id: u64
-        ) -> AccountId {
-            return self.whitelist_accounts.get(&id).unwrap();
+        ) -> Option<AccountId> {
+            if self.whitelist_accounts.get(&id).is_none() {
+                return None;
+            }
+            return Some(self.whitelist_accounts.get(&id).unwrap());
         }
 
         /// Get Whitelist Information by AccountId
