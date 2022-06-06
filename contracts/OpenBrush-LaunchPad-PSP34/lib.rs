@@ -220,19 +220,13 @@ pub mod artzero_launchpad_psp34 {
                 self.admin_address == self.env().caller() {
                     assert!(project.project_type != 2);
                     
-                    if  end_time > Self::env().block_timestamp() {
+                    if  end_time <= Self::env().block_timestamp() {
                         return Err(Error::InvalidStartTimeAndEndTime);
                     } else {
-                        let mut project_type = 1;
-                        if end_time <= Self::env().block_timestamp() {
-                            project_type = 2;
-                        }
-
                         project.name = name;
                         project.description = description;
                         project.roadmaps = roadmaps;
                         project.team_members = team_members;
-                        project.project_type = project_type;
                         self.projects.insert(&contract_address, &project);
 
                         if self.set_multiple_attributes(contract_address, attributes, attribute_vals).is_err() {
