@@ -220,7 +220,7 @@ pub mod artzero_launchpad_psp34 {
                 self.admin_address == self.env().caller() {
                     assert!(project.project_type != 2);
                     
-                    if  end_time <= Self::env().block_timestamp() {
+                    if  project.end_time <= Self::env().block_timestamp() {
                         return Err(Error::InvalidStartTimeAndEndTime);
                     } else {
                         project.name = name;
