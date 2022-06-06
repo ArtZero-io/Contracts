@@ -54,50 +54,13 @@ pub mod artzero_launchpad_psp34 {
         scale::Decode,
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub struct RoadMap {
-        name: AccountId,
-        description: Vec<u8>,
-        estimated_time: Timestamp
-    }
-
-    #[derive(
-        Clone,
-        Debug,
-        Ord,
-        PartialOrd,
-        Eq,
-        PartialEq,
-        Default,
-        PackedLayout,
-        SpreadLayout,
-        scale::Encode,
-        scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub struct TeamMemberInformation {
-        name: AccountId,
-        avatar: Vec<u8>,
-        social_links: Vec<u8>
-    }
-
-    #[derive(
-        Clone,
-        Debug,
-        Ord,
-        PartialOrd,
-        Eq,
-        PartialEq,
-        Default,
-        PackedLayout,
-        SpreadLayout,
-        scale::Encode,
-        scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Project {
+        is_active: bool,
         project_type: u8, // 1 is Live Project, 2 is Ended Project
         project_owner: AccountId,
         total_supply: u64,
+        roadmaps: Vec<u8>,
+        team_members: Vec<u8>,
         start_time: Timestamp,
         end_time: Timestamp
     }
@@ -114,6 +77,7 @@ pub mod artzero_launchpad_psp34 {
         projects_by_id: Mapping<u64, AccountId>,
         projects_by_owner: Mapping<AccountId, Vec<AccountId>>,
         attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
+        active_project_count: u64
     }
 
     impl Ownable for ArtZeroLaunchPadPSP34 {}
@@ -141,6 +105,7 @@ pub mod artzero_launchpad_psp34 {
             self.admin_address = admin_address;
             self.standard_nft_hash = standard_nft_hash;
             self.project_count = 0;
+            self.active_project_count = 0;
             Ok(())
         }
 
@@ -154,6 +119,8 @@ pub mod artzero_launchpad_psp34 {
             name: String,
             description: String,
             total_supply: u64,
+            roadmaps: String,
+            team_members: String,
             start_time: Timestamp,
             end_time: Timestamp,
             attributes: Vec<String>,
@@ -200,9 +167,12 @@ pub mod artzero_launchpad_psp34 {
             }
 
             let new_project = Project {
+                is_active: false,
                 project_type: project_type, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
                 total_supply: total_supply,
+                roadmaps: roadmaps.into_bytes(),
+                team_members: team_members.into_bytes(),
                 start_time: start_time,
                 end_time: end_time
             };
@@ -280,8 +250,6 @@ pub mod artzero_launchpad_psp34 {
             } else {
                 return Err(Error::ProjectOwnerAndAdmin);
             }
-
-
         }
 
         /* END SETTERS */
