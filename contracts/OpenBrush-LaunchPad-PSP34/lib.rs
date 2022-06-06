@@ -56,6 +56,8 @@ pub mod artzero_launchpad_psp34 {
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Project {
         is_active: bool,
+        name: Vec<u8>,
+        description: Vec<u8>,
         project_type: u8, // 1 is Live Project, 2 is Ended Project
         project_owner: AccountId,
         total_supply: u64,
@@ -168,6 +170,8 @@ pub mod artzero_launchpad_psp34 {
 
             let new_project = Project {
                 is_active: false,
+                name: name.into_bytes(),
+                description: description.into_bytes(),
                 project_type: project_type, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
                 total_supply: total_supply,
@@ -184,6 +188,62 @@ pub mod artzero_launchpad_psp34 {
                     "error set_multiple_attributes"
                 )
             };
+
+            Ok(())
+        }
+
+        /// Edit a project - Only project owner and admin
+        #[ink(message)]
+        pub fn edit_project(
+            &mut self,
+            contract_address: AccountId,
+            name: String,
+            description: String,
+            roadmaps: String,
+            team_members: String,
+            start_time: Timestamp,
+            end_time: Timestamp,
+            attributes: Vec<String>,
+            attribute_vals: Vec<String> 
+        ) -> Result<(), Error> {
+            if start_time > end_time {
+                return Err(Error::InvalidStartTimeAndEndTime);
+            }
+
+            if self.projects.get(&contract_address).is_none(){
+                return Err(Error::ProjectNotExist);
+            }            
+
+            let mut project = self.projects.get(&contract_address).unwrap();
+
+            if  project.owner_address == self.env().caller() ||
+                self.admin_address == self.env().caller() {
+                    assert!(project.project_type != 2);
+                    
+                    if  end_time > Self::env().block_timestamp() {
+                        return Err(Error::InvalidStartTimeAndEndTime);
+                    } else {
+                        let mut project_type = 1;
+                        if end_time <= Self::env().block_timestamp() {
+                            project_type = 2;
+                        }
+
+                        project.name = name;
+                        project.description = description;
+                        project.roadmaps = roadmaps;
+                        project.team_members = team_members;
+                        project.project_type = project_type;
+                        self.projects.insert(&contract_address, &project);
+
+                        if self.set_multiple_attributes(contract_address, attributes, attribute_vals).is_err() {
+                            panic!(
+                                "error set_multiple_attributes"
+                            )
+                        };
+                    }
+            } else {
+                return Err(Error::InvalidCaller);
+            }
 
             Ok(())
         }
@@ -223,7 +283,7 @@ pub mod artzero_launchpad_psp34 {
             self.attributes.insert(&(account,key), &value);
         }
 
-        /// Set multiple attributes type string - Only admin - project owner
+        /// Set multiple attributes type string - Only admin and project owner
         #[ink(message)]
         pub fn set_multiple_attributes(
             &mut self, 
@@ -250,6 +310,35 @@ pub mod artzero_launchpad_psp34 {
             } else {
                 return Err(Error::ProjectOwnerAndAdmin);
             }
+        }
+
+        /// Update is active project - Only Admin
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_is_active_project(
+            &mut self,
+            is_active: bool,
+            contract_address: AccountId
+        ) -> Result<(), Error>  {
+            if self.projects.get(&nft_contract_address).is_none(){
+                return Err(Error::ProjectNotExist);
+            }
+
+            if  self.env().caller() != self.admin_address {
+                return Err(Error::OnlyAdmin);
+            }
+
+            let mut project = self.projects.get(&contract_address).unwrap();
+            assert!(is_active != project.is_active);
+            project.is_active = is_active;
+
+            if is_active == true {
+                self.active_project_count = self.active_project_count.checked_add(1).unwrap();
+            } else {
+                self.active_project_count = self.active_project_count.checked_sub(1).unwrap();
+            }
+            self.projects.insert(&contract_address, &project);
+            Ok(())
         }
 
         /* END SETTERS */
@@ -308,6 +397,19 @@ pub mod artzero_launchpad_psp34 {
             id: u64
         ) -> Option<AccountId> {
             return self.projects_by_id.get(&id);
+        }
+
+        // Get is active of project by address
+        #[ink(message)]
+        pub fn get_is_active_project(
+            &self,
+            contract_address: AccountId
+        ) -> bool {
+            if self.projects.get(&contract_address).is_none(){
+                return false;
+            }
+
+            return self.projects.get(&contract_address).unwrap();
         }
 
         /* END GETTERS*/
