@@ -194,7 +194,6 @@ pub mod artzero_launchpad_psp34 {
             }
 
             let mut project_type = 1;
-
             if end_time <= Self::env().block_timestamp() {
                 project_type = 2;
             }
@@ -206,7 +205,6 @@ pub mod artzero_launchpad_psp34 {
                 start_time: start_time,
                 end_time: end_time
             };
-
             self.projects.insert(&contract_account, &new_project);
 
             if self.set_multiple_attributes(contract_account, attributes, attribute_vals).is_err() {
@@ -244,6 +242,7 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
+        /// Set an attribute but not public function
         fn _set_attribute(
             &mut self, 
             account: AccountId,
@@ -340,6 +339,28 @@ pub mod artzero_launchpad_psp34 {
             id: u64
         ) -> Option<AccountId> {
             return self.projects_by_id.get(&id);
+        }
+
+        /// Get projects by owner address
+        #[ink(message)]
+        pub fn get_collections_by_owner(
+            &self,
+            owner_address: AccountId
+        ) -> Option<Vec<AccountId>> {
+            return self.projects_by_owner.get(&owner_address);
+        }
+
+        /// Get project by NFT address
+        #[ink(message)]
+        pub fn get_project_by_nft_address(
+            &self,
+            nft_contract_address: AccountId
+        ) -> Option<Project> {
+            if self.projects.get(&nft_contract_address).is_none(){
+                 return None;
+             }
+            let project = self.projects.get(&nft_contract_address).unwrap();
+            Some(project)
         }
 
         /* END GETTERS*/
