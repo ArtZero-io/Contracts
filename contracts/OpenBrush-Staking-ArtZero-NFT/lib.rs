@@ -74,18 +74,18 @@ pub mod artzero_staking_nft {
     }
 
     impl EnumerableMappingForStakedAccount {
-        pub fn insert(&mut self, account: &Option<AccountId>, index: &u64) {
+        pub fn insert(&mut self, account: &AccountId, index: &u64) {
             self.account_to_index.insert(account, index);
             self.index_to_account.insert(index, account);
         }
 
-        pub fn remove(&mut self, account: &Option<AccountId>, last_index: &u64) -> Result<(), PSP34Error> {
+        pub fn remove(&mut self, account: &AccountId, last_index: &u64) -> Result<(), PSP34Error> {
             let index = self.account_to_index.get(account).ok_or(PSP34Error::TokenNotExists)?;
 
             if last_index != &index {
                 let last_account = self.index_to_account.get(last_index).ok_or(PSP34Error::TokenNotExists)?;
-                self.index_to_account.insert(index, last_account);
-                self.account_to_index.insert(last_account, index);
+                self.index_to_account.insert(index, &last_account);
+                self.account_to_index.insert(last_account, &index);
             }
 
             self.account_to_index.remove(account);
@@ -97,7 +97,7 @@ pub mod artzero_staking_nft {
             self.index_to_account.get(index).ok_or(PSP34Error::TokenNotExists)
         }
 
-        pub fn get_by_account(&self, account: &Option<AccountId>) -> Result<u64, PSP34Error> {
+        pub fn get_by_account(&self, account: &AccountId) -> Result<u64, PSP34Error> {
             self.account_to_index.get(account).ok_or(PSP34Error::TokenNotExists)
         }
     }
@@ -195,7 +195,7 @@ pub mod artzero_staking_nft {
         ) -> Result<(), OwnableError> {
             self.nft_contract_address = artzero_nft_contract;
             self.limit_unstake_time = limit_unstake_time;
-            self.staking_list_last_index = 0;
+            self.staked_accounts_last_index = 0;
             Ok(())
         }        
 
@@ -261,7 +261,7 @@ pub mod artzero_staking_nft {
         /// Get staked accounts last index
         #[ink(message)]
         pub fn get_staked_accounts_last_index(&self) -> u64 {
-            self.staked_accounts_last_index;
+            self.staked_accounts_last_index
         }
 
         /// Stake multiple NFTs - Make sure approve this contract can send token on owner behalf
@@ -270,9 +270,7 @@ pub mod artzero_staking_nft {
 
             let caller = self.env().caller();
             let leng = token_ids.len();
-
             let mut last_index = 0;
-            let mut staked_accounts_count = 0;
 
             if self.staking_list_last_index.get(Some(caller)).is_some() {
                 last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
@@ -299,9 +297,9 @@ pub mod artzero_staking_nft {
                 }
 
                 //Step 4 - Add account to staked_accounts
-                if self.staked_accounts.get_by_account(&Some(caller)).is_err() {
+                if self.staked_accounts.get_by_account(&caller).is_err() {
                     self.staked_accounts_last_index = self.staked_accounts_last_index.checked_add(1).unwrap();
-                    self.staked_accounts.insert(&Some(caller), &self.staked_accounts_last_index);
+                    self.staked_accounts.insert(&caller, &self.staked_accounts_last_index);
                 }
 
                 self.env().emit_event(NewStakeEvent {
@@ -425,6 +423,12 @@ pub mod artzero_staking_nft {
                     )
                 };
 
+                if self.staked_accounts.get_by_account(&caller).is_err() {
+                    panic!(
+                        "error: not exist staked account"
+                    )
+                };
+
                 //Step 2 - transfer token to caller Check request unstake
                 let request_unstake_time = self.get_request_unstake_time(caller, token_ids[i]);
                 assert!(request_unstake_time>0);
@@ -444,10 +448,9 @@ pub mod artzero_staking_nft {
                 // self.pending_unstaking_list.insert(&(caller, token_ids[i]), 0);
 
                 //Step 5 - Remove from staked_accounts
-                if self.staked_accounts.get_by_account(&Some(caller)) {
-                    self.staked_accounts.remove(&Some(caller), &self.staked_accounts_last_index);
-                    self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
-                }
+                self.staked_accounts.remove(&caller, &self.staked_accounts_last_index);
+                self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
+                
 
                 self.env().emit_event(UnstakeEvent {
                     staker:Some(caller),
