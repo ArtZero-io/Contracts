@@ -33,6 +33,13 @@ pub mod artzero_staking_nft {
         index_to_id: Mapping<(Option<AccountId>, u64), u64>,
     }
 
+    #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
+    #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
+    pub struct EnumerableMappingForStakedAccount {
+        account_to_index: Mapping<AccountId, u64>,
+        index_to_account: Mapping<u64, AccountId>,
+    }
+
     impl EnumerableMapping {
         pub fn insert(&mut self, owner: &Option<AccountId>, id: &u64, index: &u64) {
             self.id_to_index.insert((owner, id), index);
@@ -66,6 +73,35 @@ pub mod artzero_staking_nft {
         }
     }
 
+    impl EnumerableMappingForStakedAccount {
+        pub fn insert(&mut self, account: &Option<AccountId>, index: &u64) {
+            self.account_to_index.insert(account, index);
+            self.index_to_account.insert(index, account);
+        }
+
+        pub fn remove(&mut self, account: &Option<AccountId>, last_index: &u64) -> Result<(), PSP34Error> {
+            let index = self.account_to_index.get(account).ok_or(PSP34Error::TokenNotExists)?;
+
+            if last_index != &index {
+                let last_account = self.index_to_account.get(last_index).ok_or(PSP34Error::TokenNotExists)?;
+                self.index_to_account.insert(index, last_account);
+                self.account_to_index.insert(last_account, index);
+            }
+
+            self.account_to_index.remove(account);
+            self.index_to_account.remove(last_index);
+            Ok(())
+        }
+
+        pub fn get_by_index(&self, index: &u64) -> Result<AccountId, PSP34Error> {
+            self.index_to_account.get(index).ok_or(PSP34Error::TokenNotExists)
+        }
+
+        pub fn get_by_account(&self, account: &Option<AccountId>) -> Result<u64, PSP34Error> {
+            self.account_to_index.get(account).ok_or(PSP34Error::TokenNotExists)
+        }
+    }
+
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
@@ -90,6 +126,8 @@ pub mod artzero_staking_nft {
     pub struct ArtZeroStakingNFT{
         #[OwnableStorageField]
         ownable: OwnableData,
+        staked_accounts: EnumerableMappingForStakedAccount,
+        staked_accounts_last_index: u64,
         staking_list: EnumerableMapping,
         staking_list_last_index: Mapping<Option<AccountId>, u64>,
         nft_contract_address: AccountId,
@@ -157,6 +195,7 @@ pub mod artzero_staking_nft {
         ) -> Result<(), OwnableError> {
             self.nft_contract_address = artzero_nft_contract;
             self.limit_unstake_time = limit_unstake_time;
+            self.staking_list_last_index = 0;
             Ok(())
         }        
 
@@ -219,6 +258,12 @@ pub mod artzero_staking_nft {
             self.limit_unstake_time
         }
 
+        /// Get staked accounts last index
+        #[ink(message)]
+        pub fn get_staked_accounts_last_index(&self) -> u64 {
+            self.staked_accounts_last_index;
+        }
+
         /// Stake multiple NFTs - Make sure approve this contract can send token on owner behalf
         #[ink(message)]
         pub fn stake(&mut self,token_ids:Vec<u64>) -> Result<(), Error> {
@@ -227,6 +272,8 @@ pub mod artzero_staking_nft {
             let leng = token_ids.len();
 
             let mut last_index = 0;
+            let mut staked_accounts_count = 0;
+
             if self.staking_list_last_index.get(Some(caller)).is_some() {
                 last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
             }
@@ -250,13 +297,20 @@ pub mod artzero_staking_nft {
                 .fire().is_ok() {
                     return Err(Error::CannotTransfer);
                 }
+
+                //Step 4 - Add account to staked_accounts
+                if self.staked_accounts.get_by_account(&Some(caller)).is_err() {
+                    self.staked_accounts_last_index = self.staked_accounts_last_index.checked_add(1).unwrap();
+                    self.staked_accounts.insert(&Some(caller), &self.staked_accounts_last_index);
+                }
+
                 self.env().emit_event(NewStakeEvent {
                     staker:Some(caller),
                     token_id:token_ids[i]
                 });
             }
             self.staking_list_last_index.insert(Some(caller),&(last_index+leng as u64));
-
+            
             Ok(())
         }
 
@@ -388,6 +442,12 @@ pub mod artzero_staking_nft {
                 assert!(self.pending_unstaking_list_token_index.remove(&Some(caller),&token_ids[i],&pending_unstaking_last_index).is_ok());
                 pending_unstaking_last_index = pending_unstaking_last_index.checked_sub(1).unwrap();
                 // self.pending_unstaking_list.insert(&(caller, token_ids[i]), 0);
+
+                //Step 5 - Remove from staked_accounts
+                if self.staked_accounts.get_by_account(&Some(caller)) {
+                    self.staked_accounts.remove(&Some(caller), &self.staked_accounts_last_index);
+                    self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
+                }
 
                 self.env().emit_event(UnstakeEvent {
                     staker:Some(caller),
