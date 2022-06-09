@@ -241,6 +241,26 @@ pub mod artzero_staking_nft {
             self.staking_list.get_by_index(&Some(account),&index).unwrap()
         }
 
+        ///Get staked accounts: index by AccountId
+        #[ink(message)]
+        pub fn get_staked_accounts_index_by_account(&self,account: AccountId) -> u64 {
+            if self.staked_accounts.get_by_account(&account).is_err() {
+                return 0
+            } else {
+                return self.staked_accounts.get_by_account(&account).unwrap()
+            }
+        }
+
+        ///Get staked accounts: account by Index
+        #[ink(message)]
+        pub fn get_staked_accounts_account_by_index(&self, index: u64) -> Option<AccountId> {
+            if self.staked_accounts.get_by_index(&index).is_err() {
+                return None
+            } else {
+                return Some(self.staked_accounts.get_by_index(&index).unwrap())
+            }
+        }
+
         ///Get pending unstaked token ids by AccountId
         #[ink(message)]
         pub fn get_pending_unstaked_id(&self,account: AccountId, index: u64) -> u64 {
@@ -296,19 +316,16 @@ pub mod artzero_staking_nft {
                     return Err(Error::CannotTransfer);
                 }
 
-                //Step 4 - Add account to staked_accounts
-                if self.staked_accounts.get_by_account(&caller).is_err() {
-                    self.staked_accounts_last_index = self.staked_accounts_last_index.checked_add(1).unwrap();
-                    self.staked_accounts.insert(&caller, &self.staked_accounts_last_index);
-                }
-
                 self.env().emit_event(NewStakeEvent {
                     staker:Some(caller),
                     token_id:token_ids[i]
                 });
             }
             self.staking_list_last_index.insert(Some(caller),&(last_index+leng as u64));
-            
+            if self.staked_accounts.get_by_account(&caller).is_err() {
+                self.staked_accounts_last_index = self.staked_accounts_last_index.checked_add(1).unwrap();
+                self.staked_accounts.insert(&caller, &self.staked_accounts_last_index);
+            }
             Ok(())
         }
 
@@ -351,6 +368,11 @@ pub mod artzero_staking_nft {
                     staker:Some(caller),
                     token_id:token_ids[i]
                 });
+            }
+            
+            if last_index == 0 {
+                self.staked_accounts.remove(&caller, &self.staked_accounts_last_index);
+                self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
             }
             self.staking_list_last_index.insert(Some(caller),&last_index);
             self.total_staked = self.total_staked.checked_sub(leng as u64).unwrap();
@@ -397,6 +419,10 @@ pub mod artzero_staking_nft {
                     token_id:token_ids[i]
                 });
             }
+            if self.staked_accounts.get_by_account(&caller).is_err() {
+                self.staked_accounts_last_index = self.staked_accounts_last_index.checked_add(1).unwrap();
+                self.staked_accounts.insert(&caller, &self.staked_accounts_last_index);
+            }
             self.total_staked = self.total_staked.checked_add(leng as u64).unwrap();
             self.pending_unstaking_list_token_last_index.insert(Some(caller), &(pending_unstaking_last_index));
             self.staking_list_last_index.insert(Some(caller),&(last_index));
@@ -423,12 +449,6 @@ pub mod artzero_staking_nft {
                     )
                 };
 
-                if self.staked_accounts.get_by_account(&caller).is_err() {
-                    panic!(
-                        "error: not exist staked account"
-                    )
-                };
-
                 //Step 2 - transfer token to caller Check request unstake
                 let request_unstake_time = self.get_request_unstake_time(caller, token_ids[i]);
                 assert!(request_unstake_time>0);
@@ -446,15 +466,6 @@ pub mod artzero_staking_nft {
                 assert!(self.pending_unstaking_list_token_index.remove(&Some(caller),&token_ids[i],&pending_unstaking_last_index).is_ok());
                 pending_unstaking_last_index = pending_unstaking_last_index.checked_sub(1).unwrap();
                 // self.pending_unstaking_list.insert(&(caller, token_ids[i]), 0);
-
-                //Step 5 - Remove from staked_accounts
-                if self.staking_list_last_index.get(Some(caller)).is_some() {
-                    let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
-                    if last_index == 0 {
-                        self.staked_accounts.remove(&caller, &self.staked_accounts_last_index);
-                        self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
-                    }
-                }
                 
                 self.env().emit_event(UnstakeEvent {
                     staker:Some(caller),
