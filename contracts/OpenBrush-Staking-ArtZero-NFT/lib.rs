@@ -448,10 +448,14 @@ pub mod artzero_staking_nft {
                 // self.pending_unstaking_list.insert(&(caller, token_ids[i]), 0);
 
                 //Step 5 - Remove from staked_accounts
-                self.staked_accounts.remove(&caller, &self.staked_accounts_last_index);
-                self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
+                if self.staking_list_last_index.get(Some(caller)).is_some() {
+                    let mut last_index = self.staking_list_last_index.get(Some(caller)).unwrap();
+                    if last_index == 0 {
+                        self.staked_accounts.remove(&caller, &self.staked_accounts_last_index);
+                        self.staked_accounts_last_index = self.staked_accounts_last_index.checked_sub(1).unwrap();
+                    }
+                }
                 
-
                 self.env().emit_event(UnstakeEvent {
                     staker:Some(caller),
                     token_id:token_ids[i]
