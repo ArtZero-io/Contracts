@@ -109,7 +109,9 @@ pub mod artzero_staking_nft {
         Custom(String),
         TokenOwnerNotMatch,
         NotApproved,
-        CannotTransfer
+        CannotTransfer,
+        OnlyOwner,
+        OnlyAdmin
     }
 
     impl From<OwnableError> for Error {
@@ -126,6 +128,8 @@ pub mod artzero_staking_nft {
     pub struct ArtZeroStakingNFT{
         #[OwnableStorageField]
         ownable: OwnableData,
+        is_locked: bool,
+        admin_address: AccountId,
         staked_accounts: EnumerableMappingForStakedAccount,
         staked_accounts_last_index: u64,
         staking_list: EnumerableMapping,
@@ -177,12 +181,13 @@ pub mod artzero_staking_nft {
         #[ink(constructor)]
         pub fn new(
             contract_owner: AccountId,
+            admin_address:AccountId,
             artzero_nft_contract: AccountId, 
             limit_unstake_time: u64
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
-                instance.initialize(artzero_nft_contract, limit_unstake_time).ok().unwrap();
+                instance.initialize(artzero_nft_contract, limit_unstake_time, admin_address).ok().unwrap();
             })
         }
 
@@ -191,11 +196,14 @@ pub mod artzero_staking_nft {
         pub fn initialize(
             &mut self,
             artzero_nft_contract: AccountId,
-            limit_unstake_time: u64
+            limit_unstake_time: u64,
+            admin_address: AccountId
         ) -> Result<(), OwnableError> {
             self.nft_contract_address = artzero_nft_contract;
             self.limit_unstake_time = limit_unstake_time;
+            self.admin_address = admin_address;
             self.staked_accounts_last_index = 0;
+            self.is_locked = false;
             Ok(())
         }        
 
@@ -216,11 +224,48 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
+        /// Update Admin Address - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_admin_address(
+            &mut self,
+            admin_address: AccountId
+        )  -> Result<(), Error> {
+            self.admin_address = admin_address;
+            Ok(())
+        }
+
+        /// Update is locked - only Admin
+        #[ink(message)]
+        pub fn update_is_locked(
+            &mut self,
+            is_locked: bool
+        )  -> Result<(), Error> {
+            if  self.env().caller() == self.admin_address {
+                self.is_locked = is_locked;
+                Ok(())
+            } else{
+                return Err(Error::OnlyAdmin);
+            }
+        }
+
         // GETTERS
         ///Get NFT contract address
         #[ink(message)]
         pub fn get_artzero_nft_contract(&self) -> AccountId {
             self.nft_contract_address
+        }
+
+        ///Get Is Locked Status
+        #[ink(message)]
+        pub fn get_is_locked(&self) -> bool {
+            self.is_locked
+        }
+
+        ///Get Admin Account
+        #[ink(message)]
+        pub fn get_admin_address(&self) -> AccountId {
+            self.admin_address
         }
 
         ///Get request unstake Time
@@ -230,7 +275,7 @@ pub mod artzero_staking_nft {
             if ret.is_some(){
                 return ret.unwrap()
             }
-            else{
+            else {
                 return 0
             }
         }
@@ -287,6 +332,7 @@ pub mod artzero_staking_nft {
         /// Stake multiple NFTs - Make sure approve this contract can send token on owner behalf
         #[ink(message)]
         pub fn stake(&mut self,token_ids:Vec<u64>) -> Result<(), Error> {
+            assert!(self.is_locked == false);
 
             let caller = self.env().caller();
             let leng = token_ids.len();
@@ -332,6 +378,7 @@ pub mod artzero_staking_nft {
         /// Request Unstake multiple NFTs
         #[ink(message)]
         pub fn request_unstake(&mut self, token_ids:Vec<u64>) -> Result<(), Error> {
+            assert!(self.is_locked == false);
             let caller = self.env().caller();
             let leng = token_ids.len();
 
@@ -383,6 +430,7 @@ pub mod artzero_staking_nft {
         /// Cancel Request
         #[ink(message)]
         pub fn cancel_request_unstake(&mut self, token_ids:Vec<u64>) -> Result<(), Error> {
+            assert!(self.is_locked == false);
             let caller = self.env().caller();
             let leng = token_ids.len();
 
@@ -432,6 +480,7 @@ pub mod artzero_staking_nft {
         /// unStake multiple NFTs
         #[ink(message)]
         pub fn unstake(&mut self,token_ids:Vec<u64>) -> Result<(), Error> {
+            assert!(self.is_locked == false);
             //Step 1 - Check if the token is belong to caller
             let caller = self.env().caller();
             let leng = token_ids.len();
@@ -497,6 +546,7 @@ pub mod artzero_staking_nft {
             assert!(Psp34Ref::transfer(&self.nft_contract_address,receiver,token_id.clone(),Vec::<u8>::new()).is_ok());
             Ok(())
         }
+        
     }
 
     impl CrossArtZeroStaking for ArtZeroStakingNFT{
