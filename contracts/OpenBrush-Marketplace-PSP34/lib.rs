@@ -1,12 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod artzero_marketplace_psp34 {
     use ink_env::CallFlags;
     use ink_prelude::string::String;
-    use brush::contracts::ownable::*;
-    use brush::contracts::traits::{
+    use openbrush::contracts::ownable::*;
+    use openbrush::contracts::traits::{
         psp34::{
             extensions::{
                 burnable::*,
@@ -15,7 +15,7 @@ pub mod artzero_marketplace_psp34 {
             *,
         },
     };
-    use brush::modifiers;
+    use openbrush::modifiers;
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -166,19 +166,19 @@ pub mod artzero_marketplace_psp34 {
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
 
-    #[brush::wrapper]
+    #[openbrush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
-    #[brush::wrapper]
+    #[openbrush::wrapper]
     pub type CollectionRef = dyn CrossArtZeroCollection;
-    #[brush::wrapper]
+    #[openbrush::wrapper]
     pub type StakingRef = dyn CrossArtZeroStaking;
 
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait CrossArtZeroStaking {
         #[ink(message)]
         fn get_total_staked_by_account(&self,account: AccountId) -> u32;
     }
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait CrossArtZeroCollection {
         #[ink(message)]
         fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32;

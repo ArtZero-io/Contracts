@@ -1,11 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod artzero_collection_manager {
     use ink_prelude::string::String;
-    use brush::contracts::ownable::*;
-    use brush::modifiers;
+    use openbrush::contracts::ownable::*;
+    use openbrush::modifiers;
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -90,7 +90,7 @@ pub mod artzero_collection_manager {
 
     impl Ownable for ArtZeroCollectionManager {}
 
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait CrossArtZeroCollection {
         #[ink(message)]
         fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32;

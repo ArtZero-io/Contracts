@@ -58,7 +58,7 @@ pub mod psp34_nft {
 
     impl Ownable for Psp34Nft {}
     #[openbrush::wrapper]
-    pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
+    pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
     impl PSP34 for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Internal for Psp34Nft {}

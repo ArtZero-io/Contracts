@@ -1,12 +1,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod artzero_staking_nft {
     use ink_env::CallFlags;
     use ink_prelude::string::String;
-    use brush::contracts::ownable::*;
-    use brush::contracts::traits::{
+    use openbrush::contracts::ownable::*;
+    use openbrush::contracts::traits::{
         psp34::{
             extensions::{
                 burnable::*,
@@ -15,7 +15,7 @@ pub mod artzero_staking_nft {
             *,
         },
     };
-    use brush::modifiers;
+    use openbrush::modifiers;
     use ink_storage::traits::SpreadAllocate;
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
@@ -165,7 +165,7 @@ pub mod artzero_staking_nft {
 
     impl Ownable for ArtZeroStakingNFT {}
 
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait CrossArtZeroStaking {
         #[ink(message)]
         fn get_total_staked_by_account(&self,account: AccountId) -> u64;
@@ -174,7 +174,7 @@ pub mod artzero_staking_nft {
         fn get_total_pending_unstaked_by_account(&self,account: AccountId) -> u64;
     }
 
-    #[brush::wrapper]
+    #[openbrush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
 
     impl ArtZeroStakingNFT {
