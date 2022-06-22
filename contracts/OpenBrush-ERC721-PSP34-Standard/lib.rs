@@ -5,15 +5,14 @@ pub use self::psp34_nft::{
     Psp34NftRef,
 };
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod psp34_nft {
     use ink_prelude::string::String;
-    use brush::contracts::psp34::*;
-    use brush::contracts::psp34::extensions::metadata::*;
-    use brush::contracts::psp34::extensions::burnable::*;
-    use brush::contracts::psp34::extensions::enumerable::*;
-    use brush::contracts::ownable::*;
-    use brush::modifiers;
+    use openbrush::contracts::psp34::*;
+    use openbrush::contracts::psp34::extensions::metadata::*;
+    use openbrush::contracts::psp34::extensions::enumerable::*;
+    use openbrush::contracts::ownable::*;
+    use openbrush::modifiers;
     use ink_storage::{
         traits::{
             SpreadAllocate
@@ -58,15 +57,14 @@ pub mod psp34_nft {
     }
 
     impl Ownable for Psp34Nft {}
-    #[brush::wrapper]
+    #[openbrush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
     impl PSP34 for Psp34Nft {}
-    impl PSP34Burnable for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Internal for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
 
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait Psp34Traits {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
@@ -167,6 +165,15 @@ pub mod psp34_nft {
             return self.locked_token_count;
         }
 
+        #[ink(message)]
+        pub fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
+            let caller = self.env().caller();
+            //check ownership
+            let token_owner = self.owner_of(id.clone()).unwrap();
+            assert!(caller == token_owner);
+
+            self._burn_from(caller, id)
+        }
     }
 
     impl Psp34Traits for Psp34Nft{

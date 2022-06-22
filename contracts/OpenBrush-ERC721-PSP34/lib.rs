@@ -1,15 +1,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod artzero_psp34 {
     use ink_prelude::string::String;
-    use brush::contracts::psp34::*;
-    use brush::contracts::psp34::extensions::metadata::*;
-    use brush::contracts::psp34::extensions::burnable::*;
-    use brush::contracts::psp34::extensions::enumerable::*;
-    use brush::contracts::ownable::*;
-    use brush::modifiers;
+    use openbrush::contracts::psp34::*;
+    use openbrush::contracts::psp34::extensions::metadata::*;
+    use openbrush::contracts::psp34::extensions::enumerable::*;
+    use openbrush::contracts::ownable::*;
+    use openbrush::modifiers;
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -109,12 +108,11 @@ pub mod artzero_psp34 {
 
     impl Ownable for ArtZeroNFT {}
     impl PSP34 for ArtZeroNFT {}
-    impl PSP34Burnable for ArtZeroNFT {}
     impl PSP34Metadata for ArtZeroNFT {}
     impl PSP34Internal for ArtZeroNFT {}
     impl PSP34Enumerable for ArtZeroNFT {}
 
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait Psp34Traits {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
@@ -140,9 +138,9 @@ pub mod artzero_psp34 {
         #[ink(constructor)]
         pub fn new(
             contract_owner: AccountId,
-            admin_address: AccountId, 
-            name: String, 
-            symbol: String, 
+            admin_address: AccountId,
+            name: String,
+            symbol: String,
             total_supply: u64,
             minting_fee: Balance,
             public_sale_amount: u64
@@ -157,9 +155,9 @@ pub mod artzero_psp34 {
         #[modifiers(only_owner)]
         pub fn initialize(
             &mut self,
-            admin_address: AccountId, 
-            name: String, 
-            symbol: String, 
+            admin_address: AccountId,
+            name: String,
+            symbol: String,
             total_supply: u64,
             minting_fee: Balance,
             public_sale_amount: u64
@@ -221,7 +219,7 @@ pub mod artzero_psp34 {
                 if self.whitelists.get(&account).is_none(){
                     return Err(Error::InvalidInput);
                 }
-   
+
                let mut whitelist = self.whitelists.get(&account).unwrap();
                if whitelist_amount >= whitelist.whitelist_amount {
                    self.whitelist_mint_total_amount = self.whitelist_mint_total_amount.checked_add(whitelist_amount - whitelist.whitelist_amount).unwrap();
@@ -229,7 +227,7 @@ pub mod artzero_psp34 {
                else{
                    self.whitelist_mint_total_amount = self.whitelist_mint_total_amount.checked_sub(whitelist.whitelist_amount - whitelist_amount).unwrap();
                }
-   
+
                whitelist.whitelist_amount = whitelist_amount;
                self.whitelists.insert(&account, &whitelist);
                Ok(())
@@ -271,7 +269,7 @@ pub mod artzero_psp34 {
         ) -> Result<(), Error> {
             self.minting_fee = minting_fee;
             Ok(())
-        }        
+        }
 
         /// set public_sale_amount: public sale amount limit - Only Owner
         #[ink(message)]
@@ -286,7 +284,7 @@ pub mod artzero_psp34 {
             self.public_sale_amount = public_sale_amount;
             Ok(())
         }
-        
+
         /*
             END OF WHITELIST FUNCTIONS =============
         */
@@ -303,7 +301,7 @@ pub mod artzero_psp34 {
             if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
-            
+
             self.last_token_id += 1;
             assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
 
@@ -327,7 +325,7 @@ pub mod artzero_psp34 {
             if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
-            
+
             if self.whitelist_minted_count.checked_add(mint_amount).unwrap() > self.whitelist_mint_total_amount {
                 return Err(Error::InvalidMintAmount);
             }
@@ -339,7 +337,7 @@ pub mod artzero_psp34 {
             if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap() {
                 return Err(Error::InvalidMintAmount);
             }
-            
+
             caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
             self.whitelists.insert(&caller, &caller_info);
 
@@ -379,7 +377,7 @@ pub mod artzero_psp34 {
             if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
-            
+
             self.last_token_id += 1;
             self.public_sale_minted_count += 1;
             assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
@@ -462,7 +460,7 @@ pub mod artzero_psp34 {
             }
             return Some(self.whitelists.get(&account).unwrap());
         }
-        
+
         /// Get Whitelist Count
         #[ink(message)]
         pub fn get_whitelist_count(
@@ -527,6 +525,15 @@ pub mod artzero_psp34 {
             }
         }
 
+        #[ink(message)]
+        pub fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
+            let caller = self.env().caller();
+            //check ownership
+            let token_owner = self.owner_of(id.clone()).unwrap();
+            assert!(caller == token_owner);
+
+            self._burn_from(caller, id)
+        }
     }
 
     impl Psp34Traits for ArtZeroNFT {

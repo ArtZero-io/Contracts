@@ -1,10 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod artzero_profile_manager {
     use ink_prelude::string::String;
-    use brush::contracts::ownable::*;
+    use openbrush::contracts::ownable::*;
     use ink_storage::traits::SpreadAllocate;
     use ink_prelude::vec::Vec;
     use ink_storage::Mapping;
@@ -42,7 +42,7 @@ pub mod artzero_profile_manager {
                 instance._init_with_owner(contract_owner);
             })
         }
-        
+
         /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
         pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {

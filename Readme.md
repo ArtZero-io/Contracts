@@ -1,7 +1,8 @@
 Contract Addresses:
 
 # Profile Contract
-5G8DSQGDJ7F3xvuyWXNnKeivzPotcuHLfmjHqgs87YYUQ8mR
+0xf31d538f1a6a3988b910fd756646c032fa3d19be2c37509f0a5b4d218d0c43e6
+5EAzkcmj7oxrDiPjLw17ktNWaG27tL4k4SAabes9qCHcrhGq
 
 # ArtZero NFT Contract / Mint
 5FoLoL5mYXpBwxJUMDo3tcwh5VTrzaz3LvbA4B7LiivjXV7C
