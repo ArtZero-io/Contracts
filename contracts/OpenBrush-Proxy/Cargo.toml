@@ -5,26 +5,25 @@ authors = ["ArtZero <admin@artzero.io>"]
 edition = "2021"
 
 [dependencies]
-ink_primitives = { tag = "v3.0.1", git = "https://github.com/paritytech/ink", default-features = false }
-ink_metadata = { tag = "v3.0.1", git = "https://github.com/paritytech/ink", default-features = false, features = ["derive"], optional = true }
-ink_env = { tag = "v3.0.1", git = "https://github.com/paritytech/ink", default-features = false }
-ink_storage = { tag = "v3.0.1", git = "https://github.com/paritytech/ink", default-features = false }
-ink_lang = { tag = "v3.0.1", git = "https://github.com/paritytech/ink", default-features = false }
-ink_prelude = { tag = "v3.0.1", git = "https://github.com/paritytech/ink", default-features = false }
+ink_primitives = { version = "~3.2.0", default-features = false }
+ink_metadata = { version = "~3.2.0", default-features = false, features = ["derive"], optional = true }
+ink_env = { version = "~3.2.0", default-features = false }
+ink_storage = { version = "~3.2.0", default-features = false }
+ink_lang = { version = "~3.2.0", default-features = false }
+ink_prelude = { version = "~3.2.0", default-features = false }
+ink_engine = { version = "~3.2.0", default-features = false, optional = true }
 
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2", default-features = false, features = ["derive"], optional = true }
 
 # These dependencies
-brush = { commit = "4de98129a216e94bac59bd575fadc8c66c6cf67e", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["proxy","ownable"] }
+openbrush = { tag = "v2.0.0", git = "https://github.com/Supercolony-net/openbrush-contracts", default-features = false, features = ["proxy"] }
 
 [lib]
 name = "proxy_contract"
 path = "lib.rs"
 crate-type = [
-    # Used for normal contract Wasm blobs.
     "cdylib",
-    "rlib"
 ]
 
 [features]
@@ -41,13 +40,9 @@ std = [
     "scale-info/std",
 
     # These dependencies
-    "brush/std",
+    "openbrush/std",
 ]
 ink-as-dependency = []
 
 [profile.dev]
 codegen-units = 16
-overflow-checks = false
-
-[profile.release]
-overflow-checks = false

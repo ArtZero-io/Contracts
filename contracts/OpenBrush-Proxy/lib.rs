@@ -1,13 +1,13 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
-pub mod az_proxy {
-    use brush::contracts::{
+#[openbrush::contract]
+pub mod proxy {
+    use ink_storage::traits::SpreadAllocate;
+    use openbrush::contracts::{
         ownable::*,
         proxy::*,
     };
-    use ink_storage::traits::SpreadAllocate;
 
     #[ink(storage)]
     #[derive(Default, SpreadAllocate, ProxyStorage)]
