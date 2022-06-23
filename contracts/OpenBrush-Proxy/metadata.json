@@ -1,0 +1,377 @@
+{
+  "source": {
+    "hash": "0xbafd9b283b39dd6d4642831d7f9622a78ceb215776017b2ba05255752656e7eb",
+    "language": "ink! 3.2.0",
+    "compiler": "rustc 1.63.0-nightly"
+  },
+  "contract": {
+    "name": "proxy_contract",
+    "version": "1.0.0",
+    "authors": [
+      "ArtZero <admin@artzero.io>"
+    ]
+  },
+  "V3": {
+    "spec": {
+      "constructors": [
+        {
+          "args": [
+            {
+              "label": "forward_to",
+              "type": {
+                "displayName": [
+                  "Hash"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [],
+          "label": "new",
+          "payable": false,
+          "selector": "0x9bae9d5e"
+        }
+      ],
+      "docs": [],
+      "events": [],
+      "messages": [
+        {
+          "args": [],
+          "docs": [],
+          "label": "forward",
+          "mutates": false,
+          "payable": true,
+          "returnType": null,
+          "selector": "0x45753c2b"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Leaves the contract without owner. It will not be possible to call",
+            " owner's functions anymore. Can only be called by the current owner.",
+            "",
+            " NOTE: Renouncing ownership will leave the contract without an owner,",
+            " thereby removing any functionality that is only available to the owner.",
+            "",
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner"
+          ],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Returns the address of the current owner."
+          ],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [
+            {
+              "label": "new_owner",
+              "type": {
+                "displayName": [
+                  "ownable_external",
+                  "TransferOwnershipInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Transfers ownership of the contract to a `new_owner`.",
+            " Can only be called by the current owner.",
+            "",
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner.",
+            "",
+            " Panics with `NewOwnerIsZero` error if new owner's address is zero."
+          ],
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [],
+          "label": "Proxy::get_delegate_code",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "proxy_external",
+              "GetDelegateCodeOutput"
+            ],
+            "type": 4
+          },
+          "selector": "0xf0038ea9"
+        },
+        {
+          "args": [
+            {
+              "label": "new_code_hash",
+              "type": {
+                "displayName": [
+                  "proxy_external",
+                  "ChangeDelegateCodeInput1"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [],
+          "label": "Proxy::change_delegate_code",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "proxy_external",
+              "ChangeDelegateCodeOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0xaf580574"
+        }
+      ]
+    },
+    "storage": {
+      "struct": {
+        "fields": [
+          {
+            "layout": {
+              "struct": {
+                "fields": [
+                  {
+                    "layout": {
+                      "struct": {
+                        "fields": [
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x238cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                                "ty": 0
+                              }
+                            },
+                            "name": "owner"
+                          },
+                          {
+                            "layout": {
+                              "enum": {
+                                "dispatchKey": "0x248cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                                "variants": {
+                                  "0": {
+                                    "fields": [
+                                      {
+                                        "layout": {
+                                          "cell": {
+                                            "key": "0x258cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                                            "ty": 3
+                                          }
+                                        },
+                                        "name": null
+                                      }
+                                    ]
+                                  },
+                                  "1": {
+                                    "fields": []
+                                  }
+                                }
+                              }
+                            },
+                            "name": "_reserved"
+                          }
+                        ]
+                      }
+                    },
+                    "name": "ownable"
+                  },
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x011a5a7a8a0022fc5668884fcf5a5540d5d4b5e86a82139784e533a3eb744d60",
+                        "ty": 4
+                      }
+                    },
+                    "name": "forward_to"
+                  }
+                ]
+              }
+            },
+            "name": "proxy"
+          }
+        ]
+      }
+    },
+    "types": [
+      {
+        "id": 0,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 1,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_env",
+            "types",
+            "AccountId"
+          ]
+        }
+      },
+      {
+        "id": 1,
+        "type": {
+          "def": {
+            "array": {
+              "len": 32,
+              "type": 2
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "type": {
+          "def": {
+            "primitive": "u8"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "type": {
+          "def": {
+            "tuple": []
+          }
+        }
+      },
+      {
+        "id": 4,
+        "type": {
+          "def": {
+            "composite": {
+              "fields": [
+                {
+                  "type": 1,
+                  "typeName": "[u8; 32]"
+                }
+              ]
+            }
+          },
+          "path": [
+            "ink_env",
+            "types",
+            "Hash"
+          ]
+        }
+      },
+      {
+        "id": 5,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "fields": [
+                    {
+                      "type": 3
+                    }
+                  ],
+                  "index": 0,
+                  "name": "Ok"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 6
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Err"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 3
+            },
+            {
+              "name": "E",
+              "type": 6
+            }
+          ],
+          "path": [
+            "Result"
+          ]
+        }
+      },
+      {
+        "id": 6,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "CallerIsNotOwner"
+                },
+                {
+                  "index": 1,
+                  "name": "NewOwnerIsZero"
+                }
+              ]
+            }
+          },
+          "path": [
+            "openbrush_contracts",
+            "traits",
+            "errors",
+            "ownable",
+            "OwnableError"
+          ]
+        }
+      }
+    ]
+  }
+}

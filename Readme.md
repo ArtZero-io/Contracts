@@ -24,6 +24,9 @@ Contract Addresses:
 0xe41f6c139cc42e015ba4575b885cb71fce8659946575cd1f9bc1a9e3beee02ca
 5F1pXynBWFUBQqrUSQ61xAE7hPmwuABjzcK9vY8fbejNTRgG
 
+# Proxy Contract
+0xbafd9b283b39dd6d4642831d7f9622a78ceb215776017b2ba05255752656e7eb
+
 Deploy Steps:
 1. Deploy profile Contract
 2. Deploy Artzero NFT Contract
