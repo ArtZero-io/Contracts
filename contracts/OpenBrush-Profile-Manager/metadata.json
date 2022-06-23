@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xf31d538f1a6a3988b910fd756646c032fa3d19be2c37509f0a5b4d218d0c43e6",
+    "hash": "0x7141bc896ce6898a956e0f1dd9ca1498f03d94b478f3dd207df263d41e08e805",
     "language": "ink! 3.2.0",
     "compiler": "rustc 1.63.0-nightly"
   },
@@ -106,6 +106,33 @@
         {
           "args": [],
           "docs": [
+            " Leaves the contract without owner. It will not be possible to call",
+            " owner's functions anymore. Can only be called by the current owner.",
+            "",
+            " NOTE: Renouncing ownership will leave the contract without an owner,",
+            " thereby removing any functionality that is only available to the owner.",
+            "",
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner"
+          ],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 12
+          },
+          "selector": "0x5e228753"
+        },
+        {
+          "args": [],
+          "docs": [
             " Returns the address of the current owner."
           ],
           "label": "Ownable::owner",
@@ -156,33 +183,6 @@
             "type": 12
           },
           "selector": "0x11f43efd"
-        },
-        {
-          "args": [],
-          "docs": [
-            " Leaves the contract without owner. It will not be possible to call",
-            " owner's functions anymore. Can only be called by the current owner.",
-            "",
-            " NOTE: Renouncing ownership will leave the contract without an owner,",
-            " thereby removing any functionality that is only available to the owner.",
-            "",
-            " On success a `OwnershipTransferred` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Panics with `CallerIsNotOwner` error if caller is not owner"
-          ],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 12
-          },
-          "selector": "0x5e228753"
         }
       ]
     },
