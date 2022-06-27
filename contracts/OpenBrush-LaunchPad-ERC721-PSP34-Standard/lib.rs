@@ -23,6 +23,27 @@ pub mod launchpad_psp34_nft_standard {
     use ink_storage::Mapping;
     use ink_prelude::string::ToString;
 
+    #[derive(
+        Copy,
+        Clone,
+        Debug,
+        Ord,
+        PartialOrd,
+        Eq,
+        PartialEq,
+        Default,
+        PackedLayout,
+        SpreadLayout,
+        scale::Encode,
+        scale::Decode,
+    )]
+    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    pub struct Whitelist {
+        whitelist_amount: u64,
+        claimed_amount: u64,
+        minting_fee: Balance
+    }
+
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
@@ -38,7 +59,15 @@ pub mod launchpad_psp34_nft_standard {
         #[PSP34EnumerableStorageField]
         enumdata: PSP34EnumerableData,
         locked_tokens: Mapping<Id, u8>,
-        locked_token_count: u64
+        locked_token_count: u64,
+        total_supply: u64,
+        last_pharse_id: u64,
+        whitelist_count: u64,
+        pharses_code_by_id: Mapping<u64, Vec<u8>>,
+        pharses_id_by_code: Mapping<Vec<u8>, u64>,
+        pharse_whitelists_link: Mapping<(AccountId, u64), Whitelist)>,
+        public_pharse: Mapping<u64, u8>,
+        default_pharse_id: u64
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -85,9 +114,12 @@ pub mod launchpad_psp34_nft_standard {
     impl LaunchPadPsp34NftStandard {
 
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId) -> Self {
+        pub fn new(contract_owner: AccountId, total_supply: u64) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
+                instance.total_supply = total_supply;
+                instance.last_pharse_id = 0;
+                instance.default_pharse_id = 0;
             })
         }
 
@@ -101,20 +133,164 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        ///Only Owner can mint new token and add attributes for it
+        /// Add new whitelist - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn mint_with_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error> {
+        pub fn add_whitelist(
+            &mut self,
+            account: AccountId,
+            pharse_id: u64,
+            whitelist_amount: u64,
+            whitelist_price: Balance
+        ) -> Result<(), Error> {
+            //fee must less than total tokens
+            if  whitelist_amount > self.total_supply ||
+                whitelist_amount == 0 {
+                return Err(Error::InvalidInput);
+            }
+            if  self.pharse_whitelists_link.get(&(account, pharse_id)).is_some() {
+                return Err(Error::InvalidInput);
+            }
+
+            self.whitelist_count += 1;
+
+            let whitelist = Whitelist {
+                whitelist_amount: whitelist_amount,
+                claimed_amount: 0,
+                minting_fee: whitelist_price
+            }
+
+            self.pharse_whitelists_link.insert(&(account, pharse_id), &whitelist);
+
+            Ok(())
+            
+        }
+
+        /// Whitelisted User Creates multiple
+        #[ink(message)]
+        #[ink(payable)]
+        pub fn whitelist_mint(&mut self, pharse_id: u64, mint_amount: u64) -> Result<(), Error> {
+            if self.public_pharse.get(&pharse_id).is_none() {
+                return Err(Error::PharseNotExist); 
+            }
+            if self.public_pharse.get(&pharse_id).unwrap() == 1 || pharse_id == self.default_pharse_id {
+                if self.last_token_id >= self.total_supply {
+                    return Err(Error::TokenLimitReached);
+                }
+                let caller = self.env().caller();
+                
+                if self.pharse_whitelists_link.get(&(caller, pharse_id)).is_none(){
+                    return Err(Error::InvalidInput);
+                }
+    
+                let mut caller_info = self.pharse_whitelists_link.get(&(caller, pharse_id)).unwrap();
+                if caller_info.whitelist_amount <= caller_info.claimed_amount {
+                    return Err(Error::ClaimedAll);
+                }
+    
+                if  caller_info.minting_fee != self.env().transferred_value() {
+                    return Err(Error::InvalidFee);
+                }
+    
+                caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
+                self.pharse_whitelists_link.insert(&(caller, pharse_id), &caller_info);
+    
+                for _i in 0..mint_amount {
+                    self.last_token_id += 1;
+                    assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+                }
+    
+                Ok(())
+            } else {
+                return Err(Error::PharseNotPublic);
+            }
+        }
+
+        ///Add new phare - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn addNewPharse(
+            &mut self, 
+            pharse_code: String, 
+            whitelist_accounts: Vec<AccountId>, 
+            whitelist_amounts: Vec<u64>,
+            whitelist_prices: Vec<Balance>
+        ) -> Result<(), Error> {
+            let pharse_id_by_code = self.pharses_id_by_code.get(&pharse_code.into_bytes());
+            if pharse_id_by_code.is_some() {
+                return Err(Error::Custom(String::from("This code is exist!")));
+            }
+            if whitelist_accounts.len() != whitelist_amounts.len() || whitelist_accounts.len() != whitelist_prices.len() {
+                return Err(Error::Custom(String::from("Inputs not same length")));
+            }
             let caller = self.env().caller();
-            self.last_token_id += 1;
-            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
-            if self.set_multiple_attributes(Id::U64(self.last_token_id), attributes, values).is_err() {
-                panic!(
-                    "error set_multiple_attributes"
-                )
-            };
+            self.last_pharse_id += 1;
+            let length = whitelist_accounts.len();
+            self.pharses_id_by_code.insert(&pharse_code.into_bytes(), &self.last_pharse_id);
+            self.pharses_code_by_id.insert(&self.last_pharse_id, &pharse_code.into_bytes());
+            self.public_pharse.insert(&self.last_pharse_id, 0);
+            for i in 0..length {
+                let whitelist = Whitelist {
+                    whitelist_amount: whitelist_amounts[i].clone(),
+                    claimed_amount: 0,
+                    minting_fee: whitelist_prices[i].clone()
+                };
+                self.whitelist_count += 1;
+                self.pharse_whitelists_link.insert(&(whitelist_accounts[i].clone(), self.last_pharse_id), &whitelist);
+            }
             Ok(())
         }
+
+        /// Get whitelist information by pharse code
+        #[ink(message)]
+        pub fn get_whitelist_by_account_id(
+            &self,
+            account: AccountId,
+            pharse_code: String
+        ) -> Option<Whitelist> {
+            if self.pharses_id_by_code.get(&pharse_code).is_none() {
+                return None;
+            }
+            let pharse_id = self.pharses_id_by_code.get(&pharse_code).unwrap();
+            if self.pharse_whitelists_link.get(&(account, pharse_id)).is_none() {
+                return None;
+            }
+            return Some(self.pharse_whitelists_link.get(&(account, pharse_id)).unwrap());
+        }
+
+        /// Get Default Pharse Id
+        #[ink(message)]
+        pub fn get_default_pharse_id(
+            &self
+        ) -> u64 {
+            return self.default_pharse_id;
+        }
+
+        /// Get Whitelist Count
+        #[ink(message)]
+        pub fn get_public_pharse_status(
+            &self,
+            pharse_id: u64
+        ) -> Option<u8> {
+            if self.public_pharse.get(&pharse_id).is_none() {
+                return None;
+            }
+            return self.public_pharse.get(&pharse_id).unwrap();
+        }
+
+        /// Get Whitelist Count
+        #[ink(message)]
+        pub fn get_whitelist_count(
+            &self
+        ) -> u64 {
+            return self.whitelist_count;
+        }
+
+        ///Get Pharse Count 
+        #[ink(message)]
+        pub fn get_last_pharse_id(&self) -> u64 {
+            return self.last_pharse_id;
+        }  
 
         ///Get Token Count
         #[ink(message)]
@@ -165,6 +341,36 @@ pub mod launchpad_psp34_nft_standard {
             return self.locked_token_count;
         }
 
+        ///Get Locked Token Count
+        pub fn get_total_supply(&self) -> u64 {
+            return self.total_supply;
+        }
+
+        /// Update public pharse status - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_public_pharse_status(
+            &mut self, 
+            pharse_id: u64, 
+            status: u8
+        ) -> Result<(), Error> {
+            if self.public_pharse.get(&pharse_id).is_none() {
+                return Err(Error::PharseNotExist); 
+            }
+            self.public_pharse.insert(&pharse_id, &status);
+            Ok(())
+        }
+
+        /// Update default pharse id - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_default_pharse_id(
+            &mut self, 
+            pharse_id: u64
+        ) -> Result<(), Error> {
+            self.default_pharse_id = pharse_id;
+            Ok(())
+        }
     }
 
     impl LaunchPadPsp34NftStandardTraits for LaunchPadPsp34NftStandard {
