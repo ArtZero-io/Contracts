@@ -1,11 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod artzero_launchpad_psp34 {
     use ink_prelude::string::String;
-    use brush::contracts::ownable::*;
-    use brush::modifiers;
+    use openbrush::contracts::ownable::*;
+    use openbrush::modifiers;
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -128,7 +128,7 @@ pub mod artzero_launchpad_psp34 {
             attributes: Vec<String>,
             attribute_vals: Vec<String> 
         ) -> Result<(), Error> {
-            if start_time > end_time {
+            if start_time >= end_time {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
 
@@ -149,8 +149,6 @@ pub mod artzero_launchpad_psp34 {
             let contract_account:AccountId = contract.to_account_id();
             self.project_count += 1;
             self.projects_by_id.insert(&self.project_count, &contract_account);
-            let projects_by_owner = self.projects_by_owner.get(&project_owner);
-
             let projects_by_owner = self.projects_by_owner.get(&project_owner);
             if projects_by_owner.is_none() {
                 let mut projects = Vec::<AccountId>::new();
@@ -214,17 +212,17 @@ pub mod artzero_launchpad_psp34 {
 
             let mut project = self.projects.get(&contract_address).unwrap();
 
-            if  project.owner_address == self.env().caller() ||
+            if  project.project_owner == self.env().caller() ||
                 self.admin_address == self.env().caller() {
                     assert!(project.project_type != 2);
                     
                     if  project.end_time <= Self::env().block_timestamp() {
                         return Err(Error::InvalidStartTimeAndEndTime);
                     } else {
-                        project.name = name;
-                        project.description = description;
-                        project.roadmaps = roadmaps;
-                        project.team_members = team_members;
+                        project.name = name.into_bytes();
+                        project.description = description.into_bytes();
+                        project.roadmaps = roadmaps.into_bytes();
+                        project.team_members = team_members.into_bytes();
                         self.projects.insert(&contract_address, &project);
 
                         if self.set_multiple_attributes(contract_address, attributes, attribute_vals).is_err() {
@@ -313,7 +311,7 @@ pub mod artzero_launchpad_psp34 {
             is_active: bool,
             contract_address: AccountId
         ) -> Result<(), Error>  {
-            if self.projects.get(&nft_contract_address).is_none(){
+            if self.projects.get(&contract_address).is_none(){
                 return Err(Error::ProjectNotExist);
             }
 
@@ -412,18 +410,6 @@ pub mod artzero_launchpad_psp34 {
             }
             let project = self.projects.get(&nft_contract_address).unwrap();
             Some(project)
-        }
-
-        // Get is active of project by address
-        #[ink(message)]
-        pub fn get_is_active_project(
-            &self,
-            contract_address: AccountId
-        ) -> bool {
-            if self.projects.get(&contract_address).is_none(){
-                return false;
-            }
-            return self.projects.get(&contract_address).unwrap();
         }
 
         /* END GETTERS*/

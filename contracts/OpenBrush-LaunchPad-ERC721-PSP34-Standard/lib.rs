@@ -5,22 +5,23 @@ pub use self::launchpad_psp34_nft_standard::{
     LaunchPadPsp34NftStandardRef,
 };
 
-#[brush::contract]
+#[openbrush::contract]
 pub mod launchpad_psp34_nft_standard {
     use ink_prelude::string::String;
-    use brush::contracts::psp34::*;
-    use brush::contracts::psp34::extensions::metadata::*;
-    use brush::contracts::psp34::extensions::burnable::*;
-    use brush::contracts::psp34::extensions::enumerable::*;
-    use brush::contracts::ownable::*;
-    use brush::modifiers;
+    use openbrush::contracts::psp34::*;
+    use openbrush::contracts::psp34::extensions::metadata::*;
+    use openbrush::contracts::psp34::extensions::enumerable::*;
+    use openbrush::contracts::ownable::*;
+    use openbrush::modifiers;
     use ink_storage::{
         traits::{
-            SpreadAllocate
+            PackedLayout,
+            SpreadAllocate,
+            SpreadLayout,
         },
+        Mapping,
     };
     use ink_prelude::vec::Vec;
-    use ink_storage::Mapping;
     use ink_prelude::string::ToString;
 
     #[derive(
@@ -44,6 +45,29 @@ pub mod launchpad_psp34_nft_standard {
         minting_fee: Balance
     }
 
+    #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
+    #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
+    pub struct EnumerablePharseAccountMapping {
+        /// Pharse id is key
+        pharse_id_to_account: Mapping<(u64, u64), AccountId>,
+        account_to_pharse_id: Mapping<(u64, AccountId), u64>
+    }
+
+    impl EnumerablePharseAccountMapping {
+        pub fn insert(&mut self, account: &AccountId, pharse_id: &u64, account_index: &u64) {
+            self.pharse_id_to_account.insert((account_index, pharse_id), account);
+            self.account_to_pharse_id.insert((account_index, account), pharse_id);
+        }
+
+        pub fn get_by_account(&self, account: &AccountId, account_index: &u64) -> Result<u64, Error> {
+            self.account_to_pharse_id.get((account_index, account)).ok_or(Error::InvalidInput)
+        }
+
+        pub fn get_by_pharse_id(&self, pharse_id: &u64, account_index: &u64) -> Result<AccountId, Error> {
+            self.pharse_id_to_account.get((account_index, pharse_id)).ok_or(Error::InvalidInput)
+        }
+    }
+
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
@@ -65,16 +89,35 @@ pub mod launchpad_psp34_nft_standard {
         whitelist_count: u64,
         pharses_code_by_id: Mapping<u64, Vec<u8>>,
         pharses_id_by_code: Mapping<Vec<u8>, u64>,
-        pharse_whitelists_link: Mapping<(AccountId, u64), Whitelist)>,
+        pharse_whitelists_link: Mapping<(AccountId, u64), Whitelist>,
         public_pharse: Mapping<u64, u8>,
-        default_pharse_id: u64
+        default_pharse_id: u64,
+        pharse_account_link: EnumerablePharseAccountMapping,
+        pharse_account_last_index: Mapping<u64, u64>
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
         Custom(String),
-        NotOwner
+        NotApproved,
+        TokenExists,
+        TokenNotFound,
+        CannotInsert,
+        CannotFetchValue,
+        NotAllowed,
+        InvalidInput,
+        OnlyAdmin,
+        ClaimedAll,
+        TokenLimitReached,
+        TokenLimitReachedMode1,
+        InvalidFee,
+        NotMintTime,
+        NotEnoughBalance,
+        InvalidMintAmount,
+        PharseNotExist,
+        PharseNotPublic,
+        PharseCodeNotExist
     }
 
     impl From<OwnableError> for Error {
@@ -87,15 +130,14 @@ pub mod launchpad_psp34_nft_standard {
     }
 
     impl Ownable for LaunchPadPsp34NftStandard {}
-    #[brush::wrapper]
-    pub type Psp34Ref = dyn PSP34 + PSP34Burnable + PSP34Metadata;
+    #[openbrush::wrapper]
+    pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
     impl PSP34 for LaunchPadPsp34NftStandard {}
-    impl PSP34Burnable for LaunchPadPsp34NftStandard {}
     impl PSP34Metadata for LaunchPadPsp34NftStandard {}
     impl PSP34Internal for LaunchPadPsp34NftStandard {}
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
 
-    #[brush::trait_definition]
+    #[openbrush::trait_definition]
     pub trait LaunchPadPsp34NftStandardTraits {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
@@ -158,7 +200,14 @@ pub mod launchpad_psp34_nft_standard {
                 whitelist_amount: whitelist_amount,
                 claimed_amount: 0,
                 minting_fee: whitelist_price
+            };
+            
+            let mut pharse_account_last_index_tmp = 1;
+            if self.pharse_account_last_index.get(&pharse_id).is_some() {
+                pharse_account_last_index_tmp = self.pharse_account_last_index.get(&pharse_id).unwrap() + 1;
             }
+            self.pharse_account_last_index.insert(&pharse_id, &pharse_account_last_index_tmp);
+
 
             self.pharse_whitelists_link.insert(&(account, pharse_id), &whitelist);
 
@@ -209,26 +258,27 @@ pub mod launchpad_psp34_nft_standard {
         ///Add new phare - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn addNewPharse(
+        pub fn add_new_pharse(
             &mut self, 
             pharse_code: String, 
             whitelist_accounts: Vec<AccountId>, 
             whitelist_amounts: Vec<u64>,
             whitelist_prices: Vec<Balance>
         ) -> Result<(), Error> {
-            let pharse_id_by_code = self.pharses_id_by_code.get(&pharse_code.into_bytes());
-            if pharse_id_by_code.is_some() {
-                return Err(Error::Custom(String::from("This code is exist!")));
+            let byte_pharse_code = pharse_code.into_bytes();
+            if self.pharses_id_by_code.get(&byte_pharse_code).is_some() {
+                return Err(Error::PharseCodeNotExist);
             }
+            
             if whitelist_accounts.len() != whitelist_amounts.len() || whitelist_accounts.len() != whitelist_prices.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
-            let caller = self.env().caller();
+
             self.last_pharse_id += 1;
             let length = whitelist_accounts.len();
-            self.pharses_id_by_code.insert(&pharse_code.into_bytes(), &self.last_pharse_id);
-            self.pharses_code_by_id.insert(&self.last_pharse_id, &pharse_code.into_bytes());
-            self.public_pharse.insert(&self.last_pharse_id, 0);
+            self.pharses_id_by_code.insert(&byte_pharse_code, &self.last_pharse_id);
+            self.pharses_code_by_id.insert(&self.last_pharse_id, &byte_pharse_code);
+            self.public_pharse.insert(&self.last_pharse_id, &0);
             for i in 0..length {
                 let whitelist = Whitelist {
                     whitelist_amount: whitelist_amounts[i].clone(),
@@ -236,6 +286,15 @@ pub mod launchpad_psp34_nft_standard {
                     minting_fee: whitelist_prices[i].clone()
                 };
                 self.whitelist_count += 1;
+                
+                if self.pharse_whitelists_link.get(&(whitelist_accounts[i].clone(), self.last_pharse_id)).is_none() {
+                    let mut pharse_account_last_index_tmp = 1;
+                    if self.pharse_account_last_index.get(&self.last_pharse_id).is_some() {
+                        pharse_account_last_index_tmp = self.pharse_account_last_index.get(&self.last_pharse_id).unwrap() + 1;
+                    }
+                    self.pharse_account_last_index.insert(&self.last_pharse_id, &pharse_account_last_index_tmp);
+                    self.pharse_account_link.insert(&whitelist_accounts[i].clone(), &self.last_pharse_id, &pharse_account_last_index_tmp);
+                }
                 self.pharse_whitelists_link.insert(&(whitelist_accounts[i].clone(), self.last_pharse_id), &whitelist);
             }
             Ok(())
@@ -248,14 +307,35 @@ pub mod launchpad_psp34_nft_standard {
             account: AccountId,
             pharse_code: String
         ) -> Option<Whitelist> {
-            if self.pharses_id_by_code.get(&pharse_code).is_none() {
+            let byte_pharse_code = pharse_code.into_bytes();
+            if self.pharses_id_by_code.get(&byte_pharse_code).is_none() {
                 return None;
             }
-            let pharse_id = self.pharses_id_by_code.get(&pharse_code).unwrap();
+            let pharse_id = self.pharses_id_by_code.get(&byte_pharse_code).unwrap();
             if self.pharse_whitelists_link.get(&(account, pharse_id)).is_none() {
                 return None;
             }
             return Some(self.pharse_whitelists_link.get(&(account, pharse_id)).unwrap());
+        }
+
+        /// Get Pharse Account Link by Pharse Id
+        #[ink(message)]
+        pub fn get_pharse_account_link_by_pharse_id( 
+            &self,
+            pharse_id: u64, 
+            account_index: u64
+        ) -> AccountId {
+            return self.pharse_account_link.get_by_pharse_id(&pharse_id, &account_index).unwrap();
+        }
+
+        /// Get Pharse Account Link by Account
+        #[ink(message)]
+        pub fn get_pharse_account_link_by_account( 
+            &self,
+            account: AccountId, 
+            account_index: u64
+        ) -> u64 {
+            return self.pharse_account_link.get_by_account(&account, &account_index).unwrap();
         }
 
         /// Get Default Pharse Id
@@ -275,7 +355,7 @@ pub mod launchpad_psp34_nft_standard {
             if self.public_pharse.get(&pharse_id).is_none() {
                 return None;
             }
-            return self.public_pharse.get(&pharse_id).unwrap();
+            return Some(self.public_pharse.get(&pharse_id).unwrap());
         }
 
         /// Get Whitelist Count
@@ -447,6 +527,7 @@ pub mod launchpad_psp34_nft_standard {
         fn get_attribute_count(&self) -> u32 {
             self.attribute_count
         }
+
         ///Get Attribute Name
         #[ink(message)]
         fn get_attribute_name(&self, index:u32) -> String {
@@ -458,6 +539,7 @@ pub mod launchpad_psp34_nft_standard {
                 String::from("")
             }
         }
+
         /// Get URI from token ID
         #[ink(message)]
         fn token_uri(
