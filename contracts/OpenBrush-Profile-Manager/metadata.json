@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x7141bc896ce6898a956e0f1dd9ca1498f03d94b478f3dd207df263d41e08e805",
+    "hash": "0xe7de4bf40c73a3a68c24d605ac62db1270f0af1cb37699d9c9f62053f92cb665",
     "language": "ink! 3.2.0",
     "compiler": "rustc 1.63.0-nightly"
   },
@@ -235,12 +235,21 @@
           },
           {
             "layout": {
-              "cell": {
-                "key": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "ty": 4
+              "struct": {
+                "fields": [
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0xd6f6a66103e52d940145ccd243a105f3980c9a81611e500edaca89c0d6edaa71",
+                        "ty": 4
+                      }
+                    },
+                    "name": "attributes"
+                  }
+                ]
               }
             },
-            "name": "attributes"
+            "name": "manager"
           }
         ]
       }

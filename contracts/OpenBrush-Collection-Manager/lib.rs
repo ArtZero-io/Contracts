@@ -53,11 +53,10 @@ pub mod artzero_collection_manager {
         PartialOrd,
         Eq,
         PartialEq,
-        Default,
         PackedLayout,
         SpreadLayout,
         scale::Encode,
-        scale::Decode,
+        scale::Decode
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Collection {
@@ -70,11 +69,11 @@ pub mod artzero_collection_manager {
         show_on_chain_metadata: bool
     }
 
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
-    #[ink(storage)]
-    pub struct ArtZeroCollectionManager{
-        #[OwnableStorageField]
-        ownable: OwnableData,
+    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroCollectionManager");
+
+    #[derive(Default)]
+    #[openbrush::storage(STORAGE_KEY)]
+    struct Manager {
         standard_nft_hash: Hash,
         admin_address: AccountId,
         collection_count: u64,
@@ -86,6 +85,15 @@ pub mod artzero_collection_manager {
         max_royal_fee_rate: u32,
         active_collection_count: u64,
         attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
+        _reserved: Option<()>,
+    }
+
+    #[derive(Default, SpreadAllocate, OwnableStorage)]
+    #[ink(storage)]
+    pub struct ArtZeroCollectionManager{
+        #[OwnableStorageField]
+        ownable: OwnableData,
+        manager: Manager
     }
 
     impl Ownable for ArtZeroCollectionManager {}
@@ -114,7 +122,7 @@ pub mod artzero_collection_manager {
     impl ArtZeroCollectionManager {
         #[ink(constructor)]
         pub fn new(
-            admin_address: AccountId, 
+            admin_address: AccountId,
             owner_address: AccountId,
             standard_nft_hash: Hash,
             simple_mode_adding_fee: Balance,
@@ -137,13 +145,13 @@ pub mod artzero_collection_manager {
             advance_mode_adding_fee: Balance,
             max_royal_fee_rate: u32
         ) -> Result<(), OwnableError> {
-            self.collection_count = 0;
-            self.active_collection_count = 0;
-            self.simple_mode_adding_fee = simple_mode_adding_fee;
-            self.advance_mode_adding_fee = advance_mode_adding_fee;
-            self.admin_address = admin_address;
-            self.standard_nft_hash = standard_nft_hash;
-            self.max_royal_fee_rate = max_royal_fee_rate;
+            self.manager.collection_count = 0;
+            self.manager.active_collection_count = 0;
+            self.manager.simple_mode_adding_fee = simple_mode_adding_fee;
+            self.manager.advance_mode_adding_fee = advance_mode_adding_fee;
+            self.manager.admin_address = admin_address;
+            self.manager.standard_nft_hash = standard_nft_hash;
+            self.manager.max_royal_fee_rate = max_royal_fee_rate;
             Ok(())
         }
 
@@ -161,11 +169,11 @@ pub mod artzero_collection_manager {
             royal_fee:u32
         ) -> Result<(), Error> {
 
-            if self.simple_mode_adding_fee != self.env().transferred_value() {
+            if self.manager.simple_mode_adding_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
             //fee must equal or less than 5%
-            if royal_fee > self.max_royal_fee_rate {
+            if royal_fee > self.manager.max_royal_fee_rate {
                 return Err(Error::InvalidRoyalFee);
             }
 
@@ -174,7 +182,7 @@ pub mod artzero_collection_manager {
             let hash = hash.as_ref();
             let contract = Psp34NftRef::new(collection_owner,nft_name,nft_symbol)
                 .endowment(0)
-                .code_hash(self.standard_nft_hash)
+                .code_hash(self.manager.standard_nft_hash)
                 .salt_bytes(&hash[..4])
                 .instantiate()
                 .unwrap_or_else(|error| {
@@ -186,20 +194,20 @@ pub mod artzero_collection_manager {
             let contract_account:AccountId = contract.to_account_id();
 
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
-            self.collection_count += 1;
-            self.active_collection_count += 1;
-            self.collections_by_id.insert(&self.collection_count, &contract_account);
+            self.manager.collection_count += 1;
+            self.manager.active_collection_count += 1;
+            self.manager.collections_by_id.insert(&self.manager.collection_count, &contract_account);
 
-            let collections_by_owner = self.collections_by_owner.get(&collection_owner);
+            let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if collections_by_owner.is_none(){
                 let mut collections = Vec::<AccountId>::new();
                 collections.push(contract_account);
-                self.collections_by_owner.insert(&collection_owner, &collections);
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             }
             else{
                 let mut collections = collections_by_owner.unwrap();
                 collections.push(contract_account);
-                self.collections_by_owner.insert(&collection_owner, &collections);
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             }
 
             let new_collection = Collection {
@@ -212,7 +220,7 @@ pub mod artzero_collection_manager {
                 show_on_chain_metadata: true
             };
 
-            self.collections.insert(&contract_account, &new_collection);
+            self.manager.collections.insert(&contract_account, &new_collection);
 
             if self.set_multiple_attributes(contract_account, attributes, attribute_vals).is_err() {
                 panic!(
@@ -243,30 +251,30 @@ pub mod artzero_collection_manager {
             is_collect_royal_fee: bool,
             royal_fee:u32
         ) -> Result<(), Error> {
-            if self.advance_mode_adding_fee != self.env().transferred_value() {
+            if self.manager.advance_mode_adding_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
-            if self.collections.get(&nft_contract_address).is_some(){
+            if self.manager.collections.get(&nft_contract_address).is_some(){
                 return Err(Error::AddressAlreadyExists);
             }
             //fee must equal or less than 5%
-            if royal_fee > self.max_royal_fee_rate {
+            if royal_fee > self.manager.max_royal_fee_rate {
                 return Err(Error::InvalidRoyalFee);
             }
             //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
-            self.collection_count += 1;
-            self.collections_by_id.insert(&self.collection_count, &nft_contract_address);
+            self.manager.collection_count += 1;
+            self.manager.collections_by_id.insert(&self.manager.collection_count, &nft_contract_address);
 
-            let collections_by_owner = self.collections_by_owner.get(&collection_owner);
+            let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if collections_by_owner.is_none(){
                 let mut collections = Vec::<AccountId>::new();
                 collections.push(nft_contract_address);
-                self.collections_by_owner.insert(&collection_owner, &collections);
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             }
             else{
                 let mut collections = collections_by_owner.unwrap();
                 collections.push(nft_contract_address);
-                self.collections_by_owner.insert(&collection_owner, &collections);
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             }
 
             let new_collection = Collection {
@@ -279,7 +287,7 @@ pub mod artzero_collection_manager {
                 show_on_chain_metadata: false
             };
 
-            self.collections.insert(&nft_contract_address, &new_collection);
+            self.manager.collections.insert(&nft_contract_address, &new_collection);
 
             if self.set_multiple_attributes(nft_contract_address, attributes, attribute_vals).is_err() {
                 panic!(
@@ -305,14 +313,14 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             new_owner: AccountId
         ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            let mut collection = self.collections.get(&contract_address).unwrap();
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
 
-            if  self.env().caller() == self.admin_address {
+            if  self.env().caller() == self.manager.admin_address {
                     collection.collection_owner = new_owner;
-                    self.collections.insert(&contract_address, &collection);
+                    self.manager.collections.insert(&contract_address, &collection);
                     Ok(())
              }
              else{
@@ -326,14 +334,14 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             nft_contract_address: AccountId
         ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            let mut collection = self.collections.get(&contract_address).unwrap();
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
 
-            if  self.env().caller() == self.admin_address {
+            if  self.env().caller() == self.manager.admin_address {
                 collection.nft_contract_address = nft_contract_address;
-                self.collections.insert(&contract_address, &collection);
+                self.manager.collections.insert(&contract_address, &collection);
                 Ok(())
              }
              else{
@@ -347,11 +355,11 @@ pub mod artzero_collection_manager {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            let collection = self.collections.get(&contract_address).unwrap();
-            if collection.collection_owner == self.env().caller() || self.admin_address == self.env().caller() {
+            let collection = self.manager.collections.get(&contract_address).unwrap();
+            if collection.collection_owner == self.env().caller() || self.manager.admin_address == self.env().caller() {
                 let length = attributes.len();
                 for i in 0..length {
                     let attribute = attributes[i].clone();
@@ -374,7 +382,7 @@ pub mod artzero_collection_manager {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.attributes.get(&(account,attribute.into_bytes()));
+                let value = self.manager.attributes.get(&(account,attribute.into_bytes()));
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
                 }
@@ -388,7 +396,7 @@ pub mod artzero_collection_manager {
         }
 
         fn _set_attribute(&mut self, account: AccountId,key: Vec<u8>, value: Vec<u8>) {
-            self.attributes.insert(&(account,key), &value);
+            self.manager.attributes.insert(&(account,key), &value);
         }
 
 
@@ -399,13 +407,13 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             contract_type: u8
         ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            let mut collection = self.collections.get(&contract_address).unwrap();
-            if  self.env().caller() == self.admin_address {
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
+            if  self.env().caller() == self.manager.admin_address {
                     collection.contract_type = contract_type;
-                    self.collections.insert(&contract_address, &collection);
+                    self.manager.collections.insert(&contract_address, &collection);
                     Ok(())
              }
              else{
@@ -421,13 +429,13 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_collect_royal_fee: bool
         ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            let mut collection = self.collections.get(&contract_address).unwrap();
-            if  self.env().caller() == self.admin_address {
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
+            if  self.env().caller() == self.manager.admin_address {
                     collection.is_collect_royal_fee = is_collect_royal_fee;
-                    self.collections.insert(&contract_address, &collection);
+                    self.manager.collections.insert(&contract_address, &collection);
                     Ok(())
              }
              else{
@@ -443,18 +451,18 @@ pub mod artzero_collection_manager {
             new_fee: u32
         ) -> Result<(), Error>  {
             //fee must equal or less than 5%
-            if new_fee > self.max_royal_fee_rate {
+            if new_fee > self.manager.max_royal_fee_rate {
                   return Err(Error::InvalidFee);
              }
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                  return Err(Error::CollectionNotExist);
              }
 
-            let mut collection = self.collections.get(&contract_address).unwrap();
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
 
-            if  self.env().caller() == self.admin_address {
+            if  self.env().caller() == self.manager.admin_address {
                     collection.royal_fee = new_fee;
-                    self.collections.insert(&contract_address, &collection);
+                    self.manager.collections.insert(&contract_address, &collection);
                     Ok(())
              }
              else{
@@ -469,16 +477,16 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             show_on_chain_metadata: bool
         ) -> Result<(), Error>  {
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                  return Err(Error::CollectionNotExist);
              }
 
-            let mut collection = self.collections.get(&contract_address).unwrap();
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
 
             if  self.env().caller() == collection.collection_owner ||
-                self.env().caller() == self.admin_address {
+                self.env().caller() == self.manager.admin_address {
                     collection.show_on_chain_metadata = show_on_chain_metadata;
-                    self.collections.insert(&contract_address, &collection);
+                    self.manager.collections.insert(&contract_address, &collection);
                     Ok(())
              }
              else{
@@ -495,22 +503,22 @@ pub mod artzero_collection_manager {
             is_active: bool
         ) -> Result<(), Error>  {
 
-            if self.collections.get(&contract_address).is_none(){
+            if self.manager.collections.get(&contract_address).is_none(){
                 return Err(Error::CollectionNotExist);
             }
-            if  self.env().caller() != self.admin_address {
+            if  self.env().caller() != self.manager.admin_address {
                  return Err(Error::OnlyAdmin);
              }
-            let mut collection = self.collections.get(&contract_address).unwrap();
+            let mut collection = self.manager.collections.get(&contract_address).unwrap();
             assert!(is_active != collection.is_active);
             collection.is_active = is_active;
 
             if is_active == true {
-                self.active_collection_count = self.active_collection_count.checked_add(1).unwrap();
+                self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
             } else {
-                self.active_collection_count = self.active_collection_count.checked_sub(1).unwrap();
+                self.manager.active_collection_count = self.manager.active_collection_count.checked_sub(1).unwrap();
             }
-            self.collections.insert(&contract_address, &collection);
+            self.manager.collections.insert(&contract_address, &collection);
             Ok(())
         }
 
@@ -519,7 +527,7 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_simple_mode_adding_fee(&mut self,simple_mode_adding_fee: Balance)  -> Result<(), Error> {
-            self.simple_mode_adding_fee = simple_mode_adding_fee;
+            self.manager.simple_mode_adding_fee = simple_mode_adding_fee;
             Ok(())
         }
 
@@ -527,7 +535,7 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_standard_nft_hash(&mut self,standard_nft_hash: Hash)  -> Result<(), Error> {
-            self.standard_nft_hash = standard_nft_hash;
+            self.manager.standard_nft_hash = standard_nft_hash;
             Ok(())
         }
 
@@ -535,7 +543,7 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_advance_mode_adding_fee(&mut self,advance_mode_adding_fee: Balance)  -> Result<(), Error> {
-            self.advance_mode_adding_fee = advance_mode_adding_fee;
+            self.manager.advance_mode_adding_fee = advance_mode_adding_fee;
             Ok(())
         }
 
@@ -543,7 +551,7 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_max_royal_fee_rate(&mut self,max_royal_fee_rate: u32)  -> Result<(), Error> {
-            self.max_royal_fee_rate = max_royal_fee_rate;
+            self.manager.max_royal_fee_rate = max_royal_fee_rate;
             Ok(())
         }
         /// Update Admin Address - only Owner
@@ -553,7 +561,7 @@ pub mod artzero_collection_manager {
             &mut self,
             admin_address: AccountId
         )  -> Result<(), Error> {
-            self.admin_address = admin_address;
+            self.manager.admin_address = admin_address;
             Ok(())
         }
         /// Withdraw Fees - only Owner
@@ -576,12 +584,12 @@ pub mod artzero_collection_manager {
         /// Get Collection Information by Collection Address (NFT address)
         #[ink(message)]
         pub fn get_collection_by_address(&self,nft_contract_address: AccountId) -> Option<Collection> {
-            return self.collections.get(&nft_contract_address);
+            return self.manager.collections.get(&nft_contract_address);
         }
         /// Get All Collection Addresses by Owner Address
         #[ink(message)]
         pub fn get_collections_by_owner(&self,owner_address: AccountId) -> Option<Vec<AccountId>> {
-            return self.collections_by_owner.get(&owner_address);
+            return self.manager.collections_by_owner.get(&owner_address);
         }
 
         /// Get Standard Nft Hash
@@ -589,7 +597,7 @@ pub mod artzero_collection_manager {
         pub fn get_standard_nft_hash(
             &self
         ) -> Hash {
-            return self.standard_nft_hash;
+            return self.manager.standard_nft_hash;
         }
 
         /// Get Collection Contract by ID
@@ -598,7 +606,7 @@ pub mod artzero_collection_manager {
             &self,
             id: u64
         ) -> Option<AccountId> {
-            return self.collections_by_id.get(&id);
+            return self.manager.collections_by_id.get(&id);
         }
 
         /// Get Collection Count
@@ -606,7 +614,7 @@ pub mod artzero_collection_manager {
         pub fn get_collection_count(
             &self
         ) -> u64 {
-            return self.collection_count;
+            return self.manager.collection_count;
         }
 
         /// Get Collection Count
@@ -614,7 +622,7 @@ pub mod artzero_collection_manager {
         pub fn get_active_collection_count(
             &self
         ) -> u64 {
-            return self.active_collection_count;
+            return self.manager.active_collection_count;
         }
 
         ///Get Simple Mode Adding Fee
@@ -622,15 +630,15 @@ pub mod artzero_collection_manager {
         pub fn get_simple_mode_adding_fee(
             &self
         ) -> Balance {
-            return self.simple_mode_adding_fee;
+            return self.manager.simple_mode_adding_fee;
         }
-        
+
         ///Get Advance Mode Adding Fee
         #[ink(message)]
         pub fn get_advance_mode_adding_fee(
             &self
         ) -> Balance {
-            return self.advance_mode_adding_fee;
+            return self.manager.advance_mode_adding_fee;
         }
 
         /// Get Admin Address
@@ -638,7 +646,7 @@ pub mod artzero_collection_manager {
         pub fn get_admin_address(
             &self
         ) -> AccountId {
-            return self.admin_address;
+            return self.manager.admin_address;
         }
 
         /// Get Royal Max Fee
@@ -646,7 +654,7 @@ pub mod artzero_collection_manager {
         pub fn get_max_royal_fee_rate(
             &self
         ) -> u32 {
-            return self.max_royal_fee_rate;
+            return self.manager.max_royal_fee_rate;
         }
 
     }
@@ -655,11 +663,11 @@ pub mod artzero_collection_manager {
         ///Get royal fee of the Collection
         #[ink(message)]
         fn get_royal_fee(&self,nft_contract_address: AccountId) -> u32 {
-            if self.collections.get(&nft_contract_address).is_none(){
+            if self.manager.collections.get(&nft_contract_address).is_none(){
                  return 0;
              }
 
-            let collection = self.collections.get(&nft_contract_address).unwrap();
+            let collection = self.manager.collections.get(&nft_contract_address).unwrap();
             if  !collection.is_collect_royal_fee ||
                 !collection.is_active{
                 return 0;
@@ -671,32 +679,32 @@ pub mod artzero_collection_manager {
         ///Check if the Collection is active not
         #[ink(message)]
         fn is_active(&self,nft_contract_address: AccountId) -> bool {
-            if self.collections.get(&nft_contract_address).is_none(){
+            if self.manager.collections.get(&nft_contract_address).is_none(){
                  return false;
              }
 
-            let collection = self.collections.get(&nft_contract_address).unwrap();
+            let collection = self.manager.collections.get(&nft_contract_address).unwrap();
             return collection.is_active;
         }
 
         ///Get NFT Contract Type 1 or 2 for PSP34
         #[ink(message)]
         fn get_contract_type(&self,nft_contract_address: AccountId) -> u8 {
-            if self.collections.get(&nft_contract_address).is_none(){
+            if self.manager.collections.get(&nft_contract_address).is_none(){
                  return 0;
              }
 
-            let collection = self.collections.get(&nft_contract_address).unwrap();
+            let collection = self.manager.collections.get(&nft_contract_address).unwrap();
             return collection.contract_type;
         }
 
         /// Get Collection Owner by Collection Address (NFT address)
         #[ink(message)]
         fn get_collection_owner(&self,nft_contract_address: AccountId) -> Option<AccountId> {
-            if self.collections.get(&nft_contract_address).is_none(){
+            if self.manager.collections.get(&nft_contract_address).is_none(){
                  return None;
              }
-            let collection = self.collections.get(&nft_contract_address).unwrap();
+            let collection = self.manager.collections.get(&nft_contract_address).unwrap();
             Some(collection.collection_owner)
         }
     }

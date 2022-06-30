@@ -25,12 +25,20 @@ pub mod artzero_profile_manager {
         }
     }
 
+    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroProfileManager");
+
+    #[derive(Default)]
+    #[openbrush::storage(STORAGE_KEY)]
+    struct Manager {
+        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>
+    }
+
     #[derive(Default, SpreadAllocate, OwnableStorage)]
     #[ink(storage)]
     pub struct ArtZeroProfileManager{
         #[OwnableStorageField]
         ownable: OwnableData,
-        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>
+        manager: Manager
     }
 
     impl Ownable for ArtZeroProfileManager {}
@@ -66,7 +74,7 @@ pub mod artzero_profile_manager {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.attributes.get(&(account,attribute.into_bytes()));
+                let value = self.manager.attributes.get(&(account,attribute.into_bytes()));
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
                 }
@@ -80,7 +88,7 @@ pub mod artzero_profile_manager {
         }
 
         fn _set_attribute(&mut self, account: AccountId,key: Vec<u8>, value: Vec<u8>) {
-            self.attributes.insert(&(account,key), &value);
+            self.manager.attributes.insert(&(account,key), &value);
         }
     }
 }

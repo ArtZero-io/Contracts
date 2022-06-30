@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x271ee1d724dfd772895772ff57685db64e74250ea86036e50797c5d75d0e2b2b",
+    "hash": "0x7dfbd006b02b4c08106d7a4d8a814794ff0b46b4d284d0863292ca513121a846",
     "language": "ink! 3.2.0",
     "compiler": "rustc 1.63.0-nightly"
   },
@@ -777,6 +777,23 @@
         {
           "args": [],
           "docs": [
+            " Returns the address of the current owner."
+          ],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [
             " Leaves the contract without owner. It will not be possible to call",
             " owner's functions anymore. Can only be called by the current owner.",
             "",
@@ -800,51 +817,6 @@
             "type": 15
           },
           "selector": "0x5e228753"
-        },
-        {
-          "args": [],
-          "docs": [
-            " Returns the address of the current owner."
-          ],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [
-            {
-              "label": "account",
-              "type": {
-                "displayName": [
-                  "crossartzerostaking_external",
-                  "GetTotalStakedByAccountInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            "Get User NFT staked in the contract"
-          ],
-          "label": "CrossArtZeroStaking::get_total_staked_by_account",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "crossartzerostaking_external",
-              "GetTotalStakedByAccountOutput"
-            ],
-            "type": 6
-          },
-          "selector": "0x487f1cac"
         },
         {
           "args": [
@@ -873,6 +845,34 @@
             "type": 6
           },
           "selector": "0x3d9ff06d"
+        },
+        {
+          "args": [
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "crossartzerostaking_external",
+                  "GetTotalStakedByAccountInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get User NFT staked in the contract"
+          ],
+          "label": "CrossArtZeroStaking::get_total_staked_by_account",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerostaking_external",
+              "GetTotalStakedByAccountOutput"
+            ],
+            "type": 6
+          },
+          "selector": "0x487f1cac"
         }
       ]
     },
@@ -925,165 +925,200 @@
           },
           {
             "layout": {
-              "cell": {
-                "key": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "ty": 4
-              }
-            },
-            "name": "is_locked"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0100000000000000000000000000000000000000000000000000000000000000",
-                "ty": 0
-              }
-            },
-            "name": "admin_address"
-          },
-          {
-            "layout": {
               "struct": {
                 "fields": [
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0200000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 5
+                        "key": "0x75a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 4
                       }
                     },
-                    "name": "account_to_index"
+                    "name": "is_locked"
                   },
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0300000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 8
+                        "key": "0x76a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 0
                       }
                     },
-                    "name": "index_to_account"
-                  }
-                ]
-              }
-            },
-            "name": "staked_accounts"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0400000000000000000000000000000000000000000000000000000000000000",
-                "ty": 6
-              }
-            },
-            "name": "staked_accounts_last_index"
-          },
-          {
-            "layout": {
-              "struct": {
-                "fields": [
+                    "name": "admin_address"
+                  },
                   {
                     "layout": {
-                      "cell": {
-                        "key": "0x0500000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 9
+                      "struct": {
+                        "fields": [
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x77a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                "ty": 5
+                              }
+                            },
+                            "name": "account_to_index"
+                          },
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x78a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                "ty": 8
+                              }
+                            },
+                            "name": "index_to_account"
+                          }
+                        ]
                       }
                     },
-                    "name": "id_to_index"
+                    "name": "staked_accounts"
                   },
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0600000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 9
+                        "key": "0x79a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 6
                       }
                     },
-                    "name": "index_to_id"
-                  }
-                ]
-              }
-            },
-            "name": "staking_list"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0700000000000000000000000000000000000000000000000000000000000000",
-                "ty": 12
-              }
-            },
-            "name": "staking_list_last_index"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0800000000000000000000000000000000000000000000000000000000000000",
-                "ty": 0
-              }
-            },
-            "name": "nft_contract_address"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
-                "ty": 6
-              }
-            },
-            "name": "total_staked"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0a00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 6
-              }
-            },
-            "name": "limit_unstake_time"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0b00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 13
-              }
-            },
-            "name": "pending_unstaking_list"
-          },
-          {
-            "layout": {
-              "struct": {
-                "fields": [
+                    "name": "staked_accounts_last_index"
+                  },
                   {
                     "layout": {
-                      "cell": {
-                        "key": "0x0c00000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 9
+                      "struct": {
+                        "fields": [
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x7aa8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                "ty": 9
+                              }
+                            },
+                            "name": "id_to_index"
+                          },
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x7ba8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                "ty": 9
+                              }
+                            },
+                            "name": "index_to_id"
+                          }
+                        ]
                       }
                     },
-                    "name": "id_to_index"
+                    "name": "staking_list"
                   },
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0d00000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 9
+                        "key": "0x7ca8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 12
                       }
                     },
-                    "name": "index_to_id"
+                    "name": "staking_list_last_index"
+                  },
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x7da8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 0
+                      }
+                    },
+                    "name": "nft_contract_address"
+                  },
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x7ea8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 6
+                      }
+                    },
+                    "name": "total_staked"
+                  },
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x7fa8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 6
+                      }
+                    },
+                    "name": "limit_unstake_time"
+                  },
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x80a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 13
+                      }
+                    },
+                    "name": "pending_unstaking_list"
+                  },
+                  {
+                    "layout": {
+                      "struct": {
+                        "fields": [
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x81a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                "ty": 9
+                              }
+                            },
+                            "name": "id_to_index"
+                          },
+                          {
+                            "layout": {
+                              "cell": {
+                                "key": "0x82a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                "ty": 9
+                              }
+                            },
+                            "name": "index_to_id"
+                          }
+                        ]
+                      }
+                    },
+                    "name": "pending_unstaking_list_token_index"
+                  },
+                  {
+                    "layout": {
+                      "cell": {
+                        "key": "0x83a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "ty": 12
+                      }
+                    },
+                    "name": "pending_unstaking_list_token_last_index"
+                  },
+                  {
+                    "layout": {
+                      "enum": {
+                        "dispatchKey": "0x84a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                        "variants": {
+                          "0": {
+                            "fields": [
+                              {
+                                "layout": {
+                                  "cell": {
+                                    "key": "0x85a8af34f792d9122e22d4ecbeb5d9eecdad8988d17cc21e7f01474d6d3300b2",
+                                    "ty": 3
+                                  }
+                                },
+                                "name": null
+                              }
+                            ]
+                          },
+                          "1": {
+                            "fields": []
+                          }
+                        }
+                      }
+                    },
+                    "name": "_reserved"
                   }
                 ]
               }
             },
-            "name": "pending_unstaking_list_token_index"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0e00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 12
-              }
-            },
-            "name": "pending_unstaking_list_token_last_index"
+            "name": "manager"
           }
         ]
       }
