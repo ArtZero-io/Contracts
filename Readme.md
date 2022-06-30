@@ -1,37 +1,38 @@
-Contract Addresses:
+Code Hashes and Contract Addresses:
+
+# Proxy Contract Hash Code
+0x949a226723dfd260e7be6f192d0223de70a92667c8e200abe08773ff7982942b
 
 # Profile Contract
-0x7141bc896ce6898a956e0f1dd9ca1498f03d94b478f3dd207df263d41e08e805
-5CTLLyrpNLCWZzFCKUv7aa17ov3KdZFD6R8omiKSQQahW61F
+0xe7de4bf40c73a3a68c24d605ac62db1270f0af1cb37699d9c9f62053f92cb665
+5ELq3WCQvLyQ6LqZASQXH6vo1rtELtC2dYjF6pPziGSFAURT
 
-# ArtZero NFT Contract / Mint
-0xa5b43011e540569dd4a01f861fd1d9056466e7e8dd3b951702b2ef132e8ac78f
-5EiDzMtbuH96ym8HWRxhBQPG7CyhVaUrQjfzk5vuWs5zbCbR
+# ArtZero NFT Contract / Mint (PROXY)
+0xe1c413ad59256a7fcdd3fc0350b19ff6a6169215798fde1dfec4196a76fcadf4
+5HCQaquu3ZCDNgGCSrVgu1UgfqCDJ1Z8tFAi1cDK3JV8cd7G
 
-# ArtZero NFT Staking Contract
-0x271ee1d724dfd772895772ff57685db64e74250ea86036e50797c5d75d0e2b2b
-5HNAdMFqvvvc76x7hR8W6e4spAjbZECwT4mNQwtJUJBYQdpk
-
-# Collection Manager
-0x88715994a79fe3dd4f01ddb61e541d3828ab896dabdc0862772e8905534c62e6
-5G4Yfmsrtjh3AqZzEBLTgdBuJ5Mj7JgzNC3XQiCoDzSdeZeh
-
-# Marketplace Contract
-0xd27125a4cedcdb951192f561d48583d9e6d67697d6a6214e35cd6a27a2d8cacf
-5GPqMBWQwCkRKKq7KwF7qauzrr7fB2hhbE1VhYUH8r4uqST8
+# ArtZero NFT Staking Contract (PROXY)
+0x7dfbd006b02b4c08106d7a4d8a814794ff0b46b4d284d0863292ca513121a846
+5G8EFZR3Prv63cao4hGx8zVCmMAvHU4rHcWkqCgqWxBXTz8n
 
 # ArtZero NFT Standard Contract
 0xe41f6c139cc42e015ba4575b885cb71fce8659946575cd1f9bc1a9e3beee02ca
 5F1pXynBWFUBQqrUSQ61xAE7hPmwuABjzcK9vY8fbejNTRgG
 
-# Proxy Contract
-0xbafd9b283b39dd6d4642831d7f9622a78ceb215776017b2ba05255752656e7eb
+# Collection Manager (PROXY)
+0x1d903ac69e3e097056f6480ead141ad8fb9de7f564e933dc078a25b89d103d8e
+5CY2xoR8QwrwpphqioYLfL6A5jHn9meKQibWQBYtfNA4KZak
+
+# Marketplace Contract (PROXY)
+0xfb91ce3d946405b9203f23bd867da097a6911e5b924d4025abe61d9ea92c8d56
+5HKXsapeuLDo3sW5qaGTcQwjcsJy9hNGskfRaxEv3C9fzpUP
+
 
 Deploy Steps:
 1. Deploy profile Contract
-2. Deploy Artzero NFT Contract
+2. Deploy Artzero NFT Contract via Proxy
 Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
 3. Deploy NFT Standard Contract
-4. Deploy Collection Contract
-5. Deploy Staking Contract
-6. Deploy Marketplace Contract
+4. Deploy Collection Contract via Proxy
+5. Deploy Staking Contract via Proxy
+6. Deploy Marketplace Contract via Proxy
