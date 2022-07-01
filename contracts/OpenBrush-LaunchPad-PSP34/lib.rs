@@ -67,11 +67,11 @@ pub mod artzero_launchpad_psp34 {
         end_time: Timestamp
     }
 
-    #[ink(storage)]
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
-    pub struct ArtZeroLaunchPadPSP34 {
-        #[OwnableStorageField]
-        ownable: OwnableData,
+    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroLaunchPadPSP34");
+
+    #[derive(Default)]
+    #[openbrush::storage(STORAGE_KEY)]
+    struct Manager {
         admin_address: AccountId,
         standard_nft_hash: Hash,
         project_count: u64,
@@ -79,7 +79,16 @@ pub mod artzero_launchpad_psp34 {
         projects_by_id: Mapping<u64, AccountId>,
         projects_by_owner: Mapping<AccountId, Vec<AccountId>>,
         attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
-        active_project_count: u64
+        active_project_count: u64,
+        _reserved: Option<()>
+    }
+
+    #[ink(storage)]
+    #[derive(Default, SpreadAllocate, OwnableStorage)]
+    pub struct ArtZeroLaunchPadPSP34 {
+        #[OwnableStorageField]
+        ownable: OwnableData,
+        manager: Manager
     }
 
     impl Ownable for ArtZeroLaunchPadPSP34 {}
@@ -104,10 +113,10 @@ pub mod artzero_launchpad_psp34 {
             admin_address: AccountId,
             standard_nft_hash: Hash
         ) -> Result<(), OwnableError> {
-            self.admin_address = admin_address;
-            self.standard_nft_hash = standard_nft_hash;
-            self.project_count = 0;
-            self.active_project_count = 0;
+            self.manager.admin_address = admin_address;
+            self.manager.standard_nft_hash = standard_nft_hash;
+            self.manager.project_count = 0;
+            self.manager.active_project_count = 0;
             Ok(())
         }
 
@@ -128,7 +137,7 @@ pub mod artzero_launchpad_psp34 {
             attributes: Vec<String>,
             attribute_vals: Vec<String> 
         ) -> Result<(), Error> {
-            if start_time >= end_time {
+            if start_time >= end_time || end_time <= Self::env().block_timestamp() {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
 
@@ -137,7 +146,7 @@ pub mod artzero_launchpad_psp34 {
             let hash = hash.as_ref();
             let contract = LaunchPadPsp34NftStandardRef::new(project_owner, total_supply)
                 .endowment(0)
-                .code_hash(self.standard_nft_hash)
+                .code_hash(self.manager.standard_nft_hash)
                 .salt_bytes(&hash[..4])
                 .instantiate()
                 .unwrap_or_else(|error| {
@@ -147,29 +156,24 @@ pub mod artzero_launchpad_psp34 {
                     )
                 });
             let contract_account:AccountId = contract.to_account_id();
-            self.project_count += 1;
-            self.projects_by_id.insert(&self.project_count, &contract_account);
-            let projects_by_owner = self.projects_by_owner.get(&project_owner);
+            self.manager.project_count += 1;
+            self.manager.projects_by_id.insert(&self.manager.project_count, &contract_account);
+            let projects_by_owner = self.manager.projects_by_owner.get(&project_owner);
             if projects_by_owner.is_none() {
                 let mut projects = Vec::<AccountId>::new();
                 projects.push(contract_account);
-                self.projects_by_owner.insert(&project_owner, &projects);
+                self.manager.projects_by_owner.insert(&project_owner, &projects);
             } else {
                 let mut projects = projects_by_owner.unwrap();
                 projects.push(contract_account);
-                self.projects_by_owner.insert(&project_owner, &projects);
-            }
-
-            let mut project_type = 1;
-            if end_time <= Self::env().block_timestamp() {
-                project_type = 2;
+                self.manager.projects_by_owner.insert(&project_owner, &projects);
             }
 
             let new_project = Project {
                 is_active: false,
                 name: name.into_bytes(),
                 description: description.into_bytes(),
-                project_type: project_type, // 1 is Live Project, 2 is Ended Project
+                project_type: 1, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
                 total_supply: total_supply,
                 roadmaps: roadmaps.into_bytes(),
@@ -177,7 +181,7 @@ pub mod artzero_launchpad_psp34 {
                 start_time: start_time,
                 end_time: end_time
             };
-            self.projects.insert(&contract_account, &new_project);
+            self.manager.projects.insert(&contract_account, &new_project);
 
             if self.set_multiple_attributes(contract_account, attributes, attribute_vals).is_err() {
                 panic!(
@@ -206,14 +210,14 @@ pub mod artzero_launchpad_psp34 {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
 
-            if self.projects.get(&contract_address).is_none(){
+            if self.manager.projects.get(&contract_address).is_none(){
                 return Err(Error::ProjectNotExist);
             }            
 
-            let mut project = self.projects.get(&contract_address).unwrap();
+            let mut project = self.manager.projects.get(&contract_address).unwrap();
 
             if  project.project_owner == self.env().caller() ||
-                self.admin_address == self.env().caller() {
+                self.manager.admin_address == self.env().caller() {
                     assert!(project.project_type != 2);
                     
                     if  project.end_time <= Self::env().block_timestamp() {
@@ -223,7 +227,7 @@ pub mod artzero_launchpad_psp34 {
                         project.description = description.into_bytes();
                         project.roadmaps = roadmaps.into_bytes();
                         project.team_members = team_members.into_bytes();
-                        self.projects.insert(&contract_address, &project);
+                        self.manager.projects.insert(&contract_address, &project);
 
                         if self.set_multiple_attributes(contract_address, attributes, attribute_vals).is_err() {
                             panic!(
@@ -249,7 +253,7 @@ pub mod artzero_launchpad_psp34 {
             &mut self,
             admin_address: AccountId
         ) -> Result<(), Error>  {
-            self.admin_address = admin_address;
+            self.manager.admin_address = admin_address;
             Ok(())
         }
 
@@ -260,7 +264,7 @@ pub mod artzero_launchpad_psp34 {
             &mut self,
             standard_nft_hash: Hash
         ) -> Result<(), Error>  {
-            self.standard_nft_hash = standard_nft_hash;
+            self.manager.standard_nft_hash = standard_nft_hash;
             Ok(())
         }
 
@@ -271,7 +275,7 @@ pub mod artzero_launchpad_psp34 {
             key: Vec<u8>, 
             value: Vec<u8>
         ) {
-            self.attributes.insert(&(account,key), &value);
+            self.manager.attributes.insert(&(account,key), &value);
         }
 
         /// Set multiple attributes type string - Only admin and project owner
@@ -285,11 +289,11 @@ pub mod artzero_launchpad_psp34 {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
-            if self.projects.get(&contract_address).is_none() {
+            if self.manager.projects.get(&contract_address).is_none() {
                 return Err(Error::ProjectNotExist);
             }
-            let project = self.projects.get(&contract_address).unwrap();
-            if project.project_owner == self.env().caller() || self.admin_address == self.env().caller() {
+            let project = self.manager.projects.get(&contract_address).unwrap();
+            if project.project_owner == self.env().caller() || self.manager.admin_address == self.env().caller() {
                 let length = attributes.len();
                 for i in 0..length {
                     let attribute = attributes[i].clone();
@@ -305,30 +309,29 @@ pub mod artzero_launchpad_psp34 {
 
         /// Update is active project - Only Admin
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn update_is_active_project(
             &mut self,
             is_active: bool,
             contract_address: AccountId
         ) -> Result<(), Error>  {
-            if self.projects.get(&contract_address).is_none(){
+            if self.manager.projects.get(&contract_address).is_none(){
                 return Err(Error::ProjectNotExist);
             }
 
-            if  self.env().caller() != self.admin_address {
+            if  self.env().caller() != self.manager.admin_address {
                 return Err(Error::OnlyAdmin);
             }
 
-            let mut project = self.projects.get(&contract_address).unwrap();
+            let mut project = self.manager.projects.get(&contract_address).unwrap();
             assert!(is_active != project.is_active);
             project.is_active = is_active;
 
             if is_active == true {
-                self.active_project_count = self.active_project_count.checked_add(1).unwrap();
+                self.manager.active_project_count = self.manager.active_project_count.checked_add(1).unwrap();
             } else {
-                self.active_project_count = self.active_project_count.checked_sub(1).unwrap();
+                self.manager.active_project_count = self.manager.active_project_count.checked_sub(1).unwrap();
             }
-            self.projects.insert(&contract_address, &project);
+            self.manager.projects.insert(&contract_address, &project);
             Ok(())
         }
 
@@ -336,12 +339,22 @@ pub mod artzero_launchpad_psp34 {
         
         /* GETTERS */
 
+        
+
+        /// Get active project count
+        #[ink(message)]
+        pub fn get_active_project_count(
+            &self
+        ) -> u64 {
+            return self.manager.active_project_count;
+        }
+
         /// Get admin address
         #[ink(message)]
         pub fn get_admin_address(
             &self
         ) -> AccountId {
-            return self.admin_address;
+            return self.manager.admin_address;
         }
 
         /// Get project count
@@ -349,7 +362,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_project_count(   
             &self
         ) -> u64 {
-            return self.project_count;
+            return self.manager.project_count;
         }
 
         /// Get standard nft hash
@@ -357,7 +370,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_standard_nft_hash(   
             &self
         ) -> Hash {
-            return self.standard_nft_hash;
+            return self.manager.standard_nft_hash;
         }
 
         // Get multi attributes
@@ -371,7 +384,7 @@ pub mod artzero_launchpad_psp34 {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.attributes.get(&(account,attribute.into_bytes()));
+                let value = self.manager.attributes.get(&(account,attribute.into_bytes()));
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
                 } else{
@@ -387,16 +400,16 @@ pub mod artzero_launchpad_psp34 {
             &self,
             id: u64
         ) -> Option<AccountId> {
-            return self.projects_by_id.get(&id);
+            return self.manager.projects_by_id.get(&id);
         }
 
         /// Get projects by owner address
         #[ink(message)]
-        pub fn get_collections_by_owner(
+        pub fn get_projects_by_owner(
             &self,
             owner_address: AccountId
-        ) -> Option<Vec<AccountId>> {
-            return self.projects_by_owner.get(&owner_address);
+        ) -> Vec<AccountId> {
+            return self.manager.projects_by_owner.get(&owner_address).unwrap();
         }
 
         /// Get project by NFT address
@@ -405,11 +418,11 @@ pub mod artzero_launchpad_psp34 {
             &self,
             nft_contract_address: AccountId
         ) -> Option<Project> {
-            if self.projects.get(&nft_contract_address).is_none(){
+            if self.manager.projects.get(&nft_contract_address).is_none(){
                 return None;
             }
-            let project = self.projects.get(&nft_contract_address).unwrap();
-            Some(project)
+            
+            Some(self.manager.projects.get(&nft_contract_address).unwrap())
         }
 
         /* END GETTERS*/
