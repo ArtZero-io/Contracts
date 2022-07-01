@@ -47,24 +47,24 @@ pub mod launchpad_psp34_nft_standard {
 
     #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
     #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
-    pub struct EnumerablePharseAccountMapping {
-        /// Pharse id is key
-        pharse_id_to_account: Mapping<(u64, u64), AccountId>,
-        account_to_pharse_id: Mapping<(u64, AccountId), u64>
+    pub struct EnumerablePhaseAccountMapping {
+        /// Phase id is key
+        phase_id_to_account: Mapping<(u64, u64), AccountId>,
+        account_to_phase_id: Mapping<(u64, AccountId), u64>
     }
 
-    impl EnumerablePharseAccountMapping {
-        pub fn insert(&mut self, account: &AccountId, pharse_id: &u64, account_index: &u64) {
-            self.pharse_id_to_account.insert((account_index, pharse_id), account);
-            self.account_to_pharse_id.insert((account_index, account), pharse_id);
+    impl EnumerablePhaseAccountMapping {
+        pub fn insert(&mut self, account: &AccountId, phase_id: &u64, account_index: &u64) {
+            self.phase_id_to_account.insert((account_index, phase_id), account);
+            self.account_to_phase_id.insert((account_index, account), phase_id);
         }
 
         pub fn get_by_account(&self, account: &AccountId, account_index: &u64) -> Result<u64, Error> {
-            self.account_to_pharse_id.get((account_index, account)).ok_or(Error::InvalidInput)
+            self.account_to_phase_id.get((account_index, account)).ok_or(Error::InvalidInput)
         }
 
-        pub fn get_by_pharse_id(&self, pharse_id: &u64, account_index: &u64) -> Result<AccountId, Error> {
-            self.pharse_id_to_account.get((account_index, pharse_id)).ok_or(Error::InvalidInput)
+        pub fn get_by_phase_id(&self, phase_id: &u64, account_index: &u64) -> Result<AccountId, Error> {
+            self.phase_id_to_account.get((account_index, phase_id)).ok_or(Error::InvalidInput)
         }
     }
 
@@ -85,15 +85,15 @@ pub mod launchpad_psp34_nft_standard {
         locked_tokens: Mapping<Id, u8>,
         locked_token_count: u64,
         total_supply: u64,
-        last_pharse_id: u64,
+        last_phase_id: u64,
         whitelist_count: u64,
-        pharses_code_by_id: Mapping<u64, Vec<u8>>,
-        pharses_id_by_code: Mapping<Vec<u8>, u64>,
-        pharse_whitelists_link: Mapping<(AccountId, u64), Whitelist>,
-        public_pharse: Mapping<u64, u8>,
-        default_pharse_id: u64,
-        pharse_account_link: EnumerablePharseAccountMapping,
-        pharse_account_last_index: Mapping<u64, u64>
+        phases_code_by_id: Mapping<u64, Vec<u8>>,
+        phases_id_by_code: Mapping<Vec<u8>, u64>,
+        phase_whitelists_link: Mapping<(AccountId, u64), Whitelist>,
+        public_phase: Mapping<u64, u8>,
+        default_phase_id: u64,
+        phase_account_link: EnumerablePhaseAccountMapping,
+        phase_account_last_index: Mapping<u64, u64>
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -115,9 +115,10 @@ pub mod launchpad_psp34_nft_standard {
         NotMintTime,
         NotEnoughBalance,
         InvalidMintAmount,
-        PharseNotExist,
-        PharseNotPublic,
-        PharseCodeNotExist
+        PhaseNotExist,
+        PhaseNotPublic,
+        PhaseCodeNotExist,
+        WhitelistNotExist
     }
 
     impl From<OwnableError> for Error {
@@ -160,8 +161,8 @@ pub mod launchpad_psp34_nft_standard {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
                 instance.total_supply = total_supply;
-                instance.last_pharse_id = 0;
-                instance.default_pharse_id = 0;
+                instance.last_phase_id = 0;
+                instance.default_phase_id = 0;
             })
         }
 
@@ -175,22 +176,49 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
+        /// Update whitelist - Only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_whitelist(
+            &mut self,
+            account: AccountId,
+            phase_id: u64,
+            whitelist_amount: u64,
+            whitelist_price: Balance
+        ) {
+            //Whitelist amount must less than total supply or greater than zero
+            if  whitelist_amount > self.total_supply ||
+                whitelist_amount == 0 {
+                return Err(Error::InvalidInput);
+            }
+
+            if  self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
+                return Err(Error::WhitelistNotExist);
+            }
+            
+            let mut whitelist = Whitelist {
+                whitelist_amount: whitelist_amount,
+                whitelist_price: whitelist_price
+            };
+            self.phase_whitelists_link.insert(&(account, phase_id), whitelist)
+        }
+
         /// Add new whitelist - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn add_whitelist(
             &mut self,
             account: AccountId,
-            pharse_id: u64,
+            phase_id: u64,
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
-            //fee must less than total tokens
+            //Whitelist amount must less than total supply or greater than zero
             if  whitelist_amount > self.total_supply ||
                 whitelist_amount == 0 {
                 return Err(Error::InvalidInput);
             }
-            if  self.pharse_whitelists_link.get(&(account, pharse_id)).is_some() {
+            if  self.phase_whitelists_link.get(&(account, phase_id)).is_some() {
                 return Err(Error::InvalidInput);
             }
 
@@ -202,14 +230,14 @@ pub mod launchpad_psp34_nft_standard {
                 minting_fee: whitelist_price
             };
             
-            let mut pharse_account_last_index_tmp = 1;
-            if self.pharse_account_last_index.get(&pharse_id).is_some() {
-                pharse_account_last_index_tmp = self.pharse_account_last_index.get(&pharse_id).unwrap() + 1;
+            let mut phase_account_last_index_tmp = 1;
+            if self.phase_account_last_index.get(&phase_id).is_some() {
+                phase_account_last_index_tmp = self.phase_account_last_index.get(&phase_id).unwrap() + 1;
             }
-            self.pharse_account_last_index.insert(&pharse_id, &pharse_account_last_index_tmp);
+            self.phase_account_last_index.insert(&phase_id, &phase_account_last_index_tmp);
 
 
-            self.pharse_whitelists_link.insert(&(account, pharse_id), &whitelist);
+            self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
 
             Ok(())
             
@@ -218,21 +246,21 @@ pub mod launchpad_psp34_nft_standard {
         /// Whitelisted User Creates multiple
         #[ink(message)]
         #[ink(payable)]
-        pub fn whitelist_mint(&mut self, pharse_id: u64, mint_amount: u64) -> Result<(), Error> {
-            if self.public_pharse.get(&pharse_id).is_none() {
-                return Err(Error::PharseNotExist); 
+        pub fn whitelist_mint(&mut self, phase_id: u64, mint_amount: u64) -> Result<(), Error> {
+            if self.public_phase.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist); 
             }
-            if self.public_pharse.get(&pharse_id).unwrap() == 1 || pharse_id == self.default_pharse_id {
+            if self.public_phase.get(&phase_id).unwrap() == 1 || phase_id == self.default_phase_id {
                 if self.last_token_id >= self.total_supply {
                     return Err(Error::TokenLimitReached);
                 }
                 let caller = self.env().caller();
                 
-                if self.pharse_whitelists_link.get(&(caller, pharse_id)).is_none(){
+                if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
                     return Err(Error::InvalidInput);
                 }
     
-                let mut caller_info = self.pharse_whitelists_link.get(&(caller, pharse_id)).unwrap();
+                let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
                 if caller_info.whitelist_amount <= caller_info.claimed_amount {
                     return Err(Error::ClaimedAll);
                 }
@@ -240,9 +268,9 @@ pub mod launchpad_psp34_nft_standard {
                 if  caller_info.minting_fee != self.env().transferred_value() {
                     return Err(Error::InvalidFee);
                 }
-    
+
                 caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
-                self.pharse_whitelists_link.insert(&(caller, pharse_id), &caller_info);
+                self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
     
                 for _i in 0..mint_amount {
                     self.last_token_id += 1;
@@ -251,111 +279,89 @@ pub mod launchpad_psp34_nft_standard {
     
                 Ok(())
             } else {
-                return Err(Error::PharseNotPublic);
+                return Err(Error::PhaseNotPublic);
             }
         }
 
         ///Add new phare - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn add_new_pharse(
+        pub fn add_new_phase(
             &mut self, 
-            pharse_code: String, 
-            whitelist_accounts: Vec<AccountId>, 
-            whitelist_amounts: Vec<u64>,
-            whitelist_prices: Vec<Balance>
+            phase_code: String
         ) -> Result<(), Error> {
-            let byte_pharse_code = pharse_code.into_bytes();
-            if self.pharses_id_by_code.get(&byte_pharse_code).is_some() {
-                return Err(Error::PharseCodeNotExist);
+            let byte_phase_code = phase_code.into_bytes();
+            if self.phases_id_by_code.get(&byte_phase_code).is_some() {
+                return Err(Error::PhaseCodeNotExist);
             }
             
             if whitelist_accounts.len() != whitelist_amounts.len() || whitelist_accounts.len() != whitelist_prices.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
 
-            self.last_pharse_id += 1;
-            let length = whitelist_accounts.len();
-            self.pharses_id_by_code.insert(&byte_pharse_code, &self.last_pharse_id);
-            self.pharses_code_by_id.insert(&self.last_pharse_id, &byte_pharse_code);
-            self.public_pharse.insert(&self.last_pharse_id, &0);
-            for i in 0..length {
-                let whitelist = Whitelist {
-                    whitelist_amount: whitelist_amounts[i].clone(),
-                    claimed_amount: 0,
-                    minting_fee: whitelist_prices[i].clone()
-                };
-                self.whitelist_count += 1;
-                
-                if self.pharse_whitelists_link.get(&(whitelist_accounts[i].clone(), self.last_pharse_id)).is_none() {
-                    let mut pharse_account_last_index_tmp = 1;
-                    if self.pharse_account_last_index.get(&self.last_pharse_id).is_some() {
-                        pharse_account_last_index_tmp = self.pharse_account_last_index.get(&self.last_pharse_id).unwrap() + 1;
-                    }
-                    self.pharse_account_last_index.insert(&self.last_pharse_id, &pharse_account_last_index_tmp);
-                    self.pharse_account_link.insert(&whitelist_accounts[i].clone(), &self.last_pharse_id, &pharse_account_last_index_tmp);
-                }
-                self.pharse_whitelists_link.insert(&(whitelist_accounts[i].clone(), self.last_pharse_id), &whitelist);
-            }
+            self.last_phase_id += 1;
+            self.phases_id_by_code.insert(&byte_phase_code, &self.last_phase_id);
+            self.phases_code_by_id.insert(&self.last_phase_id, &byte_phase_code);
+            self.public_phase.insert(&self.last_phase_id, &0);
             Ok(())
         }
 
-        /// Get whitelist information by pharse code
+        /// Get whitelist information by phase code
         #[ink(message)]
         pub fn get_whitelist_by_account_id(
             &self,
             account: AccountId,
-            pharse_code: String
+            phase_code: String
         ) -> Option<Whitelist> {
-            let byte_pharse_code = pharse_code.into_bytes();
-            if self.pharses_id_by_code.get(&byte_pharse_code).is_none() {
+            let byte_phase_code = phase_code.into_bytes();
+            if self.phases_id_by_code.get(&byte_phase_code).is_none() {
                 return None;
             }
-            let pharse_id = self.pharses_id_by_code.get(&byte_pharse_code).unwrap();
-            if self.pharse_whitelists_link.get(&(account, pharse_id)).is_none() {
+            let phase_id = self.phases_id_by_code.get(&byte_phase_code).unwrap();
+            if self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
                 return None;
             }
-            return Some(self.pharse_whitelists_link.get(&(account, pharse_id)).unwrap());
+            return Some(self.phase_whitelists_link.get(&(account, phase_id)).unwrap());
         }
 
-        /// Get Pharse Account Link by Pharse Id
+        /// Get phase Account Link by phase Id
         #[ink(message)]
-        pub fn get_pharse_account_link_by_pharse_id( 
+        pub fn get_phase_account_link_by_phase_id( 
             &self,
-            pharse_id: u64, 
+            phase_id: u64, 
             account_index: u64
         ) -> AccountId {
-            return self.pharse_account_link.get_by_pharse_id(&pharse_id, &account_index).unwrap();
+            return self.phase_account_link.get_by_phase_id(&phase_id, &account_index).unwrap();
         }
 
-        /// Get Pharse Account Link by Account
+        /// Get phase Account Link by Account
         #[ink(message)]
-        pub fn get_pharse_account_link_by_account( 
+        pub fn get_phase_account_link_by_account( 
             &self,
             account: AccountId, 
             account_index: u64
         ) -> u64 {
-            return self.pharse_account_link.get_by_account(&account, &account_index).unwrap();
+            return self.phase_account_link.get_by_account(&account, &account_index).unwrap();
         }
 
-        /// Get Default Pharse Id
+        /// Get Default phase Id
         #[ink(message)]
-        pub fn get_default_pharse_id(
+        pub fn get_default_phase_id(
             &self
         ) -> u64 {
-            return self.default_pharse_id;
+            return self.default_phase_id;
         }
 
         /// Get Whitelist Count
         #[ink(message)]
-        pub fn get_public_pharse_status(
+        pub fn get_public_phase_status(
             &self,
-            pharse_id: u64
+            phase_id: u64
         ) -> Option<u8> {
-            if self.public_pharse.get(&pharse_id).is_none() {
+            if self.public_phase.get(&phase_id).is_none() {
                 return None;
             }
-            return Some(self.public_pharse.get(&pharse_id).unwrap());
+            return Some(self.public_phase.get(&phase_id).unwrap());
         }
 
         /// Get Whitelist Count
@@ -366,10 +372,10 @@ pub mod launchpad_psp34_nft_standard {
             return self.whitelist_count;
         }
 
-        ///Get Pharse Count 
+        ///Get phase Count 
         #[ink(message)]
-        pub fn get_last_pharse_id(&self) -> u64 {
-            return self.last_pharse_id;
+        pub fn get_last_phase_id(&self) -> u64 {
+            return self.last_phase_id;
         }  
 
         ///Get Token Count
@@ -426,29 +432,29 @@ pub mod launchpad_psp34_nft_standard {
             return self.total_supply;
         }
 
-        /// Update public pharse status - Only Owner
+        /// Update public phase status - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn update_public_pharse_status(
+        pub fn update_public_phase_status(
             &mut self, 
-            pharse_id: u64, 
+            phase_id: u64, 
             status: u8
         ) -> Result<(), Error> {
-            if self.public_pharse.get(&pharse_id).is_none() {
-                return Err(Error::PharseNotExist); 
+            if self.public_phase.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist); 
             }
-            self.public_pharse.insert(&pharse_id, &status);
+            self.public_phase.insert(&phase_id, &status);
             Ok(())
         }
 
-        /// Update default pharse id - Only Owner
+        /// Update default phase id - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn update_default_pharse_id(
+        pub fn update_default_phase_id(
             &mut self, 
-            pharse_id: u64
+            phase_id: u64
         ) -> Result<(), Error> {
-            self.default_pharse_id = pharse_id;
+            self.default_phase_id = phase_id;
             Ok(())
         }
     }
