@@ -185,22 +185,23 @@ pub mod launchpad_psp34_nft_standard {
             phase_id: u64,
             whitelist_amount: u64,
             whitelist_price: Balance
-        ) {
-            //Whitelist amount must less than total supply or greater than zero
-            if  whitelist_amount > self.total_supply ||
-                whitelist_amount == 0 {
-                return Err(Error::InvalidInput);
-            }
-
+        ) -> Result<(), Error> {
+            let mut whitelist = self.phase_whitelists_link.get(&(account, phase_id)).unwrap();
             if  self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
                 return Err(Error::WhitelistNotExist);
             }
-            
-            let mut whitelist = Whitelist {
-                whitelist_amount: whitelist_amount,
-                whitelist_price: whitelist_price
-            };
-            self.phase_whitelists_link.insert(&(account, phase_id), whitelist)
+
+            //Whitelist amount must less than total supply or greater than zero
+            if  whitelist_amount > self.total_supply ||
+                whitelist_amount == 0 || 
+                whitelist_amount <= whitelist.claimed_amount {
+                return Err(Error::InvalidInput);
+            }
+
+            whitelist.whitelist_amount = whitelist_amount;
+            whitelist.minting_fee = whitelist_price;
+            self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
+            Ok(())
         }
 
         /// Add new whitelist - Only Owner
@@ -235,8 +236,6 @@ pub mod launchpad_psp34_nft_standard {
                 phase_account_last_index_tmp = self.phase_account_last_index.get(&phase_id).unwrap() + 1;
             }
             self.phase_account_last_index.insert(&phase_id, &phase_account_last_index_tmp);
-
-
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
 
             Ok(())
@@ -264,6 +263,10 @@ pub mod launchpad_psp34_nft_standard {
                 if caller_info.whitelist_amount <= caller_info.claimed_amount {
                     return Err(Error::ClaimedAll);
                 }
+
+                if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap()  {
+                    return Err(Error::InvalidInput);
+                }
     
                 if  caller_info.minting_fee != self.env().transferred_value() {
                     return Err(Error::InvalidFee);
@@ -283,6 +286,21 @@ pub mod launchpad_psp34_nft_standard {
             }
         }
 
+        /// Withdraw Fees - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
+            if value > self.env().balance() {
+                return Err(Error::NotEnoughBalance);
+            }
+            if self.env().transfer(self.env().caller(), value).is_err() {
+                panic!(
+                    "error withdraw_fee"
+                )
+            }
+            Ok(())
+        }
+
         ///Add new phare - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -293,10 +311,6 @@ pub mod launchpad_psp34_nft_standard {
             let byte_phase_code = phase_code.into_bytes();
             if self.phases_id_by_code.get(&byte_phase_code).is_some() {
                 return Err(Error::PhaseCodeNotExist);
-            }
-            
-            if whitelist_accounts.len() != whitelist_amounts.len() || whitelist_accounts.len() != whitelist_prices.len() {
-                return Err(Error::Custom(String::from("Inputs not same length")));
             }
 
             self.last_phase_id += 1;
