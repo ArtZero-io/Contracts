@@ -5,15 +5,15 @@ Code Hashes and Contract Addresses:
 
 # Profile Contract
 0xe7de4bf40c73a3a68c24d605ac62db1270f0af1cb37699d9c9f62053f92cb665
-5ELq3WCQvLyQ6LqZASQXH6vo1rtELtC2dYjF6pPziGSFAURT
+5GSfASGWNhqA8VYhHsvVumkqebK2CN8s5gNkR1nfevSFEtkn
 
 # ArtZero NFT Contract / Mint (PROXY)
 0xe1c413ad59256a7fcdd3fc0350b19ff6a6169215798fde1dfec4196a76fcadf4
-5HCQaquu3ZCDNgGCSrVgu1UgfqCDJ1Z8tFAi1cDK3JV8cd7G
+5D7AgkJ8dJ53gcmqCK8pYNCqgQxMqoQcQdMC8NARRx3a2XHq
 
 # ArtZero NFT Staking Contract (PROXY)
 0x7dfbd006b02b4c08106d7a4d8a814794ff0b46b4d284d0863292ca513121a846
-5G8EFZR3Prv63cao4hGx8zVCmMAvHU4rHcWkqCgqWxBXTz8n
+5ENPD7pqp9iofPAL2djcVr3myZXeG2A7dScXgHLGqzgGRFLr
 
 # ArtZero NFT Standard Contract
 0xe41f6c139cc42e015ba4575b885cb71fce8659946575cd1f9bc1a9e3beee02ca
@@ -21,11 +21,11 @@ Code Hashes and Contract Addresses:
 
 # Collection Manager (PROXY)
 0x1d903ac69e3e097056f6480ead141ad8fb9de7f564e933dc078a25b89d103d8e
-5CY2xoR8QwrwpphqioYLfL6A5jHn9meKQibWQBYtfNA4KZak
+5FC33tCVpcgxNrvVdRA5TdhYWMWr1ysW6GRRMawJJGwJxb6M
 
 # Marketplace Contract (PROXY)
 0xfb91ce3d946405b9203f23bd867da097a6911e5b924d4025abe61d9ea92c8d56
-5HKXsapeuLDo3sW5qaGTcQwjcsJy9hNGskfRaxEv3C9fzpUP
+5EYAyonn6JNuychz3wZVL9to6UUeGf77K2EacQVqCQVxLLHZ
 
 
 Deploy Steps:
