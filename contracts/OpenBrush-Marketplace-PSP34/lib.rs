@@ -454,7 +454,12 @@ pub mod artzero_marketplace_psp34 {
             if royal_fee > 0{
                 assert!(self.env().transfer(collection_owner.unwrap(), royal_fee).is_ok());
             }
-            
+            //Send AZERO to seller
+            let seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee_after_discount).unwrap();
+            //seller_fee = self.apply_discount(caller, );
+            if seller_fee  > 0{
+                assert!(self.env().transfer(seller, seller_fee).is_ok());
+            }
             let collection_volume = self.manager.volume_by_collection.get(&nft_contract_address);
             let user_volume = self.manager.volume_by_user.get(&seller);
             let mut user_volume_unwrap = 0;
@@ -466,25 +471,17 @@ pub mod artzero_marketplace_psp34 {
             if user_volume.is_some() {
                 user_volume_unwrap = user_volume.unwrap();
             }
-            
-            //Send AZERO to seller
-            let mut seller_fee = price.checked_sub(royal_fee).unwrap().checked_sub(platform_fee_after_discount).unwrap();
+            //Send AZERO cashback to buyer
             if platform_fee > platform_fee_after_discount {
-                // assert!(self.env().transfer(seller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_ok());
-                seller_fee = seller_fee.checked_add(platform_fee.checked_sub(platform_fee_after_discount).unwrap()).unwrap();
                 let volume = price.checked_sub(platform_fee.checked_sub(platform_fee_after_discount).unwrap()).unwrap();
                 self.manager.total_volume = self.manager.total_volume.checked_add(volume).unwrap();
                 collection_volume_unwarp = collection_volume_unwarp.checked_add(volume).unwrap();
                 user_volume_unwrap = user_volume_unwrap.checked_add(volume).unwrap();
-            } else {
+            }
+            else{
                 self.manager.total_volume = self.manager.total_volume.checked_add(price).unwrap();
                 collection_volume_unwarp = collection_volume_unwarp.checked_add(price).unwrap();
                 user_volume_unwrap = user_volume_unwrap.checked_add(price).unwrap();
-            }
-            
-            //seller_fee = self.apply_discount(caller, );
-            if seller_fee  > 0{
-                assert!(self.env().transfer(seller, seller_fee).is_ok());
             }
             self.manager.volume_by_collection.insert(&nft_contract_address,&collection_volume_unwarp);
             self.manager.volume_by_user.insert(&seller,&user_volume_unwrap);
