@@ -61,7 +61,6 @@ pub mod artzero_launchpad_psp34 {
         description: Vec<u8>,
         project_type: u8, // 1 is Live Project, 2 is Ended Project
         project_owner: AccountId,
-        nft_contract_address: AccountId,
         total_supply: u64,
         roadmaps: Vec<u8>,
         team_members: Vec<u8>,
@@ -167,7 +166,6 @@ pub mod artzero_launchpad_psp34 {
                 description: description.into_bytes(),
                 project_type: 1, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
-                nft_contract_address: contract_account,
                 total_supply: total_supply,
                 roadmaps: roadmaps.into_bytes(),
                 team_members: team_members.into_bytes(),
