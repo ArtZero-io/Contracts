@@ -662,7 +662,7 @@ pub mod artzero_marketplace_psp34 {
                         let platform_fee = price.checked_mul(self.manager.platform_fee as u128).unwrap().checked_div(10000).unwrap();
                         //Fee after Staking discount
                         let platform_fee_after_discount = self.apply_discount(
-                            caller,
+                            seller,
                             platform_fee
                         );
 
@@ -699,7 +699,6 @@ pub mod artzero_marketplace_psp34 {
                         }
                         //Send AZERO cashback to buyer
                         if platform_fee > platform_fee_after_discount {
-                            assert!(self.env().transfer(caller, platform_fee.checked_sub(platform_fee_after_discount).unwrap()).is_ok());
                             let volume = price.checked_sub(platform_fee.checked_sub(platform_fee_after_discount).unwrap()).unwrap();
                             self.manager.total_volume = self.manager.total_volume.checked_add(volume).unwrap();
                             collection_volume_unwarp = collection_volume_unwarp.checked_add(volume).unwrap();
