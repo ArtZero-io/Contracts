@@ -122,12 +122,12 @@ pub mod psp34_nft {
             return self.last_token_id;
         }
 
-        fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
+        fn add_attribute_name(&mut self, attribute_input:Vec<u8>) {
             let mut exist:bool = false;
             for index in 0..self.attribute_count {
                 let attribute_name = self.attribute_names.get(&(index+1));
-                if attribute_name.is_some(){
-                    if attribute_name.unwrap() == attribute_input{
+                if attribute_name.is_some() {
+                    if attribute_name.unwrap() == attribute_input {
                         exist = true;
                         break;
                     }
@@ -168,16 +168,13 @@ pub mod psp34_nft {
         #[ink(message)]
         pub fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
             let caller = self.env().caller();
-            //check ownership
             let token_owner = self.owner_of(id.clone()).unwrap();
             assert!(caller == token_owner);
-
             self._burn_from(caller, id)
         }
     }
 
     impl Psp34Traits for Psp34Nft{
-
         /// Change baseURI
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -191,11 +188,9 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
             assert!(token_id != Id::U64(0));
-
             if self.is_locked_nft(token_id.clone()) {
                 return Err(Error::Custom(String::from("Token is locked")));
             }
-
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
@@ -203,27 +198,22 @@ pub mod psp34_nft {
             let mut sorted_attributes = attributes.clone();
             sorted_attributes.sort();
             let length = sorted_attributes.len();
-
             for i in 0..length {
                 let attribute = sorted_attributes[i].clone();
                 let byte_attribute = attribute.into_bytes();
-
                 if i + 1 < length {
                     let next_attribute = sorted_attributes[i + 1].clone();
                     let byte_next_attribute = next_attribute.into_bytes();
-                    if byte_attribute == byte_next_attribute{
+                    if byte_attribute == byte_next_attribute {
                         return Err(Error::Custom(String::from("Duplicated Attributes")));
                     }
                 }
-
                 let unsorted_attribute = attributes[i].clone();
                 let byte_unsorted_attribute = unsorted_attribute.into_bytes();
                 let value = values[i].clone();
-
                 self.add_attribute_name(byte_unsorted_attribute.clone());
                 self._set_attribute(token_id.clone(),byte_unsorted_attribute.clone(), value.into_bytes());
             }
-
             Ok(())
         }
 
@@ -237,8 +227,7 @@ pub mod psp34_nft {
                 let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
-                }
-                else{
+                } else {
                     ret.push(String::from(""));
                 }
             }
@@ -256,22 +245,18 @@ pub mod psp34_nft {
             let attribute = self.attribute_names.get(&index);
             if attribute.is_some() {
                 String::from_utf8(attribute.unwrap()).unwrap()
-            }
-            else{
+            } else {
                 String::from("")
             }
         }
+
         /// Get URI from token ID
         #[ink(message)]
-        fn token_uri(
-            &self,
-            token_id: u64
-        ) -> String {
+        fn token_uri(&self, token_id: u64) -> String {
             let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
             let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
             token_uri = token_uri + &token_id.to_string() + &String::from(".json");
             return token_uri;
         }
-
     }
 }

@@ -63,7 +63,6 @@ pub mod artzero_profile_manager {
                 let value = values[i].clone();
                 self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
             }
-
             Ok(())
         }
 
@@ -77,12 +76,9 @@ pub mod artzero_profile_manager {
                 let value = self.manager.attributes.get(&(account,attribute.into_bytes()));
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
-                }
-                else{
+                } else{
                     ret.push(String::from(""));
                 }
-
-
             }
             ret
         }
