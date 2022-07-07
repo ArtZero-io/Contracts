@@ -23,11 +23,11 @@ pub mod psp34_nft {
     use ink_storage::Mapping;
     use ink_prelude::string::ToString;
 
-    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
+    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
     #[ink(storage)]
     pub struct Psp34Nft{
         #[PSP34StorageField]
-        psp34: PSP34Data,
+        psp34: PSP34Data<EnumerableBalances>,
         #[PSP34MetadataStorageField]
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
@@ -37,8 +37,6 @@ pub mod psp34_nft {
         attribute_count: u32,
         attribute_names: Mapping<u32,Vec<u8>>,
         mint_fee: Balance,
-        #[PSP34EnumerableStorageField]
-        enumdata: PSP34EnumerableData,
         locked_tokens: Mapping<Id, u8>,
         locked_token_count: u64
     }

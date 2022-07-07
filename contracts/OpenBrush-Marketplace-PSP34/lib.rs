@@ -106,7 +106,6 @@ pub mod artzero_marketplace_psp34 {
 
         pub fn remove(&mut self, nft_contract_address: &Option<AccountId>, seller: &Option<AccountId>, id: &Id, last_index: &u128) -> Result<(), PSP34Error> {
             let index = self.id_to_index.get((nft_contract_address, seller, id)).ok_or(PSP34Error::TokenNotExists)?;
-
             if last_index != &index {
                 let last_id = self
                     .index_to_id
@@ -121,7 +120,6 @@ pub mod artzero_marketplace_psp34 {
 
             Ok(())
         }
-
         pub fn get_by_index(&self, nft_contract_address: &Option<AccountId>, seller: &Option<AccountId>, index: &u128) -> Result<Id, PSP34Error> {
             self.index_to_id.get((nft_contract_address, seller, index)).ok_or(PSP34Error::TokenNotExists)
         }

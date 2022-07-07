@@ -65,17 +65,15 @@ pub mod artzero_psp34 {
         mint_mode: u8
     }
 
-    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage, PSP34EnumerableStorage)]
+    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
     #[ink(storage)]
     pub struct ArtZeroNFT{
         #[PSP34StorageField]
-        psp34: PSP34Data,
+        psp34: PSP34Data<EnumerableBalances>,
         #[PSP34MetadataStorageField]
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
         ownable: OwnableData,
-        #[PSP34EnumerableStorageField]
-        enumdata: PSP34EnumerableData,
         manager: Manager
     }
 
