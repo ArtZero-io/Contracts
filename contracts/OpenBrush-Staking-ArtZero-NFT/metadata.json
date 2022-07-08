@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x7dfbd006b02b4c08106d7a4d8a814794ff0b46b4d284d0863292ca513121a846",
-    "language": "ink! 3.2.0",
-    "compiler": "rustc 1.63.0-nightly"
+    "hash": "0x16b689ac2666beecc84b2fd4a6b93d94fd3646e80ae9c416b02e1a231221eef8",
+    "language": "ink! 3.3.0",
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_staking_nft",
@@ -825,34 +825,6 @@
               "type": {
                 "displayName": [
                   "crossartzerostaking_external",
-                  "GetTotalPendingUnstakedByAccountInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            "Get User NFT staked in the contract"
-          ],
-          "label": "CrossArtZeroStaking::get_total_pending_unstaked_by_account",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "crossartzerostaking_external",
-              "GetTotalPendingUnstakedByAccountOutput"
-            ],
-            "type": 6
-          },
-          "selector": "0x3d9ff06d"
-        },
-        {
-          "args": [
-            {
-              "label": "account",
-              "type": {
-                "displayName": [
-                  "crossartzerostaking_external",
                   "GetTotalStakedByAccountInput1"
                 ],
                 "type": 0
@@ -873,6 +845,34 @@
             "type": 6
           },
           "selector": "0x487f1cac"
+        },
+        {
+          "args": [
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "crossartzerostaking_external",
+                  "GetTotalPendingUnstakedByAccountInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            "Get User NFT staked in the contract"
+          ],
+          "label": "CrossArtZeroStaking::get_total_pending_unstaked_by_account",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerostaking_external",
+              "GetTotalPendingUnstakedByAccountOutput"
+            ],
+            "type": 6
+          },
+          "selector": "0x3d9ff06d"
         }
       ]
     },
@@ -1675,8 +1675,7 @@
           "path": [
             "openbrush_contracts",
             "traits",
-            "psp34",
-            "psp34",
+            "types",
             "Id"
           ]
         }

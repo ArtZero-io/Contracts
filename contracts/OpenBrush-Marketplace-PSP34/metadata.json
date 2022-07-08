@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xfb91ce3d946405b9203f23bd867da097a6911e5b924d4025abe61d9ea92c8d56",
-    "language": "ink! 3.2.0",
-    "compiler": "rustc 1.63.0-nightly"
+    "hash": "0x816f3609c3ef966578a99ae963f9bdbbd8d57cc3369a6736560036ee3842393d",
+    "language": "ink! 3.3.0",
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_marketplace_psp34",
@@ -1295,33 +1295,6 @@
           "selector": "0x4fa43c8c"
         },
         {
-          "args": [],
-          "docs": [
-            " Leaves the contract without owner. It will not be possible to call",
-            " owner's functions anymore. Can only be called by the current owner.",
-            "",
-            " NOTE: Renouncing ownership will leave the contract without an owner,",
-            " thereby removing any functionality that is only available to the owner.",
-            "",
-            " On success a `OwnershipTransferred` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Panics with `CallerIsNotOwner` error if caller is not owner"
-          ],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "RenounceOwnershipOutput"
-            ],
-            "type": 29
-          },
-          "selector": "0x5e228753"
-        },
-        {
           "args": [
             {
               "label": "new_owner",
@@ -1357,6 +1330,33 @@
             "type": 29
           },
           "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Leaves the contract without owner. It will not be possible to call",
+            " owner's functions anymore. Can only be called by the current owner.",
+            "",
+            " NOTE: Renouncing ownership will leave the contract without an owner,",
+            " thereby removing any functionality that is only available to the owner.",
+            "",
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner"
+          ],
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "RenounceOwnershipOutput"
+            ],
+            "type": 29
+          },
+          "selector": "0x5e228753"
         }
       ]
     },
@@ -1769,8 +1769,7 @@
           "path": [
             "openbrush_contracts",
             "traits",
-            "psp34",
-            "psp34",
+            "types",
             "Id"
           ]
         }
