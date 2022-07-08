@@ -4,22 +4,24 @@
 #[openbrush::contract]
 pub mod artzero_profile_manager {
     use ink_prelude::string::String;
-    use openbrush::contracts::ownable::*;
-    use ink_storage::traits::SpreadAllocate;
     use ink_prelude::vec::Vec;
+    use ink_storage::traits::SpreadAllocate;
     use ink_storage::Mapping;
+    use openbrush::contracts::ownable::*;
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
         /// Custom error type for cases if writer of traits added own restrictions
-        Custom(String)
+        Custom(String),
     }
 
     impl From<OwnableError> for Error {
         fn from(ownable: OwnableError) -> Self {
             match ownable {
-                OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
+                OwnableError::CallerIsNotOwner => {
+                    Error::Custom(String::from("O::CallerIsNotOwner"))
+                }
                 OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
             }
         }
@@ -30,15 +32,15 @@ pub mod artzero_profile_manager {
     #[derive(Default)]
     #[openbrush::storage(STORAGE_KEY)]
     struct Manager {
-        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>
+        attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>>,
     }
 
     #[derive(Default, SpreadAllocate, OwnableStorage)]
     #[ink(storage)]
-    pub struct ArtZeroProfileManager{
+    pub struct ArtZeroProfileManager {
         #[OwnableStorageField]
         ownable: OwnableData,
-        manager: Manager
+        manager: Manager,
     }
 
     impl Ownable for ArtZeroProfileManager {}
@@ -53,7 +55,11 @@ pub mod artzero_profile_manager {
 
         /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
         #[ink(message)]
-        pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+        pub fn set_multiple_attributes(
+            &mut self,
+            attributes: Vec<String>,
+            values: Vec<String>,
+        ) -> Result<(), Error> {
             if attributes.len() != values.len() {
                 return Err(Error::Custom(String::from("Inputs not same length")));
             }
@@ -61,7 +67,11 @@ pub mod artzero_profile_manager {
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute(self.env().caller(),attribute.into_bytes(), value.into_bytes());
+                self._set_attribute(
+                    self.env().caller(),
+                    attribute.into_bytes(),
+                    value.into_bytes(),
+                );
             }
             Ok(())
         }
@@ -73,18 +83,21 @@ pub mod artzero_profile_manager {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.manager.attributes.get(&(account,attribute.into_bytes()));
+                let value = self
+                    .manager
+                    .attributes
+                    .get(&(account, attribute.into_bytes()));
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
-                } else{
+                } else {
                     ret.push(String::from(""));
                 }
             }
             ret
         }
 
-        fn _set_attribute(&mut self, account: AccountId,key: Vec<u8>, value: Vec<u8>) {
-            self.manager.attributes.insert(&(account,key), &value);
+        fn _set_attribute(&mut self, account: AccountId, key: Vec<u8>, value: Vec<u8>) {
+            self.manager.attributes.insert(&(account, key), &value);
         }
     }
 }

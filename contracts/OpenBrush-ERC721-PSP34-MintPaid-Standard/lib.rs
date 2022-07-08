@@ -1,31 +1,24 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
-pub use self::psp34_nft::{
-    Psp34Nft,
-    Psp34NftRef,
-};
+pub use self::psp34_nft::{Psp34Nft, Psp34NftRef};
 
 #[openbrush::contract]
 pub mod psp34_nft {
     use ink_prelude::string::String;
-    use openbrush::contracts::psp34::*;
-    use openbrush::contracts::psp34::extensions::metadata::*;
+    use ink_prelude::string::ToString;
+    use ink_prelude::vec::Vec;
+    use ink_storage::traits::SpreadAllocate;
+    use ink_storage::Mapping;
+    use openbrush::contracts::ownable::*;
     use openbrush::contracts::psp34::extensions::burnable::*;
     use openbrush::contracts::psp34::extensions::enumerable::*;
-    use openbrush::contracts::ownable::*;
+    use openbrush::contracts::psp34::extensions::metadata::*;
+    use openbrush::contracts::psp34::*;
     use openbrush::modifiers;
-    use ink_storage::{
-        traits::{
-            SpreadAllocate
-        },
-    };
-    use ink_prelude::vec::Vec;
-    use ink_storage::Mapping;
-    use ink_prelude::string::ToString;
 
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
     #[ink(storage)]
-    pub struct Psp34Nft{
+    pub struct Psp34Nft {
         #[PSP34StorageField]
         psp34: PSP34Data<EnumerableBalances>,
         #[PSP34MetadataStorageField]
@@ -35,10 +28,10 @@ pub mod psp34_nft {
         total_supply: u64,
         last_token_id: u64,
         attribute_count: u32,
-        attribute_names: Mapping<u32,Vec<u8>>,
+        attribute_names: Mapping<u32, Vec<u8>>,
         mint_fee: Balance,
         locked_tokens: Mapping<Id, u8>,
-        locked_token_count: u64
+        locked_token_count: u64,
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -47,13 +40,15 @@ pub mod psp34_nft {
         Custom(String),
         NotOwner,
         InvalidFee,
-        TokenLimitReached
+        TokenLimitReached,
     }
 
     impl From<OwnableError> for Error {
         fn from(ownable: OwnableError) -> Self {
             match ownable {
-                OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
+                OwnableError::CallerIsNotOwner => {
+                    Error::Custom(String::from("O::CallerIsNotOwner"))
+                }
                 OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
             }
         }
@@ -73,32 +68,59 @@ pub mod psp34_nft {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
         #[ink(message)]
-        fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error>;
+        fn set_multiple_attributes(
+            &mut self,
+            token_id: Id,
+            attributes: Vec<String>,
+            values: Vec<String>,
+        ) -> Result<(), Error>;
         #[ink(message)]
         fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String>;
         #[ink(message)]
         fn get_attribute_count(&self) -> u32;
         #[ink(message)]
-        fn get_attribute_name(&self, index:u32) -> String;
+        fn get_attribute_name(&self, index: u32) -> String;
         #[ink(message)]
-        fn token_uri(&self,token_id: u64) -> String;
+        fn token_uri(&self, token_id: u64) -> String;
     }
 
     impl Psp34Nft {
-
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId, name: String, symbol: String, total_supply: u64, mint_fee: Balance) -> Self {
+        pub fn new(
+            contract_owner: AccountId,
+            name: String,
+            symbol: String,
+            total_supply: u64,
+            mint_fee: Balance,
+        ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
-                instance.initialize(name, symbol, total_supply, mint_fee).ok().unwrap();
+                instance
+                    .initialize(name, symbol, total_supply, mint_fee)
+                    .ok()
+                    .unwrap();
             })
         }
 
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn initialize(&mut self, name: String, symbol: String, total_supply: u64, mint_fee: Balance) -> Result<(), OwnableError> {
-            self._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
-            self._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
+        pub fn initialize(
+            &mut self,
+            name: String,
+            symbol: String,
+            total_supply: u64,
+            mint_fee: Balance,
+        ) -> Result<(), OwnableError> {
+            self._set_attribute(
+                Id::U8(0),
+                String::from("name").into_bytes(),
+                name.into_bytes(),
+            );
+            self._set_attribute(
+                Id::U8(0),
+                String::from("symbol").into_bytes(),
+                symbol.into_bytes(),
+            );
             self.mint_fee = mint_fee;
             self.total_supply = total_supply;
             Ok(())
@@ -108,7 +130,7 @@ pub mod psp34_nft {
         #[ink(message)]
         #[ink(payable)]
         pub fn public_mint(&mut self) -> Result<(), Error> {
-            if  self.mint_fee != self.env().transferred_value() {
+            if self.mint_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
             if self.last_token_id >= self.total_supply {
@@ -136,17 +158,22 @@ pub mod psp34_nft {
         ///Only Owner can mint new token and add attributes for it
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn mint_with_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error> {
+        pub fn mint_with_attributes(
+            &mut self,
+            attributes: Vec<String>,
+            values: Vec<String>,
+        ) -> Result<(), Error> {
             if self.last_token_id >= self.total_supply {
                 return Err(Error::TokenLimitReached);
             }
             let caller = self.env().caller();
             self.last_token_id += 1;
             assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
-            if self.set_multiple_attributes(Id::U64(self.last_token_id), attributes, values).is_err() {
-                panic!(
-                    "error set_multiple_attributes"
-                )
+            if self
+                .set_multiple_attributes(Id::U64(self.last_token_id), attributes, values)
+                .is_err()
+            {
+                panic!("error set_multiple_attributes")
             };
             Ok(())
         }
@@ -157,10 +184,10 @@ pub mod psp34_nft {
             return self.last_token_id;
         }
 
-        fn add_attribute_name(&mut self, attribute_input:Vec<u8>) {
-            let mut exist:bool = false;
+        fn add_attribute_name(&mut self, attribute_input: Vec<u8>) {
+            let mut exist: bool = false;
             for index in 0..self.attribute_count {
-                let attribute_name = self.attribute_names.get(&(index+1));
+                let attribute_name = self.attribute_names.get(&(index + 1));
                 if attribute_name.is_some() {
                     if attribute_name.unwrap() == attribute_input {
                         exist = true;
@@ -170,7 +197,8 @@ pub mod psp34_nft {
             }
             if !exist {
                 self.attribute_count += 1;
-                self.attribute_names.insert(&self.attribute_count, &attribute_input);
+                self.attribute_names
+                    .insert(&self.attribute_count, &attribute_input);
             }
         }
 
@@ -229,19 +257,28 @@ pub mod psp34_nft {
         }
     }
 
-    impl Psp34Traits for Psp34Nft{
+    impl Psp34Traits for Psp34Nft {
         /// Change baseURI
         #[ink(message)]
         #[modifiers(only_owner)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
-            self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+            self._set_attribute(
+                Id::U8(0),
+                String::from("baseURI").into_bytes(),
+                uri.into_bytes(),
+            );
             Ok(())
         }
 
         ///Only Owner can set multiple attributes to a token
         #[ink(message)]
         #[modifiers(only_owner)]
-        fn set_multiple_attributes(&mut self, token_id:Id, attributes: Vec<String>, values: Vec<String>) -> Result<(),Error> {
+        fn set_multiple_attributes(
+            &mut self,
+            token_id: Id,
+            attributes: Vec<String>,
+            values: Vec<String>,
+        ) -> Result<(), Error> {
             assert!(token_id != Id::U64(0));
             if !self.is_locked_nft(token_id.clone()) {
                 return Err(Error::Custom(String::from("Token is locked")));
@@ -267,7 +304,11 @@ pub mod psp34_nft {
                 let byte_unsorted_attribute = unsorted_attribute.into_bytes();
                 let value = values[i].clone();
                 self.add_attribute_name(byte_unsorted_attribute.clone());
-                self._set_attribute(token_id.clone(),byte_unsorted_attribute.clone(), value.into_bytes());
+                self._set_attribute(
+                    token_id.clone(),
+                    byte_unsorted_attribute.clone(),
+                    value.into_bytes(),
+                );
             }
             Ok(())
         }
@@ -279,7 +320,7 @@ pub mod psp34_nft {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
+                let value = self.get_attribute(token_id.clone(), attribute.into_bytes());
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
                 } else {
@@ -296,7 +337,7 @@ pub mod psp34_nft {
         }
         ///Get Attribute Name
         #[ink(message)]
-        fn get_attribute_name(&self, index:u32) -> String {
+        fn get_attribute_name(&self, index: u32) -> String {
             let attribute = self.attribute_names.get(&index);
             if attribute.is_some() {
                 String::from_utf8(attribute.unwrap()).unwrap()
