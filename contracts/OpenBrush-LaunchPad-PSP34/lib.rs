@@ -80,7 +80,8 @@ pub mod artzero_launchpad_psp34 {
         projects_by_id: Mapping<u64, AccountId>,
         projects_by_owner: Mapping<AccountId, Vec<AccountId>>,
         attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
-        active_project_count: u64
+        active_project_count: u64,
+        max_phases_per_project: u8,
     }
 
     impl Ownable for ArtZeroLaunchPadPSP34 {}
@@ -88,19 +89,21 @@ pub mod artzero_launchpad_psp34 {
     impl ArtZeroLaunchPadPSP34 {
         #[ink(constructor)]
         pub fn new(
+            max_phases_per_project: u8,
             admin_address: AccountId, 
             owner_address: AccountId,
             standard_nft_hash: Hash
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
                 _instance._init_with_owner(owner_address);
-                _instance.initialize(admin_address, standard_nft_hash).ok().unwrap()
+                _instance.initialize(max_phases_per_project, admin_address, standard_nft_hash).ok().unwrap()
             })
         }
 
         #[ink(message)]
         pub fn initialize(
             &mut self,
+            max_phases_per_project: u8,
             admin_address: AccountId,
             standard_nft_hash: Hash
         ) -> Result<(), OwnableError> {
@@ -108,6 +111,7 @@ pub mod artzero_launchpad_psp34 {
             self.standard_nft_hash = standard_nft_hash;
             self.project_count = 0;
             self.active_project_count = 0;
+            self.max_phases_per_project = max_phases_per_project;
             Ok(())
         }
 
@@ -128,14 +132,14 @@ pub mod artzero_launchpad_psp34 {
             attributes: Vec<String>,
             attribute_vals: Vec<String> 
         ) -> Result<(), Error> {
-            if start_time >= end_time || end_time <= Self::env().block_timestamp() {
-                return Err(Error::InvalidStartTimeAndEndTime);
-            }
+            // if start_time >= end_time || end_time <= Self::env().block_timestamp() {
+            //     return Err(Error::InvalidStartTimeAndEndTime);
+            // }
 
             let (hash, _) =
                 ink_env::random::<ink_env::DefaultEnvironment>(name.as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
-            let contract = LaunchPadPsp34NftStandardRef::new(project_owner, total_supply)
+            let contract = LaunchPadPsp34NftStandardRef::new(self.max_phases_per_project, project_owner, total_supply)
                 .endowment(0)
                 .code_hash(self.standard_nft_hash)
                 .salt_bytes(&hash[..4])
