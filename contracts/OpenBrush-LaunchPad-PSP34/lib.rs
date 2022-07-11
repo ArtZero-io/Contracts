@@ -57,15 +57,12 @@ pub mod artzero_launchpad_psp34 {
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Project {
         is_active: bool,
-        name: Vec<u8>,
-        description: Vec<u8>,
         project_type: u8, // 1 is Live Project, 2 is Ended Project
         project_owner: AccountId,
         total_supply: u64,
-        roadmaps: Vec<u8>,
-        team_members: Vec<u8>,
         start_time: Timestamp,
-        end_time: Timestamp
+        end_time: Timestamp,
+        project_info: Vec<u8>,
     }
 
     #[derive(Default, SpreadAllocate, OwnableStorage)]
@@ -79,7 +76,6 @@ pub mod artzero_launchpad_psp34 {
         projects: Mapping<AccountId, Project>,
         projects_by_id: Mapping<u64, AccountId>,
         projects_by_owner: Mapping<AccountId, Vec<AccountId>>,
-        attributes: Mapping<(AccountId,Vec<u8>), Vec<u8>>,
         active_project_count: u64,
         max_phases_per_project: u8,
     }
@@ -122,22 +118,17 @@ pub mod artzero_launchpad_psp34 {
         pub fn add_new_project(
             &mut self,
             project_owner: AccountId,
-            name: String,
-            description: String,
             total_supply: u64,
-            roadmaps: String,
-            team_members: String,
             start_time: Timestamp,
             end_time: Timestamp,
-            attributes: Vec<String>,
-            attribute_vals: Vec<String> 
+            project_info: String,
         ) -> Result<(), Error> {
-            // if start_time >= end_time || end_time <= Self::env().block_timestamp() {
-            //     return Err(Error::InvalidStartTimeAndEndTime);
-            // }
+            if start_time >= end_time || end_time <= Self::env().block_timestamp() {
+                return Err(Error::InvalidStartTimeAndEndTime);
+            }
 
             let (hash, _) =
-                ink_env::random::<ink_env::DefaultEnvironment>(name.as_bytes()).expect("Failed to get salt");
+                ink_env::random::<ink_env::DefaultEnvironment>(project_info.as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
             let contract = LaunchPadPsp34NftStandardRef::new(self.max_phases_per_project, project_owner, total_supply)
                 .endowment(0)
@@ -166,24 +157,14 @@ pub mod artzero_launchpad_psp34 {
 
             let new_project = Project {
                 is_active: false,
-                name: name.into_bytes(),
-                description: description.into_bytes(),
                 project_type: 1, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
                 total_supply: total_supply,
-                roadmaps: roadmaps.into_bytes(),
-                team_members: team_members.into_bytes(),
                 start_time: start_time,
-                end_time: end_time
+                end_time: end_time,
+                project_info: project_info.into_bytes(),
             };
             self.projects.insert(&contract_account, &new_project);
-
-            if self.set_multiple_attributes(contract_account, attributes, attribute_vals).is_err() {
-                panic!(
-                    "error set_multiple_attributes"
-                )
-            };
-
             Ok(())
         }
 
@@ -192,55 +173,36 @@ pub mod artzero_launchpad_psp34 {
         pub fn edit_project(
             &mut self,
             contract_address: AccountId,
-            name: String,
-            description: String,
-            roadmaps: String,
-            team_members: String,
             start_time: Timestamp,
             end_time: Timestamp,
-            attributes: Vec<String>,
-            attribute_vals: Vec<String> 
+            project_info: String
         ) -> Result<(), Error> {
             if start_time > end_time {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
-
             if self.projects.get(&contract_address).is_none(){
                 return Err(Error::ProjectNotExist);
             }            
-
             let mut project = self.projects.get(&contract_address).unwrap();
-
             if  project.project_owner == self.env().caller() ||
                 self.admin_address == self.env().caller() {
                     assert!(project.project_type != 2);
-                    
                     if  project.end_time <= Self::env().block_timestamp() {
                         return Err(Error::InvalidStartTimeAndEndTime);
                     } else {
-                        project.name = name.into_bytes();
-                        project.description = description.into_bytes();
-                        project.roadmaps = roadmaps.into_bytes();
-                        project.team_members = team_members.into_bytes();
+                        project.end_time = end_time;
+                        project.start_time = start_time;
+                        project.project_info = project_info.into_bytes();
                         self.projects.insert(&contract_address, &project);
-
-                        if self.set_multiple_attributes(contract_address, attributes, attribute_vals).is_err() {
-                            panic!(
-                                "error set_multiple_attributes"
-                            )
-                        };
                     }
             } else {
                 return Err(Error::InvalidCaller);
             }
-
             Ok(())
         }
-
         /* END EXECUTE FUNCTION*/
 
         /* SETTERS */
-
         /// Update admin address - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -258,48 +220,9 @@ pub mod artzero_launchpad_psp34 {
         pub fn update_standard_nft_hash(
             &mut self,
             standard_nft_hash: Hash
-        ) -> Result<(), Error>  {
+        ) -> Result<(), Error> {
             self.standard_nft_hash = standard_nft_hash;
             Ok(())
-        }
-
-        /// Set an attribute but not public function
-        fn _set_attribute(
-            &mut self, 
-            account: AccountId,
-            key: Vec<u8>, 
-            value: Vec<u8>
-        ) {
-            self.attributes.insert(&(account,key), &value);
-        }
-
-        /// Set multiple attributes type string - Only admin and project owner
-        #[ink(message)]
-        pub fn set_multiple_attributes(
-            &mut self, 
-            contract_address: AccountId, 
-            attributes: Vec<String>, 
-            values: Vec<String>
-        ) -> Result<(),Error> {
-            if attributes.len() != values.len() {
-                return Err(Error::Custom(String::from("Inputs not same length")));
-            }
-            if self.projects.get(&contract_address).is_none() {
-                return Err(Error::ProjectNotExist);
-            }
-            let project = self.projects.get(&contract_address).unwrap();
-            if project.project_owner == self.env().caller() || self.admin_address == self.env().caller() {
-                let length = attributes.len();
-                for i in 0..length {
-                    let attribute = attributes[i].clone();
-                    let value = values[i].clone();
-                    self._set_attribute(contract_address, attribute.into_bytes(), value.into_bytes());
-                }
-
-                Ok(())
-            } else {
-                return Err(Error::ProjectOwnerAndAdmin);
-            }
         }
 
         /// Update is active project - Only Admin
@@ -334,8 +257,6 @@ pub mod artzero_launchpad_psp34 {
         
         /* GETTERS */
 
-        
-
         /// Get active project count
         #[ink(message)]
         pub fn get_active_project_count(
@@ -366,27 +287,6 @@ pub mod artzero_launchpad_psp34 {
             &self
         ) -> Hash {
             return self.standard_nft_hash;
-        }
-
-        // Get multi attributes
-        #[ink(message)]
-        pub fn get_attributes(
-            &self, 
-            account: AccountId, 
-            attributes: Vec<String>
-        ) -> Vec<String> {
-            let length = attributes.len();
-            let mut ret = Vec::<String>::new();
-            for i in 0..length {
-                let attribute = attributes[i].clone();
-                let value = self.attributes.get(&(account,attribute.into_bytes()));
-                if value.is_some() {
-                    ret.push(String::from_utf8(value.unwrap()).unwrap());
-                } else{
-                    ret.push(String::from(""));
-                }
-            }
-            ret
         }
 
         // Get project by id
