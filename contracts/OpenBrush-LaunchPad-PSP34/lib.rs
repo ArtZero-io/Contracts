@@ -128,7 +128,7 @@ pub mod artzero_launchpad_psp34 {
             }
 
             let (hash, _) =
-                ink_env::random::<ink_env::DefaultEnvironment>(project_info.as_bytes()).expect("Failed to get salt");
+                ink_env::random::<ink_env::DefaultEnvironment>(&project_info[..4].as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
             let contract = LaunchPadPsp34NftStandardRef::new(self.max_phases_per_project, project_owner, total_supply)
                 .endowment(0)
