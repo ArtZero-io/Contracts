@@ -20,13 +20,7 @@ pub mod artzero_staking_nft {
     )]
     #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
     pub struct EnumerableMapping {
-        /// Mapping from index to `Id`.
-        ///
-        /// ** Note ** Owner can be `None` that means it is a contract.
         id_to_index: Mapping<(Option<AccountId>, u64), u64>,
-        /// Mapping from owner's index to `Id`.
-        ///
-        /// ** Note ** Owner can be `None` that means it is a contract.
         index_to_id: Mapping<(Option<AccountId>, u64), u64>,
     }
 
@@ -130,7 +124,6 @@ pub mod artzero_staking_nft {
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Custom error type for cases if writer of traits added own restrictions
         Custom(String),
         TokenOwnerNotMatch,
         NotApproved,
@@ -168,6 +161,8 @@ pub mod artzero_staking_nft {
         pending_unstaking_list_token_index: EnumerableMapping,
         pending_unstaking_list_token_last_index: Mapping<Option<AccountId>, u64>,
         reward_pool: Balance,
+        claimable_reward: Balance,
+        is_claimed: Mapping<AccountId, bool>,
         _reserved: Option<()>,
     }
 
@@ -198,6 +193,13 @@ pub mod artzero_staking_nft {
     pub struct CancelRequestUnstakeEvent {
         staker: Option<AccountId>,
         token_id: u64,
+    }
+
+    #[ink(event)]
+    pub struct ClaimReward {
+        staker: Option<AccountId>,
+        reward_amount: Balance,
+        staked_amount: u64,
     }
 
     impl Ownable for ArtZeroStakingNFT {}
@@ -276,8 +278,16 @@ pub mod artzero_staking_nft {
         /// Update is locked - only Admin
         #[ink(message)]
         pub fn update_is_locked(&mut self, is_locked: bool) -> Result<(), Error> {
+            assert!(is_locked != self.manager.is_locked);
             if self.env().caller() == self.manager.admin_address {
                 self.manager.is_locked = is_locked;
+                if is_locked == true { //when locked, we also lock the reward amount to use for reward calculation
+                    self.manager.claimable_reward = self.manager.reward_pool;
+                }
+                else {
+                    self.manager.reward_pool = self.manager.claimable_reward; //unclaimed Reward set back to reward_pool
+                }
+
                 Ok(())
             } else {
                 return Err(Error::OnlyAdmin);
@@ -295,19 +305,56 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
+        /// Set Account so it can claim the reward. Must run by backend every month before add_reward
+        #[ink(message)]
+        pub fn set_claimable(&mut self) -> Result<(), Error> {
+            assert!(self.manager.is_locked);
+            let caller = self.env().caller();
+            assert!(caller == self.manager.admin_address);
+            self.manager.is_claimed.insert(&caller,&false); //Can only claim once
+            Ok(())
+        }
+
         /// Claim Reward
         #[ink(message)]
         pub fn claim_reward(&mut self) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let is_claimed = self.manager.is_claimed.get(caller);
+            assert!(is_claimed.is_some());
+            assert!(is_claimed.unwrap() == false);
+            self.manager.is_claimed.insert(&caller,&true); //Can only claim once
+
             assert!(self.manager.total_staked>0);
             assert!(self.manager.is_locked); //Only allow when locked
-            let staked_amount = self.manager.staking_list_last_index.get(Some(self.env().caller()));
+
+            let staked_amount = self.manager.staking_list_last_index.get(Some(caller));
             assert!(staked_amount.is_some());
             assert!(staked_amount.unwrap()>0);
             assert!(self.manager.reward_pool>0);
+
             let reward = (self.manager.reward_pool * (staked_amount.unwrap() as u128)) / (self.manager.total_staked as u128);
 
-            if self.env().transfer(self.env().caller(), reward).is_err() {
-                panic!("error claim reward")
+            if self.manager.claimable_reward >= reward {
+                self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
+                if self.env().transfer(caller, reward).is_err() {
+                    panic!("error claim reward")
+                }
+                self.env().emit_event(ClaimReward {
+                    staker: Some(caller),
+                    reward_amount: reward,
+                    staked_amount: staked_amount.unwrap(),
+                });
+            }
+            else {
+                if self.env().transfer(caller, self.manager.claimable_reward).is_err() {
+                    panic!("error claim reward")
+                }
+                self.env().emit_event(ClaimReward {
+                    staker: Some(caller),
+                    reward_amount: self.manager.claimable_reward,
+                    staked_amount: staked_amount.unwrap(),
+                });
+                self.manager.claimable_reward = 0;
             }
 
             Ok(())
