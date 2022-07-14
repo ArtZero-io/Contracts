@@ -167,6 +167,7 @@ pub mod artzero_staking_nft {
         pending_unstaking_list: Mapping<(AccountId, u64), u64>,
         pending_unstaking_list_token_index: EnumerableMapping,
         pending_unstaking_list_token_last_index: Mapping<Option<AccountId>, u64>,
+        reward_pool: Balance,
         _reserved: Option<()>,
     }
 
@@ -281,6 +282,35 @@ pub mod artzero_staking_nft {
             } else {
                 return Err(Error::OnlyAdmin);
             }
+        }
+
+        /// Add reward to reward_pool
+        #[ink(message)]
+        #[ink(payable)]
+        pub fn add_reward(&mut self) -> Result<(), Error> {
+            let reward = self.env().transferred_value();
+            assert!(reward>0);
+            assert!(self.manager.is_locked); //Only allow adding reward when contract is locked
+            self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
+            Ok(())
+        }
+
+        /// Claim Reward
+        #[ink(message)]
+        pub fn claim_reward(&mut self) -> Result<(), Error> {
+            assert!(self.manager.total_staked>0);
+            assert!(self.manager.is_locked); //Only allow when locked
+            let staked_amount = self.manager.staking_list_last_index.get(Some(self.env().caller()));
+            assert!(staked_amount.is_some());
+            assert!(staked_amount.unwrap()>0);
+            assert!(self.manager.reward_pool>0);
+            let reward = (self.manager.reward_pool * (staked_amount.unwrap() as u128)) / (self.manager.total_staked as u128);
+
+            if self.env().transfer(self.env().caller(), reward).is_err() {
+                panic!("error claim reward")
+            }
+
+            Ok(())
         }
 
         // GETTERS
