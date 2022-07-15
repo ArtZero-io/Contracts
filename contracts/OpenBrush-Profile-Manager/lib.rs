@@ -52,7 +52,7 @@ pub mod artzero_profile_manager {
             })
         }
 
-        /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        /// Set multiple profile attributes
         #[ink(message)]
         pub fn set_multiple_attributes(
             &mut self,
@@ -75,7 +75,7 @@ pub mod artzero_profile_manager {
             Ok(())
         }
 
-        // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        // Get multiple profile attributes
         #[ink(message)]
         pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();

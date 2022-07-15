@@ -16,15 +16,10 @@ pub mod artzero_collection_manager {
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
         Custom(String),
-        AddressAlreadyExists,
-        CollectionNotExist,
         CollectionOwnerAndAdmin,
         OnlyOwner,
         OnlyAdmin,
         InvalidCaller,
-        InvalidFee,
-        InvalidRoyalFee,
-        NotEnoughBalance,
     }
 
     impl From<OwnableError> for Error {
@@ -169,12 +164,9 @@ pub mod artzero_collection_manager {
             is_collect_royal_fee: bool,
             royal_fee: u32,
         ) -> Result<(), Error> {
-            if self.manager.simple_mode_adding_fee != self.env().transferred_value() {
-                return Err(Error::InvalidFee);
-            }
-            if royal_fee > self.manager.max_royal_fee_rate { //fee must equal or less than 5%
-                return Err(Error::InvalidRoyalFee);
-            }
+            assert!(self.manager.simple_mode_adding_fee == self.env().transferred_value(),"invalid fee");
+            assert!(royal_fee <= self.manager.max_royal_fee_rate,"invalid royal fee");
+
             let (hash, _) = ink_env::random::<ink_env::DefaultEnvironment>(nft_name.as_bytes())
                 .expect("Failed to get salt");
             let hash = hash.as_ref();
@@ -247,21 +239,9 @@ pub mod artzero_collection_manager {
             is_collect_royal_fee: bool,
             royal_fee: u32,
         ) -> Result<(), Error> {
-            if self.manager.advance_mode_adding_fee != self.env().transferred_value() {
-                return Err(Error::InvalidFee);
-            }
-            if self
-                .manager
-                .collections
-                .get(&nft_contract_address)
-                .is_some()
-            {
-                return Err(Error::AddressAlreadyExists);
-            }
-
-            if royal_fee > self.manager.max_royal_fee_rate {
-                return Err(Error::InvalidRoyalFee);
-            }
+            assert!(self.manager.advance_mode_adding_fee == self.env().transferred_value(),"invalid fee");
+            assert!(self.manager.collections.get(&nft_contract_address).is_none(),"address exists");
+            assert!(royal_fee <= self.manager.max_royal_fee_rate,"invalid royal fee");
             self.manager.collection_count += 1;
             self.manager
                 .collections_by_id
@@ -315,19 +295,15 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             new_owner: AccountId,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == self.manager.admin_address {
-                collection.collection_owner = new_owner;
-                self.manager
-                    .collections
-                    .insert(&contract_address, &collection);
-                Ok(())
-            } else {
-                return Err(Error::OnlyAdmin);
-            }
+            assert!(self.env().caller() == self.manager.admin_address);
+            collection.collection_owner = new_owner;
+            self.manager
+                .collections
+                .insert(&contract_address, &collection);
+            Ok(())
+
         }
         /// Update nft_contract_address - Only Admin can change
         #[ink(message)]
@@ -336,19 +312,14 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             nft_contract_address: AccountId,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == self.manager.admin_address {
-                collection.nft_contract_address = nft_contract_address;
-                self.manager
-                    .collections
-                    .insert(&contract_address, &collection);
-                Ok(())
-            } else {
-                return Err(Error::OnlyAdmin);
-            }
+            assert!(self.env().caller() == self.manager.admin_address);
+            collection.nft_contract_address = nft_contract_address;
+            self.manager
+                .collections
+                .insert(&contract_address, &collection);
+            Ok(())
         }
 
         /// Set multiple profile attributes
@@ -359,12 +330,8 @@ pub mod artzero_collection_manager {
             attributes: Vec<String>,
             values: Vec<String>,
         ) -> Result<(), Error> {
-            if attributes.len() != values.len() {
-                return Err(Error::Custom(String::from("Inputs not same length")));
-            }
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(attributes.len() == values.len(),"Inputs not same length");
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let collection = self.manager.collections.get(&contract_address).unwrap();
             if collection.collection_owner == self.env().caller()
                 || self.manager.admin_address == self.env().caller()
@@ -416,19 +383,14 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             contract_type: u8,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == self.manager.admin_address {
-                collection.contract_type = contract_type;
-                self.manager
-                    .collections
-                    .insert(&contract_address, &collection);
-                Ok(())
-            } else {
-                return Err(Error::OnlyAdmin);
-            }
+            assert!(self.env().caller() == self.manager.admin_address);
+            collection.contract_type = contract_type;
+            self.manager
+                .collections
+                .insert(&contract_address, &collection);
+            Ok(())
         }
 
         /// Update Is Royal Fee - Only Admin can change
@@ -438,19 +400,14 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_collect_royal_fee: bool,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == self.manager.admin_address {
-                collection.is_collect_royal_fee = is_collect_royal_fee;
-                self.manager
-                    .collections
-                    .insert(&contract_address, &collection);
-                Ok(())
-            } else {
-                return Err(Error::OnlyAdmin);
-            }
+            assert!(self.env().caller() == self.manager.admin_address);
+            collection.is_collect_royal_fee = is_collect_royal_fee;
+            self.manager
+                .collections
+                .insert(&contract_address, &collection);
+            Ok(())
         }
 
         /// Update royal_fee - Only Admin can change
@@ -460,23 +417,15 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             new_fee: u32,
         ) -> Result<(), Error> {
-
-            if new_fee > self.manager.max_royal_fee_rate {
-                return Err(Error::InvalidFee);
-            }
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(new_fee <= self.manager.max_royal_fee_rate, "invalid fee");
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == self.manager.admin_address {
-                collection.royal_fee = new_fee;
-                self.manager
-                    .collections
-                    .insert(&contract_address, &collection);
-                Ok(())
-            } else {
-                return Err(Error::OnlyAdmin);
-            }
+            assert!(self.env().caller() == self.manager.admin_address);
+            collection.royal_fee = new_fee;
+            self.manager
+                .collections
+                .insert(&contract_address, &collection);
+            Ok(())
         }
 
         /// Update show_on_chain_metadata - admin and collection owner can change
@@ -486,9 +435,7 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             show_on_chain_metadata: bool,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             if self.env().caller() == collection.collection_owner
                 || self.env().caller() == self.manager.admin_address
@@ -510,12 +457,8 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_active: bool,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none() {
-                return Err(Error::CollectionNotExist);
-            }
-            if self.env().caller() != self.manager.admin_address {
-                return Err(Error::OnlyAdmin);
-            }
+            assert!(self.manager.collections.get(&contract_address).is_some(),"collection not exist");
+            assert!(self.env().caller() == self.manager.admin_address,"only admin");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             assert!(is_active != collection.is_active);
             collection.is_active = is_active;
@@ -582,12 +525,8 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
-            if value > self.env().balance() {
-                return Err(Error::NotEnoughBalance);
-            }
-            if self.env().transfer(self.env().caller(), value).is_err() {
-                panic!("error withdraw_fee")
-            }
+            assert!(value <= self.env().balance(),"not enough balance");
+            assert!(self.env().transfer(self.env().caller(), value).is_ok(),"error withdraw_fee");
             Ok(())
         }
 
