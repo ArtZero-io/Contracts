@@ -123,9 +123,9 @@ pub mod artzero_launchpad_psp34 {
             start_time: Timestamp,
             end_time: Timestamp,
             project_info: String,
-            code_phases: String,
-            start_time_phases: Timestamp,
-            end_time_phases: Timestamp
+            code_phases: Vec<String>,
+            start_time_phases: Vec<Timestamp>,
+            end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
             // if start_time >= end_time || end_time <= Self::env().block_timestamp() {
             //     return Err(Error::InvalidStartTimeAndEndTime);

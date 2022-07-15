@@ -183,9 +183,9 @@ pub mod launchpad_psp34_nft_standard {
             limit_phase_count: u8, 
             contract_owner: AccountId, 
             total_supply: u64, 
-            code_phases: String,
-            start_time_phases: Timestamp,
-            end_time_phases: Timestamp
+            code_phases: Vec<String>,
+            start_time_phases: Vec<Timestamp>,
+            end_time_phases: Vec<Timestamp>
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
@@ -193,7 +193,12 @@ pub mod launchpad_psp34_nft_standard {
                 instance.last_phase_id = 0;
                 instance.default_phase_id = 0;
                 instance.limit_phase_count = limit_phase_count;
-                instance.add_new_phase(code_phases, start_time_phases, end_time_phases);
+                if code_phases.len() == start_time_phases.len() && code_phases.len() == end_time_phases.len() && code_phases.len() <= limit_phase_count {
+                    let phase_length = code_phases.len();
+                    for i in 0..phase_length {
+                        instance.add_new_phase(code_phases[i].clone(), start_time_phases[i].clone(), end_time_phases[i].clone());
+                    }
+                }
             })
         }
 
