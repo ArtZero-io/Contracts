@@ -12,7 +12,6 @@ pub mod artzero_profile_manager {
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Custom error type for cases if writer of traits added own restrictions
         Custom(String),
     }
 
@@ -53,7 +52,7 @@ pub mod artzero_profile_manager {
             })
         }
 
-        /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        /// Set multiple profile attributes
         #[ink(message)]
         pub fn set_multiple_attributes(
             &mut self,
@@ -76,7 +75,7 @@ pub mod artzero_profile_manager {
             Ok(())
         }
 
-        // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        // Get multiple profile attributes
         #[ink(message)]
         pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();

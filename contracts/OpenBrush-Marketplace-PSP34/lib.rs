@@ -18,7 +18,6 @@ pub mod artzero_marketplace_psp34 {
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Custom error type for cases if writer of traits added own restrictions
         Custom(String),
         TokenOwnerNotMatch,
         NotApproved,
@@ -83,11 +82,7 @@ pub mod artzero_marketplace_psp34 {
     )]
     #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
     pub struct EnumerableMapping {
-        /// Mapping from index to `Id`.
-        ///
         id_to_index: Mapping<(Option<AccountId>, Option<AccountId>, Id), u128>,
-        /// Mapping from owner's index to `Id`.
-        ///
         index_to_id: Mapping<(Option<AccountId>, Option<AccountId>, u128), Id>,
     }
 
@@ -163,24 +158,16 @@ pub mod artzero_marketplace_psp34 {
         collection_contract_address: AccountId,
         staking_contract_address: AccountId,
         platform_fee: u32, //1% = 100
-        //List of all tokens for sale in the marketplace,
-        // (NFT Contract Address, Token ID) --> Token Sale Information
-        market_list: Mapping<(AccountId, Id), ForSaleItem>,
-        //(NFT Contract Address, Seller Address) EnumerableMapping--> list of all token ids
-        sale_tokens_ids: EnumerableMapping,
+        market_list: Mapping<(AccountId, Id), ForSaleItem>, //NFT for sale in the marketplace, (NFT Contract Address, Token ID)
+        sale_tokens_ids: EnumerableMapping, //(NFT Contract Address, Seller Address)
         sale_tokens_ids_last_index: Mapping<(Option<AccountId>, Option<AccountId>), u128>,
-        //(NFT Contract Address, Seller Address, token ID)
-        bidders: Mapping<(AccountId, AccountId, Id), Vec<BidInformation>>,
-        //(Collection Contract Address)
-        // Number Listed Token
-        listed_token_number_by_collection_address: Mapping<AccountId, u64>,
-        //Platform Statistics
+        bidders: Mapping<(AccountId, AccountId, Id), Vec<BidInformation>>, //(NFT Contract Address, Seller Address, token ID)
+        listed_token_number_by_collection_address: Mapping<AccountId, u64>,//Number Listed Token (Collection Contract Address)
         total_volume: Balance,
         volume_by_collection: Mapping<AccountId, Balance>,
         volume_by_user: Mapping<AccountId, Balance>,
         total_profit: Balance,
         current_profit: Balance,
-        //Platform discount
         staking_discount_criteria: Vec<u8>,
         staking_discount_rate: Vec<u16>,
         _reserved: Option<()>,
@@ -379,7 +366,6 @@ pub mod artzero_marketplace_psp34 {
                     price: price,
                     is_for_sale: true,
                 };
-                //Update listed token
                 self.manager
                     .market_list
                     .insert(&(nft_contract_address, token_id.clone()), &new_sale);
@@ -494,7 +480,6 @@ pub mod artzero_marketplace_psp34 {
             let caller = self.env().caller();
             let seller = sale_information.nft_owner;
             let price = sale_information.price;
-            //General checking to ensure its from valid owner and sale is active
             assert!(seller != caller);
             assert!(sale_information.is_for_sale);
             assert!(price == self.env().transferred_value());
@@ -507,11 +492,10 @@ pub mod artzero_marketplace_psp34 {
                 nft_contract_address,
             );
             assert!(contract_type <= 2 && contract_type >= 1); //psp34 only
-                                                               //remove from market list
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
-                .insert(&(nft_contract_address, token_id.clone()), &sale_information);
+                .insert(&(nft_contract_address, token_id.clone()), &sale_information); //remove from market list
             //Step 1: Check if the token is for sale
             assert!(self
                 .manager
