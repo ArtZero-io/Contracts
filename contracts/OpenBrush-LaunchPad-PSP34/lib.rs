@@ -65,6 +65,7 @@ pub mod artzero_launchpad_psp34 {
         project_info: Vec<u8>,
     }
 
+    
     #[derive(Default, SpreadAllocate, OwnableStorage)]
     #[ink(storage)]
     pub struct ArtZeroLaunchPadPSP34 {
@@ -122,16 +123,20 @@ pub mod artzero_launchpad_psp34 {
             start_time: Timestamp,
             end_time: Timestamp,
             project_info: String,
+            code_phases: String,
+            start_time_phases: Timestamp,
+            end_time_phases: Timestamp
         ) -> Result<(), Error> {
-            if start_time >= end_time || end_time <= Self::env().block_timestamp() {
-                return Err(Error::InvalidStartTimeAndEndTime);
-            }
+            // if start_time >= end_time || end_time <= Self::env().block_timestamp() {
+            //     return Err(Error::InvalidStartTimeAndEndTime);
+            // }
 
             let (hash, _) =
                 ink_env::random::<ink_env::DefaultEnvironment>(&project_info[..4].as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
-            let contract = LaunchPadPsp34NftStandardRef::new(self.max_phases_per_project, project_owner, total_supply)
-                .endowment(0)
+            let contract = LaunchPadPsp34NftStandardRef::new(
+                self.max_phases_per_project, project_owner, total_supply, code_phases, start_time_phases, end_time_phases
+            ).endowment(0)
                 .code_hash(self.standard_nft_hash)
                 .salt_bytes(&hash[..4])
                 .instantiate()

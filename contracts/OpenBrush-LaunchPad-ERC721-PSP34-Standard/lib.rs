@@ -179,14 +179,54 @@ pub mod launchpad_psp34_nft_standard {
     impl LaunchPadPsp34NftStandard {
 
         #[ink(constructor)]
-        pub fn new(limit_phase_count: u8, contract_owner: AccountId, total_supply: u64) -> Self {
+        pub fn new(
+            limit_phase_count: u8, 
+            contract_owner: AccountId, 
+            total_supply: u64, 
+            code_phases: String,
+            start_time_phases: Timestamp,
+            end_time_phases: Timestamp
+        ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
                 instance.total_supply = total_supply;
                 instance.last_phase_id = 0;
                 instance.default_phase_id = 0;
                 instance.limit_phase_count = limit_phase_count;
+                instance.add_new_phase(code_phases, start_time_phases, end_time_phases);
             })
+        }
+
+        ///Add new phare - Only Owner
+        #[ink(message)]
+        pub fn add_new_phase(
+            &mut self, 
+            phase_code: String,
+            start_time: Timestamp,
+            end_time: Timestamp
+        ) -> Result<(), Error> {
+            if self.last_phase_id == self.limit_phase_count {
+                return Err(Error::PhaseLimitReached);
+            }
+            if self.validate_phase_schedule(start_time, end_time) == true {
+                let byte_phase_code = phase_code.into_bytes();
+                if self.phases_id_by_code.get(&byte_phase_code).is_some() {
+                    return Err(Error::PhaseExisted);
+                }
+                self.last_phase_id += 1;
+                
+                let phase = Phase {
+                    start_time: start_time, 
+                    end_time: end_time
+                };
+                self.phases.insert(&self.last_phase_id, &phase);
+                self.phases_id_by_code.insert(&byte_phase_code, &self.last_phase_id);
+                self.phases_code_by_id.insert(&self.last_phase_id, &byte_phase_code);
+                self.public_phase.insert(&self.last_phase_id, &0);
+                Ok(())
+            } else {
+                return Err(Error::InvalidInput);
+            }
         }
 
         ///Only Owner can mint new token
@@ -264,7 +304,7 @@ pub mod launchpad_psp34_nft_standard {
             
         }
 
-        /// Whitelisted User Creates multiple
+        /// Whitelisted User eates multiple
         #[ink(message)]
         #[ink(payable)]
         pub fn whitelist_mint(&mut self, phase_id: u8, mint_amount: u64) -> Result<(), Error> {
@@ -321,39 +361,6 @@ pub mod launchpad_psp34_nft_standard {
                 )
             }
             Ok(())
-        }
-
-        ///Add new phare - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn add_new_phase(
-            &mut self, 
-            phase_code: String,
-            start_time: Timestamp,
-            end_time: Timestamp
-        ) -> Result<(), Error> {
-            if self.last_phase_id == self.limit_phase_count {
-                return Err(Error::PhaseLimitReached);
-            }
-            if self.validate_phase_schedule(start_time, end_time) == true {
-                let byte_phase_code = phase_code.into_bytes();
-                if self.phases_id_by_code.get(&byte_phase_code).is_some() {
-                    return Err(Error::PhaseExisted);
-                }
-                self.last_phase_id += 1;
-                
-                let phase = Phase {
-                    start_time: start_time, 
-                    end_time: end_time
-                };
-                self.phases.insert(&self.last_phase_id, &phase);
-                self.phases_id_by_code.insert(&byte_phase_code, &self.last_phase_id);
-                self.phases_code_by_id.insert(&self.last_phase_id, &byte_phase_code);
-                self.public_phase.insert(&self.last_phase_id, &0);
-                Ok(())
-            } else {
-                return Err(Error::InvalidInput);
-            }
         }
 
         /// Update phase schedule
