@@ -42,23 +42,19 @@ pub mod artzero_psp34 {
     #[openbrush::storage(STORAGE_KEY)]
     struct Manager {
         admin_address: AccountId,
-        //Max Total Token number to Mint
-        total_supply: u64,
+        total_supply: u64,              //Max Total Token number to Mint
         last_token_id: u64,
         whitelist_minted_count: u64,
         public_sale_minted_count: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32, Vec<u8>>,
-        //Who got free mint
-        whitelists: Mapping<AccountId, Whitelist>,
+        whitelists: Mapping<AccountId, Whitelist>,          //Who got free mint
         whitelist_count: u64,
         whitelist_accounts: Mapping<u64, AccountId>,
         whitelist_mint_total_amount: u64,
-        //Public Sale Minting Fee
-        minting_fee: Balance,
+        minting_fee: Balance,           //Public Sale Minting Fee
         public_sale_amount: u64,
-        //Mint Mode: 0: not started / 1: allow whitelist and public sale mint / 2: just allow whitelist mint
-        mint_mode: u8,
+        mint_mode: u8, //Mint Mode: 0: not started / 1: allow whitelist and public sale mint / 2: just allow whitelist mint
     }
 
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]

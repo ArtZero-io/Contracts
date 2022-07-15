@@ -15,14 +15,10 @@ pub mod artzero_collection_manager {
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Custom error type for cases if writer of traits added own restrictions
         Custom(String),
-        /// Returned if the address already exists upon registration.
         AddressAlreadyExists,
         CollectionNotExist,
-        //Collection Owner and Admin Contract can do
         CollectionOwnerAndAdmin,
-        //OnlyOwner can do
         OnlyOwner,
         OnlyAdmin,
         InvalidCaller,
@@ -56,12 +52,12 @@ pub mod artzero_collection_manager {
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Collection {
-        collection_owner: AccountId, //to receive Royal Fee - OnlyAdmin can update
-        nft_contract_address: AccountId, //OnlyAdmin can update
-        contract_type: u8,           //1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
-        is_collect_royal_fee: bool,  //OnlyAdmin can update
-        royal_fee: u32,              //100 = 1% 10000 = 100% OnlyAdmin
-        is_active: bool,             // OnlyAdmin can update
+        collection_owner: AccountId,        //to receive Royal Fee - OnlyAdmin can update
+        nft_contract_address: AccountId,    //OnlyAdmin can update
+        contract_type: u8,                  //1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
+        is_collect_royal_fee: bool,         //OnlyAdmin can update
+        royal_fee: u32,                     //100 = 1% 10000 = 100% OnlyAdmin
+        is_active: bool,                    // OnlyAdmin can update
         show_on_chain_metadata: bool,
     }
 
@@ -176,8 +172,7 @@ pub mod artzero_collection_manager {
             if self.manager.simple_mode_adding_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee);
             }
-            //fee must equal or less than 5%
-            if royal_fee > self.manager.max_royal_fee_rate {
+            if royal_fee > self.manager.max_royal_fee_rate { //fee must equal or less than 5%
                 return Err(Error::InvalidRoyalFee);
             }
             let (hash, _) = ink_env::random::<ink_env::DefaultEnvironment>(nft_name.as_bytes())
@@ -192,7 +187,7 @@ pub mod artzero_collection_manager {
                     panic!("failed at instantiating the NFT contract: {:?}", error)
                 });
             let contract_account: AccountId = contract.to_account_id();
-            //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
+
             self.manager.collection_count += 1;
             self.manager.active_collection_count += 1;
             self.manager
@@ -263,11 +258,10 @@ pub mod artzero_collection_manager {
             {
                 return Err(Error::AddressAlreadyExists);
             }
-            //fee must equal or less than 5%
+
             if royal_fee > self.manager.max_royal_fee_rate {
                 return Err(Error::InvalidRoyalFee);
             }
-            //Increase collection_count and save the latest id with nft_contract_address - for tracking purpose
             self.manager.collection_count += 1;
             self.manager
                 .collections_by_id
@@ -357,7 +351,7 @@ pub mod artzero_collection_manager {
             }
         }
 
-        /// Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        /// Set multiple profile attributes
         #[ink(message)]
         pub fn set_multiple_attributes(
             &mut self,
@@ -391,7 +385,7 @@ pub mod artzero_collection_manager {
             }
         }
 
-        // Get multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram
+        // Get multiple profile attributes
         #[ink(message)]
         pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();
@@ -466,7 +460,7 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             new_fee: u32,
         ) -> Result<(), Error> {
-            //fee must equal or less than 5%
+
             if new_fee > self.manager.max_royal_fee_rate {
                 return Err(Error::InvalidFee);
             }
@@ -538,7 +532,6 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /* OWNER FUNCTIONS */
         /// Update Simple Mode Adding Collection Fee - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]

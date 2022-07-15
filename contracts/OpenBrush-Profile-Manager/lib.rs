@@ -12,7 +12,6 @@ pub mod artzero_profile_manager {
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
-        /// Custom error type for cases if writer of traits added own restrictions
         Custom(String),
     }
 
