@@ -114,6 +114,7 @@ pub mod launchpad_psp34_nft_standard {
         phase_account_link: EnumerablePhaseAccountMapping,
         phase_account_last_index: Mapping<u8, u64>,
         limit_phase_count: u8,
+        launchpad_contract_address: AccountId,
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -160,6 +161,15 @@ pub mod launchpad_psp34_nft_standard {
     impl PSP34Internal for LaunchPadPsp34NftStandard {}
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
 
+    #[openbrush::wrapper]
+    pub type ArtZeroLaunchPadPSP34Ref = dyn CrossArtZeroLaunchPadPSP34;
+
+    #[openbrush::trait_definition]
+    pub trait CrossArtZeroLaunchPadPSP34 {
+        #[ink(message)]
+        fn get_project_mint_fee(&self) -> u32;
+    }
+
     #[openbrush::trait_definition]
     pub trait LaunchPadPsp34NftStandardTraits {
         #[ink(message)]
@@ -180,6 +190,7 @@ pub mod launchpad_psp34_nft_standard {
 
         #[ink(constructor)]
         pub fn new(
+            launchpad_contract_address: AccountId,
             limit_phase_count: u8, 
             contract_owner: AccountId, 
             total_supply: u64, 
@@ -189,6 +200,7 @@ pub mod launchpad_psp34_nft_standard {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
+                instance.launchpad_contract_address = launchpad_contract_address;
                 instance.total_supply = total_supply;
                 instance.last_phase_id = 0;
                 instance.default_phase_id = 0;
@@ -334,11 +346,13 @@ pub mod launchpad_psp34_nft_standard {
                 if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap()  {
                     return Err(Error::InvalidInput);
                 }
-    
+                let project_mint_fee = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee(
+                    &self.launchpad_contract_address
+                );
                 if  caller_info.minting_fee != self.env().transferred_value() {
                     return Err(Error::InvalidFee);
                 }
-
+                
                 caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
                 self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
     
