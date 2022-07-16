@@ -167,7 +167,7 @@ pub mod launchpad_psp34_nft_standard {
     #[openbrush::trait_definition]
     pub trait CrossArtZeroLaunchPadPSP34 {
         #[ink(message)]
-        fn get_project_mint_fee(&self) -> u32;
+        fn get_project_mint_fee_rate(&self) -> u32;
     }
 
     #[openbrush::trait_definition]
@@ -205,7 +205,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.last_phase_id = 0;
                 instance.default_phase_id = 0;
                 instance.limit_phase_count = limit_phase_count;
-                if code_phases.len() == start_time_phases.len() && code_phases.len() == end_time_phases.len() && code_phases.len() <= limit_phase_count {
+                if code_phases.len() == start_time_phases.len() && code_phases.len() == end_time_phases.len() && code_phases.len() as u8 <= limit_phase_count {
                     let phase_length = code_phases.len();
                     for i in 0..phase_length {
                         instance.add_new_phase(code_phases[i].clone(), start_time_phases[i].clone(), end_time_phases[i].clone());
@@ -346,13 +346,25 @@ pub mod launchpad_psp34_nft_standard {
                 if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap()  {
                     return Err(Error::InvalidInput);
                 }
-                let project_mint_fee = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee(
-                    &self.launchpad_contract_address
-                );
+                
                 if  caller_info.minting_fee != self.env().transferred_value() {
                     return Err(Error::InvalidFee);
                 }
-                
+                let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
+                    &self.launchpad_contract_address
+                );
+                // Send minting fee to launchpad contract
+                let project_mint_fee = caller_info.minting_fee
+                    .checked_mul(project_mint_fee_rate as u128)
+                    .unwrap()
+                    .checked_div(10000)
+                    .unwrap();
+                if project_mint_fee > 0 {
+                    assert!(self
+                        .env()
+                        .transfer(self.launchpad_contract_address, project_mint_fee)
+                        .is_ok());
+                }
                 caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
                 self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
     

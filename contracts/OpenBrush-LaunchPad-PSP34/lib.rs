@@ -79,7 +79,8 @@ pub mod artzero_launchpad_psp34 {
         projects_by_owner: Mapping<AccountId, Vec<AccountId>>,
         active_project_count: u64,
         max_phases_per_project: u8,
-        project_adding_fee: Balance
+        project_adding_fee: Balance,
+        project_mint_fee_rate: u32
     }
 
     impl Ownable for ArtZeroLaunchPadPSP34 {}
@@ -87,7 +88,7 @@ pub mod artzero_launchpad_psp34 {
     #[openbrush::trait_definition]
     pub trait CrossArtZeroLaunchPadPSP34 {
         #[ink(message)]
-        fn get_project_mint_fee(&self) -> u32;
+        fn get_project_mint_fee_rate(&self) -> u32;
     }
 
     impl ArtZeroLaunchPadPSP34 {
@@ -98,11 +99,12 @@ pub mod artzero_launchpad_psp34 {
             owner_address: AccountId,
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
-            project_mint_fee: u32, //1% = 100
+            project_mint_fee_rate: u32, //1% = 100
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
+                assert!(project_mint_fee_rate < 10000);
                 _instance._init_with_owner(owner_address);
-                _instance.initialize(max_phases_per_project, admin_address, standard_nft_hash, project_adding_fee, project_mint_fee).ok().unwrap()
+                _instance.initialize(max_phases_per_project, admin_address, standard_nft_hash, project_adding_fee, project_mint_fee_rate).ok().unwrap()
             })
         }
 
@@ -113,7 +115,7 @@ pub mod artzero_launchpad_psp34 {
             admin_address: AccountId,
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
-            project_mint_fee: u32
+            project_mint_fee_rate: u32
         ) -> Result<(), OwnableError> {
             self.admin_address = admin_address;
             self.standard_nft_hash = standard_nft_hash;
@@ -121,7 +123,7 @@ pub mod artzero_launchpad_psp34 {
             self.active_project_count = 0;
             self.max_phases_per_project = max_phases_per_project;
             self.project_adding_fee = project_adding_fee;
-            self.project_mint_fee = project_mint_fee;
+            self.project_mint_fee_rate = project_mint_fee_rate;
             Ok(())
         }
 
@@ -233,17 +235,17 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
-        /// Update project mint fee - Only Admin
+        /// Update project mint fee rate - Only Admin
         #[ink(message)]
-        pub fn update_project_mint_fee(
+        pub fn update_project_mint_fee_rate(
             &mut self,
-            project_mint_fee: u32
+            project_mint_fee_rate: u32
         ) -> Result<(), Error>  {
             if  self.env().caller() != self.admin_address {
                 return Err(Error::OnlyAdmin);
             }
 
-            self.project_mint_fee = project_mint_fee;
+            self.project_mint_fee_rate = project_mint_fee_rate;
             Ok(())
         }
         
@@ -359,10 +361,10 @@ pub mod artzero_launchpad_psp34 {
     impl CrossArtZeroLaunchPadPSP34 for ArtZeroLaunchPadPSP34 {
         /// Get project mint fee
         #[ink(message)]
-        fn get_project_mint_fee(
+        fn get_project_mint_fee_rate(
             &self
         ) -> u32 {
-            return self.project_mint_fee;
+            return self.project_mint_fee_rate;
         }
     }
 }
