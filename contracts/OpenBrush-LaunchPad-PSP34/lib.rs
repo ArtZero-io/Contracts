@@ -131,7 +131,6 @@ pub mod artzero_launchpad_psp34 {
 
         /// Add new project
         #[ink(message)]
-        #[ink(payable)]
         pub fn add_new_project(
             &mut self,
             project_owner: AccountId,
@@ -146,7 +145,7 @@ pub mod artzero_launchpad_psp34 {
             // if start_time >= end_time || end_time <= Self::env().block_timestamp() {
             //     return Err(Error::InvalidStartTimeAndEndTime);
             // }
-            assert!(self.project_adding_fee == self.env().transferred_value(), "invalid fee");
+            // assert!(self.project_adding_fee == self.env().transferred_value(), "invalid fee");
             let (hash, _) =
                 ink_env::random::<ink_env::DefaultEnvironment>(&project_info[..4].as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
@@ -235,6 +234,20 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
+        /// update project adding fee - Only Admin
+        #[ink(message)]
+        pub fn update_project_adding_fee(
+            &mut self,
+            project_adding_fee: Balance
+        ) -> Result<(), Error> {
+            if  self.env().caller() != self.admin_address {
+                return Err(Error::OnlyAdmin);
+            }
+            
+            self.project_adding_fee = project_adding_fee;
+            Ok(())
+        }
+
         /// Update project mint fee rate - Only Admin
         #[ink(message)]
         pub fn update_project_mint_fee_rate(
@@ -292,6 +305,14 @@ pub mod artzero_launchpad_psp34 {
         
         /* GETTERS */
 
+        /// Get Project Adding Fee
+        #[ink(message)]
+        pub fn get_project_adding_fee(
+            &self
+        ) -> Balance {
+            return self.project_adding_fee;
+        }
+        
         /// Get active project count
         #[ink(message)]
         pub fn get_active_project_count(
