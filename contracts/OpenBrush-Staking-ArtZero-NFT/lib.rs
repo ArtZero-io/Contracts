@@ -202,6 +202,12 @@ pub mod artzero_staking_nft {
         staked_amount: u64,
     }
 
+    #[ink(event)]
+    pub struct AddReward {
+        reward_amount: Balance,
+        total_staked_amount: u64,
+    }
+
     impl Ownable for ArtZeroStakingNFT {}
 
     #[openbrush::trait_definition]
@@ -302,6 +308,10 @@ pub mod artzero_staking_nft {
             assert!(reward>0);
             assert!(self.manager.is_locked); //Only allow adding reward when contract is locked
             self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
+            self.env().emit_event(AddReward {
+                reward_amount: reward,
+                total_staked_amount: self.manager.total_staked
+            });
             Ok(())
         }
 
@@ -361,6 +371,22 @@ pub mod artzero_staking_nft {
         }
 
         // GETTERS
+        #[ink(message)]
+        pub fn get_reward_pool(&self) -> Balance {
+            self.manager.reward_pool
+        }
+        #[ink(message)]
+        pub fn get_claimable_reward(&self) -> Balance {
+            self.manager.claimable_reward
+        }
+        #[ink(message)]
+        pub fn is_claimed(&self) -> bool {
+            let is_claimed = self.manager.is_claimed.get(self.env().caller());
+            if is_claimed.is_some() {
+                return is_claimed.unwrap();
+            }
+            return false;
+        }
         ///Get NFT contract address
         #[ink(message)]
         pub fn get_artzero_nft_contract(&self) -> AccountId {
