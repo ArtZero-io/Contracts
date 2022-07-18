@@ -131,6 +131,7 @@ pub mod artzero_launchpad_psp34 {
 
         /// Add new project
         #[ink(message)]
+        #[ink(payable)]
         pub fn add_new_project(
             &mut self,
             project_owner: AccountId,
@@ -142,10 +143,10 @@ pub mod artzero_launchpad_psp34 {
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
-            // if start_time >= end_time || end_time <= Self::env().block_timestamp() {
-            //     return Err(Error::InvalidStartTimeAndEndTime);
-            // }
-            // assert!(self.project_adding_fee == self.env().transferred_value(), "invalid fee");
+            if start_time >= end_time || end_time <= Self::env().block_timestamp() {
+                return Err(Error::InvalidStartTimeAndEndTime);
+            }
+            assert!(self.project_adding_fee == self.env().transferred_value(), "invalid fee");
             let (hash, _) =
                 ink_env::random::<ink_env::DefaultEnvironment>(&project_info[..4].as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
