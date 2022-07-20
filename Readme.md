@@ -13,7 +13,7 @@ Code Hashes and Contract Addresses:
 
 # ArtZero NFT Staking Contract (PROXY)
 0x16b689ac2666beecc84b2fd4a6b93d94fd3646e80ae9c416b02e1a231221eef8
-5HSQcwhqfJJdu1kmB6r1j7opjbLWgBRgnUNcmioWJbuRCtm1
+5CbP7RFS6o3sqGwc3t3oPWGQdNsmZnoQGjS3VDMaDCNQG8to
 
 # ArtZero NFT Standard Contract
 0x7ab51f87c6098769aa0db2f02d62c7a645a57ec91b5c58e3c412998ba681d1d4
