@@ -449,6 +449,18 @@ pub mod launchpad_psp34_nft_standard {
             return self.limit_phase_count;
         }
 
+        /// Get get phases code by Phase Id
+        #[ink(message)]
+        pub fn get_phases_code_by_id(
+            &self,
+            phase_id: u8
+        ) -> Option<String> {
+            if self.phases_code_by_id.get(&phase_id).is_none() {
+                return None;
+            }
+            return Some(String::from_utf8(self.phases_code_by_id.get(&phase_id).unwrap()).unwrap());
+        }
+
         /// Get Phase Schedule by Phase Id
         #[ink(message)]
         pub fn get_phase_schedule_by_id(
@@ -583,6 +595,7 @@ pub mod launchpad_psp34_nft_standard {
         }
 
         ///Get Locked Token Count
+        #[ink(message)]
         pub fn get_total_supply(&self) -> u64 {
             return self.total_supply;
         }
