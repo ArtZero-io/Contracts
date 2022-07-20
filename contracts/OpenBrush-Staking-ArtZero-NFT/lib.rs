@@ -695,7 +695,7 @@ pub mod artzero_staking_nft {
                 self.manager.staking_list.insert(
                     &Some(caller),
                     &token_ids[i],
-                    &(last_index + (i as u64) + 1),
+                    &(last_index + 1),
                 );
                 last_index = last_index.checked_add(1).unwrap();
                 //Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
