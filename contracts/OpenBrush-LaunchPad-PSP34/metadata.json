@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x83ead8c71f88989358b3f21afee9847fd64957e472ad2a9b0fd4d28078077099",
+    "hash": "0xf7b9f4187288569aba60483fee69c855d8f0ab3ab358e8e99f2fe5f7a39a29e3",
     "language": "ink! 3.3.0",
-    "compiler": "rustc 1.61.0-nightly"
+    "compiler": "rustc 1.63.0-nightly"
   },
   "contract": {
     "name": "artzero_launchpad_psp34",
@@ -311,6 +311,32 @@
         {
           "args": [
             {
+              "label": "project_adding_fee",
+              "type": {
+                "displayName": [
+                  "Balance"
+                ],
+                "type": 14
+              }
+            }
+          ],
+          "docs": [
+            " update project adding fee - Only Admin"
+          ],
+          "label": "update_project_adding_fee",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 21
+          },
+          "selector": "0x0c3b5043"
+        },
+        {
+          "args": [
+            {
               "label": "project_mint_fee_rate",
               "type": {
                 "displayName": [
@@ -394,6 +420,22 @@
             "type": 21
           },
           "selector": "0x88efeaf2"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get Project Adding Fee"
+          ],
+          "label": "get_project_adding_fee",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Balance"
+            ],
+            "type": 14
+          },
+          "selector": "0x57fe17e8"
         },
         {
           "args": [],

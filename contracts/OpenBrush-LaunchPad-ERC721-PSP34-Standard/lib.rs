@@ -61,6 +61,8 @@ pub mod launchpad_psp34_nft_standard {
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Phase {
+        whitelist_amount: u64,
+        claimed_amount: u64,
         start_time: Timestamp,
         end_time: Timestamp
     }
@@ -233,8 +235,10 @@ pub mod launchpad_psp34_nft_standard {
                 self.last_phase_id += 1;
                 
                 let phase = Phase {
+                    whitelist_amount: 0,
+                    claimed_amount: 0,
                     start_time: start_time, 
-                    end_time: end_time
+                    end_time: end_time                   
                 };
                 self.phases.insert(&self.last_phase_id, &phase);
                 self.phases_id_by_code.insert(&byte_phase_code, &self.last_phase_id);
@@ -269,7 +273,11 @@ pub mod launchpad_psp34_nft_standard {
             if  self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
                 return Err(Error::WhitelistNotExist);
             }
+            if self.phases.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist);
+            }
             let mut whitelist = self.phase_whitelists_link.get(&(account, phase_id)).unwrap();
+            let old_whitelist_amount = whitelist.whitelist_amount;
             //Whitelist amount must less than total supply or greater than zero
             if  whitelist_amount > self.total_supply ||
                 whitelist_amount == 0 || 
@@ -280,6 +288,10 @@ pub mod launchpad_psp34_nft_standard {
             whitelist.whitelist_amount = whitelist_amount;
             whitelist.minting_fee = whitelist_price;
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
+            let mut phase = self.phases.get(&phase_id).unwrap();
+            let mut whitelist_amount_tmp = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
+            phase.whitelist_amount = whitelist_amount_tmp;
+            self.phases.insert(&phase_id, &phase);
             Ok(())
         }
 
@@ -297,6 +309,9 @@ pub mod launchpad_psp34_nft_standard {
             if  whitelist_amount > self.total_supply ||
                 whitelist_amount == 0 {
                 return Err(Error::InvalidInput);
+            }
+            if self.phases.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist);
             }
             if  self.phase_whitelists_link.get(&(account, phase_id)).is_some() {
                 return Err(Error::InvalidInput);
@@ -316,9 +331,11 @@ pub mod launchpad_psp34_nft_standard {
             }
             self.phase_account_last_index.insert(&phase_id, &phase_account_last_index_tmp);
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
-
+            let mut phase = self.phases.get(&phase_id).unwrap();
+            let whitelist_amount_tmp = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
+            phase.whitelist_amount = whitelist_amount_tmp;
+            self.phases.insert(&phase_id, &phase);
             Ok(())
-            
         }
 
         /// Whitelisted User eates multiple
@@ -529,6 +546,31 @@ pub mod launchpad_psp34_nft_standard {
                 return None;
             }
             return Some(self.public_phase.get(&phase_id).unwrap());
+        }
+
+        /// Get current phase
+        #[ink(message)]
+        pub fn get_current_phase(&self) -> Option<u8> {
+            let current_time = Self::env().block_timestamp();
+            for index in 0..self.last_phase_id {
+                let phase = self.phases.get(&(index+1)).unwrap();
+                if phase.start_time <= current_time && phase.end_time >= current_time {
+                    return Some(index + 1);
+                }
+            }
+            return None;
+        }
+
+        /// Check time in a phase
+        #[ink(message)]
+        pub fn is_in_schedule_phase(&self, time: Timestamp) -> Option<u8> {
+            for index in 0..self.last_phase_id {
+                let phase = self.phases.get(&(index+1)).unwrap();
+                if phase.start_time <= time && phase.end_time >= time {
+                    return Some(index);
+                }
+            }
+            return None;
         }
 
         /// Get Whitelist Count
