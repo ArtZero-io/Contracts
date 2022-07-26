@@ -112,7 +112,6 @@ pub mod launchpad_psp34_nft_standard {
         phase_whitelists_link: Mapping<(AccountId, u8), Whitelist>,
         phases: Mapping<u8, Phase>,
         public_phase: Mapping<u8, u8>,
-        default_phase_id: u8,
         phase_account_link: EnumerablePhaseAccountMapping,
         phase_account_last_index: Mapping<u8, u64>,
         limit_phase_count: u8,
@@ -205,7 +204,6 @@ pub mod launchpad_psp34_nft_standard {
                 instance.launchpad_contract_address = launchpad_contract_address;
                 instance.total_supply = total_supply;
                 instance.last_phase_id = 0;
-                instance.default_phase_id = 0;
                 instance.limit_phase_count = limit_phase_count;
                 if code_phases.len() == start_time_phases.len() && code_phases.len() == end_time_phases.len() && code_phases.len() as u8 <= limit_phase_count {
                     let phase_length = code_phases.len();
@@ -342,58 +340,54 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         #[ink(payable)]
         pub fn whitelist_mint(&mut self, phase_id: u8, mint_amount: u64) -> Result<(), Error> {
-            if self.public_phase.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist); 
+            if self.last_token_id >= self.total_supply {
+                return Err(Error::TokenLimitReached);
             }
-            if self.public_phase.get(&phase_id).unwrap() == 1 || phase_id == self.default_phase_id {
-                if self.last_token_id >= self.total_supply {
-                    return Err(Error::TokenLimitReached);
-                }
-                let caller = self.env().caller();
-                
-                if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
-                    return Err(Error::InvalidInput);
-                }
-    
-                let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
-                if caller_info.whitelist_amount <= caller_info.claimed_amount {
-                    return Err(Error::ClaimedAll);
-                }
+            let caller = self.env().caller();
+            
+            if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
+                return Err(Error::InvalidInput);
+            }
 
-                if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap()  {
-                    return Err(Error::InvalidInput);
-                }
-                
-                if  caller_info.minting_fee != self.env().transferred_value() {
-                    return Err(Error::InvalidFee);
-                }
-                let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
-                    &self.launchpad_contract_address
-                );
-                // Send minting fee to launchpad contract
-                let project_mint_fee = caller_info.minting_fee
-                    .checked_mul(project_mint_fee_rate as u128)
-                    .unwrap()
-                    .checked_div(10000)
-                    .unwrap();
-                if project_mint_fee > 0 {
-                    assert!(self
-                        .env()
-                        .transfer(self.launchpad_contract_address, project_mint_fee)
-                        .is_ok());
-                }
-                caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
-                self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
-    
-                for _i in 0..mint_amount {
-                    self.last_token_id += 1;
-                    assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
-                }
-    
-                Ok(())
-            } else {
-                return Err(Error::PhaseNotPublic);
+            let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
+            if caller_info.whitelist_amount <= caller_info.claimed_amount {
+                return Err(Error::ClaimedAll);
             }
+
+            if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap()  {
+                return Err(Error::InvalidInput);
+            }
+            
+            if  caller_info.minting_fee != self.env().transferred_value() {
+                return Err(Error::InvalidFee);
+            }
+            let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
+                &self.launchpad_contract_address
+            );
+            // Send minting fee to launchpad contract
+            let project_mint_fee = caller_info.minting_fee
+                .checked_mul(project_mint_fee_rate as u128)
+                .unwrap()
+                .checked_div(10000)
+                .unwrap();
+            if project_mint_fee > 0 {
+                assert!(self
+                    .env()
+                    .transfer(self.launchpad_contract_address, project_mint_fee)
+                    .is_ok());
+            }
+            caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
+            self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
+
+            for _i in 0..mint_amount {
+                self.last_token_id += 1;
+                assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+            }
+            let mut phase = self.phases.get(&phase_id).unwrap();
+            let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
+            phase.claimed_amount = claimed_amount_tmp;
+            self.phases.insert(&phase_id, &phase);
+            Ok(())
         }
 
         /// Withdraw Fees - only Owner
@@ -528,14 +522,6 @@ pub mod launchpad_psp34_nft_standard {
             return self.phase_account_link.get_by_account(&account, &account_index).unwrap();
         }
 
-        /// Get Default phase Id
-        #[ink(message)]
-        pub fn get_default_phase_id(
-            &self
-        ) -> u8 {
-            return self.default_phase_id;
-        }
-
         /// Get Whitelist Count
         #[ink(message)]
         pub fn get_public_phase_status(
@@ -654,17 +640,6 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist); 
             }
             self.public_phase.insert(&phase_id, &status);
-            Ok(())
-        }
-
-        /// Update default phase id - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn update_default_phase_id(
-            &mut self, 
-            phase_id: u8
-        ) -> Result<(), Error> {
-            self.default_phase_id = phase_id;
             Ok(())
         }
     }
