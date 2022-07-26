@@ -306,7 +306,7 @@ pub mod artzero_staking_nft {
         pub fn add_reward(&mut self) -> Result<(), Error> {
             let reward = self.env().transferred_value();
             assert!(reward>0);
-            assert!(self.manager.is_locked); //Only allow adding reward when contract is locked
+            assert!(self.manager.is_locked == false); //Only allow adding reward when contract is unlocked
             self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
             self.env().emit_event(AddReward {
                 reward_amount: reward,
@@ -380,8 +380,8 @@ pub mod artzero_staking_nft {
             self.manager.claimable_reward
         }
         #[ink(message)]
-        pub fn is_claimed(&self) -> bool {
-            let is_claimed = self.manager.is_claimed.get(self.env().caller());
+        pub fn is_claimed(&self, account: AccountId) -> bool {
+            let is_claimed = self.manager.is_claimed.get(account);
             if is_claimed.is_some() {
                 return is_claimed.unwrap();
             }
