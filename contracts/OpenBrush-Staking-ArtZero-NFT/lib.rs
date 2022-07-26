@@ -162,6 +162,7 @@ pub mod artzero_staking_nft {
         pending_unstaking_list_token_last_index: Mapping<Option<AccountId>, u64>,
         reward_pool: Balance,
         claimable_reward: Balance,
+        reward_started: bool,
         is_claimed: Mapping<AccountId, bool>,
         _reserved: Option<()>,
     }
@@ -287,26 +288,38 @@ pub mod artzero_staking_nft {
             assert!(is_locked != self.manager.is_locked);
             if self.env().caller() == self.manager.admin_address {
                 self.manager.is_locked = is_locked;
-                if is_locked == true { //when locked, we also lock the reward amount to use for reward calculation
-                    self.manager.claimable_reward = self.manager.reward_pool;
-                }
-                else {
-                    self.manager.reward_pool = self.manager.claimable_reward; //unclaimed Reward set back to reward_pool
-                }
-
                 Ok(())
             } else {
                 return Err(Error::OnlyAdmin);
             }
         }
 
+        #[ink(message)]
+        pub fn start_reward_distribution(&mut self) -> Result<(), Error> {
+            assert!(self.env().caller() == self.manager.admin_address,"not admin");
+            assert!(self.manager.is_locked); //Only allow adding reward when contract is locked
+            self.manager.claimable_reward = self.manager.reward_pool;
+            self.manager.reward_started = true;
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn stop_reward_distribution(&mut self) -> Result<(), Error> {
+            assert!(self.env().caller() == self.manager.admin_address,"not admin");
+            assert!(self.manager.is_locked); //Only allow adding reward when contract is locked
+            self.manager.reward_pool = self.manager.claimable_reward; //unclaimed Rewards send back to reward_pool
+            self.manager.claimable_reward = 0;
+            self.manager.reward_started = false;
+            Ok(())
+        }
         /// Add reward to reward_pool
         #[ink(message)]
         #[ink(payable)]
         pub fn add_reward(&mut self) -> Result<(), Error> {
             let reward = self.env().transferred_value();
             assert!(reward>0);
-            assert!(self.manager.is_locked == false); //Only allow adding reward when contract is unlocked
+            assert!(self.manager.is_locked); //Only allow adding reward when contract is locked
+            assert!(self.manager.reward_started == false); //only when reward distribution is not started
             self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
             self.env().emit_event(AddReward {
                 reward_amount: reward,
@@ -317,11 +330,11 @@ pub mod artzero_staking_nft {
 
         /// Set Account so it can claim the reward. Must run by backend every month before add_reward
         #[ink(message)]
-        pub fn set_claimable(&mut self) -> Result<(), Error> {
+        pub fn set_claimable(&mut self, staker: AccountId) -> Result<(), Error> {
             assert!(self.manager.is_locked);
             let caller = self.env().caller();
             assert!(caller == self.manager.admin_address);
-            self.manager.is_claimed.insert(&caller,&false); //Can only claim once
+            self.manager.is_claimed.insert(&staker,&false); //Can only claim once
             Ok(())
         }
 
@@ -336,6 +349,7 @@ pub mod artzero_staking_nft {
 
             assert!(self.manager.total_staked>0);
             assert!(self.manager.is_locked); //Only allow when locked
+            assert!(self.manager.reward_started); //Only allow when reward distribution is started
 
             let staked_amount = self.manager.staking_list_last_index.get(Some(caller));
             assert!(staked_amount.is_some());
@@ -387,6 +401,11 @@ pub mod artzero_staking_nft {
             }
             return false;
         }
+        #[ink(message)]
+        pub fn get_reward_started(&self) -> bool {
+            self.manager.reward_started
+        }
+
         ///Get NFT contract address
         #[ink(message)]
         pub fn get_artzero_nft_contract(&self) -> AccountId {
