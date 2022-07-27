@@ -328,6 +328,8 @@ pub mod launchpad_psp34_nft_standard {
                 phase_account_last_index_tmp = self.phase_account_last_index.get(&phase_id).unwrap() + 1;
             }
             self.phase_account_last_index.insert(&phase_id, &phase_account_last_index_tmp);
+            self.phase_account_link.insert(&account, &phase_id, &phase_account_last_index_tmp);
+
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
             let whitelist_amount_tmp = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
@@ -577,6 +579,15 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         pub fn get_last_token_id(&self) -> u64 {
             return self.last_token_id;
+        }
+
+        ///Get Phase Account Last Index by Phase Id
+        #[ink(message)]
+        pub fn get_phase_account_last_index(&self, phase_id: u8) -> Option<u64> {
+            if self.phase_account_last_index.get(&phase_id).is_none() {
+                return None;
+            }
+            return Some(self.phase_account_last_index.get(&phase_id).unwrap());
         }
 
         fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
