@@ -36,3 +36,6 @@ Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
 4. Deploy Collection Contract via Proxy
 5. Deploy Staking Contract via Proxy
 6. Deploy Marketplace Contract via Proxy
+
+rustup component add rustfmt --toolchain nightly
+cargo +nightly fmt

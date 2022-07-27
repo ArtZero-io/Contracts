@@ -3,10 +3,14 @@
 
 #[openbrush::contract]
 pub mod artzero_profile_manager {
-    use ink_prelude::string::String;
-    use ink_prelude::vec::Vec;
-    use ink_storage::traits::SpreadAllocate;
-    use ink_storage::Mapping;
+    use ink_prelude::{
+        string::String,
+        vec::Vec,
+    };
+    use ink_storage::{
+        traits::SpreadAllocate,
+        Mapping,
+    };
     use openbrush::contracts::ownable::*;
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -18,9 +22,7 @@ pub mod artzero_profile_manager {
     impl From<OwnableError> for Error {
         fn from(ownable: OwnableError) -> Self {
             match ownable {
-                OwnableError::CallerIsNotOwner => {
-                    Error::Custom(String::from("O::CallerIsNotOwner"))
-                }
+                OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
                 OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
             }
         }
@@ -54,23 +56,15 @@ pub mod artzero_profile_manager {
 
         /// Set multiple profile attributes
         #[ink(message)]
-        pub fn set_multiple_attributes(
-            &mut self,
-            attributes: Vec<String>,
-            values: Vec<String>,
-        ) -> Result<(), Error> {
+        pub fn set_multiple_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error> {
             if attributes.len() != values.len() {
-                return Err(Error::Custom(String::from("Inputs not same length")));
+                return Err(Error::Custom(String::from("Inputs not same length")))
             }
             let length = attributes.len();
             for i in 0..length {
                 let attribute = attributes[i].clone();
                 let value = values[i].clone();
-                self._set_attribute(
-                    self.env().caller(),
-                    attribute.into_bytes(),
-                    value.into_bytes(),
-                );
+                self._set_attribute(self.env().caller(), attribute.into_bytes(), value.into_bytes());
             }
             Ok(())
         }
@@ -82,10 +76,7 @@ pub mod artzero_profile_manager {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self
-                    .manager
-                    .attributes
-                    .get(&(account, attribute.into_bytes()));
+                let value = self.manager.attributes.get(&(account, attribute.into_bytes()));
                 if value.is_some() {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
                 } else {
