@@ -485,7 +485,7 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update public minting phase id
+        /// Update public minting phase
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_public_minting_phase_id(&mut self, phase_id: u8) -> Result<(), Error> {
