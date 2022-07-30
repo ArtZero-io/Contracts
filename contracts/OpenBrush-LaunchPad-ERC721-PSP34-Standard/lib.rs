@@ -46,7 +46,6 @@ pub mod launchpad_psp34_nft_standard {
     }
 
     #[derive(
-        Copy,
         Clone,
         Debug,
         Ord,
@@ -61,6 +60,7 @@ pub mod launchpad_psp34_nft_standard {
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Phase {
+        title: Vec<u8>,
         whitelist_amount: u64,
         claimed_amount: u64,
         start_time: Timestamp,
@@ -107,8 +107,6 @@ pub mod launchpad_psp34_nft_standard {
         total_supply: u64,
         last_phase_id: u8,
         whitelist_count: u64,
-        phases_code_by_id: Mapping<u8, Vec<u8>>,
-        phases_id_by_code: Mapping<Vec<u8>, u8>,
         phase_whitelists_link: Mapping<(AccountId, u8), Whitelist>,
         phases: Mapping<u8, Phase>,
         public_phase: Mapping<u8, u8>,
@@ -116,6 +114,7 @@ pub mod launchpad_psp34_nft_standard {
         phase_account_last_index: Mapping<u8, u64>,
         limit_phase_count: u8,
         launchpad_contract_address: AccountId,
+        project_info: Vec<u8>
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -194,7 +193,8 @@ pub mod launchpad_psp34_nft_standard {
             launchpad_contract_address: AccountId,
             limit_phase_count: u8, 
             contract_owner: AccountId, 
-            total_supply: u64, 
+            total_supply: u64,
+            project_info: String,
             code_phases: Vec<String>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
@@ -204,6 +204,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.launchpad_contract_address = launchpad_contract_address;
                 instance.total_supply = total_supply;
                 instance.last_phase_id = 0;
+                instance.project_info = project_info.into_bytes();
                 instance.limit_phase_count = limit_phase_count;
                 if code_phases.len() == start_time_phases.len() && code_phases.len() == end_time_phases.len() && code_phases.len() as u8 <= limit_phase_count {
                     let phase_length = code_phases.len();
@@ -227,20 +228,15 @@ pub mod launchpad_psp34_nft_standard {
             }
             if self.validate_phase_schedule(start_time, end_time) == true {
                 let byte_phase_code = phase_code.into_bytes();
-                if self.phases_id_by_code.get(&byte_phase_code).is_some() {
-                    return Err(Error::PhaseExisted);
-                }
                 self.last_phase_id += 1;
-                
                 let phase = Phase {
+                    title: byte_phase_code,
                     whitelist_amount: 0,
                     claimed_amount: 0,
                     start_time: start_time, 
                     end_time: end_time                   
                 };
                 self.phases.insert(&self.last_phase_id, &phase);
-                self.phases_id_by_code.insert(&byte_phase_code, &self.last_phase_id);
-                self.phases_code_by_id.insert(&self.last_phase_id, &byte_phase_code);
                 self.public_phase.insert(&self.last_phase_id, &0);
                 Ok(())
             } else {
@@ -287,7 +283,7 @@ pub mod launchpad_psp34_nft_standard {
             whitelist.minting_fee = whitelist_price;
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
-            let mut whitelist_amount_tmp = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
+            let whitelist_amount_tmp = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
             phase.whitelist_amount = whitelist_amount_tmp;
             self.phases.insert(&phase_id, &phase);
             Ok(())
@@ -438,6 +434,69 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
+        /// Edit project information
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn edit_project_information(
+            &mut self,
+            project_info: String,
+            id_phases: Vec<u8>,
+            code_phases: Vec<String>,
+            start_time_phases: Vec<Timestamp>,
+            end_time_phases: Vec<Timestamp>
+        ) -> Result<(), Error> {
+            self.project_info = project_info.into_bytes();
+            
+            if id_phases.len() != code_phases.len() ||
+                id_phases.len() as u8 != self.last_phase_id ||
+                id_phases.len() != start_time_phases.len() || 
+                start_time_phases.len() != end_time_phases.len() {
+                return Err(Error::InvalidInput);
+            }
+            if self.validate_phase_schedules(start_time_phases.clone(), end_time_phases.clone()) == false {
+                return Err(Error::InvalidInput);
+            }
+
+            let phase_length = id_phases.len();
+
+            for i in 0..phase_length {
+                if self.phases.get(&(id_phases[i].clone())).is_none() {
+                    return Err(Error::PhaseNotExist);
+                }
+                let mut phase = self.phases.get(&(id_phases[i].clone())).unwrap();
+
+                phase.title = code_phases[i].clone().into_bytes();
+                phase.start_time = start_time_phases[i].clone();
+                phase.end_time = end_time_phases[i].clone();
+                self.phases.insert(&id_phases[i], &phase);
+            }
+            Ok(())
+        }
+
+        fn validate_phase_schedules(
+            &self, 
+            start_time_phases: Vec<Timestamp>,
+            end_time_phases: Vec<Timestamp>
+        ) -> bool {
+            if start_time_phases.len() != end_time_phases.len() {
+                return false;
+            }
+            let phase_length = start_time_phases.len();
+            for i in 0..phase_length {
+                for j in 0..phase_length {
+                    if i != j {
+                        if start_time_phases[j].clone() >= start_time_phases[i].clone() && end_time_phases[j].clone() <= start_time_phases[i].clone() {
+                            return false;
+                        }
+                        if start_time_phases[j].clone() >= end_time_phases[i].clone() && end_time_phases[j].clone() <= end_time_phases[i].clone() {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
         fn validate_phase_schedule(&self, start_time: Timestamp, end_time: Timestamp) -> bool {
             if start_time >= end_time {
                 return false;
@@ -462,16 +521,12 @@ pub mod launchpad_psp34_nft_standard {
             return self.limit_phase_count;
         }
 
-        /// Get get phases code by Phase Id
+        /// Get limit phase count
         #[ink(message)]
-        pub fn get_phases_code_by_id(
-            &self,
-            phase_id: u8
-        ) -> Option<String> {
-            if self.phases_code_by_id.get(&phase_id).is_none() {
-                return None;
-            }
-            return Some(String::from_utf8(self.phases_code_by_id.get(&phase_id).unwrap()).unwrap());
+        pub fn get_project_info(
+            &self
+        ) -> Vec<u8> {
+            return self.project_info.clone();
         }
 
         /// Get Phase Schedule by Phase Id
@@ -491,13 +546,8 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_whitelist_by_account_id(
             &self,
             account: AccountId,
-            phase_code: String
+            phase_id: u8
         ) -> Option<Whitelist> {
-            let byte_phase_code = phase_code.into_bytes();
-            if self.phases_id_by_code.get(&byte_phase_code).is_none() {
-                return None;
-            }
-            let phase_id = self.phases_id_by_code.get(&byte_phase_code).unwrap();
             if self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
                 return None;
             }

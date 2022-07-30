@@ -61,8 +61,7 @@ pub mod artzero_launchpad_psp34 {
         project_owner: AccountId,
         total_supply: u64,
         start_time: Timestamp,
-        end_time: Timestamp,
-        project_info: Vec<u8>,
+        end_time: Timestamp
     }
 
     
@@ -89,6 +88,11 @@ pub mod artzero_launchpad_psp34 {
     pub trait CrossArtZeroLaunchPadPSP34 {
         #[ink(message)]
         fn get_project_mint_fee_rate(&self) -> u32;
+    }
+
+    #[ink(event)]
+    pub struct AddNewProjectEvent {
+        nft_contract_address: AccountId,
     }
 
     impl ArtZeroLaunchPadPSP34 {
@@ -142,7 +146,7 @@ pub mod artzero_launchpad_psp34 {
             code_phases: Vec<String>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
-        ) -> Result<(), Error> {
+        ) -> Result<u64, Error> {
             if start_time >= end_time || end_time <= Self::env().block_timestamp() {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
@@ -151,7 +155,14 @@ pub mod artzero_launchpad_psp34 {
                 ink_env::random::<ink_env::DefaultEnvironment>(&project_info[..4].as_bytes()).expect("Failed to get salt");
             let hash = hash.as_ref();
             let contract = LaunchPadPsp34NftStandardRef::new(
-                Self::env().account_id(), self.max_phases_per_project, project_owner, total_supply, code_phases, start_time_phases, end_time_phases
+                Self::env().account_id(), 
+                self.max_phases_per_project,
+                project_owner,
+                total_supply,
+                project_info,
+                code_phases,
+                start_time_phases, 
+                end_time_phases
             ).endowment(0)
                 .code_hash(self.standard_nft_hash)
                 .salt_bytes(&hash[..4])
@@ -182,11 +193,10 @@ pub mod artzero_launchpad_psp34 {
                 project_owner: project_owner,
                 total_supply: total_supply,
                 start_time: start_time,
-                end_time: end_time,
-                project_info: project_info.into_bytes(),
+                end_time: end_time
             };
             self.projects.insert(&contract_account, &new_project);
-            Ok(())
+            Ok(self.project_count)
         }
 
         /// Edit a project - Only project owner and admin
@@ -195,8 +205,7 @@ pub mod artzero_launchpad_psp34 {
             &mut self,
             contract_address: AccountId,
             start_time: Timestamp,
-            end_time: Timestamp,
-            project_info: String
+            end_time: Timestamp
         ) -> Result<(), Error> {
             if start_time > end_time {
                 return Err(Error::InvalidStartTimeAndEndTime);
@@ -213,7 +222,6 @@ pub mod artzero_launchpad_psp34 {
                     } else {
                         project.end_time = end_time;
                         project.start_time = start_time;
-                        project.project_info = project_info.into_bytes();
                         self.projects.insert(&contract_address, &project);
                     }
             } else {
