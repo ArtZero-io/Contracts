@@ -149,7 +149,7 @@ pub mod artzero_launchpad_psp34 {
             code_phases: Vec<String>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
-        ) -> Result<u64, Error> {
+        ) -> Result<(), Error> {
             if start_time >= end_time || end_time <= Self::env().block_timestamp() {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
@@ -205,7 +205,7 @@ pub mod artzero_launchpad_psp34 {
                 project_id: self.project_count,
                 nft_contract_address: Some(contract_account),
             });
-            Ok(self.project_count)
+            Ok(())
         }
 
         /// Edit a project - Only project owner and admin
