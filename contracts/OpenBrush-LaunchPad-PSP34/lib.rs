@@ -92,7 +92,8 @@ pub mod artzero_launchpad_psp34 {
 
     #[ink(event)]
     pub struct AddNewProjectEvent {
-        nft_contract_address: AccountId,
+        project_id: u64,
+        nft_contract_address: Option<AccountId>
     }
 
     impl ArtZeroLaunchPadPSP34 {
@@ -196,6 +197,10 @@ pub mod artzero_launchpad_psp34 {
                 end_time: end_time
             };
             self.projects.insert(&contract_account, &new_project);
+            self.env().emit_event(AddNewProjectEvent {
+                project_id: self.project_count,
+                nft_contract_address: Some(contract_account),
+            });
             Ok(self.project_count)
         }
 
