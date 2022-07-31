@@ -457,24 +457,63 @@ pub mod launchpad_psp34_nft_standard {
         /// Update phase schedule
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn update_phase_schedule(
+        pub fn update_schedule_phase(
             &mut self, 
             phase_id: u8,
+            phase_code: String,
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
-            if self.validate_phase_schedule(start_time, end_time) == true {
-                let mut phase = self.phases.get(&phase_id).unwrap();
-                phase.start_time = start_time;
-                phase.end_time = end_time;
-                self.phases.insert(&self.last_phase_id, &phase);
-                Ok(())
-            } else {
+            if start_time >= end_time || phase_id > self.last_phase_id {
                 return Err(Error::InvalidInput);
             }
+            for index in 0..self.last_phase_id {
+                if index != phase_id {
+                    let phase = self.phases.get(&(index+1)).unwrap();
+                    if phase.start_time >= start_time && phase.end_time <= start_time {
+                        return Err(Error::InvalidInput);
+                    }
+                    if phase.start_time >= end_time && phase.end_time <= end_time {
+                        return Err(Error::InvalidInput);
+                    }
+                }
+            }
+            let mut phase = self.phases.get(&phase_id).unwrap();
+            phase.title = phase_code.clone().into_bytes();
+            phase.start_time = start_time.clone();
+            phase.end_time = end_time.clone();
+            self.phases.insert(&phase_id, &phase);
+            Ok(())
+        }
+
+        // Update schedule phases
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn update_schedule_phases(
+            &mut self, 
+            id_phases: Vec<u8>,
+            code_phases: Vec<String>,
+            start_time_phases: Vec<Timestamp>,
+            end_time_phases: Vec<Timestamp>
+        ) -> Result<(), Error> {
+            if id_phases.len() != code_phases.len() ||
+                id_phases.len() != start_time_phases.len() || 
+                start_time_phases.len() != end_time_phases.len() {
+                return Err(Error::InvalidInput);
+            }
+            let phase_length = id_phases.len();
+            for index in 0..phase_length {
+                self.update_schedule_phase(
+                    id_phases[index + 1].clone(),
+                    code_phases[index + 1].clone(),
+                    start_time_phases[index + 1].clone(),
+                    end_time_phases[index + 1].clone()
+                );
+            }
+            Ok(())
         }
 
         /// Update limit phase count
@@ -513,62 +552,10 @@ pub mod launchpad_psp34_nft_standard {
         #[modifiers(only_owner)]
         pub fn edit_project_information(
             &mut self,
-            project_info: String,
-            id_phases: Vec<u8>,
-            code_phases: Vec<String>,
-            start_time_phases: Vec<Timestamp>,
-            end_time_phases: Vec<Timestamp>
+            project_info: String
         ) -> Result<(), Error> {
             self.project_info = project_info.into_bytes();
-            
-            if id_phases.len() != code_phases.len() ||
-                id_phases.len() as u8 != self.last_phase_id ||
-                id_phases.len() != start_time_phases.len() || 
-                start_time_phases.len() != end_time_phases.len() {
-                return Err(Error::InvalidInput);
-            }
-            if self.validate_phase_schedules(start_time_phases.clone(), end_time_phases.clone()) == false {
-                return Err(Error::InvalidInput);
-            }
-
-            let phase_length = id_phases.len();
-
-            for i in 0..phase_length {
-                if self.phases.get(&(id_phases[i].clone())).is_none() {
-                    return Err(Error::PhaseNotExist);
-                }
-                let mut phase = self.phases.get(&(id_phases[i].clone())).unwrap();
-
-                phase.title = code_phases[i].clone().into_bytes();
-                phase.start_time = start_time_phases[i].clone();
-                phase.end_time = end_time_phases[i].clone();
-                self.phases.insert(&id_phases[i], &phase);
-            }
             Ok(())
-        }
-
-        fn validate_phase_schedules(
-            &self, 
-            start_time_phases: Vec<Timestamp>,
-            end_time_phases: Vec<Timestamp>
-        ) -> bool {
-            if start_time_phases.len() != end_time_phases.len() {
-                return false;
-            }
-            let phase_length = start_time_phases.len();
-            for i in 0..phase_length {
-                for j in 0..phase_length {
-                    if i != j {
-                        if start_time_phases[j].clone() >= start_time_phases[i].clone() && end_time_phases[j].clone() <= start_time_phases[i].clone() {
-                            return false;
-                        }
-                        if start_time_phases[j].clone() >= end_time_phases[i].clone() && end_time_phases[j].clone() <= end_time_phases[i].clone() {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
         }
 
         fn validate_phase_schedule(&self, start_time: Timestamp, end_time: Timestamp) -> bool {
