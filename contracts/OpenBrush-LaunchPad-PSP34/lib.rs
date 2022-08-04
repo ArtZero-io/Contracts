@@ -141,12 +141,13 @@ pub mod artzero_launchpad_psp34 {
             &mut self,
             project_owner: AccountId,
             total_supply: u64,
-            total_public_minting_amount: u64,
-            public_minting_fee: Balance,
             start_time: Timestamp,
             end_time: Timestamp,
             project_info: String,
             code_phases: Vec<String>,
+            is_public_phases: Vec<bool>,
+            public_minting_fee_phases: Vec<Balance>,
+            public_minting_amout_phases: Vec<u64>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
@@ -162,10 +163,11 @@ pub mod artzero_launchpad_psp34 {
                 self.max_phases_per_project,
                 project_owner,
                 total_supply,
-                total_public_minting_amount,
-                public_minting_fee,
                 project_info,
                 code_phases,
+                is_public_phases,
+                public_minting_fee_phases,
+                public_minting_amout_phases,
                 start_time_phases, 
                 end_time_phases
             ).endowment(0)
