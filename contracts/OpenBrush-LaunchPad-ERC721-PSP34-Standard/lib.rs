@@ -388,6 +388,21 @@ pub mod launchpad_psp34_nft_standard {
             }
             let claimed_amount_tmp = phase.claimed_amount.checked_add(1).unwrap();
             phase.claimed_amount = claimed_amount_tmp;
+            let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
+                &self.launchpad_contract_address
+            );
+            // Send minting fee to launchpad contract
+            let project_mint_fee = phase.public_minting_fee
+                .checked_mul(project_mint_fee_rate as u128)
+                .unwrap()
+                .checked_div(10000)
+                .unwrap();
+            if project_mint_fee > 0 {
+                assert!(self
+                    .env()
+                    .transfer(self.launchpad_contract_address, project_mint_fee)
+                    .is_ok());
+            }
             self.phases.insert(&phase_id, &phase);
             self.last_token_id += 1;
             self.public_minted_count += 1;
