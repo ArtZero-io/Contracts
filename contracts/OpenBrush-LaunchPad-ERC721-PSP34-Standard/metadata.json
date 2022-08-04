@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x680035caeb219a38cce3ed62f0bf12e102d5b7a225fde2cada3af673f4db7905",
+    "hash": "0x7aca74d0c07fbcb2493278a8614c5644c62121911b9890f306b4d85c929ed7fc",
     "language": "ink! 3.3.0",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "launchpad_psp34_nft_standard",
@@ -53,12 +53,48 @@
               }
             },
             {
+              "label": "project_info",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 40
+              }
+            },
+            {
               "label": "code_phases",
               "type": {
                 "displayName": [
                   "Vec"
                 ],
+                "type": 41
+              }
+            },
+            {
+              "label": "is_public_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
                 "type": 42
+              }
+            },
+            {
+              "label": "public_minting_fee_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 43
+              }
+            },
+            {
+              "label": "public_minting_amout_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 44
               }
             },
             {
@@ -97,7 +133,34 @@
                 "displayName": [
                   "String"
                 ],
-                "type": 43
+                "type": 40
+              }
+            },
+            {
+              "label": "is_public",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 34
+              }
+            },
+            {
+              "label": "public_minting_fee",
+              "type": {
+                "displayName": [
+                  "Balance"
+                ],
+                "type": 6
+              }
+            },
+            {
+              "label": "public_minting_amout",
+              "type": {
+                "displayName": [
+                  "u64"
+                ],
+                "type": 5
               }
             },
             {
@@ -265,6 +328,30 @@
                 ],
                 "type": 2
               }
+            }
+          ],
+          "docs": [],
+          "label": "public_mint",
+          "mutates": true,
+          "payable": true,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0xf5331a91"
+        },
+        {
+          "args": [
+            {
+              "label": "phase_id",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
             },
             {
               "label": "mint_amount",
@@ -328,6 +415,50 @@
               }
             },
             {
+              "label": "is_public",
+              "type": {
+                "displayName": [
+                  "bool"
+                ],
+                "type": 34
+              }
+            }
+          ],
+          "docs": [
+            " Update public phase"
+          ],
+          "label": "update_public_phase",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0xb323e2b7"
+        },
+        {
+          "args": [
+            {
+              "label": "phase_id",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "label": "phase_code",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 40
+              }
+            },
+            {
               "label": "start_time",
               "type": {
                 "displayName": [
@@ -349,7 +480,7 @@
           "docs": [
             " Update phase schedule"
           ],
-          "label": "update_phase_schedule",
+          "label": "update_schedule_phase",
           "mutates": true,
           "payable": false,
           "returnType": {
@@ -358,7 +489,58 @@
             ],
             "type": 45
           },
-          "selector": "0x191afc27"
+          "selector": "0xe7c56b96"
+        },
+        {
+          "args": [
+            {
+              "label": "id_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 7
+              }
+            },
+            {
+              "label": "code_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 41
+              }
+            },
+            {
+              "label": "start_time_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 44
+              }
+            },
+            {
+              "label": "end_time_phases",
+              "type": {
+                "displayName": [
+                  "Vec"
+                ],
+                "type": 44
+              }
+            }
+          ],
+          "docs": [],
+          "label": "update_schedule_phases",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0x7b2a806c"
         },
         {
           "args": [
@@ -387,6 +569,84 @@
           "selector": "0x8e2f3fcb"
         },
         {
+          "args": [
+            {
+              "label": "phase_id",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "docs": [
+            " Update public minting phase"
+          ],
+          "label": "update_public_minting_phase_id",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0x4523315d"
+        },
+        {
+          "args": [
+            {
+              "label": "public_minting_fee",
+              "type": {
+                "displayName": [
+                  "Balance"
+                ],
+                "type": 6
+              }
+            }
+          ],
+          "docs": [
+            " Update public minting fee"
+          ],
+          "label": "update_public_minting_fee",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0x7babff31"
+        },
+        {
+          "args": [
+            {
+              "label": "project_info",
+              "type": {
+                "displayName": [
+                  "String"
+                ],
+                "type": 40
+              }
+            }
+          ],
+          "docs": [
+            " Edit project information"
+          ],
+          "label": "edit_project_information",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0x05a37bb7"
+        },
+        {
           "args": [],
           "docs": [
             " Get limit phase count"
@@ -403,30 +663,68 @@
           "selector": "0xa7a30065"
         },
         {
-          "args": [
-            {
-              "label": "phase_id",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            }
-          ],
+          "args": [],
           "docs": [
-            " Get get phases code by Phase Id"
+            " Get public minting phase id"
           ],
-          "label": "get_phases_code_by_id",
+          "label": "get_public_minting_phase_id",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
-              "Option"
+              "u8"
             ],
-            "type": 47
+            "type": 2
           },
-          "selector": "0xc46d91a6"
+          "selector": "0x9cfbf5f3"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get total public minting amount"
+          ],
+          "label": "get_total_public_minting_amount",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u64"
+            ],
+            "type": 5
+          },
+          "selector": "0x1a0d7a59"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get public minted count"
+          ],
+          "label": "get_public_minted_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u64"
+            ],
+            "type": 5
+          },
+          "selector": "0x71b62650"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get limit phase count"
+          ],
+          "label": "get_project_info",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Vec"
+            ],
+            "type": 7
+          },
+          "selector": "0x9439195c"
         },
         {
           "args": [
@@ -450,7 +748,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 48
+            "type": 47
           },
           "selector": "0x0015cfc2"
         },
@@ -466,12 +764,12 @@
               }
             },
             {
-              "label": "phase_code",
+              "label": "phase_id",
               "type": {
                 "displayName": [
-                  "String"
+                  "u8"
                 ],
-                "type": 43
+                "type": 2
               }
             }
           ],
@@ -485,9 +783,25 @@
             "displayName": [
               "Option"
             ],
-            "type": 49
+            "type": 48
           },
           "selector": "0xfcaa85cb"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get Public Minting Fee"
+          ],
+          "label": "get_public_minting_fee",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Balance"
+            ],
+            "type": 6
+          },
+          "selector": "0x6a2d11e7"
         },
         {
           "args": [
@@ -562,48 +876,6 @@
         {
           "args": [],
           "docs": [
-            " Get Default phase Id"
-          ],
-          "label": "get_default_phase_id",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "u8"
-            ],
-            "type": 2
-          },
-          "selector": "0x4eecf692"
-        },
-        {
-          "args": [
-            {
-              "label": "phase_id",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            }
-          ],
-          "docs": [
-            " Get Whitelist Count"
-          ],
-          "label": "get_public_phase_status",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Option"
-            ],
-            "type": 50
-          },
-          "selector": "0x0ef405f4"
-        },
-        {
-          "args": [],
-          "docs": [
             " Get current phase"
           ],
           "label": "get_current_phase",
@@ -613,7 +885,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 50
+            "type": 49
           },
           "selector": "0x645c00bb"
         },
@@ -639,7 +911,7 @@
             "displayName": [
               "Option"
             ],
-            "type": 50
+            "type": 49
           },
           "selector": "0x0852eb48"
         },
@@ -694,6 +966,32 @@
         {
           "args": [
             {
+              "label": "phase_id",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
+            }
+          ],
+          "docs": [
+            "Get Phase Account Last Index by Phase Id"
+          ],
+          "label": "get_phase_account_last_index",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Option"
+            ],
+            "type": 50
+          },
+          "selector": "0xae98a70a"
+        },
+        {
+          "args": [
+            {
               "label": "token_id",
               "type": {
                 "displayName": [
@@ -739,7 +1037,7 @@
             "displayName": [
               "bool"
             ],
-            "type": 51
+            "type": 34
           },
           "selector": "0x1d244111"
         },
@@ -774,67 +1072,6 @@
             "type": 5
           },
           "selector": "0xb079adab"
-        },
-        {
-          "args": [
-            {
-              "label": "phase_id",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            },
-            {
-              "label": "status",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            }
-          ],
-          "docs": [
-            " Update public phase status - Only Owner"
-          ],
-          "label": "update_public_phase_status",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 45
-          },
-          "selector": "0xa32f78e3"
-        },
-        {
-          "args": [
-            {
-              "label": "phase_id",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            }
-          ],
-          "docs": [
-            " Update default phase id - Only Owner"
-          ],
-          "label": "update_default_phase_id",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 45
-          },
-          "selector": "0xc8cee489"
         },
         {
           "args": [],
@@ -886,7 +1123,7 @@
               "ownable_external",
               "TransferOwnershipOutput"
             ],
-            "type": 52
+            "type": 51
           },
           "selector": "0x11f43efd"
         },
@@ -913,37 +1150,9 @@
               "ownable_external",
               "RenounceOwnershipOutput"
             ],
-            "type": 52
+            "type": 51
           },
           "selector": "0x5e228753"
-        },
-        {
-          "args": [
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "OwnerOfInput1"
-                ],
-                "type": 1
-              }
-            }
-          ],
-          "docs": [
-            " Returns the owner of the token if any."
-          ],
-          "label": "PSP34::owner_of",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "OwnerOfOutput"
-            ],
-            "type": 19
-          },
-          "selector": "0x1168624d"
         },
         {
           "args": [
@@ -999,9 +1208,124 @@
               "psp34_external",
               "TransferOutput"
             ],
-            "type": 54
+            "type": 53
           },
           "selector": "0x3128d61b"
+        },
+        {
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "OwnerOfInput1"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [
+            " Returns the owner of the token if any."
+          ],
+          "label": "PSP34::owner_of",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "OwnerOfOutput"
+            ],
+            "type": 19
+          },
+          "selector": "0x1168624d"
+        },
+        {
+          "args": [
+            {
+              "label": "operator",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "ApproveInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "ApproveInput2"
+                ],
+                "type": 14
+              }
+            },
+            {
+              "label": "approved",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "ApproveInput3"
+                ],
+                "type": 34
+              }
+            }
+          ],
+          "docs": [
+            " Approves `operator` to withdraw the `id` token from the caller's account.",
+            " If `id` is `None` approves or disapproves the operator for all tokens of the caller.",
+            "",
+            " On success a `Approval` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Returns `SelfApprove` error if it is self approve.",
+            "",
+            " Returns `NotApproved` error if caller is not owner of `id`."
+          ],
+          "label": "PSP34::approve",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "ApproveOutput"
+            ],
+            "type": 53
+          },
+          "selector": "0x1932a8b0"
+        },
+        {
+          "args": [
+            {
+              "label": "owner",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "BalanceOfInput1"
+                ],
+                "type": 8
+              }
+            }
+          ],
+          "docs": [
+            " Returns the balance of the owner.",
+            "",
+            " This represents the amount of unique tokens the owner has."
+          ],
+          "label": "PSP34::balance_of",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "BalanceOfOutput"
+            ],
+            "type": 4
+          },
+          "selector": "0xcde7e55f"
         },
         {
           "args": [],
@@ -1038,63 +1362,6 @@
             "type": 1
           },
           "selector": "0xffa27a5f"
-        },
-        {
-          "args": [
-            {
-              "label": "operator",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput2"
-                ],
-                "type": 14
-              }
-            },
-            {
-              "label": "approved",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput3"
-                ],
-                "type": 51
-              }
-            }
-          ],
-          "docs": [
-            " Approves `operator` to withdraw the `id` token from the caller's account.",
-            " If `id` is `None` approves or disapproves the operator for all tokens of the caller.",
-            "",
-            " On success a `Approval` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Returns `SelfApprove` error if it is self approve.",
-            "",
-            " Returns `NotApproved` error if caller is not owner of `id`."
-          ],
-          "label": "PSP34::approve",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "ApproveOutput"
-            ],
-            "type": 54
-          },
-          "selector": "0x1932a8b0"
         },
         {
           "args": [
@@ -1141,39 +1408,9 @@
               "psp34_external",
               "AllowanceOutput"
             ],
-            "type": 51
+            "type": 34
           },
           "selector": "0x4790f55a"
-        },
-        {
-          "args": [
-            {
-              "label": "owner",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "BalanceOfInput1"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [
-            " Returns the balance of the owner.",
-            "",
-            " This represents the amount of unique tokens the owner has."
-          ],
-          "label": "PSP34::balance_of",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "BalanceOfOutput"
-            ],
-            "type": 4
-          },
-          "selector": "0xcde7e55f"
         },
         {
           "args": [
@@ -1211,7 +1448,7 @@
               "psp34metadata_external",
               "GetAttributeOutput"
             ],
-            "type": 56
+            "type": 55
           },
           "selector": "0xf19d48d1"
         },
@@ -1240,7 +1477,7 @@
               "psp34enumerable_external",
               "TokenByIndexOutput"
             ],
-            "type": 57
+            "type": 56
           },
           "selector": "0xcd0340d0"
         },
@@ -1279,123 +1516,9 @@
               "psp34enumerable_external",
               "OwnersTokenByIndexOutput"
             ],
-            "type": 57
+            "type": 56
           },
           "selector": "0x3bcfb511"
-        },
-        {
-          "args": [
-            {
-              "label": "uri",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "SetBaseUriInput1"
-                ],
-                "type": 43
-              }
-            }
-          ],
-          "docs": [
-            " Change baseURI"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::set_base_uri",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "SetBaseUriOutput"
-            ],
-            "type": 45
-          },
-          "selector": "0x054a2b94"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "GetAttributesInput1"
-                ],
-                "type": 1
-              }
-            },
-            {
-              "label": "attributes",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "GetAttributesInput2"
-                ],
-                "type": 42
-              }
-            }
-          ],
-          "docs": [
-            " Get multiple  attributes"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::get_attributes",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "GetAttributesOutput"
-            ],
-            "type": 42
-          },
-          "selector": "0x9ff76320"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "SetMultipleAttributesInput1"
-                ],
-                "type": 1
-              }
-            },
-            {
-              "label": "attributes",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "SetMultipleAttributesInput2"
-                ],
-                "type": 42
-              }
-            },
-            {
-              "label": "values",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "SetMultipleAttributesInput3"
-                ],
-                "type": 42
-              }
-            }
-          ],
-          "docs": [
-            "Only Owner can set multiple attributes to a token"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::set_multiple_attributes",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "SetMultipleAttributesOutput"
-            ],
-            "type": 45
-          },
-          "selector": "0xeb886f74"
         },
         {
           "args": [],
@@ -1438,7 +1561,7 @@
               "launchpadpsp34nftstandardtraits_external",
               "GetAttributeNameOutput"
             ],
-            "type": 43
+            "type": 40
           },
           "selector": "0x85eb89f4"
         },
@@ -1466,9 +1589,123 @@
               "launchpadpsp34nftstandardtraits_external",
               "TokenUriOutput"
             ],
-            "type": 43
+            "type": 40
           },
           "selector": "0x71b88aef"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "SetMultipleAttributesInput1"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "attributes",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "SetMultipleAttributesInput2"
+                ],
+                "type": 41
+              }
+            },
+            {
+              "label": "values",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "SetMultipleAttributesInput3"
+                ],
+                "type": 41
+              }
+            }
+          ],
+          "docs": [
+            "Only Owner can set multiple attributes to a token"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::set_multiple_attributes",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "SetMultipleAttributesOutput"
+            ],
+            "type": 45
+          },
+          "selector": "0xeb886f74"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "GetAttributesInput1"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "attributes",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "GetAttributesInput2"
+                ],
+                "type": 41
+              }
+            }
+          ],
+          "docs": [
+            " Get multiple  attributes"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::get_attributes",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "GetAttributesOutput"
+            ],
+            "type": 41
+          },
+          "selector": "0x9ff76320"
+        },
+        {
+          "args": [
+            {
+              "label": "uri",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "SetBaseUriInput1"
+                ],
+                "type": 40
+              }
+            }
+          ],
+          "docs": [
+            " Change baseURI"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::set_base_uri",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "SetBaseUriOutput"
+            ],
+            "type": 45
+          },
+          "selector": "0x054a2b94"
         }
       ]
     },
@@ -1739,52 +1976,16 @@
                 "ty": 29
               }
             },
-            "name": "phases_code_by_id"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
-                "ty": 30
-              }
-            },
-            "name": "phases_id_by_code"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0a00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 31
-              }
-            },
             "name": "phase_whitelists_link"
           },
           {
             "layout": {
               "cell": {
-                "key": "0x0b00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 34
+                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
+                "ty": 32
               }
             },
             "name": "phases"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0c00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 36
-              }
-            },
-            "name": "public_phase"
-          },
-          {
-            "layout": {
-              "cell": {
-                "key": "0x0d00000000000000000000000000000000000000000000000000000000000000",
-                "ty": 2
-              }
-            },
-            "name": "default_phase_id"
           },
           {
             "layout": {
@@ -1793,8 +1994,8 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0e00000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 37
+                        "key": "0x0a00000000000000000000000000000000000000000000000000000000000000",
+                        "ty": 35
                       }
                     },
                     "name": "phase_id_to_account"
@@ -1802,8 +2003,8 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0f00000000000000000000000000000000000000000000000000000000000000",
-                        "ty": 39
+                        "key": "0x0b00000000000000000000000000000000000000000000000000000000000000",
+                        "ty": 37
                       }
                     },
                     "name": "account_to_phase_id"
@@ -1816,8 +2017,8 @@
           {
             "layout": {
               "cell": {
-                "key": "0x1000000000000000000000000000000000000000000000000000000000000000",
-                "ty": 41
+                "key": "0x0c00000000000000000000000000000000000000000000000000000000000000",
+                "ty": 39
               }
             },
             "name": "phase_account_last_index"
@@ -1825,7 +2026,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x1100000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0d00000000000000000000000000000000000000000000000000000000000000",
                 "ty": 2
               }
             },
@@ -1834,11 +2035,56 @@
           {
             "layout": {
               "cell": {
-                "key": "0x1200000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0e00000000000000000000000000000000000000000000000000000000000000",
                 "ty": 8
               }
             },
             "name": "launchpad_contract_address"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0f00000000000000000000000000000000000000000000000000000000000000",
+                "ty": 7
+              }
+            },
+            "name": "project_info"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1000000000000000000000000000000000000000000000000000000000000000",
+                "ty": 5
+              }
+            },
+            "name": "public_minted_count"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1100000000000000000000000000000000000000000000000000000000000000",
+                "ty": 5
+              }
+            },
+            "name": "total_public_minting_amount"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1200000000000000000000000000000000000000000000000000000000000000",
+                "ty": 6
+              }
+            },
+            "name": "public_minting_fee"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1300000000000000000000000000000000000000000000000000000000000000",
+                "ty": 2
+              }
+            },
+            "name": "public_minting_phase_id"
           }
         ]
       }
@@ -2403,11 +2649,11 @@
           "params": [
             {
               "name": "K",
-              "type": 2
+              "type": 30
             },
             {
               "name": "V",
-              "type": 7
+              "type": 31
             }
           ],
           "path": [
@@ -2422,70 +2668,6 @@
         "id": 30,
         "type": {
           "def": {
-            "composite": {
-              "fields": [
-                {
-                  "name": "offset_key",
-                  "type": 27,
-                  "typeName": "Key"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "K",
-              "type": 7
-            },
-            {
-              "name": "V",
-              "type": 2
-            }
-          ],
-          "path": [
-            "ink_storage",
-            "lazy",
-            "mapping",
-            "Mapping"
-          ]
-        }
-      },
-      {
-        "id": 31,
-        "type": {
-          "def": {
-            "composite": {
-              "fields": [
-                {
-                  "name": "offset_key",
-                  "type": 27,
-                  "typeName": "Key"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "K",
-              "type": 32
-            },
-            {
-              "name": "V",
-              "type": 33
-            }
-          ],
-          "path": [
-            "ink_storage",
-            "lazy",
-            "mapping",
-            "Mapping"
-          ]
-        }
-      },
-      {
-        "id": 32,
-        "type": {
-          "def": {
             "tuple": [
               8,
               2
@@ -2494,7 +2676,7 @@
         }
       },
       {
-        "id": 33,
+        "id": 31,
         "type": {
           "def": {
             "composite": {
@@ -2525,7 +2707,7 @@
         }
       },
       {
-        "id": 34,
+        "id": 32,
         "type": {
           "def": {
             "composite": {
@@ -2545,7 +2727,7 @@
             },
             {
               "name": "V",
-              "type": 35
+              "type": 33
             }
           ],
           "path": [
@@ -2557,11 +2739,31 @@
         }
       },
       {
-        "id": 35,
+        "id": 33,
         "type": {
           "def": {
             "composite": {
               "fields": [
+                {
+                  "name": "title",
+                  "type": 7,
+                  "typeName": "Vec<u8>"
+                },
+                {
+                  "name": "is_public",
+                  "type": 34,
+                  "typeName": "bool"
+                },
+                {
+                  "name": "public_minting_fee",
+                  "type": 6,
+                  "typeName": "Balance"
+                },
+                {
+                  "name": "public_minting_amout",
+                  "type": 5,
+                  "typeName": "u64"
+                },
                 {
                   "name": "whitelist_amount",
                   "type": 5,
@@ -2593,7 +2795,15 @@
         }
       },
       {
-        "id": 36,
+        "id": 34,
+        "type": {
+          "def": {
+            "primitive": "bool"
+          }
+        }
+      },
+      {
+        "id": 35,
         "type": {
           "def": {
             "composite": {
@@ -2609,11 +2819,11 @@
           "params": [
             {
               "name": "K",
-              "type": 2
+              "type": 36
             },
             {
               "name": "V",
-              "type": 2
+              "type": 8
             }
           ],
           "path": [
@@ -2622,6 +2832,17 @@
             "mapping",
             "Mapping"
           ]
+        }
+      },
+      {
+        "id": 36,
+        "type": {
+          "def": {
+            "tuple": [
+              5,
+              2
+            ]
+          }
         }
       },
       {
@@ -2645,7 +2866,7 @@
             },
             {
               "name": "V",
-              "type": 8
+              "type": 2
             }
           ],
           "path": [
@@ -2662,56 +2883,13 @@
           "def": {
             "tuple": [
               5,
-              2
-            ]
-          }
-        }
-      },
-      {
-        "id": 39,
-        "type": {
-          "def": {
-            "composite": {
-              "fields": [
-                {
-                  "name": "offset_key",
-                  "type": 27,
-                  "typeName": "Key"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "K",
-              "type": 40
-            },
-            {
-              "name": "V",
-              "type": 2
-            }
-          ],
-          "path": [
-            "ink_storage",
-            "lazy",
-            "mapping",
-            "Mapping"
-          ]
-        }
-      },
-      {
-        "id": 40,
-        "type": {
-          "def": {
-            "tuple": [
-              5,
               8
             ]
           }
         }
       },
       {
-        "id": 41,
+        "id": 39,
         "type": {
           "def": {
             "composite": {
@@ -2743,11 +2921,29 @@
         }
       },
       {
+        "id": 40,
+        "type": {
+          "def": {
+            "primitive": "str"
+          }
+        }
+      },
+      {
+        "id": 41,
+        "type": {
+          "def": {
+            "sequence": {
+              "type": 40
+            }
+          }
+        }
+      },
+      {
         "id": 42,
         "type": {
           "def": {
             "sequence": {
-              "type": 43
+              "type": 34
             }
           }
         }
@@ -2756,7 +2952,9 @@
         "id": 43,
         "type": {
           "def": {
-            "primitive": "str"
+            "sequence": {
+              "type": 6
+            }
           }
         }
       },
@@ -2821,7 +3019,7 @@
                 {
                   "fields": [
                     {
-                      "type": 43,
+                      "type": 40,
                       "typeName": "String"
                     }
                   ],
@@ -2894,23 +3092,35 @@
                 },
                 {
                   "index": 17,
-                  "name": "PhaseNotPublic"
+                  "name": "PhaseExpired"
                 },
                 {
                   "index": 18,
-                  "name": "PhaseCodeNotExist"
+                  "name": "PhaseNotPublicSale"
                 },
                 {
                   "index": 19,
-                  "name": "PhaseExisted"
+                  "name": "PhaseCodeNotExist"
                 },
                 {
                   "index": 20,
-                  "name": "PhaseLimitReached"
+                  "name": "PhaseExisted"
                 },
                 {
                   "index": 21,
+                  "name": "PhaseLimitReached"
+                },
+                {
+                  "index": 22,
                   "name": "WhitelistNotExist"
+                },
+                {
+                  "index": 23,
+                  "name": "PhasePublicSale"
+                },
+                {
+                  "index": 24,
+                  "name": "PhaseWhiteList"
                 }
               ]
             }
@@ -2924,72 +3134,6 @@
       },
       {
         "id": 47,
-        "type": {
-          "def": {
-            "variant": {
-              "variants": [
-                {
-                  "index": 0,
-                  "name": "None"
-                },
-                {
-                  "fields": [
-                    {
-                      "type": 43
-                    }
-                  ],
-                  "index": 1,
-                  "name": "Some"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "T",
-              "type": 43
-            }
-          ],
-          "path": [
-            "Option"
-          ]
-        }
-      },
-      {
-        "id": 48,
-        "type": {
-          "def": {
-            "variant": {
-              "variants": [
-                {
-                  "index": 0,
-                  "name": "None"
-                },
-                {
-                  "fields": [
-                    {
-                      "type": 35
-                    }
-                  ],
-                  "index": 1,
-                  "name": "Some"
-                }
-              ]
-            }
-          },
-          "params": [
-            {
-              "name": "T",
-              "type": 35
-            }
-          ],
-          "path": [
-            "Option"
-          ]
-        }
-      },
-      {
-        "id": 49,
         "type": {
           "def": {
             "variant": {
@@ -3022,7 +3166,40 @@
         }
       },
       {
-        "id": 50,
+        "id": 48,
+        "type": {
+          "def": {
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 31
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 31
+            }
+          ],
+          "path": [
+            "Option"
+          ]
+        }
+      },
+      {
+        "id": 49,
         "type": {
           "def": {
             "variant": {
@@ -3055,15 +3232,40 @@
         }
       },
       {
-        "id": 51,
+        "id": 50,
         "type": {
           "def": {
-            "primitive": "bool"
-          }
+            "variant": {
+              "variants": [
+                {
+                  "index": 0,
+                  "name": "None"
+                },
+                {
+                  "fields": [
+                    {
+                      "type": 5
+                    }
+                  ],
+                  "index": 1,
+                  "name": "Some"
+                }
+              ]
+            }
+          },
+          "params": [
+            {
+              "name": "T",
+              "type": 5
+            }
+          ],
+          "path": [
+            "Option"
+          ]
         }
       },
       {
-        "id": 52,
+        "id": 51,
         "type": {
           "def": {
             "variant": {
@@ -3080,7 +3282,7 @@
                 {
                   "fields": [
                     {
-                      "type": 53
+                      "type": 52
                     }
                   ],
                   "index": 1,
@@ -3096,7 +3298,7 @@
             },
             {
               "name": "E",
-              "type": 53
+              "type": 52
             }
           ],
           "path": [
@@ -3105,7 +3307,7 @@
         }
       },
       {
-        "id": 53,
+        "id": 52,
         "type": {
           "def": {
             "variant": {
@@ -3131,7 +3333,7 @@
         }
       },
       {
-        "id": 54,
+        "id": 53,
         "type": {
           "def": {
             "variant": {
@@ -3148,7 +3350,7 @@
                 {
                   "fields": [
                     {
-                      "type": 55
+                      "type": 54
                     }
                   ],
                   "index": 1,
@@ -3164,7 +3366,7 @@
             },
             {
               "name": "E",
-              "type": 55
+              "type": 54
             }
           ],
           "path": [
@@ -3173,7 +3375,7 @@
         }
       },
       {
-        "id": 55,
+        "id": 54,
         "type": {
           "def": {
             "variant": {
@@ -3181,7 +3383,7 @@
                 {
                   "fields": [
                     {
-                      "type": 43,
+                      "type": 40,
                       "typeName": "String"
                     }
                   ],
@@ -3207,7 +3409,7 @@
                 {
                   "fields": [
                     {
-                      "type": 43,
+                      "type": 40,
                       "typeName": "String"
                     }
                   ],
@@ -3227,7 +3429,7 @@
         }
       },
       {
-        "id": 56,
+        "id": 55,
         "type": {
           "def": {
             "variant": {
@@ -3260,7 +3462,7 @@
         }
       },
       {
-        "id": 57,
+        "id": 56,
         "type": {
           "def": {
             "variant": {
@@ -3277,7 +3479,7 @@
                 {
                   "fields": [
                     {
-                      "type": 55
+                      "type": 54
                     }
                   ],
                   "index": 1,
@@ -3293,7 +3495,7 @@
             },
             {
               "name": "E",
-              "type": 55
+              "type": 54
             }
           ],
           "path": [

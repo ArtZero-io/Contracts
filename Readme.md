@@ -27,6 +27,13 @@ Code Hashes and Contract Addresses:
 0x816f3609c3ef966578a99ae963f9bdbbd8d57cc3369a6736560036ee3842393d
 5H4tBoDMBt8wsYapK2danWtnGvjKEf9DMT7GJJAhB2ksXY8h
 
+# LaunchPad Manager (PROXY)
+0xadec3e8168fc5a97876113188b8ab0cd8dea76d444e6b61f087d12cbb2ac9d27
+5HX7LQgmYrr8TezLKfmu1HMyZXL5QZWPuuoepZybeV1GF7oC
+
+# LaunchPad Standard Contract
+0x7aca74d0c07fbcb2493278a8614c5644c62121911b9890f306b4d85c929ed7fc
+5H4rdCR4gBTVRoJTSZLgfchbY68Ndqwo57XKRPXpaJ7k1ukk
 
 Deploy Steps:
 1. Deploy profile Contract
@@ -35,7 +42,9 @@ Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
 3. Deploy NFT Standard Contract
 4. Deploy Collection Contract via Proxy
 5. Deploy Staking Contract via Proxy
-6. Deploy Marketplace Contract via Proxy
+6. Deploy LaunchPad Standard Contract via Proxy
+7. LaunchPad Manager via Proxy
+8. Deploy Marketplace Contract via Proxy
 
 rustup component add rustfmt --toolchain nightly
 cargo +nightly fmt
