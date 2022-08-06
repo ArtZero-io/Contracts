@@ -306,7 +306,7 @@ pub mod artzero_staking_nft {
 
         /// Set Account so it can claim the reward. Must run by backend every month before add_reward
         #[ink(message)]
-        pub fn set_claimable(&mut self, staker: AccountId) -> Result<(), Error> {
+        pub fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), Error> {
             assert!(self.manager.is_locked);
             assert!(self.manager.reward_started == false); // only when reward distribution is not started
             let caller = self.env().caller();
