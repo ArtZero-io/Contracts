@@ -515,9 +515,10 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            if phase.whitelist_amount > 0 {
+            if phase.is_public == false && phase.whitelist_amount > 0 {
                 return Err(Error::PhaseWhiteList);
             }
+            assert!(phase.claimed_amount == 0, "Phase Minted");
             phase.is_public = is_public.clone();
             self.phases.insert(&phase_id, &phase);
             Ok(())
@@ -559,6 +560,10 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
+            if phase.is_public == false && phase.whitelist_amount > 0 {
+                return Err(Error::PhaseWhiteList);
+            }
+            assert!(phase.claimed_amount == 0, "Phase Minted");
             phase.title = phase_code.clone().into_bytes();
             phase.is_public = is_public.clone();
             phase.public_minting_fee = public_minting_fee.clone();
