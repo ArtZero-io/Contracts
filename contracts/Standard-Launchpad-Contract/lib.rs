@@ -64,6 +64,7 @@ pub mod launchpad_psp34_nft_standard {
         is_public: bool,
         public_minting_fee: Balance,
         public_minting_amount: u64,
+        public_max_minting_amount: u64,
         whitelist_amount: u64,
         claimed_amount: u64,
         start_time: Timestamp,
@@ -175,6 +176,9 @@ pub mod launchpad_psp34_nft_standard {
     pub trait CrossArtZeroLaunchPadPSP34 {
         #[ink(message)]
         fn get_project_mint_fee_rate(&self) -> u32;
+
+        #[ink(message)]
+        fn get_public_max_minting_amount(&self) -> u64;
     }
 
     #[openbrush::trait_definition]
@@ -206,6 +210,7 @@ pub mod launchpad_psp34_nft_standard {
             is_public_phases: Vec<bool>,
             public_minting_fee_phases: Vec<Balance>,
             public_minting_amount_phases: Vec<u64>,
+            public_max_minting_amount_phases: Vec<u64>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Self {
@@ -222,6 +227,7 @@ pub mod launchpad_psp34_nft_standard {
                     code_phases.len() == is_public_phases.len() &&
                     code_phases.len() == public_minting_fee_phases.len() &&
                     code_phases.len() == public_minting_amount_phases.len() &&
+                    code_phases.len() == public_max_minting_amount_phases.len() &&
                     code_phases.len() == end_time_phases.len() && 
                     code_phases.len() as u8 <= limit_phase_count {
                     let phase_length = code_phases.len();
@@ -231,6 +237,7 @@ pub mod launchpad_psp34_nft_standard {
                             is_public_phases[i].clone(),
                             public_minting_fee_phases[i].clone(),
                             public_minting_amount_phases[i].clone(),
+                            public_max_minting_amount_phases[i].clone(),
                             start_time_phases[i].clone(), 
                             end_time_phases[i].clone()
                         );
@@ -247,6 +254,7 @@ pub mod launchpad_psp34_nft_standard {
             is_public: bool,
             public_minting_fee: Balance,
             public_minting_amount: u64,
+            public_max_minting_amount: u64,
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
@@ -261,6 +269,7 @@ pub mod launchpad_psp34_nft_standard {
                     is_public: is_public,
                     public_minting_fee: public_minting_fee,
                     public_minting_amount: public_minting_amount,
+                    public_max_minting_amount: public_max_minting_amount,
                     whitelist_amount: 0,
                     claimed_amount: 0,
                     start_time: start_time, 
@@ -365,12 +374,13 @@ pub mod launchpad_psp34_nft_standard {
 
         #[ink(message)]
         #[ink(payable)]
-        pub fn public_mint(&mut self, phase_id: u8) -> Result<(), Error> {
+        pub fn public_mint(&mut self, phase_id: u8, mint_amount: u64) -> Result<(), Error> {
             let caller = self.env().caller();
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist)
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
+            assert!(mint_amount <= phase.public_max_minting_amount, "PhasePublicMintLimitReached");
             let current_time = Self::env().block_timestamp();
             if phase.start_time >= current_time && phase.end_time <= current_time {
                 return Err(Error::PhaseExpired);
@@ -378,20 +388,22 @@ pub mod launchpad_psp34_nft_standard {
             if phase.is_public == false {
                 return Err(Error::PhaseNotPublicSale)
             }
-            if self.last_token_id >= self.total_supply || phase.claimed_amount >= phase.public_minting_amount {
+            if self.last_token_id.checked_add(mint_amount).unwrap() > self.total_supply || 
+                phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.public_minting_amount {
                 return Err(Error::TokenLimitReached)
             }
-            if phase.public_minting_fee != self.env().transferred_value() {
+            if phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() != self.env().transferred_value() {
                 return Err(Error::InvalidFee)
             }
-            let claimed_amount_tmp = phase.claimed_amount.checked_add(1).unwrap();
+            let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
             phase.claimed_amount = claimed_amount_tmp;
             let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
                 &self.launchpad_contract_address
             );
-            // Send minting fee to launchpad contract
             let project_mint_fee = phase.public_minting_fee
                 .checked_mul(project_mint_fee_rate as u128)
+                .unwrap()
+                .checked_mul(mint_amount as u128)
                 .unwrap()
                 .checked_div(10000)
                 .unwrap();
@@ -401,10 +413,13 @@ pub mod launchpad_psp34_nft_standard {
                     .transfer(self.launchpad_contract_address, project_mint_fee)
                     .is_ok());
             }
+            
+            for _i in 0..mint_amount {
+                self.last_token_id += 1;
+                self.public_minted_count += 1;
+                assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+            }
             self.phases.insert(&phase_id, &phase);
-            self.last_token_id += 1;
-            self.public_minted_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
             Ok(())
         }
 
@@ -518,6 +533,7 @@ pub mod launchpad_psp34_nft_standard {
             is_public: bool,
             public_minting_fee: Balance,
             public_minting_amount: u64,
+            public_max_minting_amount: u64,
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
@@ -527,6 +543,10 @@ pub mod launchpad_psp34_nft_standard {
             if start_time >= end_time || phase_id > self.last_phase_id {
                 return Err(Error::InvalidInput);
             }
+            assert!(
+                public_max_minting_amount <= ArtZeroLaunchPadPSP34Ref::get_public_max_minting_amount(&self.launchpad_contract_address), 
+                "InvalidPublicMaxMintingAmount"
+            );
             for index in 0..self.last_phase_id {
                 if index != phase_id {
                     let phase = self.phases.get(&(index+1)).unwrap();
@@ -543,6 +563,7 @@ pub mod launchpad_psp34_nft_standard {
             phase.is_public = is_public.clone();
             phase.public_minting_fee = public_minting_fee.clone();
             phase.public_minting_amount = public_minting_amount.clone();
+            phase.public_max_minting_amount = public_max_minting_amount.clone();
             phase.start_time = start_time.clone();
             phase.end_time = end_time.clone();
             self.phases.insert(&phase_id, &phase);
@@ -558,14 +579,16 @@ pub mod launchpad_psp34_nft_standard {
             code_phases: Vec<String>,
             is_public_phases: Vec<bool>,
             public_minting_fee_phases: Vec<Balance>,
-            public_minting_amount: Vec<u64>,
+            public_minting_amount_phases: Vec<u64>,
+            public_max_minting_amount_phases: Vec<u64>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
             if id_phases.len() != code_phases.len() ||
                 id_phases.len() != is_public_phases.len() ||
                 id_phases.len() != public_minting_fee_phases.len() ||
-                id_phases.len() != public_minting_amount.len() ||
+                id_phases.len() != public_minting_amount_phases.len() ||
+                id_phases.len() != public_max_minting_amount_phases.len() ||
                 id_phases.len() != start_time_phases.len() || 
                 id_phases.len() != end_time_phases.len() {
                 return Err(Error::InvalidInput);
@@ -577,7 +600,8 @@ pub mod launchpad_psp34_nft_standard {
                     code_phases[index + 1].clone(),
                     is_public_phases[index + 1].clone(),
                     public_minting_fee_phases[index + 1].clone(),
-                    public_minting_amount[index +1].clone(),
+                    public_minting_amount_phases[index +1].clone(),
+                    public_max_minting_amount_phases[index + 1].clone(),
                     start_time_phases[index + 1].clone(),
                     end_time_phases[index + 1].clone()
                 );

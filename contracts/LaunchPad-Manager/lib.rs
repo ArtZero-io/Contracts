@@ -79,6 +79,7 @@ pub mod artzero_launchpad_psp34 {
         max_phases_per_project: u8,
         project_adding_fee: Balance,
         project_mint_fee_rate: u32,
+        public_max_minting_amount: u64,
         _reserved: Option<()>,
     }
 
@@ -96,6 +97,9 @@ pub mod artzero_launchpad_psp34 {
     pub trait CrossArtZeroLaunchPadPSP34 {
         #[ink(message)]
         fn get_project_mint_fee_rate(&self) -> u32;
+
+        #[ink(message)]
+        fn get_public_max_minting_amount(&self) -> u64;
     }
 
     #[ink(event)]
@@ -113,11 +117,19 @@ pub mod artzero_launchpad_psp34 {
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
             project_mint_fee_rate: u32, //1% = 100
+            public_max_minting_amount: u64
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
                 assert!(project_mint_fee_rate < 10000);
                 _instance._init_with_owner(owner_address);
-                _instance.initialize(max_phases_per_project, admin_address, standard_nft_hash, project_adding_fee, project_mint_fee_rate).ok().unwrap()
+                _instance.initialize(
+                    max_phases_per_project, 
+                    admin_address, 
+                    standard_nft_hash, 
+                    project_adding_fee, 
+                    project_mint_fee_rate, 
+                    public_max_minting_amount
+                ).ok().unwrap()
             })
         }
 
@@ -128,7 +140,8 @@ pub mod artzero_launchpad_psp34 {
             admin_address: AccountId,
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
-            project_mint_fee_rate: u32
+            project_mint_fee_rate: u32,
+            public_max_minting_amount: u64
         ) -> Result<(), OwnableError> {
             self.manager.admin_address = admin_address;
             self.manager.standard_nft_hash = standard_nft_hash;
@@ -137,6 +150,7 @@ pub mod artzero_launchpad_psp34 {
             self.manager.max_phases_per_project = max_phases_per_project;
             self.manager.project_adding_fee = project_adding_fee;
             self.manager.project_mint_fee_rate = project_mint_fee_rate;
+            self.manager.public_max_minting_amount = public_max_minting_amount;
             Ok(())
         }
 
@@ -248,6 +262,22 @@ pub mod artzero_launchpad_psp34 {
             }
             Ok(())
         }
+
+        /// Withdraw Fees - only Owner
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
+            if value > self.env().balance() {
+                return Err(Error::NotEnoughBalance);
+            }
+            if self.env().transfer(self.env().caller(), value).is_err() {
+                panic!(
+                    "error withdraw_fee"
+                )
+            }
+            Ok(())
+        }
+
         /* END EXECUTE FUNCTION*/
 
         /* SETTERS */
@@ -262,7 +292,7 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
-        /// update project adding fee - Only Admin
+        /// Update project adding fee - Only Admin
         #[ink(message)]
         pub fn update_project_adding_fee(
             &mut self,
@@ -273,6 +303,20 @@ pub mod artzero_launchpad_psp34 {
             }
             
             self.manager.project_adding_fee = project_adding_fee;
+            Ok(())
+        }
+
+        /// Update public max minting amount - Only Admin
+        #[ink(message)]
+        pub fn update_public_max_minting_amount(
+            &mut self,
+            public_max_minting_amount: u64
+        ) -> Result<(), Error> {
+            if  self.env().caller() != self.manager.admin_address {
+                return Err(Error::OnlyAdmin);
+            }
+            
+            self.manager.public_max_minting_amount = public_max_minting_amount;
             Ok(())
         }
 
@@ -328,6 +372,8 @@ pub mod artzero_launchpad_psp34 {
             self.manager.projects.insert(&contract_address, &project);
             Ok(())
         }
+
+
 
         /* END SETTERS */
         
@@ -414,6 +460,14 @@ pub mod artzero_launchpad_psp34 {
             &self
         ) -> u32 {
             return self.manager.project_mint_fee_rate;
+        }
+    
+        /// Get public max minting amount
+        #[ink(message)]
+        fn get_public_max_minting_amount(
+            &self
+        ) -> u64 {
+            return self.manager.public_max_minting_amount;
         }
     }
 }

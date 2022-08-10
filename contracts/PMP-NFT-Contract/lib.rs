@@ -332,10 +332,12 @@ pub mod artzero_psp34 {
             Ok(())
         }
 
+        /// Paid mint
         #[ink(message)]
         #[ink(payable)]
-        pub fn paid_mint(&mut self) -> Result<(), Error> {
+        pub fn paid_mint(&mut self, mint_amount: u64) -> Result<(), Error> {
             let caller = self.env().caller();
+            assert!(mint_amount < 5, "Invalid mint_amount");
             // Mint is disabled
             if self.manager.mint_mode == 0 {
                 return Err(Error::NotMintTime)
@@ -345,18 +347,22 @@ pub mod artzero_psp34 {
                 return Err(Error::NotMintTime)
             }
             // Mode 1 - allow whitelist and pulic mint
-            if self.manager.mint_mode == 1 && self.manager.public_sale_minted_count >= self.manager.public_sale_amount {
+            if self.manager.mint_mode == 1 && 
+                self.manager.public_sale_minted_count.checked_add(mint_amount).unwrap() > self.manager.public_sale_amount {
                 return Err(Error::TokenLimitReachedMode1)
             }
             if self.manager.mint_mode == 1 && self.manager.minting_fee != self.env().transferred_value() {
                 return Err(Error::InvalidFee)
             }
-            if self.manager.last_token_id >= self.manager.total_supply {
+            if self.manager.last_token_id.checked_add(mint_amount).unwrap() > self.manager.total_supply {
                 return Err(Error::TokenLimitReached)
             }
-            self.manager.last_token_id += 1;
-            self.manager.public_sale_minted_count += 1;
-            assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+            for _i in 0..mint_amount {
+                self.manager.last_token_id += 1;
+                self.manager.public_sale_minted_count += 1;
+                assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+            }
+            
             Ok(())
         }
 
