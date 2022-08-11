@@ -170,6 +170,7 @@ pub mod artzero_launchpad_psp34 {
             is_public_phases: Vec<bool>,
             public_minting_fee_phases: Vec<Balance>,
             public_minting_amount_phases: Vec<u64>,
+            public_max_minting_amount_phases: Vec<u64>,
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
@@ -190,6 +191,7 @@ pub mod artzero_launchpad_psp34 {
                 is_public_phases,
                 public_minting_fee_phases,
                 public_minting_amount_phases,
+                public_max_minting_amount_phases,
                 start_time_phases, 
                 end_time_phases
             ).endowment(0)

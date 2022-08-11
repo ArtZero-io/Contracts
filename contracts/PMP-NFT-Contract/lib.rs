@@ -71,6 +71,7 @@ pub mod artzero_psp34 {
         minting_fee: Balance, // Public Sale Minting Fee
         public_sale_amount: u64,
         mint_mode: u8, /* Mint Mode: 0: not started / 1: allow whitelist and public sale mint / 2: just allow whitelist mint */
+        public_max_minting_amount: u64,
     }
 
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
@@ -153,6 +154,7 @@ pub mod artzero_psp34 {
             total_supply: u64,
             minting_fee: Balance,
             public_sale_amount: u64,
+            public_max_minting_amount: u64
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
@@ -164,6 +166,7 @@ pub mod artzero_psp34 {
                         total_supply,
                         minting_fee,
                         public_sale_amount,
+                        public_max_minting_amount,
                     )
                     .ok()
                     .unwrap();
@@ -180,6 +183,7 @@ pub mod artzero_psp34 {
             total_supply: u64,
             minting_fee: Balance,
             public_sale_amount: u64,
+            public_max_minting_amount: u64
         ) -> Result<(), OwnableError> {
             self._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
             self._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
@@ -187,6 +191,7 @@ pub mod artzero_psp34 {
             self.manager.admin_address = admin_address;
             self.manager.minting_fee = minting_fee;
             self.manager.public_sale_amount = public_sale_amount;
+            self.manager.public_max_minting_amount = public_max_minting_amount;
             Ok(())
         }
 
@@ -214,6 +219,17 @@ pub mod artzero_psp34 {
                     .whitelist_mint_total_amount
                     .checked_add(whitelist_amount)
                     .unwrap();
+                Ok(())
+            } else {
+                return Err(Error::OnlyAdmin)
+            }
+        }
+
+        /// Set public max minting amount - Only Admin
+        #[ink(message)]
+        pub fn set_public_max_minting_amount(&mut self, public_max_minting_amount: u64) -> Result<(), Error> {
+            if self.env().caller() == self.manager.admin_address {
+                self.manager.public_max_minting_amount = public_max_minting_amount;
                 Ok(())
             } else {
                 return Err(Error::OnlyAdmin)
@@ -337,7 +353,7 @@ pub mod artzero_psp34 {
         #[ink(payable)]
         pub fn paid_mint(&mut self, mint_amount: u64) -> Result<(), Error> {
             let caller = self.env().caller();
-            assert!(mint_amount < 5, "Invalid mint_amount");
+            assert!(mint_amount < self.manager.public_max_minting_amount, "Invalid mint_amount");
             // Mint is disabled
             if self.manager.mint_mode == 0 {
                 return Err(Error::NotMintTime)
@@ -351,7 +367,7 @@ pub mod artzero_psp34 {
                 self.manager.public_sale_minted_count.checked_add(mint_amount).unwrap() > self.manager.public_sale_amount {
                 return Err(Error::TokenLimitReachedMode1)
             }
-            if self.manager.mint_mode == 1 && self.manager.minting_fee != self.env().transferred_value() {
+            if self.manager.mint_mode == 1 && self.manager.minting_fee.checked_mul(mint_amount as u128).unwrap() != self.env().transferred_value() {
                 return Err(Error::InvalidFee)
             }
             if self.manager.last_token_id.checked_add(mint_amount).unwrap() > self.manager.total_supply {
@@ -370,6 +386,12 @@ pub mod artzero_psp34 {
         #[ink(message)]
         pub fn get_minting_fee(&self) -> Balance {
             return self.manager.minting_fee
+        }
+
+        /// Get public max minting amount
+        #[ink(message)]
+        pub fn get_public_max_minting_amount(&self) -> u64 {
+            return self.manager.public_max_minting_amount
         }
 
         /// mint_mode 0: not started - mint_mode 1: allow whitelist and public sale mint - mint_mode 2: just allow whitelist mint
