@@ -103,6 +103,7 @@ pub mod launchpad_psp34_nft_standard {
         metadata: PSP34MetadataData,
         #[OwnableStorageField]
         ownable: OwnableData,
+        admin_address: AccountId,
         last_token_id: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32,Vec<u8>>,
@@ -222,7 +223,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.project_info = project_info.into_bytes();
                 instance.limit_phase_count = limit_phase_count;
                 instance.public_minted_count = 0;
-
+                instance.admin_address = contract_owner;
                 if code_phases.len() == start_time_phases.len() &&
                     code_phases.len() == is_public_phases.len() &&
                     code_phases.len() == public_minting_fee_phases.len() &&
@@ -246,7 +247,7 @@ pub mod launchpad_psp34_nft_standard {
             })
         }
 
-        ///Add new phare - Only Owner
+        ///Add new phare - Only Admin
         #[ink(message)]
         pub fn add_new_phase(
             &mut self, 
@@ -282,19 +283,8 @@ pub mod launchpad_psp34_nft_standard {
             }
         }
 
-        ///Only Owner can mint new token
+        /// Update whitelist - Only Admin
         #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn mint(&mut self) -> Result<(), Error> {
-            let caller = self.env().caller();
-            self.last_token_id += 1;
-            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
-            Ok(())
-        }
-
-        /// Update whitelist - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn update_whitelist(
             &mut self,
             account: AccountId,
@@ -302,6 +292,7 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
             if  self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
                 return Err(Error::WhitelistNotExist);
             }
@@ -327,9 +318,8 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Add new whitelist - Only Owner
+        /// Add new whitelist - Only Admin
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn add_whitelist(
             &mut self,
             account: AccountId,
@@ -337,6 +327,7 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
             //Whitelist amount must less than total supply or greater than zero
             if  whitelist_amount > self.total_supply ||
                 whitelist_amount == 0 {
@@ -368,6 +359,29 @@ pub mod launchpad_psp34_nft_standard {
             let mut phase = self.phases.get(&phase_id).unwrap();
             let whitelist_amount_tmp = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
             phase.whitelist_amount = whitelist_amount_tmp;
+            self.phases.insert(&phase_id, &phase);
+            Ok(())
+        }
+
+        ///Only Owner can mint new token
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn mint(&mut self, phase_id: u8, mint_amount: u64 ) -> Result<(), Error> {
+            let caller = self.env().caller();
+            if self.phases.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist)
+            }
+            let mut phase = self.phases.get(&phase_id).unwrap();
+            if self.last_token_id.checked_add(mint_amount).unwrap() > self.total_supply || 
+                phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.public_minting_amount {
+                return Err(Error::TokenLimitReached)
+            }
+            let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
+            phase.claimed_amount = claimed_amount_tmp;
+            for _i in 0..mint_amount {
+                self.last_token_id += 1;
+                assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+            }
             self.phases.insert(&phase_id, &phase);
             Ok(())
         }
@@ -503,14 +517,22 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update public phase
+        /// Update limit phase count
         #[ink(message)]
         #[modifiers(only_owner)]
+        pub fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
+            self.admin_address = admin_address;
+            Ok(())
+        }
+
+        /// Update public phase
+        #[ink(message)]
         pub fn update_public_phase(
             &mut self, 
             phase_id: u8,
             is_public: bool
         ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
@@ -526,7 +548,6 @@ pub mod launchpad_psp34_nft_standard {
 
         /// Update phase schedule
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn update_schedule_phase(
             &mut self, 
             phase_id: u8,
@@ -538,6 +559,7 @@ pub mod launchpad_psp34_nft_standard {
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
@@ -577,7 +599,6 @@ pub mod launchpad_psp34_nft_standard {
 
         // Update schedule phases
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn update_schedule_phases(
             &mut self, 
             id_phases: Vec<u8>,
@@ -589,6 +610,7 @@ pub mod launchpad_psp34_nft_standard {
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
             if id_phases.len() != code_phases.len() ||
                 id_phases.len() != is_public_phases.len() ||
                 id_phases.len() != public_minting_fee_phases.len() ||
@@ -614,21 +636,13 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update limit phase count
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn update_limit_phase_count(&mut self, limit_phase_count: u8) -> Result<(), Error> {
-            self.limit_phase_count = limit_phase_count;
-            Ok(())
-        }
-
         /// Edit project information
         #[ink(message)]
-        #[modifiers(only_owner)]
         pub fn edit_project_information(
             &mut self,
             project_info: String
         ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
             self.project_info = project_info.into_bytes();
             Ok(())
         }
@@ -663,6 +677,14 @@ pub mod launchpad_psp34_nft_standard {
             &self
         ) -> u64 {
             return self.total_public_minting_amount;
+        }
+
+        /// Get admin address
+        #[ink(message)]
+        pub fn get_admin_address(
+            &self
+        ) -> AccountId {
+            return self.admin_address;
         }
 
         /// Get public minted count
@@ -799,6 +821,7 @@ pub mod launchpad_psp34_nft_standard {
 
         /// Lock nft - Only owner token
         #[ink(message)]
+        #[modifiers(only_owner)]
         pub fn lock(&mut self, token_id: Id) -> Result<(), Error> {
             let caller = self.env().caller();
             let token_owner = self.owner_of(token_id.clone()).unwrap();
