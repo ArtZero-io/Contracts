@@ -564,20 +564,10 @@ pub mod artzero_marketplace_psp34 {
             }
             if user_volume.is_some() {
                 user_volume_unwrap = user_volume.unwrap();
-            }
-            // Send AZERO cashback to buyer
-            if platform_fee > platform_fee_after_discount {
-                let volume = price
-                    .checked_sub(platform_fee.checked_sub(platform_fee_after_discount).unwrap())
-                    .unwrap();
-                self.manager.total_volume = self.manager.total_volume.checked_add(volume).unwrap();
-                collection_volume_unwarp = collection_volume_unwarp.checked_add(volume).unwrap();
-                user_volume_unwrap = user_volume_unwrap.checked_add(volume).unwrap();
-            } else {
-                self.manager.total_volume = self.manager.total_volume.checked_add(price).unwrap();
-                collection_volume_unwarp = collection_volume_unwarp.checked_add(price).unwrap();
-                user_volume_unwrap = user_volume_unwrap.checked_add(price).unwrap();
-            }
+            }   
+            self.manager.total_volume = self.manager.total_volume.checked_add(price).unwrap();
+            collection_volume_unwarp = collection_volume_unwarp.checked_add(price).unwrap();
+            user_volume_unwrap = user_volume_unwrap.checked_add(price).unwrap();
             self.manager
                 .volume_by_collection
                 .insert(&nft_contract_address, &collection_volume_unwarp);
@@ -894,19 +884,9 @@ pub mod artzero_marketplace_psp34 {
                         if user_volume.is_some() {
                             user_volume_unwrap = user_volume.unwrap();
                         }
-                        // Send AZERO cashback to buyer
-                        if platform_fee > platform_fee_after_discount {
-                            let volume = price
-                                .checked_sub(platform_fee.checked_sub(platform_fee_after_discount).unwrap())
-                                .unwrap();
-                            self.manager.total_volume = self.manager.total_volume.checked_add(volume).unwrap();
-                            collection_volume_unwarp = collection_volume_unwarp.checked_add(volume).unwrap();
-                            user_volume_unwrap = user_volume_unwrap.checked_add(volume).unwrap();
-                        } else {
-                            self.manager.total_volume = self.manager.total_volume.checked_add(price).unwrap();
-                            collection_volume_unwarp = collection_volume_unwarp.checked_add(price).unwrap();
-                            user_volume_unwrap = user_volume_unwrap.checked_add(price).unwrap();
-                        }
+                        self.manager.total_volume = self.manager.total_volume.checked_add(price).unwrap();
+                        collection_volume_unwarp = collection_volume_unwarp.checked_add(price).unwrap();
+                        user_volume_unwrap = user_volume_unwrap.checked_add(price).unwrap();
                         self.manager
                             .volume_by_collection
                             .insert(&nft_contract_address, &collection_volume_unwarp);

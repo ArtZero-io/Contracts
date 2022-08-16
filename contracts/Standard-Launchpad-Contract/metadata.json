@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0x4bbf6204cd165c1253a08e810b1b1b47a326a2e9cf280ff29aa7b7005ce79b8a",
+    "hash": "0xc32e1c66bb726d48673a00922bef71b0be607e9c4270fe8d654c14b7bfdf9575",
     "language": "ink! 3.3.1",
     "compiler": "rustc 1.61.0-nightly"
   },
@@ -215,22 +215,6 @@
           "selector": "0x72bcb3cf"
         },
         {
-          "args": [],
-          "docs": [
-            "Only Owner can mint new token"
-          ],
-          "label": "mint",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 45
-          },
-          "selector": "0xcfdd9aa2"
-        },
-        {
           "args": [
             {
               "label": "account",
@@ -270,7 +254,7 @@
             }
           ],
           "docs": [
-            " Update whitelist - Only Owner"
+            " Update whitelist - Only Admin"
           ],
           "label": "update_whitelist",
           "mutates": true,
@@ -323,7 +307,7 @@
             }
           ],
           "docs": [
-            " Add new whitelist - Only Owner"
+            " Add new whitelist - Only Admin"
           ],
           "label": "add_whitelist",
           "mutates": true,
@@ -335,6 +319,41 @@
             "type": 45
           },
           "selector": "0xcc9972d4"
+        },
+        {
+          "args": [
+            {
+              "label": "phase_id",
+              "type": {
+                "displayName": [
+                  "u8"
+                ],
+                "type": 2
+              }
+            },
+            {
+              "label": "mint_amount",
+              "type": {
+                "displayName": [
+                  "u64"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "docs": [
+            "Only Owner can mint new token"
+          ],
+          "label": "mint",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0xcfdd9aa2"
         },
         {
           "args": [
@@ -429,6 +448,32 @@
             "type": 45
           },
           "selector": "0x07fdb555"
+        },
+        {
+          "args": [
+            {
+              "label": "admin_address",
+              "type": {
+                "displayName": [
+                  "AccountId"
+                ],
+                "type": 8
+              }
+            }
+          ],
+          "docs": [
+            " Update limit phase count"
+          ],
+          "label": "update_admin_address",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "Result"
+            ],
+            "type": 45
+          },
+          "selector": "0xb470cada"
         },
         {
           "args": [
@@ -644,32 +689,6 @@
         {
           "args": [
             {
-              "label": "limit_phase_count",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            }
-          ],
-          "docs": [
-            " Update limit phase count"
-          ],
-          "label": "update_limit_phase_count",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "Result"
-            ],
-            "type": 45
-          },
-          "selector": "0x8e2f3fcb"
-        },
-        {
-          "args": [
-            {
               "label": "project_info",
               "type": {
                 "displayName": [
@@ -724,6 +743,22 @@
             "type": 5
           },
           "selector": "0x1a0d7a59"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get admin address"
+          ],
+          "label": "get_admin_address",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "AccountId"
+            ],
+            "type": 8
+          },
+          "selector": "0x8938ef71"
         },
         {
           "args": [],
@@ -1221,30 +1256,32 @@
         {
           "args": [
             {
-              "label": "id",
+              "label": "owner",
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "OwnerOfInput1"
+                  "BalanceOfInput1"
                 ],
-                "type": 1
+                "type": 8
               }
             }
           ],
           "docs": [
-            " Returns the owner of the token if any."
+            " Returns the balance of the owner.",
+            "",
+            " This represents the amount of unique tokens the owner has."
           ],
-          "label": "PSP34::owner_of",
+          "label": "PSP34::balance_of",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "OwnerOfOutput"
+              "BalanceOfOutput"
             ],
-            "type": 19
+            "type": 4
           },
-          "selector": "0x1168624d"
+          "selector": "0xcde7e55f"
         },
         {
           "args": [
@@ -1362,36 +1399,6 @@
           "selector": "0x3128d61b"
         },
         {
-          "args": [
-            {
-              "label": "owner",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "BalanceOfInput1"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [
-            " Returns the balance of the owner.",
-            "",
-            " This represents the amount of unique tokens the owner has."
-          ],
-          "label": "PSP34::balance_of",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "BalanceOfOutput"
-            ],
-            "type": 4
-          },
-          "selector": "0xcde7e55f"
-        },
-        {
           "args": [],
           "docs": [
             " Returns current NFT total supply."
@@ -1426,6 +1433,34 @@
             "type": 1
           },
           "selector": "0xffa27a5f"
+        },
+        {
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "OwnerOfInput1"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [
+            " Returns the owner of the token if any."
+          ],
+          "label": "PSP34::owner_of",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "OwnerOfOutput"
+            ],
+            "type": 19
+          },
+          "selector": "0x1168624d"
         },
         {
           "args": [
@@ -1536,6 +1571,145 @@
           "selector": "0xcd0340d0"
         },
         {
+          "args": [],
+          "docs": [
+            "Get Attribute Count"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::get_attribute_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "GetAttributeCountOutput"
+            ],
+            "type": 4
+          },
+          "selector": "0x2b249923"
+        },
+        {
+          "args": [
+            {
+              "label": "index",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "GetAttributeNameInput1"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [
+            "Get Attribute Name"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::get_attribute_name",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "GetAttributeNameOutput"
+            ],
+            "type": 40
+          },
+          "selector": "0x85eb89f4"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "TokenUriInput1"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "docs": [
+            " Get URI from token ID"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::token_uri",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "TokenUriOutput"
+            ],
+            "type": 40
+          },
+          "selector": "0x71b88aef"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "GetAttributesInput1"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "attributes",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "GetAttributesInput2"
+                ],
+                "type": 41
+              }
+            }
+          ],
+          "docs": [
+            " Get multiple  attributes"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::get_attributes",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "GetAttributesOutput"
+            ],
+            "type": 41
+          },
+          "selector": "0x9ff76320"
+        },
+        {
+          "args": [
+            {
+              "label": "uri",
+              "type": {
+                "displayName": [
+                  "launchpadpsp34nftstandardtraits_external",
+                  "SetBaseUriInput1"
+                ],
+                "type": 40
+              }
+            }
+          ],
+          "docs": [
+            " Change baseURI"
+          ],
+          "label": "LaunchPadPsp34NftStandardTraits::set_base_uri",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "launchpadpsp34nftstandardtraits_external",
+              "SetBaseUriOutput"
+            ],
+            "type": 45
+          },
+          "selector": "0x054a2b94"
+        },
+        {
           "args": [
             {
               "label": "token_id",
@@ -1582,145 +1756,6 @@
             "type": 45
           },
           "selector": "0xeb886f74"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "TokenUriInput1"
-                ],
-                "type": 5
-              }
-            }
-          ],
-          "docs": [
-            " Get URI from token ID"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::token_uri",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "TokenUriOutput"
-            ],
-            "type": 40
-          },
-          "selector": "0x71b88aef"
-        },
-        {
-          "args": [
-            {
-              "label": "uri",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "SetBaseUriInput1"
-                ],
-                "type": 40
-              }
-            }
-          ],
-          "docs": [
-            " Change baseURI"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::set_base_uri",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "SetBaseUriOutput"
-            ],
-            "type": 45
-          },
-          "selector": "0x054a2b94"
-        },
-        {
-          "args": [],
-          "docs": [
-            "Get Attribute Count"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::get_attribute_count",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "GetAttributeCountOutput"
-            ],
-            "type": 4
-          },
-          "selector": "0x2b249923"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "GetAttributesInput1"
-                ],
-                "type": 1
-              }
-            },
-            {
-              "label": "attributes",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "GetAttributesInput2"
-                ],
-                "type": 41
-              }
-            }
-          ],
-          "docs": [
-            " Get multiple  attributes"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::get_attributes",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "GetAttributesOutput"
-            ],
-            "type": 41
-          },
-          "selector": "0x9ff76320"
-        },
-        {
-          "args": [
-            {
-              "label": "index",
-              "type": {
-                "displayName": [
-                  "launchpadpsp34nftstandardtraits_external",
-                  "GetAttributeNameInput1"
-                ],
-                "type": 4
-              }
-            }
-          ],
-          "docs": [
-            "Get Attribute Name"
-          ],
-          "label": "LaunchPadPsp34NftStandardTraits::get_attribute_name",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "launchpadpsp34nftstandardtraits_external",
-              "GetAttributeNameOutput"
-            ],
-            "type": 40
-          },
-          "selector": "0x85eb89f4"
         }
       ]
     },
@@ -1916,6 +1951,15 @@
             "layout": {
               "cell": {
                 "key": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "ty": 8
+              }
+            },
+            "name": "admin_address"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x0100000000000000000000000000000000000000000000000000000000000000",
                 "ty": 5
               }
             },
@@ -1924,7 +1968,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0100000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0200000000000000000000000000000000000000000000000000000000000000",
                 "ty": 4
               }
             },
@@ -1933,7 +1977,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0200000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0300000000000000000000000000000000000000000000000000000000000000",
                 "ty": 26
               }
             },
@@ -1942,7 +1986,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0300000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0400000000000000000000000000000000000000000000000000000000000000",
                 "ty": 28
               }
             },
@@ -1951,7 +1995,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0400000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0500000000000000000000000000000000000000000000000000000000000000",
                 "ty": 5
               }
             },
@@ -1960,7 +2004,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0500000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0600000000000000000000000000000000000000000000000000000000000000",
                 "ty": 5
               }
             },
@@ -1969,7 +2013,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0600000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0700000000000000000000000000000000000000000000000000000000000000",
                 "ty": 2
               }
             },
@@ -1978,7 +2022,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0700000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0800000000000000000000000000000000000000000000000000000000000000",
                 "ty": 5
               }
             },
@@ -1987,7 +2031,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0800000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
                 "ty": 29
               }
             },
@@ -1996,7 +2040,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0900000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0a00000000000000000000000000000000000000000000000000000000000000",
                 "ty": 32
               }
             },
@@ -2009,7 +2053,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0a00000000000000000000000000000000000000000000000000000000000000",
+                        "key": "0x0b00000000000000000000000000000000000000000000000000000000000000",
                         "ty": 35
                       }
                     },
@@ -2018,7 +2062,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x0b00000000000000000000000000000000000000000000000000000000000000",
+                        "key": "0x0c00000000000000000000000000000000000000000000000000000000000000",
                         "ty": 37
                       }
                     },
@@ -2032,7 +2076,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0c00000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0d00000000000000000000000000000000000000000000000000000000000000",
                 "ty": 39
               }
             },
@@ -2041,7 +2085,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0d00000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0e00000000000000000000000000000000000000000000000000000000000000",
                 "ty": 2
               }
             },
@@ -2050,7 +2094,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0e00000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x0f00000000000000000000000000000000000000000000000000000000000000",
                 "ty": 8
               }
             },
@@ -2059,7 +2103,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x0f00000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x1000000000000000000000000000000000000000000000000000000000000000",
                 "ty": 7
               }
             },
@@ -2068,7 +2112,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x1000000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x1100000000000000000000000000000000000000000000000000000000000000",
                 "ty": 5
               }
             },
@@ -2077,7 +2121,7 @@
           {
             "layout": {
               "cell": {
-                "key": "0x1100000000000000000000000000000000000000000000000000000000000000",
+                "key": "0x1200000000000000000000000000000000000000000000000000000000000000",
                 "ty": 5
               }
             },
