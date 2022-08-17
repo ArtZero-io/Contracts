@@ -183,7 +183,7 @@ pub mod launchpad_psp34_nft_standard {
     }
 
     #[openbrush::trait_definition]
-    pub trait LaunchPadPsp34NftStandardTraits {
+    pub trait Psp34Traits {
         #[ink(message)]
         fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
         #[ink(message)]
@@ -856,7 +856,7 @@ pub mod launchpad_psp34_nft_standard {
         }
     }
 
-    impl LaunchPadPsp34NftStandardTraits for LaunchPadPsp34NftStandard {
+    impl Psp34Traits for LaunchPadPsp34NftStandard {
 
         /// Change baseURI
         #[ink(message)]
