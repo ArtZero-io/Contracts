@@ -19,6 +19,7 @@ pub mod artzero_collection_manager {
     use openbrush::{
         contracts::ownable::*,
         modifiers,
+        traits::Storage,
     };
     use psp34_nft::psp34_nft::Psp34NftRef;
 
@@ -55,10 +56,10 @@ pub mod artzero_collection_manager {
         show_on_chain_metadata: bool,
     }
 
-    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroCollectionManager");
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroCollectionManager);
 
     #[derive(Default)]
-    #[openbrush::storage(STORAGE_KEY)]
+    #[openbrush::upgradeable_storage(STORAGE_KEY)]
     struct Manager {
         standard_nft_hash: Hash,
         admin_address: AccountId,
@@ -74,11 +75,11 @@ pub mod artzero_collection_manager {
         _reserved: Option<()>,
     }
 
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct ArtZeroCollectionManager {
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        ownable: ownable::Data,
         manager: Manager,
     }
 
