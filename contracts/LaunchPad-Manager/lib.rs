@@ -4,8 +4,11 @@
 #[openbrush::contract]
 pub mod artzero_launchpad_psp34 {
     use ink_prelude::string::String;
-    use openbrush::contracts::ownable::*;
-    use openbrush::modifiers;
+    use openbrush::{
+        contracts::ownable::*,
+        modifiers,
+        traits::Storage,
+    };
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -53,7 +56,6 @@ pub mod artzero_launchpad_psp34 {
         scale::Encode,
         scale::Decode,
     )]
-
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Project {
         is_active: bool,
@@ -64,10 +66,10 @@ pub mod artzero_launchpad_psp34 {
         end_time: Timestamp
     }
     
-    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroLaunchPadPSP34");
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroLaunchPadPSP34);
 
     #[derive(Default)]
-    #[openbrush::storage(STORAGE_KEY)]
+    #[openbrush::upgradeable_storage(STORAGE_KEY)]
     struct Manager {
         admin_address: AccountId,
         standard_nft_hash: Hash,
@@ -83,11 +85,11 @@ pub mod artzero_launchpad_psp34 {
         _reserved: Option<()>,
     }
 
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct ArtZeroLaunchPadPSP34 {
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        ownable: ownable::Data,
         manager: Manager
     }
 
