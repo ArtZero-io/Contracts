@@ -94,6 +94,15 @@ pub mod launchpad_psp34_nft_standard {
         }
     }
 
+    #[ink(event)]
+    pub struct MintingEvent {
+        minter: Option<AccountId>,
+        phase_id: u8,
+        mint_amount: u64,
+        price: Balance,
+        project_mint_fee: Balance
+    }
+
     #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
@@ -404,9 +413,11 @@ pub mod launchpad_psp34_nft_standard {
                     phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.public_minting_amount {
                     return Err(Error::TokenLimitReached)
                 }
-                if phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() != self.env().transferred_value() {
+                let transferred_price = self.env().transferred_value();
+                if phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() != transferred_price {
                     return Err(Error::InvalidFee)
                 }
+
                 let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = claimed_amount_tmp;
                 let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
@@ -432,6 +443,13 @@ pub mod launchpad_psp34_nft_standard {
                     assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
                 }
                 self.phases.insert(&phase_id, &phase);
+                self.env().emit_event(MintingEvent {
+                    minter: Some(caller),
+                    phase_id,
+                    mint_amount,
+                    price: transferred_price,
+                    project_mint_fee
+                });
                 Ok(())
             } else {
                 return Err(Error::PhaseExpired);
@@ -469,7 +487,9 @@ pub mod launchpad_psp34_nft_standard {
                     return Err(Error::InvalidInput);
                 }
                 
-                if  caller_info.minting_fee != self.env().transferred_value() {
+                let transferred_price = self.env().transferred_value();
+
+                if  caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() != transferred_price {
                     return Err(Error::InvalidFee);
                 }
                 let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
@@ -478,6 +498,8 @@ pub mod launchpad_psp34_nft_standard {
                 // Send minting fee to launchpad contract
                 let project_mint_fee = caller_info.minting_fee
                     .checked_mul(project_mint_fee_rate as u128)
+                    .unwrap()
+                    .checked_mul(mint_amount as u128)
                     .unwrap()
                     .checked_div(10000)
                     .unwrap();
@@ -498,6 +520,13 @@ pub mod launchpad_psp34_nft_standard {
                 let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = claimed_amount_tmp;
                 self.phases.insert(&phase_id, &phase);
+                self.env().emit_event(MintingEvent {
+                    minter: Some(caller),
+                    phase_id,
+                    mint_amount,
+                    price: transferred_price,
+                    project_mint_fee
+                });
                 Ok(())
             } else {
                 return Err(Error::PhaseExpired);
