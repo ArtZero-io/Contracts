@@ -98,15 +98,6 @@ pub mod launchpad_psp34_nft_standard {
         }
     }
 
-    #[ink(event)]
-    pub struct MintingEvent {
-        minter: Option<AccountId>,
-        phase_id: u8,
-        mint_amount: u64,
-        price: Balance,
-        project_mint_fee: Balance
-    }
-
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
@@ -446,13 +437,6 @@ pub mod launchpad_psp34_nft_standard {
                     assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
                 }
                 self.phases.insert(&phase_id, &phase);
-                self.env().emit_event(MintingEvent {
-                    minter: Some(caller),
-                    phase_id,
-                    mint_amount,
-                    price: transferred_price,
-                    project_mint_fee
-                });
                 Ok(())
             } else {
                 return Err(Error::PhaseExpired);
@@ -523,13 +507,6 @@ pub mod launchpad_psp34_nft_standard {
                 let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = claimed_amount_tmp;
                 self.phases.insert(&phase_id, &phase);
-                self.env().emit_event(MintingEvent {
-                    minter: Some(caller),
-                    phase_id,
-                    mint_amount,
-                    price: transferred_price,
-                    project_mint_fee
-                });
                 Ok(())
             } else {
                 return Err(Error::PhaseExpired);
