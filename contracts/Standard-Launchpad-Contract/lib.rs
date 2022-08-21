@@ -8,11 +8,6 @@ pub use self::launchpad_psp34_nft_standard::{
 #[openbrush::contract]
 pub mod launchpad_psp34_nft_standard {
     use ink_prelude::string::String;
-    use openbrush::contracts::psp34::*;
-    use openbrush::contracts::psp34::extensions::metadata::*;
-    use openbrush::contracts::psp34::extensions::enumerable::*;
-    use openbrush::contracts::ownable::*;
-    use openbrush::modifiers;
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -23,6 +18,15 @@ pub mod launchpad_psp34_nft_standard {
     };
     use ink_prelude::vec::Vec;
     use ink_prelude::string::ToString;
+    use openbrush::{
+        contracts::ownable::*,
+        contracts::psp34::extensions::{
+            enumerable::*,
+            metadata::*
+        },
+        traits::Storage,
+        modifiers,
+    };
 
     #[derive(
         Copy,
@@ -103,15 +107,15 @@ pub mod launchpad_psp34_nft_standard {
         project_mint_fee: Balance
     }
 
-    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
-        #[PSP34StorageField]
-        psp34: PSP34Data<EnumerableBalances>,
-        #[PSP34MetadataStorageField]
-        metadata: PSP34MetadataData,
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        psp34: psp34::Data<enumerable::Balances>,
+        #[storage_field]
+        metadata: metadata::Data,
+        #[storage_field]
+        ownable: ownable::Data,
         admin_address: AccountId,
         last_token_id: u64,
         attribute_count: u32,
@@ -176,7 +180,6 @@ pub mod launchpad_psp34_nft_standard {
     pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
     impl PSP34 for LaunchPadPsp34NftStandard {}
     impl PSP34Metadata for LaunchPadPsp34NftStandard {}
-    impl PSP34Internal for LaunchPadPsp34NftStandard {}
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
 
     #[openbrush::wrapper]

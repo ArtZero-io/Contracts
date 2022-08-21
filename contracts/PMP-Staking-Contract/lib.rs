@@ -23,6 +23,7 @@ pub mod artzero_staking_nft {
                 *,
             },
         },
+        traits::Storage,
         modifiers,
     };
 
@@ -125,10 +126,10 @@ pub mod artzero_staking_nft {
         }
     }
 
-    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroStakingNFT");
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroMarketplacePSP34);
 
     #[derive(Default)]
-    #[openbrush::storage(STORAGE_KEY)]
+    #[openbrush::upgradeable_storage(STORAGE_KEY)]
     struct Manager {
         is_locked: bool,
         admin_address: AccountId,
@@ -149,11 +150,11 @@ pub mod artzero_staking_nft {
         _reserved: Option<()>,
     }
 
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct ArtZeroStakingNFT {
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        ownable: ownable::Data,
         manager: Manager,
     }
 
