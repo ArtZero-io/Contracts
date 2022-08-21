@@ -19,28 +19,24 @@ pub mod psp34_nft {
         Mapping,
     };
     use openbrush::{
-        contracts::{
-            ownable::*,
-            psp34::{
-                extensions::{
-                    enumerable::*,
-                    metadata::*,
-                },
-                *,
-            },
+        contracts::ownable::*,
+        contracts::psp34::extensions::{
+            enumerable::*,
+            metadata::*
         },
+        traits::Storage,
         modifiers,
     };
 
-    #[derive(Default, SpreadAllocate, PSP34Storage, PSP34MetadataStorage, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct Psp34Nft {
-        #[PSP34StorageField]
-        psp34: PSP34Data<EnumerableBalances>,
-        #[PSP34MetadataStorageField]
-        metadata: PSP34MetadataData,
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        psp34: psp34::Data<enumerable::Balances>,
+        #[storage_field]
+        metadata: metadata::Data,
+        #[storage_field]
+        ownable: ownable::Data,
         last_token_id: u64,
         attribute_count: u32,
         attribute_names: Mapping<u32, Vec<u8>>,
@@ -69,7 +65,6 @@ pub mod psp34_nft {
     pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
     impl PSP34 for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
-    impl PSP34Internal for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
 
     #[openbrush::trait_definition]
