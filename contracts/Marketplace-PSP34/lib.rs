@@ -27,6 +27,7 @@ pub mod artzero_marketplace_psp34 {
                 *,
             },
         },
+        traits::Storage,
         modifiers,
     };
 
@@ -140,10 +141,10 @@ pub mod artzero_marketplace_psp34 {
         }
     }
 
-    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroMarketplacePSP34");
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroMarketplacePSP34);
 
     #[derive(Default)]
-    #[openbrush::storage(STORAGE_KEY)]
+    #[openbrush::upgradeable_storage(STORAGE_KEY)]
     struct Manager {
         collection_contract_address: AccountId,
         staking_contract_address: AccountId,
@@ -163,11 +164,11 @@ pub mod artzero_marketplace_psp34 {
         _reserved: Option<()>,
     }
 
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct ArtZeroMarketplacePSP34 {
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        ownable: ownable::Data,
         manager: Manager,
     }
 
