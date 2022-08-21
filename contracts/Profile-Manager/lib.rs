@@ -11,7 +11,10 @@ pub mod artzero_profile_manager {
         traits::SpreadAllocate,
         Mapping,
     };
-    use openbrush::contracts::ownable::*;
+    use openbrush::{
+        contracts::ownable::*,
+        traits::Storage,
+    };
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -28,19 +31,20 @@ pub mod artzero_profile_manager {
         }
     }
 
-    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroProfileManager");
-
-    #[derive(Default)]
-    #[openbrush::storage(STORAGE_KEY)]
-    struct Manager {
-        attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>>,
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroProfileManager);
+    
+    #[derive(Default, Debug)]
+    #[openbrush::upgradeable_storage(STORAGE_KEY)]
+    pub struct Manager {
+        attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>>
     }
 
-    #[derive(Default, SpreadAllocate, OwnableStorage)]
+
     #[ink(storage)]
+    #[derive(Default, SpreadAllocate, Storage)]
     pub struct ArtZeroProfileManager {
-        #[OwnableStorageField]
-        ownable: OwnableData,
+        #[storage_field]
+        ownable: ownable::Data,
         manager: Manager,
     }
 
