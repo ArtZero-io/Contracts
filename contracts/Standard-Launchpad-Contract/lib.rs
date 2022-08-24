@@ -15,7 +15,9 @@ pub mod launchpad_psp34_nft_standard {
             SpreadLayout,
         },
         Mapping,
+        MultiMapping
     };
+    
     use ink_prelude::vec::Vec;
     use ink_prelude::string::ToString;
     use openbrush::{
@@ -75,29 +77,6 @@ pub mod launchpad_psp34_nft_standard {
         end_time: Timestamp
     }
 
-    #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
-    #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
-    pub struct EnumerablePhaseAccountMapping {
-        /// Phase id is key
-        phase_id_to_account: Mapping<(u64, u8), AccountId>,
-        account_to_phase_id: Mapping<(u64, AccountId), u8>
-    }
-
-    impl EnumerablePhaseAccountMapping {
-        pub fn insert(&mut self, account: &AccountId, phase_id: &u8, account_index: &u64) {
-            self.phase_id_to_account.insert((account_index, phase_id), account);
-            self.account_to_phase_id.insert((account_index, account), phase_id);
-        }
-
-        pub fn get_by_account(&self, account: &AccountId, account_index: &u64) -> Result<u8, Error> {
-            self.account_to_phase_id.get((account_index, account)).ok_or(Error::InvalidInput)
-        }
-
-        pub fn get_by_phase_id(&self, phase_id: &u8, account_index: &u64) -> Result<AccountId, Error> {
-            self.phase_id_to_account.get((account_index, phase_id)).ok_or(Error::InvalidInput)
-        }
-    }
-
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
@@ -118,7 +97,7 @@ pub mod launchpad_psp34_nft_standard {
         whitelist_count: u64,
         phase_whitelists_link: Mapping<(AccountId, u8), Whitelist>,
         phases: Mapping<u8, Phase>,
-        phase_account_link: EnumerablePhaseAccountMapping,
+        phase_account_link: MultiMapping<Option<u8>, AccountId>,
         phase_account_last_index: Mapping<u8, u64>,
         limit_phase_count: u8,
         launchpad_contract_address: AccountId,
@@ -356,7 +335,7 @@ pub mod launchpad_psp34_nft_standard {
                 phase_account_last_index_tmp = self.phase_account_last_index.get(&phase_id).unwrap() + 1;
             }
             self.phase_account_last_index.insert(&phase_id, &phase_account_last_index_tmp);
-            self.phase_account_link.insert(&account, &phase_id, &phase_account_last_index_tmp);
+            self.phase_account_link.insert(&phase_id, &account);
 
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
@@ -747,17 +726,7 @@ pub mod launchpad_psp34_nft_standard {
             phase_id: u8, 
             account_index: u64
         ) -> AccountId {
-            return self.phase_account_link.get_by_phase_id(&phase_id, &account_index).unwrap();
-        }
-
-        /// Get phase Account Link by Account
-        #[ink(message)]
-        pub fn get_phase_account_link_by_account( 
-            &self,
-            account: AccountId, 
-            account_index: u64
-        ) -> u8 {
-            return self.phase_account_link.get_by_account(&account, &account_index).unwrap();
+            return self.phase_account_link.get_value(&phase_id, &account_index).unwrap();
         }
 
         /// Get current phase
