@@ -33,49 +33,9 @@ pub mod artzero_staking_nft {
 
     #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
     #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
-    pub struct EnumerableMapping {
-        id_to_index: Mapping<(Option<AccountId>, u64), u64>,
-        index_to_id: Mapping<(Option<AccountId>, u64), u64>,
-    }
-
-    #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
-    #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
     pub struct EnumerableMappingForStakedAccount {
         account_to_index: Mapping<AccountId, u64>,
         index_to_account: Mapping<u64, AccountId>,
-    }
-
-    impl EnumerableMapping {
-        pub fn insert(&mut self, owner: &Option<AccountId>, id: &u64, index: &u64) {
-            self.id_to_index.insert((owner, id), index);
-            self.index_to_id.insert((owner, index), id);
-        }
-
-        pub fn remove(&mut self, owner: &Option<AccountId>, id: &u64, last_index: &u64) -> Result<(), PSP34Error> {
-            let index = self.id_to_index.get((owner, id)).ok_or(PSP34Error::TokenNotExists)?;
-
-            if last_index != &index {
-                let last_id = self
-                    .index_to_id
-                    .get((owner, last_index))
-                    .ok_or(PSP34Error::TokenNotExists)?;
-                self.index_to_id.insert((owner, &index), &last_id);
-                self.id_to_index.insert((owner, &last_id), &index);
-            }
-
-            self.index_to_id.remove((owner, &last_index));
-            self.id_to_index.remove((owner, id));
-
-            Ok(())
-        }
-
-        pub fn get_by_index(&self, owner: &Option<AccountId>, index: &u64) -> Result<u64, PSP34Error> {
-            self.index_to_id.get((owner, index)).ok_or(PSP34Error::TokenNotExists)
-        }
-
-        pub fn get_by_id(&self, owner: &Option<AccountId>, id: &u64) -> Result<u64, PSP34Error> {
-            self.id_to_index.get((owner, id)).ok_or(PSP34Error::TokenNotExists)
-        }
     }
 
     impl EnumerableMappingForStakedAccount {
