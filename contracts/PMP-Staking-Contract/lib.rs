@@ -31,45 +31,6 @@ pub mod artzero_staking_nft {
         modifiers,
     };
 
-    #[derive(Default, Debug, ink_storage::traits::SpreadLayout, ink_storage::traits::SpreadAllocate)]
-    #[cfg_attr(feature = "std", derive(ink_storage::traits::StorageLayout))]
-    pub struct EnumerableMappingForStakedAccount {
-        account_to_index: Mapping<AccountId, u64>,
-        index_to_account: Mapping<u64, AccountId>,
-    }
-
-    impl EnumerableMappingForStakedAccount {
-        pub fn insert(&mut self, account: &AccountId, index: &u64) {
-            self.account_to_index.insert(account, index);
-            self.index_to_account.insert(index, account);
-        }
-
-        pub fn remove(&mut self, account: &AccountId, last_index: &u64) -> Result<(), PSP34Error> {
-            let index = self.account_to_index.get(account).ok_or(PSP34Error::TokenNotExists)?;
-
-            if last_index != &index {
-                let last_account = self
-                    .index_to_account
-                    .get(last_index)
-                    .ok_or(PSP34Error::TokenNotExists)?;
-                self.index_to_account.insert(index, &last_account);
-                self.account_to_index.insert(last_account, &index);
-            }
-
-            self.account_to_index.remove(account);
-            self.index_to_account.remove(last_index);
-            Ok(())
-        }
-
-        pub fn get_by_index(&self, index: &u64) -> Result<AccountId, PSP34Error> {
-            self.index_to_account.get(index).ok_or(PSP34Error::TokenNotExists)
-        }
-
-        pub fn get_by_account(&self, account: &AccountId) -> Result<u64, PSP34Error> {
-            self.account_to_index.get(account).ok_or(PSP34Error::TokenNotExists)
-        }
-    }
-
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
@@ -97,6 +58,7 @@ pub mod artzero_staking_nft {
     struct Manager {
         is_locked: bool,
         admin_address: AccountId,
+        staked_accounts: MultiMapping<u8, AccountId, ValueGuard<u8>>, // 0 is staked status, 1 is request unstake status
         staking_list: MultiMapping<AccountId, u64, ValueGuard<AccountId>>,
         pending_unstaking_list: MultiMapping<AccountId, u64, ValueGuard<AccountId>>,
         nft_contract_address: AccountId,
@@ -373,6 +335,24 @@ pub mod artzero_staking_nft {
             return self.manager.staking_list.get_value(account, &(index as u128));
         }
 
+        /// Get staked accounts: index by AccountId
+        #[ink(message)]
+        pub fn get_staked_accounts_index_by_account(&self, account: AccountId) -> Option<u128> {
+            return self.manager.staked_accounts.get_index(0, &account);
+        }
+
+        /// Get staked accounts: account by Index
+        #[ink(message)]
+        pub fn get_staked_accounts_account_by_index(&self, index: u64) -> Option<AccountId> {
+            return self.manager.staked_accounts.get_value(0, &(index as u128))
+        }
+
+        /// Get staked accounts last index
+        #[ink(message)]
+        pub fn get_staked_accounts_last_index(&self) -> u64 {
+            return self.manager.staked_accounts.count(0) as u64;
+        }
+
         /// Get pending unstaked token ids by AccountId
         #[ink(message)]
         pub fn get_pending_unstaked_id(&self, account: AccountId, index: u64) -> Option<u64> {
@@ -385,6 +365,7 @@ pub mod artzero_staking_nft {
             self.manager.total_staked
         }
 
+        /// Get limit unstake time
         #[ink(message)]
         pub fn get_limit_unstake_time(&self) -> u64 {
             self.manager.limit_unstake_time
@@ -433,6 +414,9 @@ pub mod artzero_staking_nft {
                     token_id: token_ids[i],
                 });
             }
+            if self.manager.staked_accounts.contains_value(0, &caller) == false {
+                self.manager.staked_accounts.insert(0, &caller);
+            }
 
             Ok(())
         }
@@ -461,6 +445,14 @@ pub mod artzero_staking_nft {
                     staker: Some(caller),
                     token_id: token_ids[i],
                 });
+            }
+
+            if self.manager.staking_list.count(caller) == 0 {
+                self.manager.staked_accounts.remove_value(0, &caller);
+            }
+
+            if self.manager.staked_accounts.contains_value(1, &caller) == false {
+                self.manager.staked_accounts.insert(1, &caller);
             }
 
             self.manager.total_staked = self.manager.total_staked.checked_sub(leng as u64).unwrap();
@@ -495,6 +487,15 @@ pub mod artzero_staking_nft {
                     token_id: token_ids[i],
                 });
             }
+            
+            if self.manager.pending_unstaking_list.count(caller) == 0 {
+                self.manager.staked_accounts.remove_value(1, &caller);
+            }
+
+            if self.manager.staked_accounts.contains_value(0, &caller) == false {
+                self.manager.staked_accounts.insert(0, &caller);
+            }
+
             self.manager.total_staked = self.manager.total_staked.checked_add(leng as u64).unwrap();
             Ok(())
         }
@@ -528,6 +529,9 @@ pub mod artzero_staking_nft {
                 // Step 4 - Remove from pending_unstaking_list and change request_unstaking_time to 0
                 self.manager.pending_unstaking_list.remove_value(caller, &token_ids[i]);
                 self.manager.request_unstaking_time.insert(&(caller, token_ids[i]), &0);
+                if self.manager.pending_unstaking_list.count(caller) == 0 {
+                    self.manager.staked_accounts.remove_value(1, &caller);
+                }
                 self.env().emit_event(UnstakeEvent {
                     staker: Some(caller),
                     token_id: token_ids[i],
