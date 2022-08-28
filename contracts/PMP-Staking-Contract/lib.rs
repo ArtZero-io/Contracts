@@ -98,11 +98,11 @@ pub mod artzero_staking_nft {
         is_locked: bool,
         admin_address: AccountId,
         staking_list: MultiMapping<AccountId, u64, ValueGuard<AccountId>>,
+        pending_unstaking_list: MultiMapping<AccountId, u64, ValueGuard<AccountId>>,
         nft_contract_address: AccountId,
         total_staked: u64,
         limit_unstake_time: u64, // minutes
         request_unstaking_time: Mapping<(AccountId, u64), u64>,
-        pending_unstaking_list: MultiMapping<AccountId, u64, ValueGuard<AccountId>>,
         reward_pool: Balance,
         claimable_reward: Balance,
         reward_started: bool,
@@ -424,6 +424,9 @@ pub mod artzero_staking_nft {
                 .is_ok()
                 {
                     return Err(Error::CannotTransfer)
+                }
+                if self.manager.is_claimed.get(caller).is_none() {
+                    self.manager.is_claimed.insert(&caller, &false);
                 }
                 self.env().emit_event(NewStakeEvent {
                     staker: Some(caller),
