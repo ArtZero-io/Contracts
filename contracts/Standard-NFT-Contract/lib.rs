@@ -75,8 +75,7 @@ pub mod psp34_nft {
         fn set_multiple_attributes(
             &mut self,
             token_id: Id,
-            attributes: Vec<String>,
-            values: Vec<String>,
+            metadata: Vec<(String, String)>
         ) -> Result<(), Error>;
         #[ink(message)]
         fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String>;
@@ -111,16 +110,11 @@ pub mod psp34_nft {
         /// Only Owner can mint new token and add attributes for it
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn mint_with_attributes(&mut self, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error> {
+        pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), Error> {
             let caller = self.env().caller();
             self.last_token_id += 1;
-            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
-            if self
-                .set_multiple_attributes(Id::U64(self.last_token_id), attributes, values)
-                .is_err()
-            {
-                panic!("error set_multiple_attributes")
-            };
+            self._mint_to(caller, Id::U64(self.last_token_id))?;
+            self.set_multiple_attributes(Id::U64(self.last_token_id), metadata);
             Ok(())
         }
 
@@ -197,35 +191,15 @@ pub mod psp34_nft {
         fn set_multiple_attributes(
             &mut self,
             token_id: Id,
-            attributes: Vec<String>,
-            values: Vec<String>,
+            metadata: Vec<(String, String)>
         ) -> Result<(), Error> {
             assert!(token_id != Id::U64(0));
             if self.is_locked_nft(token_id.clone()) {
                 return Err(Error::Custom(String::from("Token is locked")))
             }
-            if attributes.len() != values.len() {
-                return Err(Error::Custom(String::from("Inputs not same length")))
-            }
-            // Check Duplication
-            let mut sorted_attributes = attributes.clone();
-            sorted_attributes.sort();
-            let length = sorted_attributes.len();
-            for i in 0..length {
-                let attribute = sorted_attributes[i].clone();
-                let byte_attribute = attribute.into_bytes();
-                if i + 1 < length {
-                    let next_attribute = sorted_attributes[i + 1].clone();
-                    let byte_next_attribute = next_attribute.into_bytes();
-                    if byte_attribute == byte_next_attribute {
-                        return Err(Error::Custom(String::from("Duplicated Attributes")))
-                    }
-                }
-                let unsorted_attribute = attributes[i].clone();
-                let byte_unsorted_attribute = unsorted_attribute.into_bytes();
-                let value = values[i].clone();
-                self.add_attribute_name(byte_unsorted_attribute.clone());
-                self._set_attribute(token_id.clone(), byte_unsorted_attribute.clone(), value.into_bytes());
+            for (attribute, value) in &metadata {
+                self.add_attribute_name(attribute.into_bytes());
+                self._set_attribute(token_id.clone(), attribute.into_bytes(), value.into_bytes());
             }
             Ok(())
         }
