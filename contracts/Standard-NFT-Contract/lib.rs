@@ -113,8 +113,13 @@ pub mod psp34_nft {
         pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), Error> {
             let caller = self.env().caller();
             self.last_token_id += 1;
-            self._mint_to(caller, Id::U64(self.last_token_id))?;
-            self.set_multiple_attributes(Id::U64(self.last_token_id), metadata);
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+            if self
+                .set_multiple_attributes(Id::U64(self.last_token_id), metadata)
+                .is_err()
+            {
+                panic!("error set_multiple_attributes")
+            };
             Ok(())
         }
 
@@ -198,8 +203,8 @@ pub mod psp34_nft {
                 return Err(Error::Custom(String::from("Token is locked")))
             }
             for (attribute, value) in &metadata {
-                self.add_attribute_name(attribute.into_bytes());
-                self._set_attribute(token_id.clone(), attribute.into_bytes(), value.into_bytes());
+                self.add_attribute_name(attribute.clone().into_bytes());
+                self._set_attribute(token_id.clone(), attribute.clone().into_bytes(), value.clone().into_bytes());
             }
             Ok(())
         }
