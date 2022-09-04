@@ -614,11 +614,7 @@ pub mod artzero_collection_manager {
         /// Get Collection Owner by Collection Address (NFT address)
         #[ink(message)]
         fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId> {
-            if self.manager.collections.get(&nft_contract_address).is_none() {
-                return None
-            }
-            let collection = self.manager.collections.get(&nft_contract_address).unwrap();
-            Some(collection.collection_owner)
+            return Some(Some(self.manager.collections.get(&nft_contract_address).unwrap())?.collection_owner);
         }
     }
 }
