@@ -870,8 +870,8 @@ pub mod launchpad_psp34_nft_standard {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                if let Some(self.get_attribute(token_id.clone(),attribute.into_bytes())) = value {
-                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+                if let Some(value) = self.get_attribute(token_id.clone(),attribute.into_bytes()) {
+                    ret.push(String::from_utf8(value).unwrap());
                 } else {
                     ret.push(String::from(""));
                 }
