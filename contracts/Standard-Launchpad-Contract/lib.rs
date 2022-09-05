@@ -426,9 +426,6 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist)
             }
             let phase = self.phases.get(&phase_id).unwrap();
-            if phase.is_public == true {
-                return Err(Error::PhasePublicSale)
-            }
             let current_time = Self::env().block_timestamp();
             if phase.start_time <= current_time && phase.end_time >= current_time {
                 if self.last_token_id >= self.total_supply {
@@ -524,9 +521,6 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            if phase.is_public == false && phase.whitelist_amount > 0 {
-                return Err(Error::PhaseWhiteList);
-            }
             assert!(phase.claimed_amount == 0, "Phase Minted");
             phase.is_public = is_public.clone();
             self.phases.insert(&phase_id, &phase);
@@ -569,9 +563,6 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            if phase.is_public == false && phase.whitelist_amount > 0 {
-                return Err(Error::PhaseWhiteList);
-            }
             assert!(phase.claimed_amount == 0, "Phase Minted");
             phase.title = phase_code.clone().into_bytes();
             phase.is_public = is_public.clone();
@@ -879,11 +870,9 @@ pub mod launchpad_psp34_nft_standard {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.get_attribute(token_id.clone(),attribute.into_bytes());
-                if value.is_some() {
+                if let Some(self.get_attribute(token_id.clone(),attribute.into_bytes())) = value {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
-                }
-                else{
+                } else {
                     ret.push(String::from(""));
                 }
             }

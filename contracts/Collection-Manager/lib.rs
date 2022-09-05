@@ -360,8 +360,7 @@ pub mod artzero_collection_manager {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                let value = self.manager.attributes.get(&(account, attribute.into_bytes()));
-                if value.is_some() {
+                if let Some(self.get_attribute(token_id.clone(),attribute.into_bytes())) = value {
                     ret.push(String::from_utf8(value.unwrap()).unwrap());
                 } else {
                     ret.push(String::from(""));
