@@ -5,6 +5,7 @@
 pub mod artzero_collection_manager {
     use ink_lang::ToAccountId;
     use ink_prelude::{
+        vec,
         string::String,
         vec::Vec,
     };
@@ -253,8 +254,7 @@ pub mod artzero_collection_manager {
                 .insert(&self.manager.collection_count, &nft_contract_address);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if collections_by_owner.is_none() {
-                let mut collections = Vec::<AccountId>::new();
-                collections.push(nft_contract_address);
+                let collections = vec![nft_contract_address];
                 self.manager
                     .collections_by_owner
                     .insert(&collection_owner, &collections);
