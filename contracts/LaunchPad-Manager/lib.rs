@@ -446,12 +446,8 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_project_by_nft_address(
             &self,
             nft_contract_address: AccountId
-        ) -> Option<Project> {
-            if self.manager.projects.get(&nft_contract_address).is_none(){
-                return None;
-            }
-            
-            Some(self.manager.projects.get(&nft_contract_address).unwrap())
+        ) -> Option<Project> {  
+            return Some(self.manager.projects.get(&nft_contract_address))?;
         }
 
         /* END GETTERS*/
