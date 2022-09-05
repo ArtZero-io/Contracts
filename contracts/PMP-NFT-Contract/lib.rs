@@ -427,19 +427,13 @@ pub mod artzero_psp34 {
         /// Get Whitelist Account by ID
         #[ink(message)]
         pub fn get_whitelist_account(&self, id: u64) -> Option<AccountId> {
-            if self.manager.whitelist_accounts.get(&id).is_none() {
-                return None
-            }
-            return Some(self.manager.whitelist_accounts.get(&id).unwrap())
+            return Some(self.manager.whitelist_accounts.get(&id))?;
         }
 
         /// Get Whitelist Information by AccountId
         #[ink(message)]
         pub fn get_whitelist(&self, account: AccountId) -> Option<Whitelist> {
-            if self.manager.whitelists.get(&account).is_none() {
-                return None
-            }
-            return Some(self.manager.whitelists.get(&account).unwrap())
+            return Some(self.manager.whitelists.get(&account))?
         }
 
         /// Get Whitelist Count
