@@ -368,7 +368,7 @@ pub mod artzero_launchpad_psp34 {
             assert!(is_active != project.is_active);
             project.is_active = is_active;
 
-            if is_active == true {
+            if is_active {
                 self.manager.active_project_count = self.manager.active_project_count.checked_add(1).unwrap();
             } else {
                 self.manager.active_project_count = self.manager.active_project_count.checked_sub(1).unwrap();

@@ -948,7 +948,7 @@ pub mod artzero_marketplace_psp34 {
             let mut listed_token_count_unwarp = 0;
             if listed_token_count.is_some() {
                 listed_token_count_unwarp = listed_token_count.unwrap();
-                if mode == true {
+                if mode {
                     listed_token_count_unwarp = listed_token_count_unwarp.checked_add(1).unwrap();
                 } else {
                     listed_token_count_unwarp = listed_token_count_unwarp.checked_sub(1).unwrap();
@@ -957,7 +957,7 @@ pub mod artzero_marketplace_psp34 {
                     .listed_token_number_by_collection_address
                     .insert(&nft_contract_address, &listed_token_count_unwarp);
             } else {
-                if mode == true {
+                if mode {
                     listed_token_count_unwarp = listed_token_count_unwarp.checked_add(1).unwrap();
                     self.manager
                         .listed_token_number_by_collection_address
