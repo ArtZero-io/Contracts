@@ -289,11 +289,7 @@ pub mod artzero_staking_nft {
         }
         #[ink(message)]
         pub fn is_claimed(&self, account: AccountId) -> bool {
-            let is_claimed = self.manager.is_claimed.get(account);
-            if is_claimed.is_some() {
-                return is_claimed.unwrap()
-            }
-            return false
+            return self.manager.is_claimed.get(account).unwrap_or(false);
         }
         #[ink(message)]
         pub fn get_reward_started(&self) -> bool {
@@ -321,12 +317,7 @@ pub mod artzero_staking_nft {
         /// Get request unstake Time
         #[ink(message)]
         pub fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64 {
-            let ret = self.manager.request_unstaking_time.get(&(account, token_id));
-            if ret.is_some() {
-                return ret.unwrap()
-            } else {
-                return 0
-            }
+           return self.manager.request_unstaking_time.get(&(account, token_id)).unwrap_or(0);
         }
 
         /// Get staked token ids by AccountId

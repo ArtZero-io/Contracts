@@ -5,6 +5,7 @@
 pub mod artzero_marketplace_psp34 {
     use ink_env::CallFlags;
     use ink_prelude::{
+        vec,
         string::String,
         vec::Vec,
     };
@@ -279,18 +280,8 @@ pub mod artzero_marketplace_psp34 {
             self.manager.collection_contract_address = collection_contract_address;
             self.manager.staking_contract_address = staking_contract_address;
             self.manager.platform_fee = platform_fee;
-            let mut criteria = Vec::<u8>::new();
-            criteria.push(20);
-            criteria.push(9);
-            criteria.push(7);
-            criteria.push(5);
-            criteria.push(1);
-            let mut rate = Vec::<u16>::new();
-            rate.push(9000);
-            rate.push(8000);
-            rate.push(6600);
-            rate.push(5000);
-            rate.push(3000);
+            let criteria = vec![1, 5, 7, 9, 20];
+            let rate = vec![3000, 5000, 6600, 8000, 9000];
             self.manager.staking_discount_criteria = criteria;
             self.manager.staking_discount_rate = rate;
             Ok(())
@@ -615,7 +606,7 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
                 CollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type <= 2 && contract_type >= 1); // psp34 only
+            assert!(contract_type == 1 || contract_type >= 2); // psp34 only
                                                                // Step 1: Check if the token is for sale
             assert!(self
                 .manager
@@ -693,7 +684,7 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
                 CollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type <= 2 && contract_type >= 1); // psp34 only
+            assert!(contract_type == 1 || contract_type == 2); // psp34 only
                                                                // Step 1: Check if the token is for sale
             assert!(self
                 .manager
@@ -1028,14 +1019,10 @@ pub mod artzero_marketplace_psp34 {
         /// Get listed token count by collection address
         #[ink(message)]
         pub fn get_listed_token_count_by_collection_address(&self, collection_contract_address: AccountId) -> u64 {
-            let listed_token_number = self
+            return self
                 .manager
                 .listed_token_number_by_collection_address
-                .get(&collection_contract_address);
-            if listed_token_number.is_some() {
-                return listed_token_number.unwrap()
-            }
-            return 0
+                .get(&collection_contract_address).unwrap_or(0);
         }
 
         /// Get all token ids currently for sale for a collection (nft_contract_address,user_account)
@@ -1054,14 +1041,11 @@ pub mod artzero_marketplace_psp34 {
         /// Get all token ids currently for sale by a collection (nft_contract_address,user_account)
         #[ink(message)]
         pub fn total_tokens_for_sale(&self, nft_contract_address: AccountId, user_account: AccountId) -> u128 {
-            let last_index = self
+            return self
                 .manager
                 .sale_tokens_ids_last_index
-                .get((Some(nft_contract_address), Some(user_account)));
-            if last_index.is_some() {
-                return last_index.unwrap()
-            }
-            return 0
+                .get((Some(nft_contract_address), Some(user_account))).unwrap_or(0);
+
         }
         /// Get all bids from (NFT Contract Address, User Address, token ID)
         #[ink(message)]
@@ -1095,11 +1079,7 @@ pub mod artzero_marketplace_psp34 {
         /// Get total Collection volume
         #[ink(message)]
         pub fn get_volume_by_collection(&self, collection_contract_address: AccountId) -> Balance {
-            let volume = self.manager.volume_by_collection.get(&collection_contract_address);
-            if volume.is_some() {
-                return volume.unwrap()
-            }
-            return 0
+            return self.manager.volume_by_collection.get(&collection_contract_address).unwrap_or(0);
         }
 
         /// Get platform total Profit
