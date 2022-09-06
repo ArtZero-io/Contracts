@@ -286,12 +286,12 @@ pub mod launchpad_psp34_nft_standard {
             let mut whitelist = self.phase_whitelists_link.get(&(account, phase_id)).unwrap();
             let old_whitelist_amount = whitelist.whitelist_amount;
             //Whitelist amount must less than total supply or greater than zero
-            if  whitelist_amount > self.total_supply ||
-                whitelist_amount == 0 || 
-                whitelist_amount <= whitelist.claimed_amount {
-                return Err(Error::InvalidInput);
-            }
-
+            // if  whitelist_amount > self.total_supply ||
+            //     whitelist_amount == 0 || 
+            //     whitelist_amount <= whitelist.claimed_amount {
+            //     return Err(Error::InvalidInput);
+            // }
+            assert!((whitelist.claimed_amount..=self.total_supply).contains(&whitelist_amount));
             whitelist.whitelist_amount = whitelist_amount;
             whitelist.minting_fee = whitelist_price;
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
@@ -374,7 +374,7 @@ pub mod launchpad_psp34_nft_standard {
             let mut phase = self.phases.get(&phase_id).unwrap();
             assert!(mint_amount <= phase.public_max_minting_amount, "PhasePublicMintLimitReached");
             let current_time = Self::env().block_timestamp();
-            if phase.start_time <= current_time && phase.end_time >= current_time {
+            if (phase.start_time..=phase.end_time).contains(&current_time) {
                 if phase.is_public == false {
                     return Err(Error::PhaseNotPublicSale)
                 }
@@ -427,7 +427,7 @@ pub mod launchpad_psp34_nft_standard {
             }
             let phase = self.phases.get(&phase_id).unwrap();
             let current_time = Self::env().block_timestamp();
-            if phase.start_time <= current_time && phase.end_time >= current_time {
+            if (phase.start_time..=phase.end_time).contains(&current_time) {
                 if self.last_token_id >= self.total_supply {
                     return Err(Error::TokenLimitReached);
                 }
@@ -716,7 +716,7 @@ pub mod launchpad_psp34_nft_standard {
             let current_time = Self::env().block_timestamp();
             for index in 0..self.last_phase_id {
                 let phase = self.phases.get(&(index+1)).unwrap();
-                if phase.start_time <= current_time && phase.end_time >= current_time {
+                if (phase.start_time..=phase.end_time).contains(&current_time) {
                     return Some(index + 1);
                 }
             }

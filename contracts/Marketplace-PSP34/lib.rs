@@ -457,7 +457,7 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
                 CollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type <= 2 && contract_type >= 1); // psp34 only
+            assert!(contract_type == 1 || contract_type == 2); // psp34 only
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
