@@ -231,7 +231,7 @@ pub mod launchpad_psp34_nft_standard {
             })
         }
 
-        ///Add new phare - Only Owner
+        ///Add new phare - Only Admin
         #[ink(message)]
         pub fn add_new_phase(
             &mut self, 
@@ -243,28 +243,24 @@ pub mod launchpad_psp34_nft_standard {
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
-            if self.last_phase_id == self.limit_phase_count {
-                return Err(Error::PhaseLimitReached);
-            }
-            if self.validate_phase_schedule(start_time, end_time) == true {
-                let byte_phase_code = phase_code.into_bytes();
-                self.last_phase_id += 1;
-                let phase = Phase {
-                    title: byte_phase_code,
-                    is_public: is_public,
-                    public_minting_fee: public_minting_fee,
-                    public_minting_amount: public_minting_amount,
-                    public_max_minting_amount: public_max_minting_amount,
-                    whitelist_amount: 0,
-                    claimed_amount: 0,
-                    start_time: start_time, 
-                    end_time: end_time                   
-                };
-                self.phases.insert(&self.last_phase_id, &phase);
-                Ok(())
-            } else {
-                return Err(Error::InvalidInput);
-            }
+            assert!(self.env().caller() == self.admin_address || self.env().caller() == self.launchpad_contract_address);
+            assert!(self.last_phase_id.checked_add(1).unwrap() <= self.limit_phase_count);
+            assert!(self.validate_phase_schedule(start_time, end_time));
+            let byte_phase_code = phase_code.into_bytes();
+            self.last_phase_id += 1;
+            let phase = Phase {
+                title: byte_phase_code,
+                is_public: is_public,
+                public_minting_fee: public_minting_fee,
+                public_minting_amount: public_minting_amount,
+                public_max_minting_amount: public_max_minting_amount,
+                whitelist_amount: 0,
+                claimed_amount: 0,
+                start_time: start_time, 
+                end_time: end_time                   
+            };
+            self.phases.insert(&self.last_phase_id, &phase);
+            Ok(())
         }
 
         /// Update whitelist - Only Admin
@@ -285,12 +281,6 @@ pub mod launchpad_psp34_nft_standard {
             }
             let mut whitelist = self.phase_whitelists_link.get(&(account, phase_id)).unwrap();
             let old_whitelist_amount = whitelist.whitelist_amount;
-            //Whitelist amount must less than total supply or greater than zero
-            // if  whitelist_amount > self.total_supply ||
-            //     whitelist_amount == 0 || 
-            //     whitelist_amount <= whitelist.claimed_amount {
-            //     return Err(Error::InvalidInput);
-            // }
             assert!((whitelist.claimed_amount..=self.total_supply).contains(&whitelist_amount));
             whitelist.whitelist_amount = whitelist_amount;
             whitelist.minting_fee = whitelist_price;
@@ -312,26 +302,19 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_price: Balance
         ) -> Result<(), Error> {
             assert!(self.env().caller() == self.admin_address);
-            //Whitelist amount must less than total supply or greater than zero
-            if  whitelist_amount > self.total_supply ||
-                whitelist_amount == 0 {
-                return Err(Error::InvalidInput);
-            }
+            assert!((0..=self.total_supply).contains(&whitelist_amount));
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
             if  self.phase_whitelists_link.get(&(account, phase_id)).is_some() {
                 return Err(Error::InvalidInput);
             }
-
             self.whitelist_count += 1;
-
             let whitelist = Whitelist {
                 whitelist_amount: whitelist_amount,
                 claimed_amount: 0,
                 minting_fee: whitelist_price
             };
-
             self.phase_account_link.insert(phase_id, &account);
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
@@ -375,18 +358,10 @@ pub mod launchpad_psp34_nft_standard {
             assert!(mint_amount <= phase.public_max_minting_amount, "PhasePublicMintLimitReached");
             let current_time = Self::env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
-                if phase.is_public == false {
-                    return Err(Error::PhaseNotPublicSale)
-                }
-                if self.last_token_id.checked_add(mint_amount).unwrap() > self.total_supply || 
-                    phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.public_minting_amount {
-                    return Err(Error::TokenLimitReached)
-                }
-                let transferred_price = self.env().transferred_value();
-                if phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() != transferred_price {
-                    return Err(Error::InvalidFee)
-                }
-
+                assert!(phase.is_public);
+                assert!(self.last_token_id.checked_add(mint_amount).unwrap() <= self.total_supply);
+                assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.public_minting_amount);
+                assert!(phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
                 let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = claimed_amount_tmp;
                 let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
@@ -428,29 +403,14 @@ pub mod launchpad_psp34_nft_standard {
             let phase = self.phases.get(&phase_id).unwrap();
             let current_time = Self::env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
-                if self.last_token_id >= self.total_supply {
-                    return Err(Error::TokenLimitReached);
-                }
+                assert!(self.last_token_id < self.total_supply);
                 let caller = self.env().caller();
-                
                 if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
                     return Err(Error::InvalidInput);
                 }
-
                 let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
-                if caller_info.whitelist_amount <= caller_info.claimed_amount {
-                    return Err(Error::ClaimedAll);
-                }
-
-                if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap()  {
-                    return Err(Error::InvalidInput);
-                }
-                
-                let transferred_price = self.env().transferred_value();
-
-                if  caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() != transferred_price {
-                    return Err(Error::InvalidFee);
-                }
+                assert!(caller_info.whitelist_amount >= caller_info.claimed_amount.checked_add(mint_amount).unwrap());
+                assert!(caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
                 let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
                     &self.launchpad_contract_address
                 );
@@ -490,9 +450,7 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
-            if value > self.env().balance() {
-                return Err(Error::NotEnoughBalance);
-            }
+            assert!(value <= self.env().balance());
             if self.env().transfer(self.env().caller(), value).is_err() {
                 panic!(
                     "error withdraw_fee"
@@ -782,9 +740,7 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn lock(&mut self, token_id: Id) -> Result<(), Error> {
-            let caller = self.env().caller();
-            let token_owner = self.owner_of(token_id.clone()).unwrap();
-            assert!(caller == token_owner);
+            assert!(self.env().caller() == self.owner_of(token_id.clone()).unwrap());
             self.locked_token_count += 1;
             self.locked_tokens.insert(&token_id, &1);
             Ok(())
