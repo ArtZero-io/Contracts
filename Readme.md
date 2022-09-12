@@ -1,7 +1,7 @@
 Code Hashes and Contract Addresses:
 
 # Proxy Contract Hash Code
-0xc34dfedd02e4985e08948d42551be3d6758ed5f0167004f0c4b7b344d6d42344
+0x57470072d911a2103bfe6cda78bcf7375cf55dc9e56d4bef2b39b1824ab41d79
 
 # Profile Contract
 0x78ea710ed189e29ae3f2ca46672a7ede3fe14692882602191a48425888fe4253
@@ -15,23 +15,24 @@ Code Hashes and Contract Addresses:
 0x0e7ff4fb9b7c1ef631975277c64095571e2437562c6035d803ab4c7862a320c4
 5Gh6JkVixyzpU5Ne6THQKyMZwwugoAwnzmwNyDqqJD6SzaoB
 
-# ArtZero NFT Standard Contract
-0x7571bc09dcd9e818a17a1b35f1a9c92b5e83ada6f6d08be93d28307508bc1065
-
 # Collection Manager (PROXY)
-0x2b8390edc6a55dd2f03172f112eb4e755b90ea6cc8f6eeb57b67aae78af900c5
-5Dy7kjw3XUqpZyXVasWBddL6jpq6sgZCwMHLvfy42Q8qMQXg
+0x29e9d3d74451d008a7f9ff464c6e8d648d2c498255b8f46c0d5a6a2290d76923
+5DeTsjiUsy7nNiZU7tqrm2N5pxivdKGWHPxxkJs58TzpYjqL
 
 # Marketplace Contract (PROXY)
 0x9a0b60053b96d9dd31ce241e98e1014586d8e87c7e6cf899a43593011026ad2b
 5C8xoEUyK2CcuAU3DZryMdejcTAtBFrBZzx4wtqrkH9os796
 
 # LaunchPad Manager (PROXY)
-0xcd70fd768ec25fc7e191016c42aa0b01ee7379846c4f867e1217e7fa30841bb5
-5CiMZCT4APnW1w5HVqAa4AbJGHU3afjDaEhhfNwCJBzQQY61
+0x3d78dba0e916069f5ef324a4d296d79a0be029e5218cc4cb546fac3d5975a2ea
+5Go6HPGUcgpKHwZXVcDDeoJ1inbNxXSuKdzhhDJauaUHBxVq
 
+# Standard Contract
 # LaunchPad Standard Contract
-0xc4ee5b610222ccdf50b02a189815f6b8af126481f6aec8faca2a1fbd7ffcda3b
+0xdda946b6a49f21397414f00f6be489e606b429fca44ffa280f5fb7953e8cceb4
+
+# ArtZero NFT Standard Contract
+0xfe96060f8e8f5281d79f30ffea0bd9ce27f093249f39146d753a79bee55ccafa
 
 Deploy Steps:
 1. Deploy Profile Contract
@@ -41,7 +42,7 @@ Deploy Steps:
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
 Add PMP Project -> create Collection -> Update base URI -> Update admin address
 Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-PMP Address : 5HrE1aYXt4k1TvBZYkL6B1BBcFp9tCWyMdCZqp2cXDNub5zW
+PMP Address : 5FSRWvbsnaNeAyNsU1jz3DaMniEfRbWNCUvjWn2JwAPbR85p
 6. Deploy Staking Contract via Proxy
 With Address of PMP Project
 7. Deploy Marketplace Contract via Proxy
