@@ -403,42 +403,42 @@ pub mod launchpad_psp34_nft_standard {
             let phase = self.phases.get(&phase_id).unwrap();
             let current_time = Self::env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
-                // assert!(self.last_token_id < self.total_supply);
-                // let caller = self.env().caller();
-                // if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
-                //     return Err(Error::InvalidInput);
-                // }
-                // let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
-                // assert!(caller_info.whitelist_amount >= caller_info.claimed_amount.checked_add(mint_amount).unwrap());
-                // assert!(caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
-                // let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
-                //     &self.launchpad_contract_address
-                // );
-                // // Send minting fee to launchpad contract
-                // let project_mint_fee = caller_info.minting_fee
-                //     .checked_mul(project_mint_fee_rate as u128)
-                //     .unwrap()
-                //     .checked_mul(mint_amount as u128)
-                //     .unwrap()
-                //     .checked_div(10000)
-                //     .unwrap();
-                // if project_mint_fee > 0 {
-                //     assert!(self
-                //         .env()
-                //         .transfer(self.launchpad_contract_address, project_mint_fee)
-                //         .is_ok());
-                // }
-                // caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
-                // self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
+                assert!(self.last_token_id < self.total_supply);
+                let caller = self.env().caller();
+                if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
+                    return Err(Error::InvalidInput);
+                }
+                let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
+                assert!(caller_info.whitelist_amount >= caller_info.claimed_amount.checked_add(mint_amount).unwrap());
+                assert!(caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
+                let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
+                    &self.launchpad_contract_address
+                );
+                // Send minting fee to launchpad contract
+                let project_mint_fee = caller_info.minting_fee
+                    .checked_mul(project_mint_fee_rate as u128)
+                    .unwrap()
+                    .checked_mul(mint_amount as u128)
+                    .unwrap()
+                    .checked_div(10000)
+                    .unwrap();
+                if project_mint_fee > 0 {
+                    assert!(self
+                        .env()
+                        .transfer(self.launchpad_contract_address, project_mint_fee)
+                        .is_ok());
+                }
+                caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
+                self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
 
-                // for _i in 0..mint_amount {
-                //     self.last_token_id += 1;
-                //     assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
-                // }
-                // let mut phase = self.phases.get(&phase_id).unwrap();
-                // let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
-                // phase.claimed_amount = claimed_amount_tmp;
-                // self.phases.insert(&phase_id, &phase);
+                for _i in 0..mint_amount {
+                    self.last_token_id += 1;
+                    assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+                }
+                let mut phase = self.phases.get(&phase_id).unwrap();
+                let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
+                phase.claimed_amount = claimed_amount_tmp;
+                self.phases.insert(&phase_id, &phase);
                 Ok(())
             } else {
                 return Err(Error::PhaseExpired);
