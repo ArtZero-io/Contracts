@@ -1,12 +1,12 @@
 {
   "source": {
-    "hash": "0xc2b0257c8470112abcdafc29e5fa9dafaff4281e5df9667692b1dcd4710418ad",
-    "language": "ink! 3.3.0",
-    "compiler": "rustc 1.61.0-nightly"
+    "hash": "0x84a801c973a7189450461171fe2abc8a0ecd63f216a34635ca6f93f2cf819bf9",
+    "language": "ink! 3.3.1",
+    "compiler": "rustc 1.63.0-nightly"
   },
   "contract": {
     "name": "artzero_profile_manager",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "authors": [
       "ArtZero <admin@artzero.io>"
     ]
@@ -57,7 +57,7 @@
             }
           ],
           "docs": [
-            " Set multiple profile attribute, username, description, title, profile_image, twitter, facebook, telegram, instagram"
+            " Set multiple profile attributes"
           ],
           "label": "set_multiple_attributes",
           "mutates": true,
@@ -143,6 +143,23 @@
         {
           "args": [],
           "docs": [
+            " Returns the address of the current owner."
+          ],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [
             " Leaves the contract without owner. It will not be possible to call",
             " owner's functions anymore. Can only be called by the current owner.",
             "",
@@ -166,23 +183,6 @@
             "type": 12
           },
           "selector": "0x5e228753"
-        },
-        {
-          "args": [],
-          "docs": [
-            " Returns the address of the current owner."
-          ],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
         }
       ]
     },
@@ -196,7 +196,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x238cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                        "key": "0xb36ee29c00000000000000000000000000000000000000000000000000000000",
                         "ty": 0
                       }
                     },
@@ -205,14 +205,14 @@
                   {
                     "layout": {
                       "enum": {
-                        "dispatchKey": "0x248cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                        "dispatchKey": "0xb46ee29c00000000000000000000000000000000000000000000000000000000",
                         "variants": {
                           "0": {
                             "fields": [
                               {
                                 "layout": {
                                   "cell": {
-                                    "key": "0x258cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                                    "key": "0xb56ee29c00000000000000000000000000000000000000000000000000000000",
                                     "ty": 3
                                   }
                                 },
@@ -240,7 +240,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xd6f6a66103e52d940145ccd243a105f3980c9a81611e500edaca89c0d6edaa71",
+                        "key": "0xaaf2397500000000000000000000000000000000000000000000000000000000",
                         "ty": 4
                       }
                     },

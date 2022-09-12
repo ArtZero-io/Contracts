@@ -1,12 +1,12 @@
 {
   "source": {
-    "hash": "0x341efe8208643c86d2d9cd844f05d49961486fe9a7e7905c37d79d5edcb1bd96",
+    "hash": "0x29e9d3d74451d008a7f9ff464c6e8d648d2c498255b8f46c0d5a6a2290d76923",
     "language": "ink! 3.3.1",
-    "compiler": "rustc 1.61.0-nightly"
+    "compiler": "rustc 1.63.0-nightly"
   },
   "contract": {
     "name": "artzero_collection_manager",
-    "version": "1.1.0",
+    "version": "1.2.0",
     "authors": [
       "ArtZero <admin@artzero.io>"
     ]
@@ -1022,6 +1022,23 @@
           "selector": "0x389a10e6"
         },
         {
+          "args": [],
+          "docs": [
+            " Returns the address of the current owner."
+          ],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
           "args": [
             {
               "label": "new_owner",
@@ -1061,23 +1078,6 @@
         {
           "args": [],
           "docs": [
-            " Returns the address of the current owner."
-          ],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [
             " Leaves the contract without owner. It will not be possible to call",
             " owner's functions anymore. Can only be called by the current owner.",
             "",
@@ -1101,6 +1101,34 @@
             "type": 18
           },
           "selector": "0x5e228753"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "GetCollectionOwnerInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get Collection Owner by Collection Address (NFT address)"
+          ],
+          "label": "CrossArtZeroCollection::get_collection_owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "GetCollectionOwnerOutput"
+            ],
+            "type": 26
+          },
+          "selector": "0xb1f1e401"
         },
         {
           "args": [
@@ -1165,34 +1193,6 @@
               "type": {
                 "displayName": [
                   "crossartzerocollection_external",
-                  "GetCollectionOwnerInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            " Get Collection Owner by Collection Address (NFT address)"
-          ],
-          "label": "CrossArtZeroCollection::get_collection_owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "crossartzerocollection_external",
-              "GetCollectionOwnerOutput"
-            ],
-            "type": 26
-          },
-          "selector": "0xb1f1e401"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "crossartzerocollection_external",
                   "IsActiveInput1"
                 ],
                 "type": 0
@@ -1226,7 +1226,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0x238cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                        "key": "0xb36ee29c00000000000000000000000000000000000000000000000000000000",
                         "ty": 0
                       }
                     },
@@ -1235,14 +1235,14 @@
                   {
                     "layout": {
                       "enum": {
-                        "dispatchKey": "0x248cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                        "dispatchKey": "0xb46ee29c00000000000000000000000000000000000000000000000000000000",
                         "variants": {
                           "0": {
                             "fields": [
                               {
                                 "layout": {
                                   "cell": {
-                                    "key": "0x258cb4a8e1768578ab199af6c3822baceafe928fad843580aa9862286e062059",
+                                    "key": "0xb56ee29c00000000000000000000000000000000000000000000000000000000",
                                     "ty": 3
                                   }
                                 },
@@ -1270,7 +1270,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xe4f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xc495634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 4
                       }
                     },
@@ -1279,7 +1279,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xe5f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xc595634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 0
                       }
                     },
@@ -1288,7 +1288,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xe6f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xc695634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 5
                       }
                     },
@@ -1297,7 +1297,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xe7f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xc795634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 6
                       }
                     },
@@ -1306,7 +1306,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xe8f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xc895634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 6
                       }
                     },
@@ -1315,7 +1315,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xe9f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xc995634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 7
                       }
                     },
@@ -1324,7 +1324,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xeaf43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xca95634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 12
                       }
                     },
@@ -1333,7 +1333,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xebf43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xcb95634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 13
                       }
                     },
@@ -1342,7 +1342,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xecf43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xcc95634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 10
                       }
                     },
@@ -1351,7 +1351,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xedf43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xcd95634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 5
                       }
                     },
@@ -1360,7 +1360,7 @@
                   {
                     "layout": {
                       "cell": {
-                        "key": "0xeef43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "key": "0xce95634e00000000000000000000000000000000000000000000000000000000",
                         "ty": 15
                       }
                     },
@@ -1369,14 +1369,14 @@
                   {
                     "layout": {
                       "enum": {
-                        "dispatchKey": "0xeff43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                        "dispatchKey": "0xcf95634e00000000000000000000000000000000000000000000000000000000",
                         "variants": {
                           "0": {
                             "fields": [
                               {
                                 "layout": {
                                   "cell": {
-                                    "key": "0xf0f43c61536d00aba8cfb7914a55f8ac5607e9dfbd181cbe997471ef6085e10d",
+                                    "key": "0xd095634e00000000000000000000000000000000000000000000000000000000",
                                     "ty": 3
                                   }
                                 },
