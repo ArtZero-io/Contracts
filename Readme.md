@@ -1,38 +1,34 @@
 Code Hashes and Contract Addresses:
 
 # Proxy Contract Hash Code
-0x57470072d911a2103bfe6cda78bcf7375cf55dc9e56d4bef2b39b1824ab41d79
+0x99ad5611a138f138b8d93b761a88fc613b9a5a81f64c6f9e0d88d120efdf11b1
 
 # Profile Contract
-0x78ea710ed189e29ae3f2ca46672a7ede3fe14692882602191a48425888fe4253
-5E2zk4B1p4ohQmwG3uFw16yoZbYWE3ZRnb6XgPLNvi5zhG7U
-
-# ArtZero NFT Contract / Mint (PROXY)
-0x1958af8a820b5b6689a84fb4974a8a1bb7457eb7933933e51dc82a45fb198b18
-5EuozqMa5FEVt3FGFRRddUhZCpH7N5VDNvipNsTcFFRSN7Lp
+0x4c58ada7f10f297657723545030e61f1f54acc9da67187dd240ee1b87fafda6b
+5CCL6cQK6PNfW12n5edkyN3RkMmpQ7EQoWBKtyRTtZinNtWp
 
 # ArtZero NFT Staking Contract (PROXY)
-0xd7bafbfcaa1e50addd0b4095fc23dce05064748d8e6df5d2e9fc7072f73f317d
-5F3TiCn1Sjyix6iPvLB1oieLscCaHthJNghUR4XLTSEud6t4
+0xb51b61cdf2977c2c9c3ec3322c0ea384094ab7985f4f8b65b26a52129dac9673
+5Eha1Q3yJySsCqToz7FxPGoahydbSuXSfKGoiyp7F4Z8kvNa
 
 # Collection Manager (PROXY)
-0x29e9d3d74451d008a7f9ff464c6e8d648d2c498255b8f46c0d5a6a2290d76923
-5DeTsjiUsy7nNiZU7tqrm2N5pxivdKGWHPxxkJs58TzpYjqL
+0x24d01476e80a276acc9c5cdc11d5051db76232a5cfa821630cece8d7f6cc8b89
+5HLEr2CrEuNezqRtp2oooGHuUAwxjjAWFt1dsh8BXYDKerpy
 
 # Marketplace Contract (PROXY)
-0xe9e8db976db7a4b16532adc3ca09e2111ebdacd82569616d267414c7b05f7758
-5C584tEhDeGsmxoirsC5v2x5fbnoSkPB5raQSTyiJCy3Y2PF
+0xd76174dd502edb11712d007e7a2afe3485e242b859a1a26830aed6cfb7ab26c4
+5GfkBEkD313CryZoEpkZP6urgpUpmU9JSZbDRmTF8Hip63Kh
 
 # LaunchPad Manager (PROXY)
-0x3d78dba0e916069f5ef324a4d296d79a0be029e5218cc4cb546fac3d5975a2ea
-5Go6HPGUcgpKHwZXVcDDeoJ1inbNxXSuKdzhhDJauaUHBxVq
+0x5d02387f87f9dea5fb65a955579838942940bbb740fe3c27da0f109f74815a79
+5FSK66FinskoEiJSQ8yuysVTPdQSQM9igXwciYK64Smr4Nw8
 
 # Standard Contract
 # LaunchPad Standard Contract
-0x7d0c1ece15d01cab83ce2495f725f8f29fd31a5fe5ad3535775fe77a9f538980
+0x02a3829d1bfaa95ce26a76967e4840d726c158385da2d3c22e69a8b76c8d2751
 
 # ArtZero NFT Standard Contract
-0xfe96060f8e8f5281d79f30ffea0bd9ce27f093249f39146d753a79bee55ccafa
+0x4c6474cfa9dfa385c3a3a8e099e859a64bd6ba4571a68d234afb384936c9fcfb
 
 Deploy Steps:
 1. Deploy Profile Contract
@@ -42,10 +38,16 @@ Deploy Steps:
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
 Add PMP Project -> create Collection -> Update base URI -> Update admin address
 Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-PMP Address : 5FSRWvbsnaNeAyNsU1jz3DaMniEfRbWNCUvjWn2JwAPbR85p
+PMP Address : 5DACSjUWch5Q3GpYMP2CE5fUKw9bBrcPgkhgCSLchKU9Bicw
+Owner: 5ChxguNHGUCyYiXTa9bntB6SeDEbM2vUBvGLnMhAFeBwCDRy
 6. Deploy Staking Contract via Proxy
 With Address of PMP Project
 7. Deploy Marketplace Contract via Proxy
 
 rustup component add rustfmt --toolchain nightly
 cargo +nightly fmt
+
+# Unused 
+# ArtZero NFT Contract / Mint (PROXY)
+0x1958af8a820b5b6689a84fb4974a8a1bb7457eb7933933e51dc82a45fb198b18
+5EuozqMa5FEVt3FGFRRddUhZCpH7N5VDNvipNsTcFFRSN7Lp
