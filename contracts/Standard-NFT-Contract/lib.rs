@@ -61,6 +61,7 @@ pub mod psp34_nft {
     }
 
     impl Ownable for Psp34Nft {}
+
     #[openbrush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
     impl PSP34 for Psp34Nft {}
@@ -85,6 +86,8 @@ pub mod psp34_nft {
         fn get_attribute_name(&self, index: u32) -> String;
         #[ink(message)]
         fn token_uri(&self, token_id: u64) -> String;
+        #[ink(message)]
+        fn get_owner(&self) -> AccountId ;
     }
 
     impl Psp34Nft {
@@ -245,5 +248,12 @@ pub mod psp34_nft {
             token_uri = token_uri + &token_id.to_string() + &String::from(".json");
             return token_uri
         }
+
+        /// Get owner address
+        #[ink(message)]
+        fn get_owner(&self) -> AccountId {
+            return self.owner()
+        }
+
     }
 }

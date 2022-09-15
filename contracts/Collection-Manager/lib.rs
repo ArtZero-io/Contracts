@@ -98,6 +98,15 @@ pub mod artzero_collection_manager {
         fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId>;
     }
 
+    #[openbrush::wrapper]
+    pub type Psp34Ref = dyn Psp34Traits;
+
+    #[openbrush::trait_definition]
+    pub trait Psp34Traits {
+        #[ink(message)]
+        fn get_owner(&self) -> AccountId ;
+    }
+
     #[ink(event)]
     pub struct AddNewCollectionEvent {
         collection_owner: Option<AccountId>,
@@ -247,6 +256,10 @@ pub mod artzero_collection_manager {
                 self.manager.collections.get(&nft_contract_address).is_none(),
                 "address exists"
             );
+
+            
+            let collection_owner = Psp34Ref::get_owner(&nft_contract_address);
+            assert!(collection_owner == self.env().caller());
             assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
             self.manager.collection_count += 1;
             self.manager

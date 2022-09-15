@@ -69,6 +69,7 @@ pub mod launchpad_psp34_nft_standard {
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Phase {
+        is_active: bool,
         title: Vec<u8>,
         is_public: bool,
         public_minting_fee: Balance,
@@ -106,36 +107,19 @@ pub mod launchpad_psp34_nft_standard {
         project_info: Vec<u8>,
         public_minted_count: u64,
         total_public_minting_amount: u64,
+        active_phase_count: u8
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub enum Error {
         Custom(String),
-        NotApproved,
-        TokenExists,
-        TokenNotFound,
-        CannotInsert,
-        CannotFetchValue,
-        NotAllowed,
         InvalidInput,
-        OnlyAdmin,
         ClaimedAll,
         TokenLimitReached,
-        TokenLimitReachedMode1,
-        InvalidFee,
-        NotMintTime,
-        NotEnoughBalance,
-        InvalidMintAmount,
         PhaseNotExist,
         PhaseExpired,
-        PhaseNotPublicSale,
-        PhaseCodeNotExist,
-        PhaseExisted,
-        PhaseLimitReached,
-        WhitelistNotExist,
-        PhasePublicSale,
-        PhaseWhiteList
+        WhitelistNotExist
     }
 
     impl From<OwnableError> for Error {
@@ -204,6 +188,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.launchpad_contract_address = launchpad_contract_address;
                 instance.total_supply = total_supply;
                 instance.last_phase_id = 0;
+                instance.active_phase_count = 0;
                 instance.project_info = project_info.into_bytes();
                 instance.limit_phase_count = limit_phase_count;
                 instance.public_minted_count = 0;
@@ -244,11 +229,13 @@ pub mod launchpad_psp34_nft_standard {
             end_time: Timestamp
         ) -> Result<(), Error> {
             assert!(self.env().caller() == self.admin_address || self.env().caller() == self.launchpad_contract_address);
-            assert!(self.last_phase_id.checked_add(1).unwrap() <= self.limit_phase_count);
+            assert!(self.active_phase_count.checked_add(1).unwrap() <= self.limit_phase_count);
             assert!(self.validate_phase_schedule(start_time, end_time));
             let byte_phase_code = phase_code.into_bytes();
             self.last_phase_id += 1;
+            self.active_phase_count += 1;
             let phase = Phase {
+                is_active: true,
                 title: byte_phase_code,
                 is_public: is_public,
                 public_minting_fee: public_minting_fee,
@@ -479,8 +466,26 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            assert!(phase.claimed_amount == 0, "Phase Minted");
+            assert!(phase.claimed_amount == 0 && phase.start_time > Self::env().block_timestamp());
             phase.is_public = is_public.clone();
+            self.phases.insert(&phase_id, &phase);
+            Ok(())
+        }
+
+        /// Deactive Phase
+        #[ink(message)]
+        pub fn deactive_phase(
+            &mut self, 
+            phase_id: u8
+        ) -> Result<(), Error> {
+            assert!(self.env().caller() == self.admin_address);
+            if self.phases.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist);
+            }
+            let mut phase = self.phases.get(&phase_id).unwrap();
+            assert!(phase.claimed_amount == 0 && phase.start_time > Self::env().block_timestamp() && !phase.is_active);
+            phase.is_active = false;
+            self.active_phase_count -= 1;
             self.phases.insert(&phase_id, &phase);
             Ok(())
         }
@@ -502,26 +507,22 @@ pub mod launchpad_psp34_nft_standard {
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
-            if start_time >= end_time || phase_id > self.last_phase_id {
-                return Err(Error::InvalidInput);
-            }
             assert!(
-                public_max_minting_amount <= ArtZeroLaunchPadPSP34Ref::get_public_max_minting_amount(&self.launchpad_contract_address), 
-                "InvalidPublicMaxMintingAmount"
+                public_max_minting_amount <= ArtZeroLaunchPadPSP34Ref::get_public_max_minting_amount(&self.launchpad_contract_address) || 
+                start_time < end_time
             );
             for index in 0..self.last_phase_id {
                 if index != phase_id {
                     let phase = self.phases.get(&(index+1)).unwrap();
-                    if phase.start_time >= start_time && phase.end_time <= start_time {
-                        return Err(Error::InvalidInput);
-                    }
-                    if phase.start_time >= end_time && phase.end_time <= end_time {
+                    if phase.is_active && (
+                        (phase.start_time..=phase.end_time).contains(&start_time) || (phase.start_time..=phase.end_time).contains(&end_time)
+                    ) {
                         return Err(Error::InvalidInput);
                     }
                 }
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            assert!(phase.claimed_amount == 0, "Phase Minted");
+            assert!(phase.is_active && phase.claimed_amount == 0 && phase.start_time > Self::env().block_timestamp()); 
             phase.title = phase_code.clone().into_bytes();
             phase.is_public = is_public.clone();
             phase.public_minting_fee = public_minting_fee.clone();
@@ -589,15 +590,16 @@ pub mod launchpad_psp34_nft_standard {
             }
             for index in 0..self.last_phase_id {
                 let phase = self.phases.get(&(index+1)).unwrap();
-                if phase.start_time >= start_time && phase.end_time <= start_time {
-                    return false;
-                }
-                if phase.start_time >= end_time && phase.end_time <= end_time {
+                if phase.is_active && (
+                    (phase.start_time..=phase.end_time).contains(&start_time) || (phase.start_time..=phase.end_time).contains(&end_time)
+                ) {
                     return false;
                 }
             }
             return true;
         }
+
+
         
         /// Get limit phase count
         #[ink(message)]
@@ -706,6 +708,12 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_last_phase_id(&self) -> u8 {
             return self.last_phase_id;
         }  
+
+        ///Get active phase count
+        #[ink(message)]
+        pub fn get_active_phase_count(&self) -> u8 {
+            return self.active_phase_count;
+        } 
 
         ///Get Token Count
         #[ink(message)]
