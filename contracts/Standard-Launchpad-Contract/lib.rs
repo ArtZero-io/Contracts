@@ -164,6 +164,8 @@ pub mod launchpad_psp34_nft_standard {
         fn get_attribute_name(&self, index:u32) -> String;
         #[ink(message)]
         fn token_uri(&self,token_id: u64) -> String;
+        #[ink(message)]
+        fn get_owner(&self) -> AccountId ;
     }
 
     impl LaunchPadPsp34NftStandard {
@@ -871,6 +873,12 @@ pub mod launchpad_psp34_nft_standard {
             let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
             token_uri = token_uri + &token_id.to_string() + &String::from(".json");
             return token_uri;
+        }
+
+        /// Get owner address
+        #[ink(message)]
+        fn get_owner(&self) -> AccountId {
+            return self.owner()
         }
 
     }
