@@ -25,7 +25,7 @@ Code Hashes and Contract Addresses:
 
 # Standard Contract
 # LaunchPad Standard Contract
-0x02a3829d1bfaa95ce26a76967e4840d726c158385da2d3c22e69a8b76c8d2751
+0x141e86024ba01412dfc1c20542bb0f23358a046670b15d4ec595bfd2be0ffd5b
 
 # ArtZero NFT Standard Contract
 0x4c6474cfa9dfa385c3a3a8e099e859a64bd6ba4571a68d234afb384936c9fcfb
