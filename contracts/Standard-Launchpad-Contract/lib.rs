@@ -514,7 +514,7 @@ pub mod launchpad_psp34_nft_standard {
                 start_time < end_time
             );
             for index in 0..self.last_phase_id {
-                if index != phase_id {
+                if index.checked_add(1).unwrap() != phase_id {
                     let phase = self.phases.get(&(index+1)).unwrap();
                     if phase.is_active && (
                         (phase.start_time..=phase.end_time).contains(&start_time) || (phase.start_time..=phase.end_time).contains(&end_time)
