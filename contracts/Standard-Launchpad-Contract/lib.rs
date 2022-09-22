@@ -235,11 +235,13 @@ pub mod launchpad_psp34_nft_standard {
             assert!(self.env().caller() == self.admin_address || self.env().caller() == self.launchpad_contract_address);
             assert!(self.active_phase_count.checked_add(1).unwrap() <= self.limit_phase_count);
             assert!(self.validate_phase_schedule(start_time, end_time));
+            
             let byte_phase_code = phase_code.into_bytes();
             self.last_phase_id += 1;
             self.active_phase_count += 1;
             if is_public {
                 self.available_token_amount -= public_minting_amount;
+                assert!(self.available_token_amount >= 0);
             }
             let phase = if is_public {
                 Phase {
@@ -326,8 +328,8 @@ pub mod launchpad_psp34_nft_standard {
                 claimed_amount: 0,
                 minting_fee: whitelist_price
             };
-            assert!(self.available_token_amount >= whitelist_amount);
             self.available_token_amount = self.available_token_amount.checked_sub(whitelist_amount).unwrap();
+            assert!(self.available_token_amount >= 0);
             self.phase_account_link.insert(phase_id, &account);
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
@@ -542,6 +544,7 @@ pub mod launchpad_psp34_nft_standard {
             } else if phase.is_public && is_public {
                 self.available_token_amount = self.available_token_amount.checked_sub(phase.public_minting_amount.clone()).unwrap().checked_add(public_minting_amount.clone()).unwrap();
             }
+            assert!(self.available_token_amount >= 0);
             phase.is_public = is_public.clone();
             phase.start_time = start_time.clone();
             phase.end_time = end_time.clone();
@@ -794,10 +797,16 @@ pub mod launchpad_psp34_nft_standard {
             return self.locked_token_count;
         }
 
-        ///Get Locked Token Count
+        ///Get Total Supply
         #[ink(message)]
         pub fn get_total_supply(&self) -> u64 {
             return self.total_supply;
+        }
+
+        ///Get Available Token Amount
+        #[ink(message)]
+        pub fn get_available_token_amount(&self) -> u64 {
+            return self.available_token_amount;
         }
     }
 
