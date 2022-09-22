@@ -107,7 +107,8 @@ pub mod launchpad_psp34_nft_standard {
         project_info: Vec<u8>,
         public_minted_count: u64,
         total_public_minting_amount: u64,
-        active_phase_count: u8
+        active_phase_count: u8,
+        available_token_amount: u64
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -194,6 +195,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.project_info = project_info.into_bytes();
                 instance.limit_phase_count = limit_phase_count;
                 instance.public_minted_count = 0;
+                instance.available_token_amount = total_supply;
                 instance.admin_address = contract_owner;
                 if code_phases.len() == start_time_phases.len() &&
                     code_phases.len() == is_public_phases.len() &&
@@ -236,17 +238,35 @@ pub mod launchpad_psp34_nft_standard {
             let byte_phase_code = phase_code.into_bytes();
             self.last_phase_id += 1;
             self.active_phase_count += 1;
-            let phase = Phase {
-                is_active: true,
-                title: byte_phase_code,
-                is_public: is_public,
-                public_minting_fee: public_minting_fee,
-                public_minting_amount: public_minting_amount,
-                public_max_minting_amount: public_max_minting_amount,
-                whitelist_amount: 0,
-                claimed_amount: 0,
-                start_time: start_time, 
-                end_time: end_time                   
+            if is_public {
+                self.available_token_amount -= public_minting_amount;
+            }
+            let phase = if is_public {
+                Phase {
+                    is_active: true,
+                    title: byte_phase_code,
+                    is_public: is_public,
+                    public_minting_fee: public_minting_fee,
+                    public_minting_amount: public_minting_amount,
+                    public_max_minting_amount: public_max_minting_amount,
+                    whitelist_amount: 0,
+                    claimed_amount: 0,
+                    start_time: start_time, 
+                    end_time: end_time                   
+                }
+            } else {
+                Phase {
+                    is_active: true,
+                    title: byte_phase_code,
+                    is_public: is_public,
+                    public_minting_fee: 0,
+                    public_minting_amount: 0,
+                    public_max_minting_amount: 0,
+                    whitelist_amount: 0,
+                    claimed_amount: 0,
+                    start_time: start_time, 
+                    end_time: end_time                   
+                }
             };
             self.phases.insert(&self.last_phase_id, &phase);
             Ok(())
@@ -270,6 +290,8 @@ pub mod launchpad_psp34_nft_standard {
             }
             let mut whitelist = self.phase_whitelists_link.get(&(account, phase_id)).unwrap();
             let old_whitelist_amount = whitelist.whitelist_amount;
+            self.available_token_amount = self.available_token_amount.checked_add(old_whitelist_amount).unwrap().checked_sub(whitelist_amount).unwrap();
+            assert!(self.available_token_amount >= 0);
             assert!((whitelist.claimed_amount..=self.total_supply).contains(&whitelist_amount));
             whitelist.whitelist_amount = whitelist_amount;
             whitelist.minting_fee = whitelist_price;
@@ -304,6 +326,8 @@ pub mod launchpad_psp34_nft_standard {
                 claimed_amount: 0,
                 minting_fee: whitelist_price
             };
+            assert!(self.available_token_amount >= whitelist_amount);
+            self.available_token_amount = self.available_token_amount.checked_sub(whitelist_amount).unwrap();
             self.phase_account_link.insert(phase_id, &account);
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
@@ -456,24 +480,6 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update public phase
-        #[ink(message)]
-        pub fn update_public_phase(
-            &mut self, 
-            phase_id: u8,
-            is_public: bool
-        ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
-            if self.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist);
-            }
-            let mut phase = self.phases.get(&phase_id).unwrap();
-            assert!(phase.claimed_amount == 0 && phase.start_time > Self::env().block_timestamp());
-            phase.is_public = is_public.clone();
-            self.phases.insert(&phase_id, &phase);
-            Ok(())
-        }
-
         /// Deactive Phase
         #[ink(message)]
         pub fn deactive_phase(
@@ -485,9 +491,12 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            assert!(phase.claimed_amount == 0 && phase.start_time > Self::env().block_timestamp() && !phase.is_active);
+            assert!(phase.claimed_amount == 0 && self.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp() && !phase.is_active);
             phase.is_active = false;
             self.active_phase_count -= 1;
+            if phase.is_public {
+                self.available_token_amount = self.available_token_amount.checked_add(phase.public_minting_amount).unwrap();
+            }
             self.phases.insert(&phase_id, &phase);
             Ok(())
         }
@@ -524,14 +533,28 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            assert!(phase.is_active && phase.claimed_amount == 0 && phase.start_time > Self::env().block_timestamp()); 
+            assert!(phase.is_active && phase.claimed_amount == 0 && self.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp());
             phase.title = phase_code.clone().into_bytes();
+            if phase.is_public && !is_public {
+                self.available_token_amount = self.available_token_amount.checked_sub(phase.public_minting_amount.clone()).unwrap();
+            } else if !phase.is_public && is_public {
+                self.available_token_amount = self.available_token_amount.checked_add(public_minting_amount.clone()).unwrap();
+            } else if phase.is_public && is_public {
+                self.available_token_amount = self.available_token_amount.checked_sub(phase.public_minting_amount.clone()).unwrap().checked_add(public_minting_amount.clone()).unwrap();
+            }
             phase.is_public = is_public.clone();
-            phase.public_minting_fee = public_minting_fee.clone();
-            phase.public_minting_amount = public_minting_amount.clone();
-            phase.public_max_minting_amount = public_max_minting_amount.clone();
             phase.start_time = start_time.clone();
             phase.end_time = end_time.clone();
+            
+            if is_public {
+                phase.public_minting_fee = public_minting_fee.clone();
+                phase.public_minting_amount = public_minting_amount.clone();
+                phase.public_max_minting_amount = public_max_minting_amount.clone();
+            } else {
+                phase.public_minting_fee = 0;
+                phase.public_minting_amount = 0;
+                phase.public_max_minting_amount = 0;
+            }
             self.phases.insert(&phase_id, &phase);
             Ok(())
         }
