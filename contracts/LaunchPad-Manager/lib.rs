@@ -59,7 +59,6 @@ pub mod artzero_launchpad_psp34 {
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct Project {
         is_active: bool,
-        project_type: u8, // 1 is Live Project, 2 is Ended Project
         project_owner: AccountId,
         total_supply: u64,
         start_time: Timestamp,
@@ -222,7 +221,6 @@ pub mod artzero_launchpad_psp34 {
 
             let new_project = Project {
                 is_active: false,
-                project_type: 1, // 1 is Live Project, 2 is Ended Project
                 project_owner: project_owner,
                 total_supply: total_supply,
                 start_time: start_time,
@@ -244,26 +242,15 @@ pub mod artzero_launchpad_psp34 {
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
-            if start_time > end_time {
-                return Err(Error::InvalidStartTimeAndEndTime);
-            }
             if self.manager.projects.get(&contract_address).is_none(){
                 return Err(Error::ProjectNotExist);
-            }            
-            let mut project = self.manager.projects.get(&contract_address).unwrap();
-            if  project.project_owner == self.env().caller() ||
-                self.manager.admin_address == self.env().caller() {
-                    assert!(project.project_type != 2);
-                    if  project.end_time <= Self::env().block_timestamp() {
-                        return Err(Error::InvalidStartTimeAndEndTime);
-                    } else {
-                        project.end_time = end_time;
-                        project.start_time = start_time;
-                        self.manager.projects.insert(&contract_address, &project);
-                    }
-            } else {
-                return Err(Error::InvalidCaller);
             }
+            assert!(start_time < end_time);            
+            let mut project = self.manager.projects.get(&contract_address).unwrap();
+            assert!(self.manager.admin_address == self.env().caller() && project.end_time > Self::env().block_timestamp());
+            project.end_time = end_time;
+            project.start_time = start_time;
+            self.manager.projects.insert(&contract_address, &project);
             Ok(())
         }
 
