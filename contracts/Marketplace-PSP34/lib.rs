@@ -280,8 +280,8 @@ pub mod artzero_marketplace_psp34 {
             self.manager.collection_contract_address = collection_contract_address;
             self.manager.staking_contract_address = staking_contract_address;
             self.manager.platform_fee = platform_fee;
-            let criteria = vec![1, 5, 7, 9, 20];
-            let rate = vec![3000, 5000, 6600, 8000, 9000];
+            let criteria = vec![20, 9, 7, 5, 1];
+            let rate = vec![9000, 8000, 6600, 5000, 3000];
             self.manager.staking_discount_criteria = criteria;
             self.manager.staking_discount_rate = rate;
             Ok(())
