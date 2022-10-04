@@ -77,6 +77,7 @@ pub mod launchpad_psp34_nft_standard {
         public_max_minting_amount: u64,
         whitelist_amount: u64,
         claimed_amount: u64,
+        total_amount: u64,
         start_time: Timestamp,
         end_time: Timestamp
     }
@@ -253,6 +254,7 @@ pub mod launchpad_psp34_nft_standard {
                     public_max_minting_amount: public_max_minting_amount,
                     whitelist_amount: 0,
                     claimed_amount: 0,
+                    total_amount: public_minting_amount,
                     start_time: start_time, 
                     end_time: end_time                   
                 }
@@ -266,6 +268,7 @@ pub mod launchpad_psp34_nft_standard {
                     public_max_minting_amount: 0,
                     whitelist_amount: 0,
                     claimed_amount: 0,
+                    total_amount: 0,
                     start_time: start_time, 
                     end_time: end_time                   
                 }
@@ -299,8 +302,8 @@ pub mod launchpad_psp34_nft_standard {
             whitelist.minting_fee = whitelist_price;
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
-            let whitelist_amount_tmp = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
-            phase.whitelist_amount = whitelist_amount_tmp;
+            phase.whitelist_amount = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
+            phase.total_amount = phase.total_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
             self.phases.insert(&phase_id, &phase);
             Ok(())
         }
@@ -333,8 +336,8 @@ pub mod launchpad_psp34_nft_standard {
             self.phase_account_link.insert(phase_id, &account);
             self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
-            let whitelist_amount_tmp = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
-            phase.whitelist_amount = whitelist_amount_tmp;
+            phase.total_amount = phase.total_amount.checked_add(whitelist_amount).unwrap();
+            phase.whitelist_amount = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
             self.phases.insert(&phase_id, &phase);
             Ok(())
         }
@@ -535,14 +538,20 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             let mut phase = self.phases.get(&phase_id).unwrap();
-            assert!(phase.is_active && phase.claimed_amount == 0 && self.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp());
+            assert!(phase.is_active && 
+                phase.claimed_amount == 0 && 
+                self.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp()
+            );
             phase.title = phase_code.clone().into_bytes();
             if phase.is_public && !is_public {
                 self.available_token_amount = self.available_token_amount.checked_sub(phase.public_minting_amount.clone()).unwrap();
+                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount.clone()).unwrap();
             } else if !phase.is_public && is_public {
                 self.available_token_amount = self.available_token_amount.checked_add(public_minting_amount.clone()).unwrap();
+                phase.total_amount = phase.total_amount.checked_add(phase.public_minting_amount.clone()).unwrap();
             } else if phase.is_public && is_public {
                 self.available_token_amount = self.available_token_amount.checked_sub(phase.public_minting_amount.clone()).unwrap().checked_add(public_minting_amount.clone()).unwrap();
+                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount.clone()).unwrap().checked_add(public_minting_amount.clone()).unwrap();
             }
             assert!(self.available_token_amount >= 0);
             phase.is_public = is_public.clone();
