@@ -109,7 +109,8 @@ pub mod launchpad_psp34_nft_standard {
         public_minted_count: u64,
         total_public_minting_amount: u64,
         active_phase_count: u8,
-        available_token_amount: u64
+        available_token_amount: u64,
+        owner_claimed_amount: u64
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -345,23 +346,23 @@ pub mod launchpad_psp34_nft_standard {
         ///Only Owner can mint new token
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn mint(&mut self, phase_id: u8, mint_amount: u64 ) -> Result<(), Error> {
+        pub fn mint(&mut self, mint_amount: u64 ) -> Result<(), Error> {
             let caller = self.env().caller();
-            if self.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist)
-            }
-            let mut phase = self.phases.get(&phase_id).unwrap();
-            if self.last_token_id.checked_add(mint_amount).unwrap() > self.total_supply || 
-                phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.public_minting_amount {
-                return Err(Error::TokenLimitReached)
-            }
-            let claimed_amount_tmp = phase.claimed_amount.checked_add(mint_amount).unwrap();
-            phase.claimed_amount = claimed_amount_tmp;
+            assert!(self.last_token_id.checked_add(mint_amount).unwrap() <= self.total_supply);
+            let current_time = Self::env().block_timestamp();
+            let mut available_amount = 0;
+            for index in 0..self.last_phase_id {
+                let phase = self.phases.get(&(index+1)).unwrap();
+                if phase.is_active && current_time > phase.end_time {
+                    available_amount += phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap();
+                }
+            }  
+            assert!(mint_amount <= available_amount);
             for _i in 0..mint_amount {
                 self.last_token_id += 1;
                 assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
             }
-            self.phases.insert(&phase_id, &phase);
+            self.owner_claimed_amount += mint_amount;
             Ok(())
         }
 
@@ -636,7 +637,28 @@ pub mod launchpad_psp34_nft_standard {
             return true;
         }
 
+        /// Get owner claimed amount
+        #[ink(message)]
+        pub fn get_owner_claimed_amount(
+            &self
+        ) -> u64 {
+            return self.owner_claimed_amount;
+        }
 
+        /// Get owner available amount
+        pub fn get_owner_available_amount(
+            &self
+        ) -> u64 {
+            let current_time = Self::env().block_timestamp();
+            let mut available_amount = 0;
+            for index in 0..self.last_phase_id {
+                let phase = self.phases.get(&(index+1)).unwrap();
+                if phase.is_active && current_time > phase.end_time {
+                    available_amount += phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap();
+                }
+            }
+            return available_amount;
+        }
         
         /// Get limit phase count
         #[ink(message)]
@@ -713,7 +735,7 @@ pub mod launchpad_psp34_nft_standard {
             let current_time = Self::env().block_timestamp();
             for index in 0..self.last_phase_id {
                 let phase = self.phases.get(&(index+1)).unwrap();
-                if (phase.start_time..=phase.end_time).contains(&current_time) {
+                if phase.is_active && (phase.start_time..=phase.end_time).contains(&current_time) {
                     return Some(index + 1);
                 }
             }
