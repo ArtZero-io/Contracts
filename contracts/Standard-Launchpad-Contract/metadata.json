@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xdda946b6a49f21397414f00f6be489e606b429fca44ffa280f5fb7953e8cceb4",
+    "hash": "0xd513bf081af2b670bee0eebec29e4f7a4021356de5b7d5aa7f23f964e1ad2544",
     "language": "ink! 3.3.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "launchpad_psp34_nft_standard",
@@ -323,15 +323,6 @@
         {
           "args": [
             {
-              "label": "phase_id",
-              "type": {
-                "displayName": [
-                  "u8"
-                ],
-                "type": 2
-              }
-            },
-            {
               "label": "mint_amount",
               "type": {
                 "displayName": [
@@ -485,21 +476,12 @@
                 ],
                 "type": 2
               }
-            },
-            {
-              "label": "is_public",
-              "type": {
-                "displayName": [
-                  "bool"
-                ],
-                "type": 34
-              }
             }
           ],
           "docs": [
-            " Update public phase"
+            " Deactive Phase"
           ],
-          "label": "update_public_phase",
+          "label": "deactive_phase",
           "mutates": true,
           "payable": false,
           "returnType": {
@@ -508,7 +490,7 @@
             ],
             "type": 43
           },
-          "selector": "0xb323e2b7"
+          "selector": "0xc8066cce"
         },
         {
           "args": [
@@ -711,6 +693,22 @@
             "type": 43
           },
           "selector": "0x05a37bb7"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get owner claimed amount"
+          ],
+          "label": "get_owner_claimed_amount",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u64"
+            ],
+            "type": 5
+          },
+          "selector": "0xe56ba18e"
         },
         {
           "args": [],
@@ -965,6 +963,22 @@
         {
           "args": [],
           "docs": [
+            "Get active phase count"
+          ],
+          "label": "get_active_phase_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "u8"
+            ],
+            "type": 2
+          },
+          "selector": "0x8f485a88"
+        },
+        {
+          "args": [],
+          "docs": [
             "Get Token Count"
           ],
           "label": "get_last_token_id",
@@ -1075,7 +1089,7 @@
         {
           "args": [],
           "docs": [
-            "Get Locked Token Count"
+            "Get Total Supply"
           ],
           "label": "get_total_supply",
           "mutates": false,
@@ -1091,19 +1105,18 @@
         {
           "args": [],
           "docs": [
-            " Returns the address of the current owner."
+            "Get Available Token Amount"
           ],
-          "label": "Ownable::owner",
+          "label": "get_available_token_amount",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
-              "ownable_external",
-              "OwnerOutput"
+              "u64"
             ],
-            "type": 8
+            "type": 5
           },
-          "selector": "0x4fa43c8c"
+          "selector": "0x95a79e40"
         },
         {
           "args": [],
@@ -1172,51 +1185,47 @@
         {
           "args": [],
           "docs": [
-            " Returns the collection `Id` of the NFT token.",
-            "",
-            " This can represents the relationship between tokens/contracts/pallets."
+            " Returns the address of the current owner."
           ],
-          "label": "PSP34::collection_id",
+          "label": "Ownable::owner",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
-              "psp34_external",
-              "CollectionIdOutput"
+              "ownable_external",
+              "OwnerOutput"
             ],
-            "type": 1
+            "type": 8
           },
-          "selector": "0xffa27a5f"
+          "selector": "0x4fa43c8c"
         },
         {
           "args": [
             {
-              "label": "owner",
+              "label": "id",
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "BalanceOfInput1"
+                  "OwnerOfInput1"
                 ],
-                "type": 8
+                "type": 1
               }
             }
           ],
           "docs": [
-            " Returns the balance of the owner.",
-            "",
-            " This represents the amount of unique tokens the owner has."
+            " Returns the owner of the token if any."
           ],
-          "label": "PSP34::balance_of",
+          "label": "PSP34::owner_of",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "BalanceOfOutput"
+              "OwnerOfOutput"
             ],
-            "type": 4
+            "type": 19
           },
-          "selector": "0xcde7e55f"
+          "selector": "0x1168624d"
         },
         {
           "args": [
@@ -1279,6 +1288,25 @@
         {
           "args": [],
           "docs": [
+            " Returns the collection `Id` of the NFT token.",
+            "",
+            " This can represents the relationship between tokens/contracts/pallets."
+          ],
+          "label": "PSP34::collection_id",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "CollectionIdOutput"
+            ],
+            "type": 1
+          },
+          "selector": "0xffa27a5f"
+        },
+        {
+          "args": [],
+          "docs": [
             " Returns current NFT total supply."
           ],
           "label": "PSP34::total_supply",
@@ -1296,30 +1324,32 @@
         {
           "args": [
             {
-              "label": "id",
+              "label": "owner",
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "OwnerOfInput1"
+                  "BalanceOfInput1"
                 ],
-                "type": 1
+                "type": 8
               }
             }
           ],
           "docs": [
-            " Returns the owner of the token if any."
+            " Returns the balance of the owner.",
+            "",
+            " This represents the amount of unique tokens the owner has."
           ],
-          "label": "PSP34::owner_of",
+          "label": "PSP34::balance_of",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "OwnerOfOutput"
+              "BalanceOfOutput"
             ],
-            "type": 19
+            "type": 4
           },
-          "selector": "0x1168624d"
+          "selector": "0xcde7e55f"
         },
         {
           "args": [
@@ -1538,6 +1568,34 @@
         {
           "args": [
             {
+              "label": "index",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "GetAttributeNameInput1"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [
+            "Get Attribute Name"
+          ],
+          "label": "Psp34Traits::get_attribute_name",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetAttributeNameOutput"
+            ],
+            "type": 38
+          },
+          "selector": "0xfcfe34de"
+        },
+        {
+          "args": [
+            {
               "label": "token_id",
               "type": {
                 "displayName": [
@@ -1562,6 +1620,99 @@
             "type": 38
           },
           "selector": "0x249dfd4f"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Get owner address"
+          ],
+          "label": "Psp34Traits::get_owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetOwnerOutput"
+            ],
+            "type": 8
+          },
+          "selector": "0x8e1d8d71"
+        },
+        {
+          "args": [
+            {
+              "label": "uri",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "SetBaseUriInput1"
+                ],
+                "type": 38
+              }
+            }
+          ],
+          "docs": [
+            " Change baseURI"
+          ],
+          "label": "Psp34Traits::set_base_uri",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "SetBaseUriOutput"
+            ],
+            "type": 43
+          },
+          "selector": "0x4de6850b"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "SetMultipleAttributesInput1"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "attributes",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "SetMultipleAttributesInput2"
+                ],
+                "type": 39
+              }
+            },
+            {
+              "label": "values",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "SetMultipleAttributesInput3"
+                ],
+                "type": 39
+              }
+            }
+          ],
+          "docs": [
+            "Only Owner can set multiple attributes to a token"
+          ],
+          "label": "Psp34Traits::set_multiple_attributes",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "SetMultipleAttributesOutput"
+            ],
+            "type": 43
+          },
+          "selector": "0x5bf8416b"
         },
         {
           "args": [
@@ -1617,110 +1768,6 @@
             "type": 4
           },
           "selector": "0x61c50d69"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "SetMultipleAttributesInput1"
-                ],
-                "type": 1
-              }
-            },
-            {
-              "label": "attributes",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "SetMultipleAttributesInput2"
-                ],
-                "type": 39
-              }
-            },
-            {
-              "label": "values",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "SetMultipleAttributesInput3"
-                ],
-                "type": 39
-              }
-            }
-          ],
-          "docs": [
-            "Only Owner can set multiple attributes to a token"
-          ],
-          "label": "Psp34Traits::set_multiple_attributes",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "SetMultipleAttributesOutput"
-            ],
-            "type": 43
-          },
-          "selector": "0x5bf8416b"
-        },
-        {
-          "args": [
-            {
-              "label": "index",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "GetAttributeNameInput1"
-                ],
-                "type": 4
-              }
-            }
-          ],
-          "docs": [
-            "Get Attribute Name"
-          ],
-          "label": "Psp34Traits::get_attribute_name",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetAttributeNameOutput"
-            ],
-            "type": 38
-          },
-          "selector": "0xfcfe34de"
-        },
-        {
-          "args": [
-            {
-              "label": "uri",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "SetBaseUriInput1"
-                ],
-                "type": 38
-              }
-            }
-          ],
-          "docs": [
-            " Change baseURI"
-          ],
-          "label": "Psp34Traits::set_base_uri",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "SetBaseUriOutput"
-            ],
-            "type": 43
-          },
-          "selector": "0x4de6850b"
         }
       ]
     },
@@ -2064,6 +2111,33 @@
               }
             },
             "name": "total_public_minting_amount"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1100000000000000000000000000000000000000000000000000000000000000",
+                "ty": 2
+              }
+            },
+            "name": "active_phase_count"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1200000000000000000000000000000000000000000000000000000000000000",
+                "ty": 5
+              }
+            },
+            "name": "available_token_amount"
+          },
+          {
+            "layout": {
+              "cell": {
+                "key": "0x1300000000000000000000000000000000000000000000000000000000000000",
+                "ty": 5
+              }
+            },
+            "name": "owner_claimed_amount"
           }
         ]
       }
@@ -2724,6 +2798,11 @@
             "composite": {
               "fields": [
                 {
+                  "name": "is_active",
+                  "type": 34,
+                  "typeName": "bool"
+                },
+                {
                   "name": "title",
                   "type": 7,
                   "typeName": "Vec<u8>"
@@ -2755,6 +2834,11 @@
                 },
                 {
                   "name": "claimed_amount",
+                  "type": 5,
+                  "typeName": "u64"
+                },
+                {
+                  "name": "total_amount",
                   "type": 5,
                   "typeName": "u64"
                 },
@@ -2945,99 +3029,27 @@
                 },
                 {
                   "index": 1,
-                  "name": "NotApproved"
-                },
-                {
-                  "index": 2,
-                  "name": "TokenExists"
-                },
-                {
-                  "index": 3,
-                  "name": "TokenNotFound"
-                },
-                {
-                  "index": 4,
-                  "name": "CannotInsert"
-                },
-                {
-                  "index": 5,
-                  "name": "CannotFetchValue"
-                },
-                {
-                  "index": 6,
-                  "name": "NotAllowed"
-                },
-                {
-                  "index": 7,
                   "name": "InvalidInput"
                 },
                 {
-                  "index": 8,
-                  "name": "OnlyAdmin"
-                },
-                {
-                  "index": 9,
+                  "index": 2,
                   "name": "ClaimedAll"
                 },
                 {
-                  "index": 10,
+                  "index": 3,
                   "name": "TokenLimitReached"
                 },
                 {
-                  "index": 11,
-                  "name": "TokenLimitReachedMode1"
-                },
-                {
-                  "index": 12,
-                  "name": "InvalidFee"
-                },
-                {
-                  "index": 13,
-                  "name": "NotMintTime"
-                },
-                {
-                  "index": 14,
-                  "name": "NotEnoughBalance"
-                },
-                {
-                  "index": 15,
-                  "name": "InvalidMintAmount"
-                },
-                {
-                  "index": 16,
+                  "index": 4,
                   "name": "PhaseNotExist"
                 },
                 {
-                  "index": 17,
+                  "index": 5,
                   "name": "PhaseExpired"
                 },
                 {
-                  "index": 18,
-                  "name": "PhaseNotPublicSale"
-                },
-                {
-                  "index": 19,
-                  "name": "PhaseCodeNotExist"
-                },
-                {
-                  "index": 20,
-                  "name": "PhaseExisted"
-                },
-                {
-                  "index": 21,
-                  "name": "PhaseLimitReached"
-                },
-                {
-                  "index": 22,
+                  "index": 6,
                   "name": "WhitelistNotExist"
-                },
-                {
-                  "index": 23,
-                  "name": "PhasePublicSale"
-                },
-                {
-                  "index": 24,
-                  "name": "PhaseWhiteList"
                 }
               ]
             }

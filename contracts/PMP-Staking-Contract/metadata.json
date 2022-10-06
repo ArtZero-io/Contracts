@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xd7bafbfcaa1e50addd0b4095fc23dce05064748d8e6df5d2e9fc7072f73f317d",
-    "language": "ink! 3.3.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "hash": "0x18147db9556b922ebb60a3d3f1257a8baebbfc11e640d18d56db0dabc6343070",
+    "language": "ink! 3.3.0",
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_staking_nft",
@@ -959,43 +959,6 @@
           "selector": "0xd34ab274"
         },
         {
-          "args": [
-            {
-              "label": "new_owner",
-              "type": {
-                "displayName": [
-                  "ownable_external",
-                  "TransferOwnershipInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            " Transfers ownership of the contract to a `new_owner`.",
-            " Can only be called by the current owner.",
-            "",
-            " On success a `OwnershipTransferred` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Panics with `CallerIsNotOwner` error if caller is not owner.",
-            "",
-            " Panics with `NewOwnerIsZero` error if new owner's address is zero."
-          ],
-          "label": "Ownable::transfer_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "TransferOwnershipOutput"
-            ],
-            "type": 16
-          },
-          "selector": "0x11f43efd"
-        },
-        {
           "args": [],
           "docs": [
             " Returns the address of the current owner."
@@ -1042,30 +1005,39 @@
         {
           "args": [
             {
-              "label": "account",
+              "label": "new_owner",
               "type": {
                 "displayName": [
-                  "crossartzerostaking_external",
-                  "GetTotalPendingUnstakedByAccountInput1"
+                  "ownable_external",
+                  "TransferOwnershipInput1"
                 ],
                 "type": 0
               }
             }
           ],
           "docs": [
-            " Get User NFT staked in the contract"
+            " Transfers ownership of the contract to a `new_owner`.",
+            " Can only be called by the current owner.",
+            "",
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner.",
+            "",
+            " Panics with `NewOwnerIsZero` error if new owner's address is zero."
           ],
-          "label": "CrossArtZeroStaking::get_total_pending_unstaked_by_account",
-          "mutates": false,
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
-              "crossartzerostaking_external",
-              "GetTotalPendingUnstakedByAccountOutput"
+              "ownable_external",
+              "TransferOwnershipOutput"
             ],
-            "type": 9
+            "type": 16
           },
-          "selector": "0x3d9ff06d"
+          "selector": "0x11f43efd"
         },
         {
           "args": [
@@ -1094,6 +1066,34 @@
             "type": 9
           },
           "selector": "0x487f1cac"
+        },
+        {
+          "args": [
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "crossartzerostaking_external",
+                  "GetTotalPendingUnstakedByAccountInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get User NFT staked in the contract"
+          ],
+          "label": "CrossArtZeroStaking::get_total_pending_unstaked_by_account",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerostaking_external",
+              "GetTotalPendingUnstakedByAccountOutput"
+            ],
+            "type": 9
+          },
+          "selector": "0x3d9ff06d"
         }
       ]
     },

@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x29e9d3d74451d008a7f9ff464c6e8d648d2c498255b8f46c0d5a6a2290d76923",
+    "hash": "0x8db1ef367d8005dd754bc7c53da9977408fa395520e8e8b72147e56d9fc5d2b5",
     "language": "ink! 3.3.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_collection_manager",
@@ -1024,19 +1024,29 @@
         {
           "args": [],
           "docs": [
-            " Returns the address of the current owner."
+            " Leaves the contract without owner. It will not be possible to call",
+            " owner's functions anymore. Can only be called by the current owner.",
+            "",
+            " NOTE: Renouncing ownership will leave the contract without an owner,",
+            " thereby removing any functionality that is only available to the owner.",
+            "",
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner"
           ],
-          "label": "Ownable::owner",
-          "mutates": false,
+          "label": "Ownable::renounce_ownership",
+          "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "ownable_external",
-              "OwnerOutput"
+              "RenounceOwnershipOutput"
             ],
-            "type": 0
+            "type": 18
           },
-          "selector": "0x4fa43c8c"
+          "selector": "0x5e228753"
         },
         {
           "args": [
@@ -1078,29 +1088,47 @@
         {
           "args": [],
           "docs": [
-            " Leaves the contract without owner. It will not be possible to call",
-            " owner's functions anymore. Can only be called by the current owner.",
-            "",
-            " NOTE: Renouncing ownership will leave the contract without an owner,",
-            " thereby removing any functionality that is only available to the owner.",
-            "",
-            " On success a `OwnershipTransferred` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Panics with `CallerIsNotOwner` error if caller is not owner"
+            " Returns the address of the current owner."
           ],
-          "label": "Ownable::renounce_ownership",
-          "mutates": true,
+          "label": "Ownable::owner",
+          "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "ownable_external",
-              "RenounceOwnershipOutput"
+              "OwnerOutput"
             ],
-            "type": 18
+            "type": 0
           },
-          "selector": "0x5e228753"
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "crossartzerocollection_external",
+                  "GetContractTypeInput1"
+                ],
+                "type": 0
+              }
+            }
+          ],
+          "docs": [
+            " Get NFT Contract Type 1 or 2 for PSP34"
+          ],
+          "label": "CrossArtZeroCollection::get_contract_type",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "crossartzerocollection_external",
+              "GetContractTypeOutput"
+            ],
+            "type": 2
+          },
+          "selector": "0x81fa82e9"
         },
         {
           "args": [
@@ -1157,34 +1185,6 @@
             "type": 10
           },
           "selector": "0xfa0f936e"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "crossartzerocollection_external",
-                  "GetContractTypeInput1"
-                ],
-                "type": 0
-              }
-            }
-          ],
-          "docs": [
-            " Get NFT Contract Type 1 or 2 for PSP34"
-          ],
-          "label": "CrossArtZeroCollection::get_contract_type",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "crossartzerocollection_external",
-              "GetContractTypeOutput"
-            ],
-            "type": 2
-          },
-          "selector": "0x81fa82e9"
         },
         {
           "args": [

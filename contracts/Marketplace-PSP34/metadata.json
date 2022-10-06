@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0xe9e8db976db7a4b16532adc3ca09e2111ebdacd82569616d267414c7b05f7758",
+    "hash": "0xe465fa55cd72bfc7d02bb5df6de0c107e103280c43c98c07a2ead62787310b25",
     "language": "ink! 3.3.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_marketplace_psp34",
@@ -1280,6 +1280,23 @@
         {
           "args": [],
           "docs": [
+            " Returns the address of the current owner."
+          ],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 0
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [],
+          "docs": [
             " Leaves the contract without owner. It will not be possible to call",
             " owner's functions anymore. Can only be called by the current owner.",
             "",
@@ -1340,23 +1357,6 @@
             "type": 29
           },
           "selector": "0x11f43efd"
-        },
-        {
-          "args": [],
-          "docs": [
-            " Returns the address of the current owner."
-          ],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 0
-          },
-          "selector": "0x4fa43c8c"
         }
       ]
     },

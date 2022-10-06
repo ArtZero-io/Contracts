@@ -8,27 +8,27 @@ Code Hashes and Contract Addresses:
 5CCL6cQK6PNfW12n5edkyN3RkMmpQ7EQoWBKtyRTtZinNtWp
 
 # ArtZero NFT Staking Contract (PROXY)
-0xb51b61cdf2977c2c9c3ec3322c0ea384094ab7985f4f8b65b26a52129dac9673
-5Eha1Q3yJySsCqToz7FxPGoahydbSuXSfKGoiyp7F4Z8kvNa
-
-# Collection Manager (PROXY)
-0x24d01476e80a276acc9c5cdc11d5051db76232a5cfa821630cece8d7f6cc8b89
-5HLEr2CrEuNezqRtp2oooGHuUAwxjjAWFt1dsh8BXYDKerpy
+0x18147db9556b922ebb60a3d3f1257a8baebbfc11e640d18d56db0dabc6343070
+5GK6NJ8dY2kChC6nTNK5iENeAHHwimQrHCA4tx1oXNqFUouJ
 
 # Marketplace Contract (PROXY)
-0xd76174dd502edb11712d007e7a2afe3485e242b859a1a26830aed6cfb7ab26c4
-5GfkBEkD313CryZoEpkZP6urgpUpmU9JSZbDRmTF8Hip63Kh
+0xe465fa55cd72bfc7d02bb5df6de0c107e103280c43c98c07a2ead62787310b25
+5E7TRYexaHeTzx8fRyYkUmr6SP3ktzvU8YECNQeX8Z8EPmBf
 
 # LaunchPad Manager (PROXY)
-0x5d02387f87f9dea5fb65a955579838942940bbb740fe3c27da0f109f74815a79
-5FSK66FinskoEiJSQ8yuysVTPdQSQM9igXwciYK64Smr4Nw8
+0x4e77fcb9f83682a76c3c427064dbe3048ce0d6d20018bc472c5c95222f0a1878
+5Faq9SsCoKfNJazMgRmszTNvbtfGPoTAVDHUfQZHEFt51VCk
+
+# Collection Manager (PROXY)
+0x8db1ef367d8005dd754bc7c53da9977408fa395520e8e8b72147e56d9fc5d2b5
+5EF6G8JWP5H4pR6mHH3GvTHZJ5JbRR8eYHuHr1GbxTeFN2bZ
 
 # Standard Contract
 # LaunchPad Standard Contract
-0x141e86024ba01412dfc1c20542bb0f23358a046670b15d4ec595bfd2be0ffd5b
+0xd513bf081af2b670bee0eebec29e4f7a4021356de5b7d5aa7f23f964e1ad2544
 
-# ArtZero NFT Standard Contract
-0x4c6474cfa9dfa385c3a3a8e099e859a64bd6ba4571a68d234afb384936c9fcfb
+# NFT Standard Contract
+0xcbfdd4ef89fc016b461c009d022e132b4a69094ed9f7086bd83ebebe493d6ae3
 
 Deploy Steps:
 1. Deploy Profile Contract
@@ -38,7 +38,7 @@ Deploy Steps:
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
 Add PMP Project -> create Collection -> Update base URI -> Update admin address
 Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-PMP Address : 5DACSjUWch5Q3GpYMP2CE5fUKw9bBrcPgkhgCSLchKU9Bicw
+PMP Address : 5EmboP7YC3mUgGZa5wScK9apMQv9UVXFhSDe9u9j79EZf5zf
 Owner: 5ChxguNHGUCyYiXTa9bntB6SeDEbM2vUBvGLnMhAFeBwCDRy
 6. Deploy Staking Contract via Proxy
 With Address of PMP Project
