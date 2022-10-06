@@ -197,6 +197,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.project_info = project_info.into_bytes();
                 instance.limit_phase_count = limit_phase_count;
                 instance.public_minted_count = 0;
+                instance.owner_claimed_amount = 0;
                 instance.available_token_amount = total_supply;
                 instance.admin_address = contract_owner;
                 if code_phases.len() == start_time_phases.len() &&
@@ -357,7 +358,7 @@ pub mod launchpad_psp34_nft_standard {
                     available_amount += phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap();
                 }
             }  
-            assert!(mint_amount <= available_amount);
+            assert!(mint_amount <= available_amount.checked_sub(self.owner_claimed_amount).unwrap());
             for _i in 0..mint_amount {
                 self.last_token_id += 1;
                 assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
