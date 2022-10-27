@@ -179,14 +179,10 @@ pub mod artzero_collection_manager {
                 "invalid fee"
             );
             assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
-
-            let (hash, _) =
-                ink_env::random::<ink_env::DefaultEnvironment>(nft_name.as_bytes()).expect("Failed to get salt");
-            let hash = hash.as_ref();
             let contract = Psp34NftRef::new(collection_owner, nft_name, nft_symbol)
                 .endowment(0)
                 .code_hash(self.manager.standard_nft_hash)
-                .salt_bytes(&hash[..4])
+                .salt_bytes(self.manager.collection_count.to_le_bytes())
                 .instantiate()
                 .unwrap_or_else(|error| panic!("failed at instantiating the NFT contract: {:?}", error));
             let contract_account: AccountId = contract.to_account_id();

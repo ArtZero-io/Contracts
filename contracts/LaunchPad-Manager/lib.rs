@@ -177,9 +177,6 @@ pub mod artzero_launchpad_psp34 {
         ) -> Result<(), Error> {
             // assert!(start_time > Self::env().block_timestamp());
             assert!(start_time < end_time && self.manager.project_adding_fee == self.env().transferred_value(), "invalid fee");
-            let (hash, _) =
-                ink_env::random::<ink_env::DefaultEnvironment>(&project_info[..4].as_bytes()).expect("Failed to get salt");
-            let hash = hash.as_ref();
             let contract = LaunchPadPsp34NftStandardRef::new(
                 Self::env().account_id(), 
                 self.manager.max_phases_per_project,
@@ -195,7 +192,7 @@ pub mod artzero_launchpad_psp34 {
                 end_time_phases
             ).endowment(0)
                 .code_hash(self.manager.standard_nft_hash)
-                .salt_bytes(&hash[..4])
+                .salt_bytes(self.manager.project_count.to_le_bytes())
                 .instantiate()
                 .unwrap_or_else(|error| {
                     panic!(
