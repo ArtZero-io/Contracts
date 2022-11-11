@@ -1,8 +1,8 @@
 {
   "source": {
-    "hash": "0x84a801c973a7189450461171fe2abc8a0ecd63f216a34635ca6f93f2cf819bf9",
+    "hash": "0x2d6d21fca43f2d02f71abd8ba3ee7426e79fc0ae53d7b7d95fc0e9a943b857a7",
     "language": "ink! 3.3.1",
-    "compiler": "rustc 1.63.0-nightly"
+    "compiler": "rustc 1.61.0-nightly"
   },
   "contract": {
     "name": "artzero_profile_manager",
