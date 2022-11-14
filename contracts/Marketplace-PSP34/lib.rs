@@ -931,7 +931,7 @@ pub mod artzero_marketplace_psp34 {
         }
 
         // Set listed token
-        pub fn update_listed_token_by_collection_address(&mut self, nft_contract_address: AccountId, mode: bool) {
+        fn update_listed_token_by_collection_address(&mut self, nft_contract_address: AccountId, mode: bool) {
             let listed_token_count = self
                 .manager
                 .listed_token_number_by_collection_address
@@ -948,8 +948,8 @@ pub mod artzero_marketplace_psp34 {
                     .listed_token_number_by_collection_address
                     .insert(&nft_contract_address, &listed_token_count_unwarp);
             } else {
+                listed_token_count_unwarp = 1;
                 if mode {
-                    listed_token_count_unwarp = listed_token_count_unwarp.checked_add(1).unwrap();
                     self.manager
                         .listed_token_number_by_collection_address
                         .insert(&nft_contract_address, &listed_token_count_unwarp);
