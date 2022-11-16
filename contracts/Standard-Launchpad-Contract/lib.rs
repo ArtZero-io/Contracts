@@ -384,7 +384,8 @@ pub mod launchpad_psp34_nft_standard {
             if (phase.start_time..=phase.end_time).contains(&current_time) {
                 assert!(phase.is_public);
                 assert!(self.last_token_id.checked_add(mint_amount).unwrap() <= self.total_supply);
-                assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.public_minting_amount);
+                assert!(phase.public_claimed_amount.checked_add(mint_amount).unwrap() <= phase.public_minting_amount);
+                assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.total_amount);
                 assert!(phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
                 let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
                     &self.launchpad_contract_address
