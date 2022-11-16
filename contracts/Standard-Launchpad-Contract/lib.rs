@@ -109,7 +109,6 @@ pub mod launchpad_psp34_nft_standard {
         launchpad_contract_address: AccountId,
         project_info: Vec<u8>,
         public_minted_count: u64,
-        total_public_minting_amount: u64,
         active_phase_count: u8,
         available_token_amount: u64,
         owner_claimed_amount: u64
@@ -436,6 +435,7 @@ pub mod launchpad_psp34_nft_standard {
             let phase = self.phases.get(&phase_id).unwrap();
             let current_time = Self::env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
+                assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.total_amount);
                 assert!(self.last_token_id < self.total_supply);
                 let caller = self.env().caller();
                 if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
@@ -680,14 +680,6 @@ pub mod launchpad_psp34_nft_standard {
             &self
         ) -> u8 {
             return self.limit_phase_count;
-        }
-
-        /// Get total public minting amount
-        #[ink(message)]
-        pub fn get_total_public_minting_amount(
-            &self
-        ) -> u64 {
-            return self.total_public_minting_amount;
         }
 
         /// Get admin address
