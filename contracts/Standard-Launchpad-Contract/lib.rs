@@ -101,6 +101,7 @@ pub mod launchpad_psp34_nft_standard {
         total_supply: u64,
         last_phase_id: u8,
         whitelist_count: u64,
+        phase_account_public_claimed_amount: Mapping<(AccountId, u8), u64>,
         phase_whitelists_link: Mapping<(AccountId, u8), Whitelist>,
         phases: Mapping<u8, Phase>,
         phase_account_link: MultiMapping<u8, AccountId, ValueGuard<u8>>,
@@ -407,6 +408,14 @@ pub mod launchpad_psp34_nft_standard {
                     self.public_minted_count += 1;
                     assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
                 }
+                
+                if self.phase_account_public_claimed_amount.get(&(caller, phase_id)).is_none() {
+                    self.phase_account_public_claimed_amount.insert(&(caller, phase_id), &mint_amount);
+                } else {
+                    let mut phase_account_public_old_claimed_amount = self.phase_account_public_claimed_amount.get(&(caller, phase_id)).unwrap();
+                    self.phase_account_public_claimed_amount.insert(&(caller, phase_id), &phase_account_public_old_claimed_amount.checked_add(mint_amount).unwrap());
+                }
+
                 phase.public_claimed_amount = phase.public_claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 self.phases.insert(&phase_id, &phase);
@@ -782,6 +791,12 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         pub fn get_last_token_id(&self) -> u64 {
             return self.last_token_id;
+        }
+
+        ///Get Phase Account Public Claimed Amount
+        #[ink(message)]
+        pub fn get_phase_account_public_claimed_amount(&self, account_id: AccountId, phase_id: u8) -> Option<u64> {
+            return Some(self.phase_account_public_claimed_amount.get(&(account_id, phase_id)))?;
         }
 
         ///Get Phase Account Last Index by Phase Id
