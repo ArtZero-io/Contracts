@@ -9,19 +9,19 @@ Code Hashes and Contract Addresses:
 
 # ArtZero NFT Staking Contract (PROXY)
 0x138fbdb374051261d2ad3e142054fdeffa61b022b27611d715a963734d930557
-5DrRntwTddKSce3f8M2hYKwMU1hfCFbc6vjYijAx6MQsC6nQ
+5EUbfR22NYBVZzzfyu6Ejk6dwKtPB186RFuzfbgZyJB6e7n1
 
 # Marketplace Contract (PROXY)
 0x9a35960c48dd6bcf460a63061bf43a213ea2409cd81e82e1367867e1e7667859
-5GC82GMNbWkpxodMHkzf3fp1gRzbuVGTQXSq3dYwZHnFTYQJ
+5EZfvhudx5SCjcvpMCoPjph5bTmyTRj8VD98V1C6WT5qST58
 
 # LaunchPad Manager (PROXY)
 0x80146f15cca2ddf149fd47c3aeda9871d5a6dcebe9c4dc2fa311e246e047ffc1
-5F7xg71hYG2k5NMcGYRLRdewjSCLCWgT4xFrzFADXSxfXeZ8
+5G6PsbKCfFh1jBgtQG26vKXoaG3ZdmEjMtSgKA79pMfe44sY
 
 # Collection Manager (PROXY)
 0x4b39fd3b387908c96cdb1b8fc543074ef1b3b9ff79aba97f66da26076965d40d
-5EerpeoKQUT2bZMdCQ7yWNowYjPnY6ducpfSrgpaJFNYeyF4
+5F2QffMSC6V7tjXhJJvCk6vaBPZShLjjNPTB5AwQPPNATx5Y
 
 # Standard Contract
 # LaunchPad Standard Contract
@@ -38,7 +38,7 @@ Deploy Steps:
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
 Add PMP Project -> create Collection -> Update base URI -> Update admin address
 Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-PMP Address : 5EYL2sg16EpWXcMHTJ7qmic9xYgGwVnbxAubxE5icWyKx5Sg
+PMP Address : 5Hg1xe6JAGZj92wxtj1ykAfQpwwRNqzAnvhZ3TuXZEmLU1Vw
 Owner: 5EfUESCp28GXw1v9CXmpAL5BfoCNW2y4skipcEoKAbN5Ykfn
 6. Deploy Staking Contract via Proxy
 With Address of PMP Project
