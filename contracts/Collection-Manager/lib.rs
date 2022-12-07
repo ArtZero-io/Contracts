@@ -18,6 +18,7 @@ pub mod artzero_collection_manager {
         Mapping,
     };
     use openbrush::{
+        contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
         traits::Storage,
@@ -81,9 +82,15 @@ pub mod artzero_collection_manager {
     pub struct ArtZeroCollectionManager {
         #[storage_field]
         ownable: ownable::Data,
+        #[storage_field]
+        access: access_control::Data,
         manager: Manager,
     }
 
+
+    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+
+    impl AccessControl for ArtZeroCollectionManager {}
     impl Ownable for ArtZeroCollectionManager {}
 
     #[openbrush::trait_definition]
@@ -127,7 +134,10 @@ pub mod artzero_collection_manager {
             max_royal_fee_rate: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
+                let caller = instance.env().caller();
                 instance._init_with_owner(owner_address);
+                instance._init_with_admin(caller);
+                instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 instance
                     .initialize(
                         admin_address,
@@ -414,16 +424,16 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Update royal_fee - Only Admin can change
+        /// Update royal_fee - Only Admin Role can change
         #[ink(message)]
-        pub fn update_royal_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), Error> {
+        #[modifiers(only_role(ADMINER))]
+        pub fn update_royal_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), AccessControlError> {
             assert!(new_fee <= self.manager.max_royal_fee_rate, "invalid fee");
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            assert!(self.env().caller() == self.manager.admin_address);
             collection.royal_fee = new_fee;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
