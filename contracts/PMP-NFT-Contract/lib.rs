@@ -52,10 +52,10 @@ pub mod artzero_psp34 {
         claimed_amount: u64,
     }
 
-    pub const STORAGE_KEY: [u8; 32] = ink_lang::blake2x256!("ArtZeroNFT");
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
     #[derive(Default)]
-    #[openbrush::storage(STORAGE_KEY)]
+    #[openbrush::upgradeable_storage(STORAGE_KEY)]
     struct Manager {
         admin_address: AccountId,
         total_supply: u64, // Max Total Token number to Mint

@@ -57,7 +57,7 @@ pub mod artzero_collection_manager {
         show_on_chain_metadata: bool,
     }
 
-    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroCollectionManager);
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
     #[derive(Default)]
     #[openbrush::upgradeable_storage(STORAGE_KEY)]

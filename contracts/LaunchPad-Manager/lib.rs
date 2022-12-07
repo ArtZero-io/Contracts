@@ -65,7 +65,7 @@ pub mod artzero_launchpad_psp34 {
         end_time: Timestamp
     }
     
-    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(ArtZeroLaunchPadPSP34);
+    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
     #[derive(Default)]
     #[openbrush::upgradeable_storage(STORAGE_KEY)]
