@@ -6,6 +6,7 @@ pub mod artzero_launchpad_psp34 {
     use ink_prelude::string::String;
     use openbrush::{
         contracts::ownable::*,
+        contracts::access_control::*,
         modifiers,
         traits::Storage,
     };
@@ -89,9 +90,15 @@ pub mod artzero_launchpad_psp34 {
     pub struct ArtZeroLaunchPadPSP34 {
         #[storage_field]
         ownable: ownable::Data,
+        #[storage_field]
+        access: access_control::Data,
         manager: Manager
     }
 
+    // ADMINER RoleType = 3739740293
+    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+
+    impl AccessControl for ArtZeroLaunchPadPSP34 {}
     impl Ownable for ArtZeroLaunchPadPSP34 {}
 
     #[openbrush::trait_definition]
@@ -123,6 +130,8 @@ pub mod artzero_launchpad_psp34 {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
                 assert!(project_mint_fee_rate < 10000);
                 _instance._init_with_owner(owner_address);
+                _instance._init_with_admin(_instance.env().caller());
+                _instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 _instance.initialize(
                     max_phases_per_project, 
                     admin_address, 
@@ -229,7 +238,7 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
-        /// Edit a project - Only project owner and admin
+        /// Edit a project - Only Admin Role can change
         #[ink(message)]
         pub fn edit_project(
             &mut self,
@@ -242,7 +251,7 @@ pub mod artzero_launchpad_psp34 {
             }
             assert!(start_time < end_time);            
             let mut project = self.manager.projects.get(&contract_address).unwrap();
-            assert!(self.manager.admin_address == self.env().caller() && project.end_time > Self::env().block_timestamp());
+            assert!(self.has_role(ADMINER, self.env().caller()) && project.end_time > Self::env().block_timestamp());
             project.end_time = end_time;
             project.start_time = start_time;
             self.manager.projects.insert(&contract_address, &project);
@@ -278,44 +287,35 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
-        /// Update project adding fee - Only Admin
+        /// Update project adding fee - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_project_adding_fee(
             &mut self,
             project_adding_fee: Balance
-        ) -> Result<(), Error> {
-            if  self.env().caller() != self.manager.admin_address {
-                return Err(Error::OnlyAdmin);
-            }
-            
+        ) -> Result<(), AccessControlError> {
             self.manager.project_adding_fee = project_adding_fee;
             Ok(())
         }
 
-        /// Update public max minting amount - Only Admin
+        /// Update public max minting amount - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_public_max_minting_amount(
             &mut self,
             public_max_minting_amount: u64
-        ) -> Result<(), Error> {
-            if  self.env().caller() != self.manager.admin_address {
-                return Err(Error::OnlyAdmin);
-            }
-            
+        ) -> Result<(), AccessControlError> {
             self.manager.public_max_minting_amount = public_max_minting_amount;
             Ok(())
         }
 
-        /// Update project mint fee rate - Only Admin
+        /// Update project mint fee rate - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_project_mint_fee_rate(
             &mut self,
             project_mint_fee_rate: u32
-        ) -> Result<(), Error>  {
-            if  self.env().caller() != self.manager.admin_address {
-                return Err(Error::OnlyAdmin);
-            }
-
+        ) -> Result<(), AccessControlError>  {
             self.manager.project_mint_fee_rate = project_mint_fee_rate;
             Ok(())
         }
@@ -331,21 +331,15 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
-        /// Update is active project - Only Admin
+        /// Update is active project - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_is_active_project(
             &mut self,
             is_active: bool,
             contract_address: AccountId
-        ) -> Result<(), Error>  {
-            if self.manager.projects.get(&contract_address).is_none(){
-                return Err(Error::ProjectNotExist);
-            }
-
-            if  self.env().caller() != self.manager.admin_address {
-                return Err(Error::OnlyAdmin);
-            }
-
+        ) -> Result<(), AccessControlError>  {
+            assert!(self.manager.projects.get(&contract_address).is_some());
             let mut project = self.manager.projects.get(&contract_address).unwrap();
             assert!(is_active != project.is_active);
             project.is_active = is_active;

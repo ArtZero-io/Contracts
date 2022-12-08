@@ -134,9 +134,8 @@ pub mod artzero_collection_manager {
             max_royal_fee_rate: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                let caller = instance.env().caller();
                 instance._init_with_owner(owner_address);
-                instance._init_with_admin(caller);
+                instance._init_with_admin(instance.env().caller());
                 instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 instance
                     .initialize(
