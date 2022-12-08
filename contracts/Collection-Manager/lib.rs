@@ -87,7 +87,7 @@ pub mod artzero_collection_manager {
         manager: Manager,
     }
 
-
+    // ADMINER RoleType = 3739740293
     const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
 
     impl AccessControl for ArtZeroCollectionManager {}
@@ -309,37 +309,39 @@ pub mod artzero_collection_manager {
             });
             Ok(())
         }
+
         // SETTERS
         /// Update Owner of Collecion - who receive royal fee - Only Admin can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_collection_owner(
             &mut self,
             contract_address: AccountId,
             new_owner: AccountId,
-        ) -> Result<(), Error> {
+        ) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            assert!(self.env().caller() == self.manager.admin_address);
             collection.collection_owner = new_owner;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
         }
-        /// Update nft_contract_address - Only Admin can change
+
+        /// Update nft_contract_address - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_nft_contract_address(
             &mut self,
             contract_address: AccountId,
             nft_contract_address: AccountId,
-        ) -> Result<(), Error> {
+        ) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            assert!(self.env().caller() == self.manager.admin_address);
             collection.nft_contract_address = nft_contract_address;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
@@ -359,7 +361,7 @@ pub mod artzero_collection_manager {
                 "collection not exist"
             );
             let collection = self.manager.collections.get(&contract_address).unwrap();
-            if collection.collection_owner == self.env().caller() || self.manager.admin_address == self.env().caller() {
+            if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
                 let length = attributes.len();
                 for i in 0..length {
                     let attribute = attributes[i].clone();
@@ -392,33 +394,33 @@ pub mod artzero_collection_manager {
             self.manager.attributes.insert(&(account, key), &value);
         }
 
-        /// Update Type Collection - only Admin can change - 1: Manual 2: Auto
+        /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
         #[ink(message)]
-        pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: u8) -> Result<(), Error> {
+        #[modifiers(only_role(ADMINER))]
+        pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: u8) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            assert!(self.env().caller() == self.manager.admin_address);
             collection.contract_type = contract_type;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
         }
 
-        /// Update Is Royal Fee - Only Admin can change
+        /// Update Is Royal Fee - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_is_collect_royal_fee(
             &mut self,
             contract_address: AccountId,
             is_collect_royal_fee: bool,
-        ) -> Result<(), Error> {
+        ) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            assert!(self.env().caller() == self.manager.admin_address);
             collection.is_collect_royal_fee = is_collect_royal_fee;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
@@ -451,7 +453,7 @@ pub mod artzero_collection_manager {
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == collection.collection_owner || self.env().caller() == self.manager.admin_address {
+            if self.env().caller() == collection.collection_owner || self.has_role(ADMINER, self.env().caller()) {
                 collection.show_on_chain_metadata = show_on_chain_metadata;
                 self.manager.collections.insert(&contract_address, &collection);
                 Ok(())
@@ -462,12 +464,12 @@ pub mod artzero_collection_manager {
 
         /// Update Active Status When its active, collection will be shown on the UI and will be tradable - only Admin can change
         #[ink(message)]
-        pub fn update_is_active(&mut self, contract_address: AccountId, is_active: bool) -> Result<(), Error> {
+        #[modifiers(only_role(ADMINER))]
+        pub fn update_is_active(&mut self, contract_address: AccountId, is_active: bool) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
-            assert!(self.env().caller() == self.manager.admin_address, "only admin");
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             assert!(is_active != collection.is_active);
             collection.is_active = is_active;
