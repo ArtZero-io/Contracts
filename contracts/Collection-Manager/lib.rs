@@ -15,12 +15,15 @@ pub mod artzero_collection_manager {
             SpreadAllocate,
             SpreadLayout,
         },
-        Mapping,
     };
     use openbrush::{
         contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
+        storage::{
+            Mapping,
+            TypeGuard,
+        },
         traits::Storage,
     };
     use psp34_nft::psp34_nft::Psp34NftRef;
@@ -73,9 +76,16 @@ pub mod artzero_collection_manager {
         collections_by_owner: Mapping<AccountId, Vec<AccountId>>, // save contract address by owner ID
         max_royal_fee_rate: u32,
         active_collection_count: u64,
-        attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>>,
+        attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>, AttributesKey>,
         _reserved: Option<()>,
     }
+
+    pub struct AttributesKey;
+
+    impl<'a> TypeGuard<'a> for AttributesKey {
+        type Type = &'a (&'a AccountId, &'a Vec<u8>);
+    }
+
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
@@ -380,7 +390,7 @@ pub mod artzero_collection_manager {
             let mut ret = Vec::<String>::new();
             for i in 0..length {
                 let attribute = attributes[i].clone();
-                if let Some(value) = self.manager.attributes.get(&(account, attribute.into_bytes())) {
+                if let Some(value) = self.manager.attributes.get(&(&account, &attribute.into_bytes())) {
                     ret.push(String::from_utf8(value).unwrap());
                 } else {
                     ret.push(String::from(""));
@@ -390,7 +400,7 @@ pub mod artzero_collection_manager {
         }
 
         fn _set_attribute(&mut self, account: AccountId, key: Vec<u8>, value: Vec<u8>) {
-            self.manager.attributes.insert(&(account, key), &value);
+            self.manager.attributes.insert(&(&account, &key), &value);
         }
 
         /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
