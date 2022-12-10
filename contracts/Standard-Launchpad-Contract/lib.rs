@@ -20,6 +20,7 @@ pub mod launchpad_psp34_nft_standard {
     use ink_prelude::vec::Vec;
     use ink_prelude::string::ToString;
     use openbrush::{
+        contracts::access_control::*,
         contracts::ownable::*,
         contracts::psp34::extensions::{
             enumerable::*,
@@ -92,6 +93,8 @@ pub mod launchpad_psp34_nft_standard {
         metadata: metadata::Data,
         #[storage_field]
         ownable: ownable::Data,
+        #[storage_field]
+        access: access_control::Data,
         admin_address: AccountId,
         last_token_id: u64,
         attribute_count: u32,
@@ -126,6 +129,20 @@ pub mod launchpad_psp34_nft_standard {
         WhitelistNotExist
     }
 
+    impl From<AccessControlError> for Error {
+        fn from(access: AccessControlError) -> Self {
+            match access {
+                AccessControlError::MissingRole => Error::Custom(String::from("AC::MissingRole")),
+                AccessControlError::RoleRedundant => {
+                    Error::Custom(String::from("AC::RoleRedundant"))
+                }
+                AccessControlError::InvalidCaller => {
+                    Error::Custom(String::from("AC::InvalidCaller"))
+                }
+            }
+        }
+    }
+
     impl From<OwnableError> for Error {
         fn from(ownable: OwnableError) -> Self {
             match ownable {
@@ -135,12 +152,15 @@ pub mod launchpad_psp34_nft_standard {
         }
     }
 
-    impl Ownable for LaunchPadPsp34NftStandard {}
+    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+
     #[openbrush::wrapper]
     pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
     impl PSP34 for LaunchPadPsp34NftStandard {}
     impl PSP34Metadata for LaunchPadPsp34NftStandard {}
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
+    impl AccessControl for LaunchPadPsp34NftStandard {}
+    impl Ownable for LaunchPadPsp34NftStandard {}
 
     #[openbrush::wrapper]
     pub type ArtZeroLaunchPadPSP34Ref = dyn CrossArtZeroLaunchPadPSP34;
@@ -191,6 +211,8 @@ pub mod launchpad_psp34_nft_standard {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
+                instance._init_with_admin(contract_owner);
+                instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
                 instance.launchpad_contract_address = launchpad_contract_address;
                 instance.total_supply = total_supply;
                 instance.last_phase_id = 0;
@@ -200,7 +222,6 @@ pub mod launchpad_psp34_nft_standard {
                 instance.public_minted_count = 0;
                 instance.owner_claimed_amount = 0;
                 instance.available_token_amount = total_supply;
-                instance.admin_address = contract_owner;
                 if code_phases.len() == start_time_phases.len() &&
                     code_phases.len() == is_public_phases.len() &&
                     code_phases.len() == public_minting_fee_phases.len() &&
@@ -224,7 +245,7 @@ pub mod launchpad_psp34_nft_standard {
             })
         }
 
-        ///Add new phare - Only Admin
+        ///Add new phare
         #[ink(message)]
         pub fn add_new_phase(
             &mut self, 
@@ -236,7 +257,7 @@ pub mod launchpad_psp34_nft_standard {
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address || self.env().caller() == self.launchpad_contract_address);
+            assert!(self.has_role(ADMINER, self.env().caller()) || self.env().caller() == self.launchpad_contract_address);
             assert!(self.active_phase_count.checked_add(1).unwrap() <= self.limit_phase_count);
             assert!(self.validate_phase_schedule(start_time, end_time));
             
@@ -282,8 +303,9 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update whitelist - Only Admin
+        /// Update whitelist - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_whitelist(
             &mut self,
             account: AccountId,
@@ -291,7 +313,6 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
             if  self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
                 return Err(Error::WhitelistNotExist);
             }
@@ -313,8 +334,9 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Add new whitelist - Only Admin
+        /// Add new whitelist - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn add_whitelist(
             &mut self,
             account: AccountId,
@@ -322,7 +344,6 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
             assert!((0..=self.total_supply).contains(&whitelist_amount));
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
@@ -491,7 +512,7 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update limit phase count
+        /// Update admin address
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
@@ -499,13 +520,13 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Deactive Phase
+        /// Deactive Phase - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn deactive_phase(
             &mut self, 
             phase_id: u8
         ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
@@ -520,8 +541,9 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Update phase schedule
+        /// Update phase schedule - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_schedule_phase(
             &mut self, 
             phase_id: u8,
@@ -533,7 +555,6 @@ pub mod launchpad_psp34_nft_standard {
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
@@ -585,8 +606,9 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        // Update schedule phases
+        // Update schedule phases - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn update_schedule_phases(
             &mut self, 
             id_phases: Vec<u8>,
@@ -598,7 +620,6 @@ pub mod launchpad_psp34_nft_standard {
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
             if id_phases.len() != code_phases.len() ||
                 id_phases.len() != is_public_phases.len() ||
                 id_phases.len() != public_minting_fee_phases.len() ||
@@ -624,13 +645,13 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        /// Edit project information
+        /// Edit project information  - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn edit_project_information(
             &mut self,
             project_info: String
-        ) -> Result<(), Error> {
-            assert!(self.env().caller() == self.admin_address);
+        ) -> Result<(), AccessControlError> {
             self.project_info = project_info.into_bytes();
             Ok(())
         }

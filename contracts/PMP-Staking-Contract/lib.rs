@@ -15,6 +15,7 @@ pub mod artzero_staking_nft {
     use openbrush::{
         contracts::{
             ownable::*,
+            access_control::*,
             traits::psp34::{
                 extensions::{
                     burnable::*,
@@ -77,6 +78,8 @@ pub mod artzero_staking_nft {
     pub struct ArtZeroStakingNFT {
         #[storage_field]
         ownable: ownable::Data,
+        #[storage_field]
+        access: access_control::Data,
         manager: Manager,
     }
 
@@ -114,6 +117,10 @@ pub mod artzero_staking_nft {
         total_staked_amount: u64,
     }
 
+    // ADMINER RoleType = 3739740293
+    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+
+    impl AccessControl for ArtZeroStakingNFT {}
     impl Ownable for ArtZeroStakingNFT {}
 
     #[openbrush::trait_definition]
@@ -137,6 +144,8 @@ pub mod artzero_staking_nft {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 instance._init_with_owner(contract_owner);
+                instance._init_with_admin(instance.env().caller());
+                instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 instance
                     .initialize(artzero_nft_contract, limit_unstake_time, admin_address)
                     .ok()
@@ -183,27 +192,27 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
-        /// Update is locked - only Admin
+        /// Update is locked - Only Admin Role can change
         #[ink(message)]
-        pub fn update_is_locked(&mut self, is_locked: bool) -> Result<(), Error> {
+        #[modifiers(only_role(ADMINER))]
+        pub fn update_is_locked(&mut self, is_locked: bool) -> Result<(), AccessControlError> {
             assert!(is_locked != self.manager.is_locked);
-            assert!(self.env().caller() == self.manager.admin_address, "not admin");
             self.manager.is_locked = is_locked;
             Ok(())
         }
 
         #[ink(message)]
-        pub fn start_reward_distribution(&mut self) -> Result<(), Error> {
-            assert!(self.env().caller() == self.manager.admin_address, "not admin");
-            assert!(self.manager.is_locked); // Only allow adding reward when contract is locked
+        #[modifiers(only_role(ADMINER))]
+        pub fn start_reward_distribution(&mut self) -> Result<(), AccessControlError> {
+            assert!(self.manager.is_locked);
             self.manager.claimable_reward = self.manager.reward_pool;
             self.manager.reward_started = true;
             Ok(())
         }
 
         #[ink(message)]
-        pub fn stop_reward_distribution(&mut self) -> Result<(), Error> {
-            assert!(self.env().caller() == self.manager.admin_address, "not admin");
+        #[modifiers(only_role(ADMINER))]
+        pub fn stop_reward_distribution(&mut self) -> Result<(), AccessControlError> {
             assert!(self.manager.is_locked); // Only allow adding reward when contract is locked
             self.manager.reward_pool = self.manager.claimable_reward; // unclaimed Rewards send back to reward_pool
             self.manager.claimable_reward = 0;
@@ -228,11 +237,10 @@ pub mod artzero_staking_nft {
 
         /// Set Account so it can claim the reward. Must run by backend every month before add_reward
         #[ink(message)]
-        pub fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), Error> {
+        #[modifiers(only_role(ADMINER))]
+        pub fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), AccessControlError> {
             assert!(self.manager.is_locked);
             assert!(self.manager.reward_started == false); // only when reward distribution is not started
-            let caller = self.env().caller();
-            assert!(caller == self.manager.admin_address);
             self.manager.is_claimed.insert(&staker, &false); // Can only claim once
             Ok(())
         }
