@@ -13,8 +13,7 @@ pub mod launchpad_psp34_nft_standard {
             PackedLayout,
             SpreadAllocate,
             SpreadLayout,
-        },
-        Mapping
+        }
     };
 
     use ink_prelude::vec::Vec;
@@ -29,6 +28,8 @@ pub mod launchpad_psp34_nft_standard {
         storage::{
             MultiMapping,
             ValueGuard,
+            Mapping,
+            TypeGuard
         },
         traits::Storage,
         modifiers,
@@ -104,8 +105,8 @@ pub mod launchpad_psp34_nft_standard {
         total_supply: u64,
         last_phase_id: u8,
         whitelist_count: u64,
-        phase_account_public_claimed_amount: Mapping<(AccountId, u8), u64>,
-        phase_whitelists_link: Mapping<(AccountId, u8), Whitelist>,
+        phase_account_public_claimed_amount: Mapping<(AccountId, u8), u64, PhaseAccountPublicClaimedAmountKeys>,
+        phase_whitelists_link: Mapping<(AccountId, u8), Whitelist, PhaseWhitelistsLinkKeys>,
         phases: Mapping<u8, Phase>,
         phase_account_link: MultiMapping<u8, AccountId, ValueGuard<u8>>,
         limit_phase_count: u8,
@@ -115,6 +116,18 @@ pub mod launchpad_psp34_nft_standard {
         active_phase_count: u8,
         available_token_amount: u64,
         owner_claimed_amount: u64
+    }
+
+    pub struct PhaseAccountPublicClaimedAmountKeys;
+
+    impl<'a> TypeGuard<'a> for PhaseAccountPublicClaimedAmountKeys {
+        type Type = &'a (&'a AccountId, &'a u8);
+    }
+
+    pub struct PhaseWhitelistsLinkKeys;
+
+    impl<'a> TypeGuard<'a> for PhaseWhitelistsLinkKeys {
+        type Type = &'a (&'a AccountId, &'a u8);
     }
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -313,20 +326,20 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
-            if  self.phase_whitelists_link.get(&(account, phase_id)).is_none() {
+            if  self.phase_whitelists_link.get(&(&account, &phase_id)).is_none() {
                 return Err(Error::WhitelistNotExist);
             }
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
-            let mut whitelist = self.phase_whitelists_link.get(&(account, phase_id)).unwrap();
+            let mut whitelist = self.phase_whitelists_link.get(&(&account, &phase_id)).unwrap();
             let old_whitelist_amount = whitelist.whitelist_amount;
             self.available_token_amount = self.available_token_amount.checked_add(old_whitelist_amount).unwrap().checked_sub(whitelist_amount).unwrap();
             assert!(self.available_token_amount >= 0);
             assert!((whitelist.claimed_amount..=self.total_supply).contains(&whitelist_amount));
             whitelist.whitelist_amount = whitelist_amount;
             whitelist.minting_fee = whitelist_price;
-            self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
+            self.phase_whitelists_link.insert(&(&account, &phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
             phase.whitelist_amount = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
             phase.total_amount = phase.total_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
@@ -348,7 +361,7 @@ pub mod launchpad_psp34_nft_standard {
             if self.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
-            if  self.phase_whitelists_link.get(&(account, phase_id)).is_some() {
+            if  self.phase_whitelists_link.get(&(&account, &phase_id)).is_some() {
                 return Err(Error::InvalidInput);
             }
             self.whitelist_count += 1;
@@ -360,7 +373,7 @@ pub mod launchpad_psp34_nft_standard {
             self.available_token_amount = self.available_token_amount.checked_sub(whitelist_amount).unwrap();
             assert!(self.available_token_amount >= 0);
             self.phase_account_link.insert(phase_id, &account);
-            self.phase_whitelists_link.insert(&(account, phase_id), &whitelist);
+            self.phase_whitelists_link.insert(&(&account, &phase_id), &whitelist);
             let mut phase = self.phases.get(&phase_id).unwrap();
             phase.total_amount = phase.total_amount.checked_add(whitelist_amount).unwrap();
             phase.whitelist_amount = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
@@ -430,11 +443,11 @@ pub mod launchpad_psp34_nft_standard {
                     assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
                 }
                 
-                if self.phase_account_public_claimed_amount.get(&(caller, phase_id)).is_none() {
-                    self.phase_account_public_claimed_amount.insert(&(caller, phase_id), &mint_amount);
+                if self.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).is_none() {
+                    self.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &mint_amount);
                 } else {
-                    let mut phase_account_public_old_claimed_amount = self.phase_account_public_claimed_amount.get(&(caller, phase_id)).unwrap();
-                    self.phase_account_public_claimed_amount.insert(&(caller, phase_id), &phase_account_public_old_claimed_amount.checked_add(mint_amount).unwrap());
+                    let mut phase_account_public_old_claimed_amount = self.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).unwrap();
+                    self.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &phase_account_public_old_claimed_amount.checked_add(mint_amount).unwrap());
                 }
 
                 phase.public_claimed_amount = phase.public_claimed_amount.checked_add(mint_amount).unwrap();
@@ -459,10 +472,10 @@ pub mod launchpad_psp34_nft_standard {
                 assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.total_amount);
                 assert!(self.last_token_id < self.total_supply);
                 let caller = self.env().caller();
-                if self.phase_whitelists_link.get(&(caller, phase_id)).is_none(){
+                if self.phase_whitelists_link.get(&(&caller, &phase_id)).is_none(){
                     return Err(Error::InvalidInput);
                 }
-                let mut caller_info = self.phase_whitelists_link.get(&(caller, phase_id)).unwrap();
+                let mut caller_info = self.phase_whitelists_link.get(&(&caller, &phase_id)).unwrap();
                 assert!(caller_info.whitelist_amount >= caller_info.claimed_amount.checked_add(mint_amount).unwrap());
                 assert!(caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
                 let project_mint_fee_rate = ArtZeroLaunchPadPSP34Ref::get_project_mint_fee_rate(
@@ -483,7 +496,7 @@ pub mod launchpad_psp34_nft_standard {
                         .is_ok());
                 }
                 caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
-                self.phase_whitelists_link.insert(&(caller, phase_id), &caller_info);
+                self.phase_whitelists_link.insert(&(&caller, &phase_id), &caller_info);
 
                 for _i in 0..mint_amount {
                     self.last_token_id += 1;
@@ -743,7 +756,7 @@ pub mod launchpad_psp34_nft_standard {
             account: AccountId,
             phase_id: u8
         ) -> Option<Whitelist> {
-            return Some(self.phase_whitelists_link.get(&(account, phase_id)))?;
+            return Some(self.phase_whitelists_link.get(&(&account, &phase_id)))?;
         }
 
         /// Get phase Account Link
@@ -810,7 +823,7 @@ pub mod launchpad_psp34_nft_standard {
         ///Get Phase Account Public Claimed Amount
         #[ink(message)]
         pub fn get_phase_account_public_claimed_amount(&self, account_id: AccountId, phase_id: u8) -> Option<u64> {
-            return Some(self.phase_account_public_claimed_amount.get(&(account_id, phase_id)))?;
+            return Some(self.phase_account_public_claimed_amount.get(&(&account_id, &phase_id)))?;
         }
 
         ///Get Phase Account Last Index by Phase Id

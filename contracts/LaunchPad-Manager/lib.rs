@@ -9,6 +9,9 @@ pub mod artzero_launchpad_psp34 {
         contracts::access_control::*,
         modifiers,
         traits::Storage,
+        storage::{
+            Mapping
+        }
     };
     use ink_storage::{
         traits::{
@@ -18,7 +21,6 @@ pub mod artzero_launchpad_psp34 {
         }
     };
     use ink_prelude::vec::Vec;
-    use ink_storage::Mapping;
     use ink_lang::ToAccountId;
     use launchpad_psp34_nft_standard::launchpad_psp34_nft_standard::LaunchPadPsp34NftStandardRef;
 

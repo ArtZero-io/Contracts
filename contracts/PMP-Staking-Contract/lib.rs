@@ -9,8 +9,7 @@ pub mod artzero_staking_nft {
         vec::Vec,
     };
     use ink_storage::{
-        traits::SpreadAllocate,
-        Mapping,
+        traits::SpreadAllocate
     };
     use openbrush::{
         contracts::{
@@ -25,6 +24,8 @@ pub mod artzero_staking_nft {
             },
         },
         storage::{
+            Mapping,
+            TypeGuard,
             MultiMapping,
             ValueGuard,
         },
@@ -65,12 +66,18 @@ pub mod artzero_staking_nft {
         nft_contract_address: AccountId,
         total_staked: u64,
         limit_unstake_time: u64, // minutes
-        request_unstaking_time: Mapping<(AccountId, u64), u64>,
+        request_unstaking_time: Mapping<(AccountId, u64), u64, RequestUnstakingTimeKey>,
         reward_pool: Balance,
         claimable_reward: Balance,
         reward_started: bool,
         is_claimed: Mapping<AccountId, bool>,
         _reserved: Option<()>,
+    }
+
+    pub struct RequestUnstakingTimeKey;
+
+    impl<'a> TypeGuard<'a> for RequestUnstakingTimeKey {
+        type Type = &'a (&'a AccountId, &'a u64);
     }
 
     #[derive(Default, SpreadAllocate, Storage)]
@@ -249,7 +256,7 @@ pub mod artzero_staking_nft {
         #[ink(message)]
         pub fn claim_reward(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
-            let is_claimed = self.manager.is_claimed.get(caller);
+            let is_claimed = self.manager.is_claimed.get(&caller);
             assert!(is_claimed.is_some());
             assert!(is_claimed.unwrap() == false);
             self.manager.is_claimed.insert(&caller, &true); // Can only claim once
@@ -297,7 +304,7 @@ pub mod artzero_staking_nft {
         }
         #[ink(message)]
         pub fn is_claimed(&self, account: AccountId) -> bool {
-            return self.manager.is_claimed.get(account).unwrap_or(false);
+            return self.manager.is_claimed.get(&account).unwrap_or(false);
         }
         #[ink(message)]
         pub fn get_reward_started(&self) -> bool {
@@ -325,7 +332,7 @@ pub mod artzero_staking_nft {
         /// Get request unstake Time
         #[ink(message)]
         pub fn get_request_unstake_time(&self, account: AccountId, token_id: u64) -> u64 {
-           return self.manager.request_unstaking_time.get(&(account, token_id)).unwrap_or(0);
+           return self.manager.request_unstaking_time.get(&(&account, &token_id)).unwrap_or(0);
         }
 
         /// Get staked token ids by AccountId
@@ -405,7 +412,7 @@ pub mod artzero_staking_nft {
                 {
                     return Err(Error::CannotTransfer)
                 }
-                if self.manager.is_claimed.get(caller).is_none() {
+                if self.manager.is_claimed.get(&caller).is_none() {
                     self.manager.is_claimed.insert(&caller, &false);
                 }
                 self.env().emit_event(NewStakeEvent {
@@ -438,7 +445,7 @@ pub mod artzero_staking_nft {
                 self.manager.staking_list.remove_value(caller, &token_ids[i]);
                 // Step 4 - Add token to pending unstaking list
                 let current_time = Self::env().block_timestamp();
-                self.manager.request_unstaking_time.insert(&(caller, token_ids[i]), &current_time);
+                self.manager.request_unstaking_time.insert(&(&caller, &token_ids[i]), &current_time);
                 self.manager.pending_unstaking_list.insert(caller, &token_ids[i]);
                 self.env().emit_event(RequestUnstakeEvent {
                     staker: Some(caller),
@@ -527,7 +534,7 @@ pub mod artzero_staking_nft {
                 .is_ok());
                 // Step 4 - Remove from pending_unstaking_list and change request_unstaking_time to 0
                 self.manager.pending_unstaking_list.remove_value(caller, &token_ids[i]);
-                self.manager.request_unstaking_time.insert(&(caller, token_ids[i]), &0);
+                self.manager.request_unstaking_time.insert(&(&caller, &token_ids[i]), &0);
                 if self.manager.pending_unstaking_list.count(caller) == 0 {
                     self.manager.staked_accounts.remove_value(1, &caller);
                 }
