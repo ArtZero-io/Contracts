@@ -30,9 +30,7 @@ pub mod artzero_marketplace_psp34 {
         traits::Storage,
         storage::{
             Mapping,
-            TypeGuard,
-            MultiMapping,
-            ValueGuard,
+            TypeGuard
         },
         modifiers,
     };
@@ -89,60 +87,60 @@ pub mod artzero_marketplace_psp34 {
     impl EnumerableMapping {
         pub fn insert(
             &mut self,
-            nft_contract_address: &Option<AccountId>,
-            seller: &Option<AccountId>,
-            id: &Id,
-            index: &u128,
+            nft_contract_address: Option<AccountId>,
+            seller: Option<AccountId>,
+            id: Id,
+            index: u128,
         ) {
-            self.id_to_index.insert((nft_contract_address, seller, id), index);
-            self.index_to_id.insert((nft_contract_address, seller, index), id);
+            self.id_to_index.insert(&(nft_contract_address, seller, id.clone()), &index.clone());
+            self.index_to_id.insert(&(nft_contract_address, seller, index.clone()), &id.clone());
         }
 
         pub fn remove(
             &mut self,
-            nft_contract_address: &Option<AccountId>,
-            seller: &Option<AccountId>,
-            id: &Id,
-            last_index: &u128,
+            nft_contract_address: Option<AccountId>,
+            seller: Option<AccountId>,
+            id: Id,
+            last_index: u128,
         ) -> Result<(), PSP34Error> {
             let index = self
                 .id_to_index
-                .get((nft_contract_address, seller, id))
+                .get(&(nft_contract_address, seller, id.clone()))
                 .ok_or(PSP34Error::TokenNotExists)?;
-            if last_index != &index {
+            if last_index != index {
                 let last_id = self
                     .index_to_id
-                    .get((nft_contract_address, seller, last_index))
+                    .get(&(nft_contract_address, seller, last_index))
                     .ok_or(PSP34Error::TokenNotExists)?;
                 self.index_to_id
-                    .insert((nft_contract_address, seller, &index), &last_id);
+                    .insert(&(nft_contract_address, seller, index), &last_id);
                 self.id_to_index
-                    .insert((nft_contract_address, seller, &last_id), &index);
+                    .insert(&(nft_contract_address, seller, last_id), &index);
             }
 
-            self.index_to_id.remove((nft_contract_address, seller, &last_index));
-            self.id_to_index.remove((nft_contract_address, seller, id));
+            self.index_to_id.remove(&(nft_contract_address, seller, last_index));
+            self.id_to_index.remove(&(nft_contract_address, seller, id.clone()));
 
             Ok(())
         }
         pub fn get_by_index(
             &self,
-            nft_contract_address: &Option<AccountId>,
-            seller: &Option<AccountId>,
-            index: &u128,
+            nft_contract_address: Option<AccountId>,
+            seller: Option<AccountId>,
+            index: u128,
         ) -> Result<Id, PSP34Error> {
             self.index_to_id
-                .get((nft_contract_address, seller, index))
+                .get(&(nft_contract_address, seller, index))
                 .ok_or(PSP34Error::TokenNotExists)
         }
         pub fn get_by_id(
             &self,
-            nft_contract_address: &Option<AccountId>,
-            seller: &Option<AccountId>,
-            id: &Id,
+            nft_contract_address: Option<AccountId>,
+            seller: Option<AccountId>,
+            id: Id,
         ) -> Result<u128, PSP34Error> {
             self.id_to_index
-                .get((nft_contract_address, seller, id))
+                .get(&(nft_contract_address, seller, id))
                 .ok_or(PSP34Error::TokenNotExists)
         }
     }
@@ -344,10 +342,10 @@ pub mod artzero_marketplace_psp34 {
                         .unwrap();
                 }
                 self.manager.sale_tokens_ids.insert(
-                    &Some(nft_contract_address),
-                    &Some(caller),
-                    &token_id,
-                    &(last_index + 1),
+                    Some(nft_contract_address),
+                    Some(caller),
+                    token_id.clone(),
+                    last_index + 1,
                 );
                 self.manager
                     .sale_tokens_ids_last_index
@@ -419,10 +417,10 @@ pub mod artzero_marketplace_psp34 {
                 .manager
                 .sale_tokens_ids
                 .remove(
-                    &Some(nft_contract_address),
-                    &Some(caller),
-                    &token_id.clone(),
-                    &last_index
+                    Some(nft_contract_address),
+                    Some(caller),
+                    token_id.clone(),
+                    last_index
                 )
                 .is_ok());
             last_index = last_index.checked_sub(1).unwrap();
@@ -491,10 +489,10 @@ pub mod artzero_marketplace_psp34 {
                 .manager
                 .sale_tokens_ids
                 .remove(
-                    &Some(nft_contract_address),
-                    &Some(seller),
-                    &token_id.clone(),
-                    &last_index
+                    Some(nft_contract_address),
+                    Some(seller),
+                    token_id.clone(),
+                    last_index
                 )
                 .is_ok());
             last_index = last_index.checked_sub(1).unwrap();
@@ -634,7 +632,7 @@ pub mod artzero_marketplace_psp34 {
             assert!(self
                 .manager
                 .sale_tokens_ids
-                .get_by_id(&Some(nft_contract_address), &Some(seller), &token_id)
+                .get_by_id(Some(nft_contract_address), Some(seller), token_id.clone())
                 .is_ok());
             let new_bid = BidInformation {
                 bidder: caller,
@@ -712,7 +710,7 @@ pub mod artzero_marketplace_psp34 {
             assert!(self
                 .manager
                 .sale_tokens_ids
-                .get_by_id(&Some(nft_contract_address), &Some(seller), &token_id)
+                .get_by_id(Some(nft_contract_address), Some(seller), token_id.clone())
                 .is_ok());
             if self
                 .manager
@@ -807,10 +805,10 @@ pub mod artzero_marketplace_psp34 {
                 .manager
                 .sale_tokens_ids
                 .remove(
-                    &Some(nft_contract_address),
-                    &Some(caller),
-                    &token_id.clone(),
-                    &last_index
+                    Some(nft_contract_address),
+                    Some(caller),
+                    token_id.clone(),
+                    last_index
                 )
                 .is_ok());
             last_index = last_index.checked_sub(1).unwrap();
@@ -959,7 +957,7 @@ pub mod artzero_marketplace_psp34 {
                 .manager
                 .listed_token_number_by_collection_address
                 .get(&nft_contract_address);
-            let mut listed_token_count_unwarp = 0;
+            let mut listed_token_count_unwarp = 1;
             if listed_token_count.is_some() {
                 listed_token_count_unwarp = listed_token_count.unwrap();
                 if mode {
@@ -971,7 +969,6 @@ pub mod artzero_marketplace_psp34 {
                     .listed_token_number_by_collection_address
                     .insert(&nft_contract_address, &listed_token_count_unwarp);
             } else {
-                listed_token_count_unwarp = 1;
                 if mode {
                     self.manager
                         .listed_token_number_by_collection_address
@@ -1058,7 +1055,7 @@ pub mod artzero_marketplace_psp34 {
         ) -> Id {
             self.manager
                 .sale_tokens_ids
-                .get_by_index(&Some(nft_contract_address), &Some(user_account), &index)
+                .get_by_index(Some(nft_contract_address), Some(user_account), index)
                 .unwrap()
         }
         /// Get all token ids currently for sale by a collection (nft_contract_address,user_account)
