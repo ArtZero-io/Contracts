@@ -1,1 +1,1 @@
-pub mod psp34_nft;
+pub mod psp34_standard;

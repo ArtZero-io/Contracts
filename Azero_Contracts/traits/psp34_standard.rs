@@ -15,22 +15,6 @@ use openbrush::{
     }
 };
 
-#[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-pub enum Error {
-    Custom(String),
-    NotOwner,
-}
-
-impl From<OwnableError> for Error {
-    fn from(ownable: OwnableError) -> Self {
-        match ownable {
-            OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
-            OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-        }
-    }
-}
-
 #[openbrush::wrapper]
 pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
 
@@ -54,4 +38,20 @@ pub trait Psp34Traits: PSP34 + PSP34Metadata {
     fn token_uri(&self, token_id: u64) -> String;
     #[ink(message)]
     fn get_owner(&self) -> AccountId ;
+}
+
+#[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
+#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+pub enum Error {
+    Custom(String),
+    NotOwner,
+}
+
+impl From<OwnableError> for Error {
+    fn from(ownable: OwnableError) -> Self {
+        match ownable {
+            OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
+            OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
+        }
+    }
 }

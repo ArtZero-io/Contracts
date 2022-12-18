@@ -27,8 +27,8 @@ pub mod psp34_nft {
         traits::Storage,
         modifiers,
     };
-    use artzero_project::traits::psp34::*;
-    use artzero_project::impls::psp34::*;
+    use artzero_project::traits::psp34_standard::*;
+    use artzero_project::impls::psp34_standard::*;
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
@@ -40,14 +40,15 @@ pub mod psp34_nft {
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
-        manager: psp34::data::Manager,
+        manager: artzero_project::impls::psp34_standard::data::Manager,
     }
 
     impl Ownable for Psp34Nft {}
     impl PSP34 for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
-
+    impl Psp34Traits for Psp34Nft {}
+    
     impl Psp34Nft {
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
@@ -55,9 +56,6 @@ pub mod psp34_nft {
                 instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
                 instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
                 instance._init_with_owner(contract_owner);
-                instance.manager.last_token_id = 0;
-                instance.manager.attribute_count = 0;
-                instance.manager.locked_token_count = 0;
             })
         }
     }

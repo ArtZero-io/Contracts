@@ -1,3 +1,4 @@
+use crate::traits::psp34_standard::*;
 use openbrush::{
     storage::{
         Mapping,
@@ -10,21 +11,25 @@ use openbrush::{
     },
 };
 
-use ink_lang::ToAccountId;
 use ink_prelude::{
-    vec,
-    string::String,
+    string::{
+        String,
+        ToString,
+    },
     vec::Vec,
 };
 use ink_storage::{
-    traits::{
-        PackedLayout,
-        SpreadAllocate,
-        SpreadLayout,
-    }
+    traits::SpreadAllocate
 };
-
-use openbrush::traits::Storage;
+use openbrush::{
+    contracts::ownable::*,
+    contracts::psp34::extensions::{
+        enumerable::*,
+        metadata::*
+    },
+    traits::Storage,
+    modifiers,
+};
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
@@ -36,5 +41,4 @@ pub struct Manager {
     attribute_names: Mapping<u32, Vec<u8>>,
     locked_tokens: Mapping<Id, u8>,
     locked_token_count: u64,
-    _reserved: Option<()>,
 }
