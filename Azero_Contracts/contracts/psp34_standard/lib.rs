@@ -49,6 +49,69 @@ pub mod psp34_nft {
     impl PSP34Enumerable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
     
+    impl artzero_project::impls::psp34_standard::Internal for Psp34Nft {
+        /// Only Owner can mint new token
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn mint(&mut self) -> Result<(), Error> {
+            let caller = self.env().caller();
+            self.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.last_token_id)).is_ok());
+            Ok(())
+        }
+
+        /// Only Owner can mint new token and add attributes for it
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error> {
+            let caller = self.env().caller();
+            self.last_token_id += 1;
+            self._mint_to(caller, Id::U64(self.last_token_id))?;
+            self.set_multiple_attributes(Id::U64(self.last_token_id), metadata);
+            Ok(())
+        }
+
+        /// Get Token Count
+        #[ink(message)]
+        fn get_last_token_id(&self) -> u64 {
+            return self.last_token_id
+        }
+
+        /// Lock nft - Only owner token
+        #[ink(message)]
+        fn lock(&mut self, token_id: Id) -> Result<(), Error> {
+            let caller = self.env().caller();
+            let token_owner = self.owner_of(token_id.clone()).unwrap();
+            assert!(caller == token_owner);
+            self.locked_token_count += 1;
+            self.locked_tokens.insert(&token_id, &1);
+            Ok(())
+        }
+
+        /// Check token is locked or not
+        #[ink(message)]
+        fn is_locked_nft(&self, token_id: Id) -> bool {
+            if self.locked_tokens.get(&token_id).is_some() {
+                return true
+            }
+            return false
+        }
+
+        /// Get Locked Token Count
+        #[ink(message)]
+        fn get_locked_token_count(&self) -> u64 {
+            return self.locked_token_count
+        }
+
+        #[ink(message)]
+        fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
+            let caller = self.env().caller();
+            let token_owner = self.owner_of(id.clone()).unwrap();
+            assert!(caller == token_owner);
+            self._burn_from(caller, id)
+        }
+    }
+
     impl Psp34Nft {
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {

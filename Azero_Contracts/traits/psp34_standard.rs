@@ -19,7 +19,7 @@ use openbrush::{
 pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
 
 #[openbrush::trait_definition]
-pub trait Psp34Traits: PSP34 + PSP34Metadata {
+pub trait Psp34Traits {
     #[ink(message)]
     fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
     #[ink(message)]
