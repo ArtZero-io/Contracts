@@ -41,4 +41,5 @@ pub struct Manager {
     attribute_names: Mapping<u32, Vec<u8>>,
     locked_tokens: Mapping<Id, u8>,
     locked_token_count: u64,
+    _reserved: Option<()>
 }

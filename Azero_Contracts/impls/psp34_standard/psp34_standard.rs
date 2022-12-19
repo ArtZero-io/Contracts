@@ -14,10 +14,7 @@ pub use crate::{
 };
 
 
-impl<T, M> Psp34Traits for T
-where
-    T: Storage<data::Manager>>
-{
+impl<T: Storage<Manager>> Psp34Traits for T {
     /// Change baseURI
     #[ink(message)]
     #[modifiers(only_owner)]
