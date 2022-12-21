@@ -52,7 +52,7 @@ pub mod psp34_nft {
     impl PSP34Burnable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
     // impl artzero_project::impls::psp34_standard::Internal for Psp34Nft {}
-    
+
     impl Psp34Nft {
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
@@ -62,8 +62,8 @@ pub mod psp34_nft {
                 instance._init_with_owner(contract_owner);
             })
         }
-        
-        /// Only Owner can mint new token
+
+        /// This function let NFT Contract Owner to mint a new NFT without providing NFT Traits/Attributes
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn mint(&mut self) -> Result<(), Error> {
@@ -73,7 +73,7 @@ pub mod psp34_nft {
             Ok(())
         }
 
-        /// Only Owner can mint new token and add attributes for it
+        /// This function let NFT Contract Owner to mint a new NFT with NFT Traits/Attributes
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error> {
