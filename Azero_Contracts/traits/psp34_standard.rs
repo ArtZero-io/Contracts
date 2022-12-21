@@ -38,6 +38,16 @@ pub trait Psp34Traits {
     fn token_uri(&self, token_id: u64) -> String;
     #[ink(message)]
     fn get_owner(&self) -> AccountId ;
+    #[ink(message)]
+    fn get_last_token_id(&self) -> u64;
+    #[ink(message)]
+    fn lock(&mut self, token_id: Id) -> Result<(), Error>;
+    #[ink(message)]
+    fn is_locked_nft(&self, token_id: Id) -> bool;
+    #[ink(message)]
+    fn get_locked_token_count(&self) -> u64;
+    #[ink(message)]
+    fn burn(&mut self, id: Id) -> Result<(), PSP34Error>;
 }
 
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]

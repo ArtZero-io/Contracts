@@ -7,7 +7,7 @@ pub use self::psp34_nft::{
 
 #[openbrush::contract]
 pub mod psp34_nft {
-    use artzero_project::impls::psp34_standard::psp34_standard::Internal;
+    // use artzero_project::impls::psp34_standard::psp34_standard::Internal;
     use ink_prelude::{
         string::{
             String,
@@ -23,7 +23,8 @@ pub mod psp34_nft {
         contracts::ownable::*,
         contracts::psp34::extensions::{
             enumerable::*,
-            metadata::*
+            metadata::*,
+            burnable::*
         },
         traits::Storage,
         modifiers,
@@ -48,9 +49,9 @@ pub mod psp34_nft {
     impl PSP34 for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
-    impl PSP22Burnable for Psp34Nft {}
+    impl PSP34Burnable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
-    impl artzero_project::impls::psp34_standard::Internal for Psp34Nft {}
+    // impl artzero_project::impls::psp34_standard::Internal for Psp34Nft {}
     
     impl Psp34Nft {
         #[ink(constructor)]
@@ -60,6 +61,27 @@ pub mod psp34_nft {
                 instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
                 instance._init_with_owner(contract_owner);
             })
+        }
+        
+        /// Only Owner can mint new token
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn mint(&mut self) -> Result<(), Error> {
+            let caller = self.env().caller();
+            self.manager.last_token_id += 1;
+            assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+            Ok(())
+        }
+
+        /// Only Owner can mint new token and add attributes for it
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error> {
+            let caller = self.env().caller();
+            self.manager.last_token_id += 1;
+            self._mint_to(caller, Id::U64(self.manager.last_token_id))?;
+            self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata);
+            Ok(())
         }
     }
 }

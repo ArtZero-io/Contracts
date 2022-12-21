@@ -34,11 +34,47 @@ use ink_prelude::{
 
 impl<T: Storage<Manager>> Psp34Traits for T 
 where
-    T: Internal +
+    T: PSP34 + psp34::Internal +
     Storage<psp34::extensions::metadata::Data> + 
     Storage<psp34::Data<psp34::extensions::enumerable::Balances>> + 
     Storage<openbrush::contracts::ownable::Data>
 {
+    /// Get Token Count
+    default fn get_last_token_id(&self) -> u64 {
+        return self.data::<Manager>().last_token_id
+    }
+
+    /// Lock nft - Only owner token
+    default fn lock(&mut self, token_id: Id) -> Result<(), Error> {
+        let caller = T::env().caller();
+        let token_owner = self.owner_of(token_id.clone()).unwrap();
+        assert!(caller == token_owner);
+        self.data::<Manager>().locked_token_count += 1;
+        self.data::<Manager>().locked_tokens.insert(&token_id, &1);
+        Ok(())
+    }
+
+    /// Check token is locked or not
+    default fn is_locked_nft(&self, token_id: Id) -> bool {
+        if self.data::<Manager>().locked_tokens.get(&token_id).is_some() {
+            return true
+        }
+        return false
+    }
+
+    /// Get Locked Token Count
+    default fn get_locked_token_count(&self) -> u64 {
+        return self.data::<Manager>().locked_token_count
+    }
+
+    /// Burn NFT
+    default fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
+        let caller = T::env().caller();
+        let token_owner = self.owner_of(id.clone()).unwrap();
+        assert!(caller == token_owner);
+        self._burn_from(caller, id)
+    }
+
     /// Change baseURI
     #[modifiers(only_owner)]
     default fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
@@ -106,80 +142,6 @@ where
     default fn get_owner(&self) -> AccountId {
         return self.owner()
     }
-}
-
-impl<T: Storage<Manager>> Internal for T 
-where
-    T : PSP34 + 
-    Storage<Manager> +
-    Storage<psp34::extensions::metadata::Data> + 
-    Storage<psp34::Data<psp34::extensions::enumerable::Balances>> + 
-    Storage<openbrush::contracts::ownable::Data>
-{
-    /// Only Owner can mint new token
-    #[modifiers(only_owner)]
-    default fn mint(&mut self) -> Result<(), Error> {
-        let caller =  T::env().caller();
-        self.data::<Manager>().last_token_id += 1;
-        assert!(self._mint_to(caller, Id::U64(self.data::<Manager>().last_token_id)).is_ok());
-        Ok(())
-    }
-
-    /// Only Owner can mint new token and add attributes for it
-    #[modifiers(only_owner)]
-    default fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error> {
-        let caller = T::env().caller();
-        self.data::<Manager>().last_token_id += 1;
-        self._mint_to(caller, Id::U64(self.data::<Manager>().last_token_id))?;
-        self.set_multiple_attributes(Id::U64(self.data::<Manager>().last_token_id), metadata);
-        Ok(())
-    }
-
-    /// Get Token Count
-    default fn get_last_token_id(&self) -> u64 {
-        return self.data::<Manager>().last_token_id
-    }
-
-    /// Lock nft - Only owner token
-    default fn lock(&mut self, token_id: Id) -> Result<(), Error> {
-        let caller = T::env().caller();
-        let token_owner = self.owner_of(token_id.clone()).unwrap();
-        assert!(caller == token_owner);
-        self.data::<Manager>().locked_token_count += 1;
-        self.data::<Manager>().locked_tokens.insert(&token_id, &1);
-        Ok(())
-    }
-
-    /// Check token is locked or not
-    default fn is_locked_nft(&self, token_id: Id) -> bool {
-        if self.data::<Manager>().locked_tokens.get(&token_id).is_some() {
-            return true
-        }
-        return false
-    }
-
-    /// Get Locked Token Count
-    default fn get_locked_token_count(&self) -> u64 {
-        return self.data::<Manager>().locked_token_count
-    }
-
-    /// Burn NFT
-    default fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
-        let caller = T::env().caller();
-        let token_owner = self.owner_of(id.clone()).unwrap();
-        assert!(caller == token_owner);
-        self._burn_from(caller, id)
-    }
-}
-
-pub trait Internal {
-    fn mint(&mut self) -> Result<(), Error>;
-    fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error>;
-    fn get_last_token_id(&self) -> u64;
-    fn lock(&mut self, token_id: Id) -> Result<(), Error>;
-    fn is_locked_nft(&self, token_id: Id) -> bool;
-    fn get_locked_token_count(&self) -> u64;
-    fn burn(&mut self, id: Id) -> Result<(), PSP34Error>;
 }
 
 fn add_attribute_name<T: Storage<Manager>>(
