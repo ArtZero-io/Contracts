@@ -16,7 +16,7 @@ use openbrush::{
 };
 
 #[openbrush::wrapper]
-pub type Psp34Ref = dyn PSP34 + PSP34Metadata;
+pub type Psp34Ref = dyn Psp34Traits + PSP34 + PSP34Metadata;
 
 #[openbrush::trait_definition]
 pub trait Psp34Traits {

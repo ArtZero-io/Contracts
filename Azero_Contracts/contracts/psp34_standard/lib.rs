@@ -7,7 +7,6 @@ pub use self::psp34_nft::{
 
 #[openbrush::contract]
 pub mod psp34_nft {
-    // use artzero_project::impls::psp34_standard::psp34_standard::Internal;
     use ink_prelude::{
         string::{
             String,
@@ -51,7 +50,6 @@ pub mod psp34_nft {
     impl PSP34Enumerable for Psp34Nft {}
     impl PSP34Burnable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
-    // impl artzero_project::impls::psp34_standard::Internal for Psp34Nft {}
 
     impl Psp34Nft {
         #[ink(constructor)]
