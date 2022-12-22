@@ -63,8 +63,11 @@ pub mod artzero_collection_manager {
     impl AccessControl for ArtZeroCollectionManager {}
     impl Ownable for ArtZeroCollectionManager {}
     impl ArtZeroCollectionTrait for ArtZeroCollectionManager {}
-    
+
     impl ArtZeroCollectionManager {
+        /// Collection Contract Manager manages all collections on ArtZero platform. User can create in simple mode or in advanced mode
+        /// In Simple mode, the contract will automatically create the standard NFT contract for the User
+        /// In Advanced mode, user creates their own customized NFT Contract and add the contract address to the Collection Manager
         #[ink(constructor)]
         pub fn new(
             admin_address: AccountId,
@@ -111,7 +114,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Simple New Collection Creation - Auto create NFT Contract - Collection_Owner is owner of NFT contract and receive royal fee
+        /// Simple New Collection Creation - Auto create NFT Contract - Collection_Owner is owner of NFT contract and receive royalty fee
         #[ink(message)]
         #[ink(payable)]
         pub fn auto_new_collection(
@@ -124,11 +127,15 @@ pub mod artzero_collection_manager {
             is_collect_royal_fee: bool,
             royal_fee: u32,
         ) -> Result<(), Error> {
+            // Check if caller sends correct adding fee to the contract
             assert!(
                 self.manager.simple_mode_adding_fee == self.env().transferred_value(),
                 "invalid fee"
             );
+            // Check if royalty fee is less than maximal value
             assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
+
+            // Create PSP34 Standard Contract using cross call to psp34_standard contract
             let contract = Psp34NftRef::new(collection_owner, nft_name, nft_symbol)
                 .endowment(0)
                 .code_hash(self.manager.standard_nft_hash)
@@ -139,6 +146,8 @@ pub mod artzero_collection_manager {
 
             self.manager.collection_count += 1;
             self.manager.active_collection_count += 1;
+
+            // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
                 .collections_by_id
                 .insert(&self.manager.collection_count, &contract_account);
@@ -156,6 +165,7 @@ pub mod artzero_collection_manager {
                     .collections_by_owner
                     .insert(&collection_owner, &collections);
             }
+            // Add collection information to collections mapping
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address: contract_account,
@@ -172,6 +182,7 @@ pub mod artzero_collection_manager {
             {
                 panic!("error set_multiple_attributes")
             };
+            // Emit AddNewCollectionEvent event for tracking purposes
             self.env().emit_event(AddNewCollectionEvent {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(contract_account),
@@ -194,20 +205,24 @@ pub mod artzero_collection_manager {
             is_collect_royal_fee: bool,
             royal_fee: u32,
         ) -> Result<(), Error> {
+            // Check if caller sends correct adding fee to the contract
             assert!(
                 self.manager.advance_mode_adding_fee == self.env().transferred_value(),
                 "invalid fee"
             );
+            // Check if the contract already exists
             assert!(
                 self.manager.collections.get(&nft_contract_address).is_none(),
                 "address exists"
             );
 
-            
+            // Only the owner of the NFT contract collection can perform this call
             let collection_owner = Psp34Ref::get_owner(&nft_contract_address);
             assert!(collection_owner == self.env().caller());
+            // Check if royalty fee is less than maximal value
             assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
             self.manager.collection_count += 1;
+            // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
                 .collections_by_id
                 .insert(&self.manager.collection_count, &nft_contract_address);
@@ -224,6 +239,7 @@ pub mod artzero_collection_manager {
                     .collections_by_owner
                     .insert(&collection_owner, &collections);
             }
+            // Add collection information to collections mapping
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address,
@@ -240,6 +256,7 @@ pub mod artzero_collection_manager {
             {
                 panic!("error set_multiple_attributes")
             };
+            // Emit AddNewCollectionEvent event for tracking purposes
             self.env().emit_event(AddNewCollectionEvent {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(nft_contract_address),
@@ -251,7 +268,7 @@ pub mod artzero_collection_manager {
         }
 
         // SETTERS
-        /// Update Owner of Collecion - who receive royal fee - Only Admin can change
+        /// Update Owner of Collecion - who receive royalty fee - Only Admin can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_collection_owner(
@@ -269,7 +286,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Update nft_contract_address - Only Admin Role can change
+        /// Update NFT Contract Address of a collection - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_nft_contract_address(
@@ -287,7 +304,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Set multiple profile attributes
+        /// Set attributes for the collections
         #[ink(message)]
         pub fn set_multiple_attributes(
             &mut self,
@@ -314,7 +331,7 @@ pub mod artzero_collection_manager {
             }
         }
 
-        // Get multiple profile attributes
+        // Get attributes of an NFT Collection
         #[ink(message)]
         pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();
@@ -329,7 +346,7 @@ pub mod artzero_collection_manager {
             }
             ret
         }
-
+        /// Internal function to add attributes to mapping
         fn _set_attribute(&mut self, account: AccountId, key: Vec<u8>, value: Vec<u8>) {
             self.manager.attributes.insert(&(&account, &key), &value);
         }
@@ -348,7 +365,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Update Is Royal Fee - Only Admin Role can change
+        /// Update Is Royalty Fee - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_is_collect_royal_fee(
@@ -366,7 +383,7 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Update royal_fee - Only Admin Role can change
+        /// Update royalty fee of an NFT Collection - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_royal_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), AccessControlError> {
