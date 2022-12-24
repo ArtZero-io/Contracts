@@ -42,7 +42,7 @@ pub const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
 
 impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
 
-    fn get_royal_fee(&self, nft_contract_address: AccountId) -> u32 {
+    default fn get_royal_fee(&self, nft_contract_address: AccountId) -> u32 {
         if self.data::<Manager>().collections.get(&nft_contract_address).is_none() {
             return 0
         }
@@ -54,7 +54,7 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
         }
     }
 
-    fn is_active(&self, nft_contract_address: AccountId) -> bool {
+    default fn is_active(&self, nft_contract_address: AccountId) -> bool {
         if self.data::<Manager>().collections.get(&nft_contract_address).is_none() {
             return false
         }
@@ -62,7 +62,7 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
         return collection.is_active
     }
 
-    fn get_contract_type(&self, nft_contract_address: AccountId) -> u8 {
+    default fn get_contract_type(&self, nft_contract_address: AccountId) -> u8 {
         if self.data::<Manager>().collections.get(&nft_contract_address).is_none() {
             return 0
         }
@@ -70,7 +70,7 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
         return collection.contract_type
     }
 
-    fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId> {
+    default fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId> {
         return Some(Some(self.data::<Manager>().collections.get(&nft_contract_address).unwrap())?.collection_owner);
     }
 }
