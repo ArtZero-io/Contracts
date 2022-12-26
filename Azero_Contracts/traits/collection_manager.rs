@@ -19,6 +19,9 @@ use ink_prelude::{
     vec::Vec,
 };
 
+#[openbrush::wrapper]
+pub type ArtZeroCollectionRef = dyn ArtZeroCollectionTrait;
+
 #[openbrush::trait_definition]
 pub trait ArtZeroCollectionTrait {
     /// This function returns royalty fee of a Collection

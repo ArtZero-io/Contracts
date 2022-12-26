@@ -19,6 +19,9 @@ use ink_prelude::{
     vec::Vec,
 };
 
+#[openbrush::wrapper]
+pub type ArtZeroStakingRef = dyn ArtZeroStakingTrait;
+
 #[openbrush::trait_definition]
 pub trait ArtZeroStakingTrait {
     #[ink(message)]

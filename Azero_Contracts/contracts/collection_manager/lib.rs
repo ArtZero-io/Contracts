@@ -1,5 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
+pub use self::artzero_collection_manager::{
+    ArtZeroCollectionManager,
+    ArtZeroCollectionManagerRef,
+};
 
 #[openbrush::contract]
 pub mod artzero_collection_manager {
