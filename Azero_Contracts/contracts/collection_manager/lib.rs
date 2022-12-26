@@ -7,7 +7,6 @@ pub mod artzero_collection_manager {
     use ink_prelude::{
         string::{
             String,
-            ToString,
         },
         vec,
         vec::Vec,
@@ -19,10 +18,6 @@ pub mod artzero_collection_manager {
         contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
-        storage::{
-            Mapping,
-            TypeGuard,
-        },
         traits::Storage,
     };
     use artzero_project::{

@@ -3,7 +3,6 @@
 
 #[openbrush::contract]
 pub mod artzero_marketplace_psp34 {
-    use ink_lang::ToAccountId;
     use ink_env::CallFlags;
     use ink_prelude::{
         vec,
@@ -22,14 +21,12 @@ pub mod artzero_marketplace_psp34 {
             ownable::*,
             traits::psp34::{
                 PSP34Ref,
-                extensions::{
-                    burnable::*,
-                    metadata::*,
-                },
                 *,
             },
         },
-        traits::Storage,
+        traits::{
+            Storage
+        },
         storage::{
             Mapping,
             TypeGuard,
@@ -37,20 +34,13 @@ pub mod artzero_marketplace_psp34 {
         },
         modifiers,
     };
-    use artzero_project::traits::collection_manager::ArtZeroCollectionRef;
-    use artzero_project::traits::psp34_standard::*;
-    use artzero_staking_nft::ArtZeroStakingNFTRef;
     use artzero_project::{
         traits::{
-            staking::artzerostakingtrait_external::ArtZeroStakingTrait,
-            psp34_standard::{
-                *,
-                psp34traits_external::Psp34Traits
-            }
+            staking::ArtZeroStakingRef,
+            collection_manager::ArtZeroCollectionRef,
+            psp34_standard::*,
         }
     };
-    use artzero_project::traits::collection_manager::artzerocollectiontrait_external::ArtZeroCollectionTrait;
-    use psp34_nft::psp34_nft::Psp34NftRef;
 
     #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
@@ -147,7 +137,6 @@ pub mod artzero_marketplace_psp34 {
     pub struct ArtZeroMarketplacePSP34 {
         #[storage_field]
         ownable: ownable::Data,
-        #[storage_field]
         manager: Manager,
     }
 
@@ -499,7 +488,7 @@ pub mod artzero_marketplace_psp34 {
             }
             if user_volume.is_some() {
                 user_volume_unwrap = user_volume.unwrap();
-            }   
+            }
             self.manager.total_volume = self.manager.total_volume.checked_add(price).unwrap();
             collection_volume_unwarp = collection_volume_unwarp.checked_add(price).unwrap();
             user_volume_unwrap = user_volume_unwrap.checked_add(price).unwrap();
@@ -1055,10 +1044,10 @@ pub mod artzero_marketplace_psp34 {
         }
 
         fn apply_discount(&self, staker: AccountId, input_fee: Balance) -> Balance {
-            let staked_amount = ArtZeroStakingNFTRef::get_total_staked_by_account(&self.manager.staking_contract_address, staker);
+            let staked_amount = ArtZeroStakingRef::get_total_staked_by_account(&self.manager.staking_contract_address, staker);
             let length = self.manager.staking_discount_rate.len();
             for index in 0..length {
-                if staked_amount >= self.manager.staking_discount_criteria[index] as u32 {
+                if staked_amount >= self.manager.staking_discount_criteria[index] as u64 {
                     return (input_fee * (10000 - self.manager.staking_discount_rate[index] as u128)) / 10000
                 }
             }
