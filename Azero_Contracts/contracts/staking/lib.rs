@@ -52,39 +52,39 @@ pub mod artzero_staking_nft {
         manager: artzero_project::impls::staking::data::Manager,
     }
 
-    // #[ink(event)]
-    // pub struct NewStakeEvent {
-    //     staker: Option<AccountId>,
-    //     token_id: u64,
-    // }
-    // #[ink(event)]
-    // pub struct UnstakeEvent {
-    //     staker: Option<AccountId>,
-    //     token_id: u64,
-    // }
-    // #[ink(event)]
-    // pub struct RequestUnstakeEvent {
-    //     staker: Option<AccountId>,
-    //     token_id: u64,
-    // }
-    // #[ink(event)]
-    // pub struct CancelRequestUnstakeEvent {
-    //     staker: Option<AccountId>,
-    //     token_id: u64,
-    // }
-    //
-    // #[ink(event)]
-    // pub struct ClaimReward {
-    //     staker: Option<AccountId>,
-    //     reward_amount: Balance,
-    //     staked_amount: u64,
-    // }
-    //
-    // #[ink(event)]
-    // pub struct AddReward {
-    //     reward_amount: Balance,
-    //     total_staked_amount: u64,
-    // }
+    #[ink(event)]
+    pub struct NewStakeEvent {
+        staker: Option<AccountId>,
+        token_id: u64,
+    }
+    #[ink(event)]
+    pub struct UnstakeEvent {
+        staker: Option<AccountId>,
+        token_id: u64,
+    }
+    #[ink(event)]
+    pub struct RequestUnstakeEvent {
+        staker: Option<AccountId>,
+        token_id: u64,
+    }
+    #[ink(event)]
+    pub struct CancelRequestUnstakeEvent {
+        staker: Option<AccountId>,
+        token_id: u64,
+    }
+    
+    #[ink(event)]
+    pub struct ClaimReward {
+        staker: Option<AccountId>,
+        reward_amount: Balance,
+        staked_amount: u64,
+    }
+    
+    #[ink(event)]
+    pub struct AddReward {
+        reward_amount: Balance,
+        total_staked_amount: u64,
+    }
 
     impl ArtZeroStakingNFT {
         #[ink(constructor)]
@@ -180,10 +180,10 @@ pub mod artzero_staking_nft {
             assert!(self.manager.is_locked); // Only allow adding reward when contract is locked
             assert!(self.manager.reward_started == false); // only when reward distribution is not started
             self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
-            // self.env().emit_event(AddReward {
-            //     reward_amount: reward,
-            //     total_staked_amount: self.manager.total_staked,
-            // });
+            self.env().emit_event(AddReward {
+                reward_amount: reward,
+                total_staked_amount: self.manager.total_staked,
+            });
             Ok(())
         }
 
@@ -220,18 +220,18 @@ pub mod artzero_staking_nft {
             if self.manager.claimable_reward >= reward {
                 self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
                 assert!(self.env().transfer(caller, reward).is_ok(),"error claim reward");
-                // self.env().emit_event(ClaimReward {
-                //     staker: Some(caller),
-                //     reward_amount: reward,
-                //     staked_amount: staked_amount as u64,
-                // });
+                self.env().emit_event(ClaimReward {
+                    staker: Some(caller),
+                    reward_amount: reward,
+                    staked_amount: staked_amount as u64,
+                });
             } else {
                 assert!(self.env().transfer(caller, self.manager.claimable_reward).is_ok(),"error claim reward");
-                // self.env().emit_event(ClaimReward {
-                //     staker: Some(caller),
-                //     reward_amount: self.manager.claimable_reward,
-                //     staked_amount: staked_amount as u64,
-                // });
+                self.env().emit_event(ClaimReward {
+                    staker: Some(caller),
+                    reward_amount: self.manager.claimable_reward,
+                    staked_amount: staked_amount as u64,
+                });
                 self.manager.claimable_reward = 0;
             }
 
@@ -360,10 +360,10 @@ pub mod artzero_staking_nft {
                 if self.manager.is_claimed.get(&caller).is_none() {
                     self.manager.is_claimed.insert(&caller, &false);
                 }
-                // self.env().emit_event(NewStakeEvent {
-                //     staker: Some(caller),
-                //     token_id: token_ids[i],
-                // });
+                self.env().emit_event(NewStakeEvent {
+                    staker: Some(caller),
+                    token_id: token_ids[i],
+                });
             }
             if self.manager.staked_accounts.contains_value(0, &caller) == false {
                 self.manager.staked_accounts.insert(0, &caller);
@@ -392,10 +392,10 @@ pub mod artzero_staking_nft {
                 let current_time = Self::env().block_timestamp();
                 self.manager.request_unstaking_time.insert(&(&caller, &token_ids[i]), &current_time);
                 self.manager.pending_unstaking_list.insert(caller, &token_ids[i]);
-                // self.env().emit_event(RequestUnstakeEvent {
-                //     staker: Some(caller),
-                //     token_id: token_ids[i],
-                // });
+                self.env().emit_event(RequestUnstakeEvent {
+                    staker: Some(caller),
+                    token_id: token_ids[i],
+                });
             }
 
             if self.manager.staking_list.count(caller) == 0 {
@@ -433,10 +433,10 @@ pub mod artzero_staking_nft {
                     .insert(caller, &token_ids[i]);
                 // Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
                 self.manager.pending_unstaking_list.remove_value(caller, &token_ids[i]);
-                // self.env().emit_event(CancelRequestUnstakeEvent {
-                //     staker: Some(caller),
-                //     token_id: token_ids[i],
-                // });
+                self.env().emit_event(CancelRequestUnstakeEvent {
+                    staker: Some(caller),
+                    token_id: token_ids[i],
+                });
             }
 
             if self.manager.pending_unstaking_list.count(caller) == 0 {
@@ -483,10 +483,10 @@ pub mod artzero_staking_nft {
                 if self.manager.pending_unstaking_list.count(caller) == 0 {
                     self.manager.staked_accounts.remove_value(1, &caller);
                 }
-                // self.env().emit_event(UnstakeEvent {
-                //     staker: Some(caller),
-                //     token_id: token_ids[i],
-                // });
+                self.env().emit_event(UnstakeEvent {
+                    staker: Some(caller),
+                    token_id: token_ids[i],
+                });
             }
             Ok(())
         }
