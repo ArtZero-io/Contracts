@@ -1,4 +1,5 @@
 use crate::traits::launchpad_manager::*;
+use crate::impls::launchpad_manager::data::Manager;
 pub use crate::{
     impls::launchpad_manager::{
         data,
@@ -33,7 +34,9 @@ use openbrush::{
         Storage,
         AccountId,
         Hash,
-        Balance
+        Balance,
+        StorageAsRef,
+        StorageAsMut
     }
 };
 
