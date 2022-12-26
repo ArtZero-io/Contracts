@@ -95,11 +95,6 @@ pub mod launchpad_psp34_nft_standard {
     #[openbrush::upgradeable_storage(STORAGE_KEY)]
     pub struct Manager {
         pub admin_address: AccountId,
-        pub last_token_id: u64,
-        pub attribute_count: u32,
-        pub attribute_names: Mapping<u32,Vec<u8>>,
-        pub locked_tokens: Mapping<Id, u8>,
-        pub locked_token_count: u64,
         pub total_supply: u64,
         pub last_phase_id: u8,
         pub whitelist_count: u64,
@@ -176,11 +171,12 @@ pub mod launchpad_psp34_nft_standard {
         #[storage_field]
         access: access_control::Data,
         #[storage_field]
-        manager: Manager
+        manager: Manager,
+        #[storage_field]
+        manager_psp34_standard: artzero_project::impls::psp34_standard::data::Manager
     }
 
     const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
-
 
     impl Ownable for LaunchPadPsp34NftStandard {}
     impl PSP34 for LaunchPadPsp34NftStandard {}
@@ -371,7 +367,7 @@ pub mod launchpad_psp34_nft_standard {
         #[modifiers(only_owner)]
         pub fn mint(&mut self, mint_amount: u64 ) -> Result<(), Error> {
             let caller = self.env().caller();
-            assert!(self.manager.last_token_id.checked_add(mint_amount).unwrap() <= self.manager.total_supply);
+            assert!(self.manager_psp34_standard.last_token_id.checked_add(mint_amount).unwrap() <= self.manager.total_supply);
             let current_time = Self::env().block_timestamp();
             let mut available_amount = 0;
             for index in 0..self.manager.last_phase_id {
@@ -382,8 +378,8 @@ pub mod launchpad_psp34_nft_standard {
             }  
             assert!(mint_amount <= available_amount.checked_sub(self.manager.owner_claimed_amount).unwrap());
             for _i in 0..mint_amount {
-                self.manager.last_token_id += 1;
-                assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+                self.manager_psp34_standard.last_token_id += 1;
+                assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
             }
             self.manager.owner_claimed_amount += mint_amount;
             Ok(())
@@ -401,7 +397,7 @@ pub mod launchpad_psp34_nft_standard {
             let current_time = Self::env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
                 assert!(phase.is_public);
-                assert!(self.manager.last_token_id.checked_add(mint_amount).unwrap() <= self.manager.total_supply);
+                assert!(self.manager_psp34_standard.last_token_id.checked_add(mint_amount).unwrap() <= self.manager.total_supply);
                 assert!(phase.public_claimed_amount.checked_add(mint_amount).unwrap() <= phase.public_minting_amount);
                 assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.total_amount);
                 assert!(phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() == self.env().transferred_value());
@@ -423,9 +419,9 @@ pub mod launchpad_psp34_nft_standard {
                 }
                 
                 for _i in 0..mint_amount {
-                    self.manager.last_token_id += 1;
+                    self.manager_psp34_standard.last_token_id += 1;
                     self.manager.public_minted_count += 1;
-                    assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+                    assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
                 }
                 
                 if self.manager.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).is_none() {
@@ -455,7 +451,7 @@ pub mod launchpad_psp34_nft_standard {
             let current_time = Self::env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
                 assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.total_amount);
-                assert!(self.manager.last_token_id < self.manager.total_supply);
+                assert!(self.manager_psp34_standard.last_token_id < self.manager.total_supply);
                 let caller = self.env().caller();
                 if self.manager.phase_whitelists_link.get(&(&caller, &phase_id)).is_none(){
                     return Err(Error::InvalidInput);
@@ -484,8 +480,8 @@ pub mod launchpad_psp34_nft_standard {
                 self.manager.phase_whitelists_link.insert(&(&caller, &phase_id), &caller_info);
 
                 for _i in 0..mint_amount {
-                    self.manager.last_token_id += 1;
-                    assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+                    self.manager_psp34_standard.last_token_id += 1;
+                    assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
                 }
                 let mut phase = self.manager.phases.get(&phase_id).unwrap();
                 phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
@@ -802,7 +798,7 @@ pub mod launchpad_psp34_nft_standard {
         ///Get Token Count
         #[ink(message)]
         pub fn get_last_token_id(&self) -> u64 {
-            return self.manager.last_token_id;
+            return self.manager_psp34_standard.last_token_id;
         }
 
         ///Get Phase Account Public Claimed Amount
@@ -819,8 +815,8 @@ pub mod launchpad_psp34_nft_standard {
 
         fn add_attribute_name(&mut self, attribute_input:Vec<u8>){
             let mut exist:bool = false;
-            for index in 0..self.manager.attribute_count {
-                let attribute_name = self.manager.attribute_names.get(&(index+1));
+            for index in 0..self.manager_psp34_standard.attribute_count {
+                let attribute_name = self.manager_psp34_standard.attribute_names.get(&(index+1));
                 if attribute_name.is_some(){
                     if attribute_name.unwrap() == attribute_input{
                         exist = true;
@@ -829,8 +825,8 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             if !exist {
-                self.manager.attribute_count += 1;
-                self.manager.attribute_names.insert(&self.manager.attribute_count, &attribute_input);
+                self.manager_psp34_standard.attribute_count += 1;
+                self.manager_psp34_standard.attribute_names.insert(&self.manager_psp34_standard.attribute_count, &attribute_input);
             }
         }
 
