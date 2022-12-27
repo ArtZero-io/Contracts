@@ -22,7 +22,10 @@ pub mod artzero_staking_nft {
                 *,
             },
         },
-        traits::Storage,
+        traits::{
+            Storage,
+            ZERO_ADDRESS
+        },
         modifiers,
     };
     use artzero_project::{
@@ -115,7 +118,10 @@ pub mod artzero_staking_nft {
             artzero_nft_contract: AccountId,
             limit_unstake_time: u64,
             admin_address: AccountId,
-        ) -> Result<(), OwnableError> {
+        ) -> Result<(), Error> {
+            if self.manager.nft_contract_address != ZERO_ADDRESS.into(){
+                return Err(Error::AlreadyInit);
+            }
             self.manager.nft_contract_address = artzero_nft_contract;
             self.manager.limit_unstake_time = limit_unstake_time;
             self.manager.admin_address = admin_address;
