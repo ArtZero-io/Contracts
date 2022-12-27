@@ -1,28 +1,19 @@
-use crate::traits::collection_manager::*;
 
-use ink_lang::ToAccountId;
 use ink_prelude::{
-    vec,
-    string::String,
     vec::Vec,
 };
 use ink_storage::{
     traits::{
         PackedLayout,
-        SpreadAllocate,
         SpreadLayout,
     },
 };
 use openbrush::{
-    contracts::access_control::*,
-    contracts::ownable::*,
-    modifiers,
     storage::{
         Mapping,
         TypeGuard,
     },
     traits::{
-        Storage,
         AccountId,
         Hash,
         Balance
@@ -60,7 +51,7 @@ pub struct Manager {
     pub max_royal_fee_rate: u32,
     pub active_collection_count: u64,
     pub attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>, AttributesKey>,
-    pub _reserved: Option<()>,  
+    pub _reserved: Option<()>,
 }
 
 pub struct AttributesKey;

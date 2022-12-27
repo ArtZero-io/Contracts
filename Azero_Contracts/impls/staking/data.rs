@@ -1,23 +1,5 @@
-use crate::traits::staking::*;
-use ink_env::CallFlags;
-use ink_prelude::{
-    string::String,
-    vec::Vec,
-};
-use ink_storage::{
-    traits::SpreadAllocate,
-};
+
 use openbrush::{
-    contracts::{
-        ownable::*,
-        traits::psp34::{
-            extensions::{
-                burnable::*,
-                metadata::*,
-            },
-            *,
-        },
-    },
     storage::{
         MultiMapping,
         ValueGuard,
@@ -25,11 +7,9 @@ use openbrush::{
         TypeGuard
     },
     traits::{
-        Storage,
         AccountId,
         Balance
     },
-    modifiers,
 };
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);

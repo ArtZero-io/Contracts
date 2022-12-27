@@ -10,13 +10,11 @@ pub mod psp34_nft {
     use ink_prelude::{
         string::{
             String,
-            ToString,
         },
         vec::Vec,
     };
     use ink_storage::{
         traits::SpreadAllocate,
-        Mapping,
     };
     use openbrush::{
         contracts::ownable::*,
@@ -29,7 +27,6 @@ pub mod psp34_nft {
         modifiers,
     };
     use artzero_project::traits::psp34_standard::*;
-    use artzero_project::impls::psp34_standard::*;
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]

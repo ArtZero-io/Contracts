@@ -26,20 +26,23 @@ pub mod artzero_staking_nft {
         modifiers,
     };
     use artzero_project::{
-        impls::staking::*,
+        impls::{
+            staking::*,
+        },
         traits::{
             staking::{
-                Error,
-                *
-            }
-        }
+                Error
+            },
+            psp34_standard::*,
+            admin::*
+        },
+
     };
-    use psp34_nft::psp34_nft::Psp34NftRef;
-    use artzero_project::traits::psp34_standard::*;
 
     impl AccessControl for ArtZeroStakingNFT {}
     impl Ownable for ArtZeroStakingNFT {}
     impl ArtZeroStakingTrait for ArtZeroStakingNFT {}
+    impl ArtZeroAdminTrait for ArtZeroStakingNFT {}
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
@@ -50,6 +53,8 @@ pub mod artzero_staking_nft {
         access: access_control::Data,
         #[storage_field]
         manager: artzero_project::impls::staking::data::Manager,
+        #[storage_field]
+        admin_data: artzero_project::impls::admin::data::Data,
     }
 
     #[ink(event)]
@@ -72,14 +77,14 @@ pub mod artzero_staking_nft {
         staker: Option<AccountId>,
         token_id: u64,
     }
-    
+
     #[ink(event)]
     pub struct ClaimReward {
         staker: Option<AccountId>,
         reward_amount: Balance,
         staked_amount: u64,
     }
-    
+
     #[ink(event)]
     pub struct AddReward {
         reward_amount: Balance,
@@ -491,16 +496,16 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
-            assert!(value <= self.env().balance());
-            if self.env().transfer(self.env().caller(), value).is_err() {
-                panic!("error withdraw_fee")
-            }
-            Ok(())
-        }
+        // /// Withdraw Fees - only Owner
+        // #[ink(message)]
+        // #[modifiers(only_owner)]
+        // pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
+        //     assert!(value <= self.env().balance());
+        //     if self.env().transfer(self.env().caller(), value).is_err() {
+        //         panic!("error withdraw_fee")
+        //     }
+        //     Ok(())
+        // }
         /// Transfer NFT token
         #[ink(message)]
         #[modifiers(only_owner)]

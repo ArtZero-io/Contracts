@@ -1,4 +1,4 @@
-use crate::traits::psp34_standard::*;
+
 pub use crate::{
     impls::psp34_standard::{
         data,
@@ -14,14 +14,10 @@ use openbrush::{
     contracts::psp34::extensions::{
         enumerable::*,
         metadata::*,
-        mintable::*
     },
     traits::{
         AccountId,
-        Balance,
-        OccupiedStorage,
         Storage,
-        ZERO_ADDRESS,
     },
 };
 use ink_prelude::{
@@ -32,11 +28,11 @@ use ink_prelude::{
     vec::Vec,
 };
 
-impl<T: Storage<Manager>> Psp34Traits for T 
+impl<T: Storage<Manager>> Psp34Traits for T
 where
     T: PSP34 + psp34::Internal +
-    Storage<psp34::extensions::metadata::Data> + 
-    Storage<psp34::Data<psp34::extensions::enumerable::Balances>> + 
+    Storage<psp34::extensions::metadata::Data> +
+    Storage<psp34::Data<psp34::extensions::enumerable::Balances>> +
     Storage<openbrush::contracts::ownable::Data>
 {
     /// Get Token Count
@@ -164,5 +160,3 @@ fn add_attribute_name<T: Storage<Manager>>(
         data.attribute_names.insert(&data.attribute_count, &attribute_input);
     }
 }
-
-

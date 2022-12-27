@@ -1,4 +1,4 @@
-use crate::traits::collection_manager::*;
+
 pub use crate::{
     impls::collection_manager::{
         data,
@@ -8,32 +8,11 @@ pub use crate::{
     },
     traits::collection_manager::*,
 };
-use ink_lang::ToAccountId;
-use ink_prelude::{
-    vec,
-    string::String,
-    vec::Vec,
-};
-use ink_storage::{
-    traits::{
-        PackedLayout,
-        SpreadAllocate,
-        SpreadLayout,
-    },
-};
 use openbrush::{
     contracts::access_control::*,
-    contracts::ownable::*,
-    modifiers,
-    storage::{
-        Mapping,
-        TypeGuard,
-    },
     traits::{
         Storage,
         AccountId,
-        Hash,
-        Balance
     }
 };
 

@@ -1,4 +1,4 @@
-use crate::traits::staking::*;
+
 pub use crate::{
     impls::staking::{
         data,
@@ -10,17 +10,9 @@ pub use crate::{
 };
 use openbrush::{
     contracts::access_control::*,
-    contracts::ownable::*,
-    modifiers,
-    storage::{
-        Mapping,
-        TypeGuard,
-    },
     traits::{
         Storage,
         AccountId,
-        Hash,
-        Balance
     }
 };
 
