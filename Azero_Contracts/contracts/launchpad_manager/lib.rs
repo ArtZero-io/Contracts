@@ -158,7 +158,7 @@ pub mod artzero_launchpad_psp34 {
                     )
                 });
             let contract_account:AccountId = contract.to_account_id();
-            self.manager.project_count += 1;
+            self.manager.project_count = self.manager.project_count.checked_add(1).unwrap();
             self.manager.projects_by_id.insert(&self.manager.project_count, &contract_account);
             let projects_by_owner = self.manager.projects_by_owner.get(&project_owner);
             if projects_by_owner.is_none() {

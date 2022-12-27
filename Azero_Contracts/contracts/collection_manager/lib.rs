@@ -143,8 +143,8 @@ pub mod artzero_collection_manager {
                 .unwrap_or_else(|error| panic!("failed at instantiating the NFT contract: {:?}", error));
             let contract_account: AccountId = contract.to_account_id();
 
-            self.manager.collection_count += 1;
-            self.manager.active_collection_count += 1;
+            self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
+            self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
 
             // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
@@ -219,7 +219,7 @@ pub mod artzero_collection_manager {
             assert!(collection_owner == self.env().caller());
             // Check if royalty fee is less than maximal value
             assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
-            self.manager.collection_count += 1;
+            self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
             // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
                 .collections_by_id

@@ -229,10 +229,10 @@ pub mod launchpad_psp34_nft_standard {
             assert!(self.validate_phase_schedule(start_time, end_time));
 
             let byte_phase_code = phase_code.into_bytes();
-            self.manager.last_phase_id += 1;
-            self.manager.active_phase_count += 1;
+            self.manager.last_phase_id = self.manager.last_phase_id.checked_add(1).unwrap();
+            self.manager.active_phase_count = self.manager.active_phase_count.checked_add(1).unwrap();
             if is_public {
-                self.manager.available_token_amount -= public_minting_amount;
+                self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(public_minting_amount).unwrap();
                 assert!(self.manager.available_token_amount >= 0);
             }
             let phase = if is_public {
@@ -318,7 +318,7 @@ pub mod launchpad_psp34_nft_standard {
             if  self.manager.phase_whitelists_link.get(&(&account, &phase_id)).is_some() {
                 return Err(Error::InvalidInput);
             }
-            self.manager.whitelist_count += 1;
+            self.manager.whitelist_count = self.manager.whitelist_count.checked_add(1).unwrap();
             let whitelist = Whitelist {
                 whitelist_amount: whitelist_amount,
                 claimed_amount: 0,
@@ -346,15 +346,15 @@ pub mod launchpad_psp34_nft_standard {
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
                 if phase.is_active && current_time > phase.end_time {
-                    available_amount += phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap();
+                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap()).unwrap();
                 }
             }
             assert!(mint_amount <= available_amount.checked_sub(self.manager.owner_claimed_amount).unwrap());
             for _i in 0..mint_amount {
-                self.manager_psp34_standard.last_token_id += 1;
+                self.manager_psp34_standard.last_token_id = self.manager_psp34_standard.last_token_id.checked_add(1).unwrap();
                 assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
             }
-            self.manager.owner_claimed_amount += mint_amount;
+            self.manager.owner_claimed_amount = self.manager.owner_claimed_amount.checked_add(mint_amount).unwrap();
             Ok(())
         }
 
@@ -392,8 +392,8 @@ pub mod launchpad_psp34_nft_standard {
                 }
 
                 for _i in 0..mint_amount {
-                    self.manager_psp34_standard.last_token_id += 1;
-                    self.manager.public_minted_count += 1;
+                    self.manager_psp34_standard.last_token_id = self.manager_psp34_standard.last_token_id.checked_add(1).unwrap();
+                    self.manager.public_minted_count = self.manager.public_minted_count.checked_add(1).unwrap();
                     assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
                 }
 
@@ -453,7 +453,7 @@ pub mod launchpad_psp34_nft_standard {
                 self.manager.phase_whitelists_link.insert(&(&caller, &phase_id), &caller_info);
 
                 for _i in 0..mint_amount {
-                    self.manager_psp34_standard.last_token_id += 1;
+                    self.manager_psp34_standard.last_token_id = self.manager_psp34_standard.last_token_id.checked_add(1).unwrap();
                     assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
                 }
                 let mut phase = self.manager.phases.get(&phase_id).unwrap();
@@ -487,7 +487,7 @@ pub mod launchpad_psp34_nft_standard {
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
             assert!(phase.claimed_amount == 0 && self.manager.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp() && !phase.is_active);
             phase.is_active = false;
-            self.manager.active_phase_count -= 1;
+            self.manager.active_phase_count = self.manager.active_phase_count.checked_sub(1).unwrap();
             if phase.is_public {
                 self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount).unwrap();
             }
@@ -643,7 +643,7 @@ pub mod launchpad_psp34_nft_standard {
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
                 if phase.is_active && current_time > phase.end_time {
-                    available_amount += phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap();
+                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap()).unwrap();
                 }
             }
             return available_amount;
@@ -785,7 +785,7 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             if !exist {
-                self.manager_psp34_standard.attribute_count += 1;
+                self.manager_psp34_standard.attribute_count = self.manager_psp34_standard.attribute_count.checked_add(1).unwrap();
                 self.manager_psp34_standard.attribute_names.insert(&self.manager_psp34_standard.attribute_count, &attribute_input);
             }
         }

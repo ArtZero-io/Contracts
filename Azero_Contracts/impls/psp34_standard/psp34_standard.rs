@@ -46,7 +46,7 @@ where
         let caller = T::env().caller();
         let token_owner = self.owner_of(token_id.clone()).unwrap();
         assert!(caller == token_owner);
-        self.data::<Manager>().locked_token_count += 1;
+        self.data::<Manager>().locked_token_count = self.data::<Manager>().locked_token_count.checked_add(1).unwrap();
         self.data::<Manager>().locked_tokens.insert(&token_id, &1);
         Ok(())
     }
@@ -156,7 +156,7 @@ fn add_attribute_name<T: Storage<Manager>>(
         }
     }
     if !exist {
-        instance.data::<Manager>().attribute_count += 1;
+        instance.data::<Manager>().attribute_count = instance.data::<Manager>().attribute_count.checked_add(1).unwrap();
         let data = &mut instance.data::<Manager>();
         data.attribute_names.insert(&data.attribute_count, &attribute_input);
     }

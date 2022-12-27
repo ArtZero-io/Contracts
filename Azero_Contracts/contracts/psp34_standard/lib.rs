@@ -62,7 +62,7 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         pub fn mint(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
-            self.manager.last_token_id += 1;
+            self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
             assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
             Ok(())
         }
@@ -72,7 +72,7 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error> {
             let caller = self.env().caller();
-            self.manager.last_token_id += 1;
+            self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
             self._mint_to(caller, Id::U64(self.manager.last_token_id))?;
             self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata);
             Ok(())
