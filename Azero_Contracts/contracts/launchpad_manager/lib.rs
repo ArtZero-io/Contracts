@@ -8,7 +8,6 @@ pub mod artzero_launchpad_psp34 {
         string::{
             String,
         },
-        vec,
         vec::Vec,
     };
     use ink_storage::{
@@ -18,14 +17,14 @@ pub mod artzero_launchpad_psp34 {
         contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
-        traits::Storage,
+        traits::{
+            Storage,
+            ZERO_ADDRESS
+        }
     };
     use artzero_project::{
         impls::launchpad_manager::*,
         traits::{
-            psp34_standard::{
-                psp34traits_external::Psp34Traits
-            },
             launchpad_manager::{
                 *
             },
@@ -34,7 +33,6 @@ pub mod artzero_launchpad_psp34 {
         }
     };
     use launchpad_psp34_nft_standard::launchpad_psp34_nft_standard::LaunchPadPsp34NftStandardRef;
-    use artzero_project::traits::psp34_standard::*;
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
@@ -90,6 +88,7 @@ pub mod artzero_launchpad_psp34 {
         }
 
         #[ink(message)]
+        #[modifiers(only_owner)]
         pub fn initialize(
             &mut self,
             max_phases_per_project: u8,
@@ -98,7 +97,10 @@ pub mod artzero_launchpad_psp34 {
             project_adding_fee: Balance,
             project_mint_fee_rate: u32,
             public_max_minting_amount: u64
-        ) -> Result<(), OwnableError> {
+        ) -> Result<(), Error> {
+            if self.manager.admin_address != ZERO_ADDRESS.into(){
+                return Err(Error::AlreadyInit);
+            }
             self.manager.admin_address = admin_address;
             self.manager.standard_nft_hash = standard_nft_hash;
             self.manager.project_count = 0;
