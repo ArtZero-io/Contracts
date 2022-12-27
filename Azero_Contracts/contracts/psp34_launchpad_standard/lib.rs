@@ -14,9 +14,12 @@ pub mod launchpad_psp34_nft_standard {
             SpreadLayout,
         }
     };
-
-    use ink_prelude::vec::Vec;
-    use ink_prelude::string::ToString;
+    use ink_prelude::{
+        string::{
+            String,
+        },
+        vec::Vec,
+    };
     use openbrush::{
         contracts::access_control::*,
         contracts::ownable::*,
@@ -37,7 +40,7 @@ pub mod launchpad_psp34_nft_standard {
     use artzero_project::{
         traits::{
             psp34_standard::*,
-            launchpad_manager::ArtZeroLaunchPadRef
+            launchpad_manager::ArtZeroLaunchPadRef,
             admin::*,
             error::Error,
         }

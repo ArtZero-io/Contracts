@@ -48,6 +48,8 @@ pub mod artzero_launchpad_psp34 {
         #[storage_field]
         admin_data: artzero_project::impls::admin::data::Data,
     }
+    // ADMINER RoleType = 3739740293
+    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
 
     impl AccessControl for ArtZeroLaunchPadPSP34 {}
     impl Ownable for ArtZeroLaunchPadPSP34 {}
