@@ -67,15 +67,15 @@ pub mod artzero_collection_manager {
         #[ink(constructor)]
         pub fn new(
             admin_address: AccountId,
-            owner_address: AccountId,
             standard_nft_hash: Hash,
             simple_mode_adding_fee: Balance,
             advance_mode_adding_fee: Balance,
             max_royal_fee_rate: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._init_with_owner(owner_address);
-                instance._init_with_admin(instance.env().caller());
+                let caller = instance.env().caller();
+                instance._init_with_owner(caller);
+                instance._init_with_admin(caller);
                 instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 instance
                     .initialize(
