@@ -24,7 +24,8 @@ pub mod artzero_marketplace_psp34 {
             },
         },
         traits::{
-            Storage
+            Storage,
+            ZERO_ADDRESS
         },
         storage::{
             Mapping,
@@ -203,7 +204,10 @@ pub mod artzero_marketplace_psp34 {
             collection_contract_address: AccountId,
             staking_contract_address: AccountId,
             platform_fee: u32,
-        ) -> Result<(), OwnableError> {
+        ) -> Result<(), Error> {
+            if self.manager.collection_contract_address != ZERO_ADDRESS.into(){
+                return Err(Error::AlreadyInit);
+            }
             self.manager.collection_contract_address = collection_contract_address;
             self.manager.staking_contract_address = staking_contract_address;
             self.manager.platform_fee = platform_fee;
