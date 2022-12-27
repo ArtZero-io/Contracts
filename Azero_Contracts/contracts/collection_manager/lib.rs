@@ -120,12 +120,12 @@ pub mod artzero_collection_manager {
             &mut self,
             nft_name: String,
             nft_symbol: String,
-            collection_owner: AccountId,
             attributes: Vec<String>,
             attribute_vals: Vec<String>,
             is_collect_royal_fee: bool,
             royal_fee: u32,
         ) -> Result<(), Error> {
+            let collection_owner = self.env().caller();
             // Check if caller sends correct adding fee to the contract
             assert!(
                 self.manager.simple_mode_adding_fee == self.env().transferred_value(),
@@ -197,7 +197,6 @@ pub mod artzero_collection_manager {
         #[ink(payable)]
         pub fn add_new_collection(
             &mut self,
-            collection_owner: AccountId,
             nft_contract_address: AccountId,
             attributes: Vec<String>,
             attribute_vals: Vec<String>,
