@@ -18,6 +18,7 @@ pub enum Error {
     NotApproved,
     CannotTransfer,
     NotEnoughBalance,
+    AlreadyInit,
     //use in psp34_standard
     NotOwner,
     //use in launchpad_manager

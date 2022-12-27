@@ -18,7 +18,10 @@ pub mod artzero_collection_manager {
         contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
-        traits::Storage,
+        traits::{
+            Storage,
+            ZERO_ADDRESS
+        }
     };
     use artzero_project::{
         impls::collection_manager::*,
@@ -96,7 +99,10 @@ pub mod artzero_collection_manager {
             simple_mode_adding_fee: Balance,
             advance_mode_adding_fee: Balance,
             max_royal_fee_rate: u32,
-        ) -> Result<(), OwnableError> {
+        ) -> Result<(), Error> {
+            if self.manager.admin_address != ZERO_ADDRESS.into(){
+                return Err(Error::AlreadyInit);
+            }
             self.manager.collection_count = 0;
             self.manager.active_collection_count = 0;
             self.manager.simple_mode_adding_fee = simple_mode_adding_fee;
