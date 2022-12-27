@@ -21,7 +21,6 @@ pub mod psp34_nft {
         contracts::psp34::extensions::{
             enumerable::*,
             metadata::*,
-            burnable::*
         },
         traits::Storage,
         modifiers,
@@ -46,7 +45,6 @@ pub mod psp34_nft {
     impl PSP34 for Psp34Nft {}
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
-    impl PSP34Burnable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
 
     impl Psp34Nft {

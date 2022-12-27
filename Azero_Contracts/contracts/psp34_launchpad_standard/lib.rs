@@ -26,7 +26,6 @@ pub mod launchpad_psp34_nft_standard {
         contracts::psp34::extensions::{
             enumerable::*,
             metadata::*,
-            burnable::*
         },
         storage::{
             MultiMapping,
@@ -156,7 +155,6 @@ pub mod launchpad_psp34_nft_standard {
     impl PSP34 for LaunchPadPsp34NftStandard {}
     impl PSP34Metadata for LaunchPadPsp34NftStandard {}
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
-    impl PSP34Burnable for LaunchPadPsp34NftStandard {}
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
     impl ArtZeroAdminTrait for LaunchPadPsp34NftStandard {}
