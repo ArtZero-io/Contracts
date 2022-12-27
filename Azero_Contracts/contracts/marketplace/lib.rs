@@ -6,7 +6,6 @@ pub mod artzero_marketplace_psp34 {
     use ink_env::CallFlags;
     use ink_prelude::{
         vec,
-        string::String,
         vec::Vec,
     };
     use ink_storage::{
@@ -39,30 +38,10 @@ pub mod artzero_marketplace_psp34 {
             staking::ArtZeroStakingRef,
             collection_manager::ArtZeroCollectionRef,
             psp34_standard::*,
+            admin::*,
+            error::Error,
         }
     };
-
-    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub enum Error {
-        Custom(String),
-        TokenOwnerNotMatch,
-        NotApproved,
-        CannotTransfer,
-        NotListed,
-        BidAlreadyExist,
-        BidNotExist,
-        NotEnoughBalance,
-    }
-
-    impl From<OwnableError> for Error {
-        fn from(ownable: OwnableError) -> Self {
-            match ownable {
-                OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
-                OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-            }
-        }
-    }
 
     #[derive(
         Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode,
@@ -137,10 +116,14 @@ pub mod artzero_marketplace_psp34 {
     pub struct ArtZeroMarketplacePSP34 {
         #[storage_field]
         ownable: ownable::Data,
+        #[storage_field]
+        admin_data: artzero_project::impls::admin::data::Data,
         manager: Manager,
+
     }
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
+    impl ArtZeroAdminTrait for ArtZeroMarketplacePSP34 {}
 
     #[ink(event)]
     pub struct NewListEvent {
@@ -1018,17 +1001,6 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         pub fn get_current_profit(&self) -> Balance {
             self.manager.current_profit
-        }
-
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
-            if value > self.env().balance() {
-                return Err(Error::NotEnoughBalance)
-            }
-            assert!(self.env().transfer(self.env().caller(), value).is_ok());
-            Ok(())
         }
 
         /// Withdraw Profit - only Owner

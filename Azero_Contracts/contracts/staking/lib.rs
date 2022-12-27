@@ -30,11 +30,9 @@ pub mod artzero_staking_nft {
             staking::*,
         },
         traits::{
-            staking::{
-                Error
-            },
             psp34_standard::*,
-            admin::*
+            admin::*,
+            error::Error,
         },
 
     };
@@ -496,16 +494,6 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
-        // /// Withdraw Fees - only Owner
-        // #[ink(message)]
-        // #[modifiers(only_owner)]
-        // pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
-        //     assert!(value <= self.env().balance());
-        //     if self.env().transfer(self.env().caller(), value).is_err() {
-        //         panic!("error withdraw_fee")
-        //     }
-        //     Ok(())
-        // }
         /// Transfer NFT token
         #[ink(message)]
         #[modifiers(only_owner)]

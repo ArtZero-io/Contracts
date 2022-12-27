@@ -5,7 +5,6 @@ use ink_prelude::{
     vec::Vec,
 };
 use openbrush::{
-    contracts::ownable::*,
     contracts::psp34::extensions::{
         enumerable::*,
         metadata::*
@@ -14,6 +13,7 @@ use openbrush::{
         AccountId
     }
 };
+use crate::traits::error::Error;
 
 #[openbrush::wrapper]
 pub type Psp34Ref = dyn Psp34Traits + PSP34 + PSP34Metadata;
@@ -60,20 +60,4 @@ pub trait Psp34Traits {
     /// This function allows NFT Owner to burn their NFT
     #[ink(message)]
     fn burn(&mut self, id: Id) -> Result<(), PSP34Error>;
-}
-
-#[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-pub enum Error {
-    Custom(String),
-    NotOwner,
-}
-
-impl From<OwnableError> for Error {
-    fn from(ownable: OwnableError) -> Self {
-        match ownable {
-            OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
-            OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-        }
-    }
 }

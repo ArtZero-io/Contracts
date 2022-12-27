@@ -27,6 +27,7 @@ pub mod psp34_nft {
         modifiers,
     };
     use artzero_project::traits::psp34_standard::*;
+    use artzero_project::traits::error::Error;
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]

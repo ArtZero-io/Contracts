@@ -14,9 +14,11 @@ use openbrush::{
 impl<T: Storage<Data>> ArtZeroAdminTrait for T {
 
     default fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
-        assert!(value <= T::env().balance());
+        if value > T::env().balance() {
+            return Err(Error::NotEnoughBalance)
+        }
         if T::env().transfer(T::env().caller(), value).is_err() {
-            panic!("error withdraw_fee")
+            return Err(Error::WithdrawFeeError)
         }
         Ok(())
     }

@@ -1,11 +1,7 @@
 use openbrush::{
-    contracts::ownable::*,
     traits::{
         AccountId,
     }
-};
-use ink_prelude::{
-    string::String,
 };
 
 #[openbrush::wrapper]
@@ -25,23 +21,4 @@ pub trait ArtZeroCollectionTrait {
     /// This function returns the Owner of a Collection
     #[ink(message)]
     fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId>;
-}
-
-#[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-pub enum Error {
-    Custom(String),
-    CollectionOwnerAndAdmin,
-    OnlyOwner,
-    OnlyAdmin,
-    InvalidCaller,
-}
-
-impl From<OwnableError> for Error {
-    fn from(ownable: OwnableError) -> Self {
-        match ownable {
-            OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
-            OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-        }
-    }
 }

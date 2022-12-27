@@ -7,7 +7,6 @@ pub use self::launchpad_psp34_nft_standard::{
 
 #[openbrush::contract]
 pub mod launchpad_psp34_nft_standard {
-    use ink_prelude::string::String;
     use ink_storage::{
         traits::{
             PackedLayout,
@@ -35,9 +34,14 @@ pub mod launchpad_psp34_nft_standard {
         traits::Storage,
         modifiers,
     };
-    use artzero_project::traits::psp34_standard::*;
-    use artzero_project::impls::psp34_standard::*;
-    use artzero_project::traits::launchpad_manager::ArtZeroLaunchPadRef;
+    use artzero_project::{
+        traits::{
+            psp34_standard::*,
+            launchpad_manager::ArtZeroLaunchPadRef
+            admin::*,
+            error::Error,
+        }
+    };
 
     #[derive(
         Copy,
@@ -59,7 +63,7 @@ pub mod launchpad_psp34_nft_standard {
         claimed_amount: u64,
         minting_fee: Balance
     }
-    
+
     #[derive(
         Clone,
         Debug,
@@ -88,9 +92,9 @@ pub mod launchpad_psp34_nft_standard {
         start_time: Timestamp,
         end_time: Timestamp
     }
-    
+
     pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
-    
+
     #[derive(Default)]
     #[openbrush::upgradeable_storage(STORAGE_KEY)]
     pub struct Manager {
@@ -109,54 +113,19 @@ pub mod launchpad_psp34_nft_standard {
         pub active_phase_count: u8,
         pub available_token_amount: u64,
         pub owner_claimed_amount: u64,
-        pub _reserved: Option<()>,  
+        pub _reserved: Option<()>,
     }
-    
+
     pub struct PhaseAccountPublicClaimedAmountKeys;
-    
+
     impl<'a> TypeGuard<'a> for PhaseAccountPublicClaimedAmountKeys {
         type Type = &'a (&'a AccountId, &'a u8);
     }
-    
+
     pub struct PhaseWhitelistsLinkKeys;
-    
+
     impl<'a> TypeGuard<'a> for PhaseWhitelistsLinkKeys {
         type Type = &'a (&'a AccountId, &'a u8);
-    }
-    
-    #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub enum Error {
-        Custom(String),
-        InvalidInput,
-        ClaimedAll,
-        TokenLimitReached,
-        PhaseNotExist,
-        PhaseExpired,
-        WhitelistNotExist
-    }
-
-    impl From<AccessControlError> for Error {
-        fn from(access: AccessControlError) -> Self {
-            match access {
-                AccessControlError::MissingRole => Error::Custom(String::from("AC::MissingRole")),
-                AccessControlError::RoleRedundant => {
-                    Error::Custom(String::from("AC::RoleRedundant"))
-                }
-                AccessControlError::InvalidCaller => {
-                    Error::Custom(String::from("AC::InvalidCaller"))
-                }
-            }
-        }
-    }
-
-    impl From<OwnableError> for Error {
-        fn from(ownable: OwnableError) -> Self {
-            match ownable {
-                OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
-                OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-            }
-        }
     }
 
     #[derive(Default, SpreadAllocate, Storage)]
@@ -173,7 +142,9 @@ pub mod launchpad_psp34_nft_standard {
         #[storage_field]
         manager: Manager,
         #[storage_field]
-        manager_psp34_standard: artzero_project::impls::psp34_standard::data::Manager
+        manager_psp34_standard: artzero_project::impls::psp34_standard::data::Manager,
+        #[storage_field]
+        admin_data: artzero_project::impls::admin::data::Data,
     }
 
     const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
@@ -185,14 +156,15 @@ pub mod launchpad_psp34_nft_standard {
     impl PSP34Burnable for LaunchPadPsp34NftStandard {}
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
-    
+    impl ArtZeroAdminTrait for LaunchPadPsp34NftStandard {}
+
     impl LaunchPadPsp34NftStandard {
 
         #[ink(constructor)]
         pub fn new(
             launchpad_contract_address: AccountId,
-            limit_phase_count: u8, 
-            contract_owner: AccountId, 
+            limit_phase_count: u8,
+            contract_owner: AccountId,
             total_supply: u64,
             project_info: String,
             code_phases: Vec<String>,
@@ -221,7 +193,7 @@ pub mod launchpad_psp34_nft_standard {
                     code_phases.len() == public_minting_fee_phases.len() &&
                     code_phases.len() == public_minting_amount_phases.len() &&
                     code_phases.len() == public_max_minting_amount_phases.len() &&
-                    code_phases.len() == end_time_phases.len() && 
+                    code_phases.len() == end_time_phases.len() &&
                     code_phases.len() as u8 <= limit_phase_count {
                     let phase_length = code_phases.len();
                     for i in 0..phase_length {
@@ -231,7 +203,7 @@ pub mod launchpad_psp34_nft_standard {
                             public_minting_fee_phases[i].clone(),
                             public_minting_amount_phases[i].clone(),
                             public_max_minting_amount_phases[i].clone(),
-                            start_time_phases[i].clone(), 
+                            start_time_phases[i].clone(),
                             end_time_phases[i].clone()
                         );
                     }
@@ -242,7 +214,7 @@ pub mod launchpad_psp34_nft_standard {
         ///Add new phare
         #[ink(message)]
         pub fn add_new_phase(
-            &mut self, 
+            &mut self,
             phase_code: String,
             is_public: bool,
             public_minting_fee: Balance,
@@ -254,7 +226,7 @@ pub mod launchpad_psp34_nft_standard {
             assert!(self.has_role(ADMINER, self.env().caller()) || self.env().caller() == self.manager.launchpad_contract_address);
             assert!(self.manager.active_phase_count.checked_add(1).unwrap() <= self.manager.limit_phase_count);
             assert!(self.validate_phase_schedule(start_time, end_time));
-            
+
             let byte_phase_code = phase_code.into_bytes();
             self.manager.last_phase_id += 1;
             self.manager.active_phase_count += 1;
@@ -274,8 +246,8 @@ pub mod launchpad_psp34_nft_standard {
                     whitelist_amount: 0,
                     claimed_amount: 0,
                     total_amount: public_minting_amount,
-                    start_time: start_time, 
-                    end_time: end_time                   
+                    start_time: start_time,
+                    end_time: end_time
                 }
             } else {
                 Phase {
@@ -289,8 +261,8 @@ pub mod launchpad_psp34_nft_standard {
                     whitelist_amount: 0,
                     claimed_amount: 0,
                     total_amount: 0,
-                    start_time: start_time, 
-                    end_time: end_time                   
+                    start_time: start_time,
+                    end_time: end_time
                 }
             };
             self.manager.phases.insert(&self.manager.last_phase_id, &phase);
@@ -375,7 +347,7 @@ pub mod launchpad_psp34_nft_standard {
                 if phase.is_active && current_time > phase.end_time {
                     available_amount += phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap();
                 }
-            }  
+            }
             assert!(mint_amount <= available_amount.checked_sub(self.manager.owner_claimed_amount).unwrap());
             for _i in 0..mint_amount {
                 self.manager_psp34_standard.last_token_id += 1;
@@ -417,13 +389,13 @@ pub mod launchpad_psp34_nft_standard {
                         .transfer(self.manager.launchpad_contract_address, project_mint_fee)
                         .is_ok());
                 }
-                
+
                 for _i in 0..mint_amount {
                     self.manager_psp34_standard.last_token_id += 1;
                     self.manager.public_minted_count += 1;
                     assert!(self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_ok());
                 }
-                
+
                 if self.manager.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).is_none() {
                     self.manager.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &mint_amount);
                 } else {
@@ -490,20 +462,7 @@ pub mod launchpad_psp34_nft_standard {
             } else {
                 return Err(Error::PhaseExpired);
             }
-            
-        }
 
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
-            assert!(value <= self.env().balance());
-            if self.env().transfer(self.env().caller(), value).is_err() {
-                panic!(
-                    "error withdraw_fee"
-                )
-            }
-            Ok(())
         }
 
         /// Update admin address
@@ -518,7 +477,7 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn deactive_phase(
-            &mut self, 
+            &mut self,
             phase_id: u8
         ) -> Result<(), Error> {
             if self.manager.phases.get(&phase_id).is_none() {
@@ -539,7 +498,7 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_schedule_phase(
-            &mut self, 
+            &mut self,
             phase_id: u8,
             phase_code: String,
             is_public: bool,
@@ -553,7 +512,7 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             assert!(
-                public_max_minting_amount <= ArtZeroLaunchPadRef::get_public_max_minting_amount(&self.manager.launchpad_contract_address) || 
+                public_max_minting_amount <= ArtZeroLaunchPadRef::get_public_max_minting_amount(&self.manager.launchpad_contract_address) ||
                 start_time < end_time
             );
             for index in 0..self.manager.last_phase_id {
@@ -567,8 +526,8 @@ pub mod launchpad_psp34_nft_standard {
                 }
             }
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            assert!(phase.is_active && 
-                phase.claimed_amount == 0 && 
+            assert!(phase.is_active &&
+                phase.claimed_amount == 0 &&
                 self.manager.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp()
             );
             phase.title = phase_code.clone().into_bytes();
@@ -586,7 +545,7 @@ pub mod launchpad_psp34_nft_standard {
             phase.is_public = is_public.clone();
             phase.start_time = start_time.clone();
             phase.end_time = end_time.clone();
-            
+
             if is_public {
                 phase.public_minting_fee = public_minting_fee.clone();
                 phase.public_minting_amount = public_minting_amount.clone();
@@ -604,7 +563,7 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_schedule_phases(
-            &mut self, 
+            &mut self,
             id_phases: Vec<u8>,
             code_phases: Vec<String>,
             is_public_phases: Vec<bool>,
@@ -619,7 +578,7 @@ pub mod launchpad_psp34_nft_standard {
                 id_phases.len() != public_minting_fee_phases.len() ||
                 id_phases.len() != public_minting_amount_phases.len() ||
                 id_phases.len() != public_max_minting_amount_phases.len() ||
-                id_phases.len() != start_time_phases.len() || 
+                id_phases.len() != start_time_phases.len() ||
                 id_phases.len() != end_time_phases.len() {
                 return Err(Error::InvalidInput);
             }
@@ -688,7 +647,7 @@ pub mod launchpad_psp34_nft_standard {
             }
             return available_amount;
         }
-        
+
         /// Get limit phase count
         #[ink(message)]
         pub fn get_limit_phase_count(
@@ -742,9 +701,9 @@ pub mod launchpad_psp34_nft_standard {
 
         /// Get phase Account Link
         #[ink(message)]
-        pub fn get_phase_account_link( 
+        pub fn get_phase_account_link(
             &self,
-            phase_id: u8, 
+            phase_id: u8,
             account_index: u64
         ) -> AccountId {
             return self.manager.phase_account_link.get_value(phase_id, &(account_index as u128)).unwrap();
@@ -783,17 +742,17 @@ pub mod launchpad_psp34_nft_standard {
             return self.manager.whitelist_count;
         }
 
-        ///Get phase Count 
+        ///Get phase Count
         #[ink(message)]
         pub fn get_last_phase_id(&self) -> u8 {
             return self.manager.last_phase_id;
-        }  
+        }
 
         ///Get active phase count
         #[ink(message)]
         pub fn get_active_phase_count(&self) -> u8 {
             return self.manager.active_phase_count;
-        } 
+        }
 
         ///Get Token Count
         #[ink(message)]

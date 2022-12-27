@@ -27,6 +27,7 @@ use ink_prelude::{
     },
     vec::Vec,
 };
+use crate::traits::error::Error;
 
 impl<T: Storage<Manager>> Psp34Traits for T
 where

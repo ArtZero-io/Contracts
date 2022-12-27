@@ -23,13 +23,8 @@ pub mod artzero_collection_manager {
     use artzero_project::{
         impls::collection_manager::*,
         traits::{
-            psp34_standard::{
-                psp34traits_external::Psp34Traits
-            },
-            collection_manager::{
-                Error,
-                *
-            }
+            admin::*,
+            error::Error,
         }
     };
     use psp34_nft::psp34_nft::Psp34NftRef;
@@ -44,6 +39,8 @@ pub mod artzero_collection_manager {
         access: access_control::Data,
         #[storage_field]
         manager: artzero_project::impls::collection_manager::data::Manager,
+        #[storage_field]
+        admin_data: artzero_project::impls::admin::data::Data,
     }
 
     #[ink(event)]
@@ -58,6 +55,7 @@ pub mod artzero_collection_manager {
     impl AccessControl for ArtZeroCollectionManager {}
     impl Ownable for ArtZeroCollectionManager {}
     impl ArtZeroCollectionTrait for ArtZeroCollectionManager {}
+    impl ArtZeroAdminTrait for ArtZeroCollectionManager {}
 
     impl ArtZeroCollectionManager {
         /// Collection Contract Manager manages all collections on ArtZero platform. User can create in simple mode or in advanced mode
@@ -471,18 +469,6 @@ pub mod artzero_collection_manager {
         #[modifiers(only_owner)]
         pub fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
             self.manager.admin_address = admin_address;
-            Ok(())
-        }
-
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self, value: Balance) -> Result<(), Error> {
-            assert!(value <= self.env().balance(), "not enough balance");
-            assert!(
-                self.env().transfer(self.env().caller(), value).is_ok(),
-                "error withdraw_fee"
-            );
             Ok(())
         }
 

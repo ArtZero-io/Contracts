@@ -27,14 +27,15 @@ pub mod artzero_launchpad_psp34 {
                 psp34traits_external::Psp34Traits
             },
             launchpad_manager::{
-                Error,
                 *
-            }
+            },
+            admin::*,
+            error::Error,
         }
     };
     use launchpad_psp34_nft_standard::launchpad_psp34_nft_standard::LaunchPadPsp34NftStandardRef;
     use artzero_project::traits::psp34_standard::*;
-    
+
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
     pub struct ArtZeroLaunchPadPSP34 {
@@ -44,11 +45,14 @@ pub mod artzero_launchpad_psp34 {
         access: access_control::Data,
         #[storage_field]
         manager: artzero_project::impls::launchpad_manager::data::Manager,
+        #[storage_field]
+        admin_data: artzero_project::impls::admin::data::Data,
     }
 
     impl AccessControl for ArtZeroLaunchPadPSP34 {}
     impl Ownable for ArtZeroLaunchPadPSP34 {}
     impl ArtZeroLaunchPadTrait for ArtZeroLaunchPadPSP34 {}
+    impl ArtZeroAdminTrait for ArtZeroLaunchPadPSP34 {}
 
     #[ink(event)]
     pub struct AddNewProjectEvent {
@@ -60,7 +64,7 @@ pub mod artzero_launchpad_psp34 {
         #[ink(constructor)]
         pub fn new(
             max_phases_per_project: u8,
-            admin_address: AccountId, 
+            admin_address: AccountId,
             owner_address: AccountId,
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
@@ -73,11 +77,11 @@ pub mod artzero_launchpad_psp34 {
                 _instance._init_with_admin(_instance.env().caller());
                 _instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 _instance.initialize(
-                    max_phases_per_project, 
-                    admin_address, 
-                    standard_nft_hash, 
-                    project_adding_fee, 
-                    project_mint_fee_rate, 
+                    max_phases_per_project,
+                    admin_address,
+                    standard_nft_hash,
+                    project_adding_fee,
+                    project_mint_fee_rate,
                     public_max_minting_amount
                 ).ok().unwrap()
             })
@@ -127,7 +131,7 @@ pub mod artzero_launchpad_psp34 {
             // assert!(start_time > Self::env().block_timestamp());
             assert!(start_time < end_time && self.manager.project_adding_fee == self.env().transferred_value(), "invalid fee");
             let contract = LaunchPadPsp34NftStandardRef::new(
-                Self::env().account_id(), 
+                Self::env().account_id(),
                 self.manager.max_phases_per_project,
                 project_owner,
                 total_supply,
@@ -137,7 +141,7 @@ pub mod artzero_launchpad_psp34 {
                 public_minting_fee_phases,
                 public_minting_amount_phases,
                 public_max_minting_amount_phases,
-                start_time_phases, 
+                start_time_phases,
                 end_time_phases
             ).endowment(0)
                 .code_hash(self.manager.standard_nft_hash)
@@ -189,27 +193,12 @@ pub mod artzero_launchpad_psp34 {
             if self.manager.projects.get(&contract_address).is_none(){
                 return Err(Error::ProjectNotExist);
             }
-            assert!(start_time < end_time);            
+            assert!(start_time < end_time);
             let mut project = self.manager.projects.get(&contract_address).unwrap();
             assert!(self.has_role(ADMINER, self.env().caller()) && project.end_time > Self::env().block_timestamp());
             project.end_time = end_time;
             project.start_time = start_time;
             self.manager.projects.insert(&contract_address, &project);
-            Ok(())
-        }
-
-        /// Withdraw Fees - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_fee(&mut self,value: Balance)  -> Result<(), Error> {
-            if value > self.env().balance() {
-                return Err(Error::NotEnoughBalance);
-            }
-            if self.env().transfer(self.env().caller(), value).is_err() {
-                panic!(
-                    "error withdraw_fee"
-                )
-            }
             Ok(())
         }
 
@@ -259,7 +248,7 @@ pub mod artzero_launchpad_psp34 {
             self.manager.project_mint_fee_rate = project_mint_fee_rate;
             Ok(())
         }
-        
+
         /// Update standard nft hash - Only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -296,7 +285,7 @@ pub mod artzero_launchpad_psp34 {
 
 
         /* END SETTERS */
-        
+
         /* GETTERS */
 
         /// Get Project Adding Fee
@@ -306,7 +295,7 @@ pub mod artzero_launchpad_psp34 {
         ) -> Balance {
             return self.manager.project_adding_fee;
         }
-        
+
         /// Get active project count
         #[ink(message)]
         pub fn get_active_project_count(
@@ -325,7 +314,7 @@ pub mod artzero_launchpad_psp34 {
 
         /// Get project count
         #[ink(message)]
-        pub fn get_project_count(   
+        pub fn get_project_count(
             &self
         ) -> u64 {
             return self.manager.project_count;
@@ -333,7 +322,7 @@ pub mod artzero_launchpad_psp34 {
 
         /// Get standard nft hash
         #[ink(message)]
-        pub fn get_standard_nft_hash(   
+        pub fn get_standard_nft_hash(
             &self
         ) -> Hash {
             return self.manager.standard_nft_hash;
@@ -362,7 +351,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_project_by_nft_address(
             &self,
             nft_contract_address: AccountId
-        ) -> Option<Project> {  
+        ) -> Option<Project> {
             return Some(self.manager.projects.get(&nft_contract_address))?;
         }
 
