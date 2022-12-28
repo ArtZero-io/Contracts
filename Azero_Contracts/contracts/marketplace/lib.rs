@@ -182,14 +182,14 @@ pub mod artzero_marketplace_psp34 {
     impl ArtZeroMarketplacePSP34 {
         #[ink(constructor)]
         pub fn new(
-            contract_owner: AccountId,
             collection_contract_address: AccountId,
             staking_contract_address: AccountId,
             platform_fee: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 assert!(platform_fee < 10000); // must less than 100%
-                instance._init_with_owner(contract_owner);
+                let caller = instance.env().caller();
+                instance._init_with_owner(caller);
                 instance
                     .initialize(collection_contract_address, staking_contract_address, platform_fee)
                     .ok()

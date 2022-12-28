@@ -65,7 +65,6 @@ pub mod artzero_launchpad_psp34 {
         pub fn new(
             max_phases_per_project: u8,
             admin_address: AccountId,
-            owner_address: AccountId,
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
             project_mint_fee_rate: u32, //1% = 100
@@ -73,8 +72,9 @@ pub mod artzero_launchpad_psp34 {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
                 assert!(project_mint_fee_rate < 10000);
-                _instance._init_with_owner(owner_address);
-                _instance._init_with_admin(_instance.env().caller());
+                let caller = _instance.env().caller();
+                _instance._init_with_owner(caller);
+                _instance._init_with_admin(caller);
                 _instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 _instance.initialize(
                     max_phases_per_project,

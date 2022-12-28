@@ -95,14 +95,14 @@ pub mod artzero_staking_nft {
     impl ArtZeroStakingNFT {
         #[ink(constructor)]
         pub fn new(
-            contract_owner: AccountId,
             admin_address: AccountId,
             artzero_nft_contract: AccountId,
             limit_unstake_time: u64,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._init_with_owner(contract_owner);
-                instance._init_with_admin(instance.env().caller());
+                let caller = instance.env().caller();
+                instance._init_with_owner(caller);
+                instance._init_with_admin(caller);
                 instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 instance
                     .initialize(artzero_nft_contract, limit_unstake_time, admin_address)
