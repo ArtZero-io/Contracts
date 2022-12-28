@@ -58,7 +58,7 @@ pub mod artzero_collection_manager {
     impl AccessControl for ArtZeroCollectionManager {}
     impl Ownable for ArtZeroCollectionManager {}
     impl ArtZeroCollectionTrait for ArtZeroCollectionManager {}
-    impl ArtZeroAdminTrait for ArtZeroCollectionManager {}
+    impl AdminTrait for ArtZeroCollectionManager {}
 
     impl ArtZeroCollectionManager {
         /// Collection Contract Manager manages all collections on ArtZero platform. User can create in simple mode or in advanced mode

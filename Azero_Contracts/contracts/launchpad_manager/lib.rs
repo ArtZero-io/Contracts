@@ -25,9 +25,6 @@ pub mod artzero_launchpad_psp34 {
     use artzero_project::{
         impls::launchpad_manager::*,
         traits::{
-            launchpad_manager::{
-                *
-            },
             admin::*,
             error::Error,
         }
@@ -52,7 +49,7 @@ pub mod artzero_launchpad_psp34 {
     impl AccessControl for ArtZeroLaunchPadPSP34 {}
     impl Ownable for ArtZeroLaunchPadPSP34 {}
     impl ArtZeroLaunchPadTrait for ArtZeroLaunchPadPSP34 {}
-    impl ArtZeroAdminTrait for ArtZeroLaunchPadPSP34 {}
+    impl AdminTrait for ArtZeroLaunchPadPSP34 {}
 
     #[ink(event)]
     pub struct AddNewProjectEvent {

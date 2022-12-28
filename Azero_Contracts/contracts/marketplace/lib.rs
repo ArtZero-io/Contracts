@@ -124,7 +124,7 @@ pub mod artzero_marketplace_psp34 {
     }
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
-    impl ArtZeroAdminTrait for ArtZeroMarketplacePSP34 {}
+    impl AdminTrait for ArtZeroMarketplacePSP34 {}
 
     #[ink(event)]
     pub struct NewListEvent {
@@ -879,19 +879,6 @@ pub mod artzero_marketplace_psp34 {
             }
             self.manager.staking_discount_criteria = criteria;
             self.manager.staking_discount_rate = rates;
-            Ok(())
-        }
-
-        /// Transfer NFT token - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn tranfer_nft(
-            &mut self,
-            nft_contract_address: AccountId,
-            token_id: Id,
-            receiver: AccountId,
-        ) -> Result<(), Error> {
-            assert!(PSP34Ref::transfer(&nft_contract_address, receiver, token_id.clone(), Vec::<u8>::new()).is_ok());
             Ok(())
         }
 

@@ -43,7 +43,7 @@ pub mod artzero_staking_nft {
     impl AccessControl for ArtZeroStakingNFT {}
     impl Ownable for ArtZeroStakingNFT {}
     impl ArtZeroStakingTrait for ArtZeroStakingNFT {}
-    impl ArtZeroAdminTrait for ArtZeroStakingNFT {}
+    impl AdminTrait for ArtZeroStakingNFT {}
 
     #[derive(Default, SpreadAllocate, Storage)]
     #[ink(storage)]
@@ -497,20 +497,6 @@ pub mod artzero_staking_nft {
                     token_id: token_ids[i],
                 });
             }
-            Ok(())
-        }
-
-        /// Transfer NFT token
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn tranfer_nft(&mut self, token_id: Id, receiver: AccountId) -> Result<(), Error> {
-            assert!(Psp34Ref::transfer(
-                &self.manager.nft_contract_address,
-                receiver,
-                token_id.clone(),
-                Vec::<u8>::new()
-            )
-            .is_ok());
             Ok(())
         }
     }

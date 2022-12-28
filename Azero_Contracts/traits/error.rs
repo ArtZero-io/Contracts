@@ -32,6 +32,8 @@ pub enum Error {
     PhaseExpired,
     WhitelistNotExist,
     WithdrawFeeError,
+    WithdrawNFTError,
+    WithdrawPSP22Error,
     NotListed,
     BidAlreadyExist,
     BidNotExist,

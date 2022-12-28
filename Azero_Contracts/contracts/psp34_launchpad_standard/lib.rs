@@ -157,7 +157,7 @@ pub mod launchpad_psp34_nft_standard {
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
-    impl ArtZeroAdminTrait for LaunchPadPsp34NftStandard {}
+    impl AdminTrait for LaunchPadPsp34NftStandard {}
 
     impl LaunchPadPsp34NftStandard {
 

@@ -53,7 +53,7 @@ pub mod psp34_nft {
     impl PSP34Metadata for Psp34Nft {}
     impl PSP34Enumerable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
-    impl ArtZeroAdminTrait for Psp34Nft {}
+    impl AdminTrait for Psp34Nft {}
 
     impl Psp34Nft {
         #[ink(constructor)]
