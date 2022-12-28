@@ -82,7 +82,7 @@ pub mod psp34_nft {
             let caller = self.env().caller();
             self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
             self._mint_to(caller, Id::U64(self.manager.last_token_id))?;
-            self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata);
+            assert!(self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata).is_ok());
             Ok(())
         }
     }
