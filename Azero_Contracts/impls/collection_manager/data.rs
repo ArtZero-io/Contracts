@@ -10,8 +10,7 @@ use ink_storage::{
 };
 use openbrush::{
     storage::{
-        Mapping,
-        TypeGuard,
+        Mapping
     },
     traits::{
         AccountId,
@@ -19,7 +18,7 @@ use openbrush::{
         Balance
     }
 };
-
+use ink_prelude::string::String;
 
 #[derive(
     Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode,
@@ -50,12 +49,6 @@ pub struct Manager {
     pub collections_by_owner: Mapping<AccountId, Vec<AccountId>>, // save contract address by owner ID
     pub max_royal_fee_rate: u32,
     pub active_collection_count: u64,
-    pub attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>, AttributesKey>,
+    pub attributes: Mapping<AccountId, Vec<(String, String)>>,
     pub _reserved: Option<()>,
-}
-
-pub struct AttributesKey;
-
-impl<'a> TypeGuard<'a> for AttributesKey {
-    type Type = &'a (&'a AccountId, &'a Vec<u8>);
 }

@@ -317,12 +317,18 @@ pub mod artzero_collection_manager {
             );
             let collection = self.manager.collections.get(&contract_address).unwrap();
             if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
-                let length = attributes.len();
-                for i in 0..length {
+                let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or(Vec::new());
+                for i in 0..attributes.len() {
                     let attribute = attributes[i].clone();
                     let value = values[i].clone();
-                    self._set_attribute(contract_address, attribute.into_bytes(), value.into_bytes());
+                    if self.has_attribute(contract_address, attribute.clone()) {
+                        let index = self.get_collection_attribute_index(contract_address, attribute.clone()).unwrap();
+                        collection_attributes[index as usize] = (attribute, value);
+                    } else {
+                        collection_attributes.push((attribute, value));
+                    }
                 }
+                self.manager.attributes.insert(&contract_address, &collection_attributes);
                 Ok(())
             } else {
                 return Err(Error::CollectionOwnerAndAdmin)
@@ -331,22 +337,52 @@ pub mod artzero_collection_manager {
 
         // Get attributes of an NFT Collection
         #[ink(message)]
-        pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
+        pub fn get_attributes(&self, contract_address: AccountId, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();
             let mut ret = Vec::<String>::new();
             for i in 0..length {
-                let attribute = attributes[i].clone();
-                if let Some(value) = self.manager.attributes.get(&(&account, &attribute.into_bytes())) {
-                    ret.push(String::from_utf8(value).unwrap());
-                } else {
-                    ret.push(String::from(""));
-                }
+                ret.push(self.get_attribute(contract_address, attributes[i].clone()));
             }
             ret
         }
-        /// Internal function to add attributes to mapping
-        fn _set_attribute(&mut self, account: AccountId, key: Vec<u8>, value: Vec<u8>) {
-            self.manager.attributes.insert(&(&account, &key), &value);
+    
+        // Find an attribute of an NFT Collection by key
+        #[ink(message)]
+        pub fn get_attribute(&self, contract_address: AccountId, attribute_key: String) -> String {
+            if self.manager.attributes.get(&contract_address).is_none() {
+                return String::from("");
+            }
+            let collection_attributes = self.manager.attributes.get(&contract_address).unwrap();
+            for i in 0..collection_attributes.len() {
+                if collection_attributes[i].0 == attribute_key {
+                    return collection_attributes[i].1.clone();
+                }
+            }
+            return String::from("");
+        }
+
+        /// Check collection has an attribute
+        #[ink(message)]
+        pub fn has_attribute(&self, contract_address: AccountId, attribute_key: String) -> bool {
+            if self.manager.attributes.get(&contract_address).is_some() {
+                return self.manager.attributes.get(&contract_address).unwrap().iter().find(|&attribute| attribute.0 == attribute_key).is_some();
+            }
+            return false;
+        }
+
+        /// Get attribute index of collection
+        #[ink(message)]
+        pub fn get_collection_attribute_index(&self, contract_address: AccountId, attribute_key: String) -> Option<u64> {
+            return Some(self.manager.attributes.get(&contract_address).unwrap().iter().position(|attribute| attribute.0 == attribute_key).unwrap() as u64);
+        }
+
+        /// Count attributes of collection
+        #[ink(message)]
+        pub fn get_collection_attribute_count(&self, contract_address: AccountId) -> Option<u64> {
+            if self.manager.attributes.get(&contract_address).is_none() {
+                return Some(0);
+            }
+            return Some(self.manager.attributes.get(&contract_address).unwrap().len() as u64);
         }
 
         /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
