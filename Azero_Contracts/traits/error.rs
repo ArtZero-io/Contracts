@@ -19,26 +19,18 @@ pub enum Error {
     CannotTransfer,
     NotEnoughBalance,
     AlreadyInit,
-    //use in psp34_standard
     NotOwner,
-    //use in launchpad_manager
     ProjectNotExist,
     ProjectOwnerAndAdmin,
     InvalidStartTimeAndEndTime,
-    //use in collection_manager
     CollectionOwnerAndAdmin,
-    //use in psp34_launchpad_standard
     InvalidInput,
     ClaimedAll,
     TokenLimitReached,
     PhaseNotExist,
     PhaseExpired,
     WhitelistNotExist,
-
-    //use in admin
     WithdrawFeeError,
-
-    //use in marketplace
     NotListed,
     BidAlreadyExist,
     BidNotExist,

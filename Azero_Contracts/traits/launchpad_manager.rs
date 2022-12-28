@@ -6,7 +6,7 @@ pub type ArtZeroLaunchPadRef = dyn ArtZeroLaunchPadTrait;
 pub trait ArtZeroLaunchPadTrait {
     #[ink(message)]
     fn get_project_mint_fee_rate(&self) -> u32;
-
+    
     #[ink(message)]
     fn get_public_max_minting_amount(&self) -> u64;
 }
