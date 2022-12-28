@@ -27,6 +27,7 @@ pub enum Error {
     InvalidInput,
     ClaimedAll,
     TokenLimitReached,
+    UpdatePhase,
     PhaseNotExist,
     PhaseExpired,
     WhitelistNotExist,
