@@ -128,7 +128,9 @@ pub mod artzero_launchpad_psp34 {
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
-            assert!(start_time < end_time && self.manager.project_adding_fee == self.env().transferred_value(), "invalid fee");
+            if start_time >= end_time || self.manager.project_adding_fee != self.env().transferred_value() {
+                return Err(Error::InvalidInput);
+            }
             let project_owner = self.env().caller();
             let contract = LaunchPadPsp34NftStandardRef::new(
                 Self::env().account_id(),
