@@ -47,16 +47,16 @@ where
         let token_owner = self.owner_of(token_id.clone()).unwrap();
         assert!(caller == token_owner);
         self.data::<Manager>().locked_token_count = self.data::<Manager>().locked_token_count.checked_add(1).unwrap();
-        self.data::<Manager>().locked_tokens.insert(&token_id, &1);
+        self.data::<Manager>().locked_tokens.insert(&token_id, &true);
         Ok(())
     }
 
     /// Check token is locked or not
     default fn is_locked_nft(&self, token_id: Id) -> bool {
         if self.data::<Manager>().locked_tokens.get(&token_id).is_some() {
-            return true
+            return true;
         }
-        return false
+        return false;
     }
 
     /// Get Locked Token Count
