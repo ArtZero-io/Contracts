@@ -55,6 +55,7 @@ pub mod artzero_marketplace_psp34 {
         listed_date: u64,
         price: Balance,
         is_for_sale: bool,
+        royalty_fee_at_listing: u32
     }
 
     #[derive(
@@ -260,11 +261,14 @@ pub mod artzero_marketplace_psp34 {
                 self.manager
                     .sale_tokens_ids_last_index
                     .insert(&(&Some(&nft_contract_address), &Some(&caller)), &(last_index + 1));
+                let royalty_fee_rate =
+                    ArtZeroCollectionRef::get_royal_fee(&self.manager.collection_contract_address, nft_contract_address);
                 let new_sale = ForSaleItem {
                     nft_owner: token_owner,
                     listed_date: self.env().block_timestamp(),
                     price,
                     is_for_sale: true,
+                    royalty_fee_at_listing: royalty_fee_rate
                 };
                 self.manager
                     .market_list
@@ -444,10 +448,8 @@ pub mod artzero_marketplace_psp34 {
                 .current_profit
                 .checked_add(platform_fee_after_discount)
                 .unwrap();
-            let royal_fee_rate =
-                ArtZeroCollectionRef::get_royal_fee(&self.manager.collection_contract_address, nft_contract_address);
             let royal_fee = price
-                .checked_mul(royal_fee_rate as u128)
+                .checked_mul(sale_information.royalty_fee_at_listing as u128)
                 .unwrap()
                 .checked_div(10000)
                 .unwrap();
@@ -744,12 +746,8 @@ pub mod artzero_marketplace_psp34 {
                             .current_profit
                             .checked_add(platform_fee_after_discount)
                             .unwrap();
-                        let royal_fee_rate = ArtZeroCollectionRef::get_royal_fee(
-                            &self.manager.collection_contract_address,
-                            nft_contract_address,
-                        );
                         let royal_fee = price
-                            .checked_mul(royal_fee_rate as u128)
+                            .checked_mul(sale_information.royalty_fee_at_listing as u128)
                             .unwrap()
                             .checked_div(10000)
                             .unwrap();
