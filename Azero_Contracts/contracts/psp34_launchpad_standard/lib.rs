@@ -686,7 +686,7 @@ pub mod launchpad_psp34_nft_standard {
             &self,
             phase_id: u8
         ) -> Option<Phase> {
-            return Some(self.manager.phases.get(&phase_id))?;
+            return self.manager.phases.get(&phase_id);
         }
 
         /// Get whitelist information by phase code
@@ -696,7 +696,7 @@ pub mod launchpad_psp34_nft_standard {
             account: AccountId,
             phase_id: u8
         ) -> Option<Whitelist> {
-            return Some(self.manager.phase_whitelists_link.get(&(&account, &phase_id)))?;
+            return self.manager.phase_whitelists_link.get(&(&account, &phase_id));
         }
 
         /// Get phase Account Link
