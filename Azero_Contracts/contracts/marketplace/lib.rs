@@ -19,7 +19,6 @@ pub mod artzero_marketplace_psp34 {
         contracts::{
             ownable::*,
             traits::psp34::{
-                PSP34Ref,
                 *,
             },
         },
@@ -267,7 +266,7 @@ pub mod artzero_marketplace_psp34 {
                 self.manager
                     .market_list
                     .insert(&(&nft_contract_address, &token_id.clone()), &new_sale);
-                self.update_listed_token_by_collection_address(nft_contract_address, true);
+                self.update_listed_token_by_collection_address(&nft_contract_address, &true);
             }
             // Step 3 - Transfer Token from Caller to Marketplace Contract
             assert!(Psp34Ref::transfer_builder(
@@ -337,7 +336,7 @@ pub mod artzero_marketplace_psp34 {
                 .insert(&(&nft_contract_address, &caller, &token_id.clone()), &bidders);
             // Send NFT back to caller
             assert!(Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_ok());
-            self.update_listed_token_by_collection_address(nft_contract_address, false);
+            self.update_listed_token_by_collection_address(&nft_contract_address, &false);
             self.env().emit_event(UnListEvent {
                 trader: Some(caller),
                 nft_contract_address: Some(nft_contract_address),
@@ -430,7 +429,7 @@ pub mod artzero_marketplace_psp34 {
                 .checked_div(10000)
                 .unwrap();
             // Fee after Staking discount
-            let platform_fee_after_discount = self.apply_discount(seller, platform_fee);
+            let platform_fee_after_discount = self.apply_discount(&seller, &platform_fee);
             // Save profit
             self.manager.total_profit = self
                 .manager
@@ -462,7 +461,7 @@ pub mod artzero_marketplace_psp34 {
                 .unwrap()
                 .checked_sub(platform_fee_after_discount)
                 .unwrap();
-            // seller_fee = self.apply_discount(caller, );
+
             if seller_fee > 0 {
                 assert!(self.env().transfer(seller, seller_fee).is_ok());
             }
@@ -483,7 +482,7 @@ pub mod artzero_marketplace_psp34 {
                 .volume_by_collection
                 .insert(&nft_contract_address, &collection_volume_unwarp);
             self.manager.volume_by_user.insert(&seller, &user_volume_unwrap);
-            self.update_listed_token_by_collection_address(nft_contract_address, false);
+            self.update_listed_token_by_collection_address(&nft_contract_address, &false);
             // Send NFT to Buyer
             assert!(Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_ok());
             self.env().emit_event(PurchaseEvent {
@@ -730,7 +729,7 @@ pub mod artzero_marketplace_psp34 {
                             .checked_div(10000)
                             .unwrap();
                         // Fee after Staking discount
-                        let platform_fee_after_discount = self.apply_discount(seller, platform_fee);
+                        let platform_fee_after_discount = self.apply_discount(&seller, &platform_fee);
                         // Save profit
                         self.manager.total_profit = self
                             .manager
@@ -766,7 +765,7 @@ pub mod artzero_marketplace_psp34 {
                             .unwrap()
                             .checked_sub(platform_fee_after_discount)
                             .unwrap();
-                        // seller_fee = self.apply_discount(caller, );
+
                         if seller_fee > 0 {
                             assert!(self.env().transfer(seller, seller_fee).is_ok());
                         }
@@ -787,7 +786,7 @@ pub mod artzero_marketplace_psp34 {
                             .volume_by_collection
                             .insert(&nft_contract_address, &collection_volume_unwarp);
                         self.manager.volume_by_user.insert(&seller, &user_volume_unwrap);
-                        self.update_listed_token_by_collection_address(nft_contract_address, false);
+                        self.update_listed_token_by_collection_address(&nft_contract_address, &false);
                         self.env().emit_event(BidWinEvent {
                             bidder: Some(bidders[index].bidder),
                             seller: Some(seller),
@@ -835,28 +834,28 @@ pub mod artzero_marketplace_psp34 {
         }
 
         // Set listed token
-        fn update_listed_token_by_collection_address(&mut self, nft_contract_address: AccountId, mode: bool) {
+        fn update_listed_token_by_collection_address(&mut self, nft_contract_address: &AccountId, mode: &bool) {
             let listed_token_count = self
                 .manager
                 .listed_token_number_by_collection_address
-                .get(&nft_contract_address);
+                .get(nft_contract_address);
             let mut listed_token_count_unwarp = 0;
             if listed_token_count.is_some() {
                 listed_token_count_unwarp = listed_token_count.unwrap();
-                if mode {
+                if *mode {
                     listed_token_count_unwarp = listed_token_count_unwarp.checked_add(1).unwrap();
                 } else {
                     listed_token_count_unwarp = listed_token_count_unwarp.checked_sub(1).unwrap();
                 }
                 self.manager
                     .listed_token_number_by_collection_address
-                    .insert(&nft_contract_address, &listed_token_count_unwarp);
+                    .insert(nft_contract_address, &listed_token_count_unwarp);
             } else {
                 listed_token_count_unwarp = 1;
-                if mode {
+                if *mode {
                     self.manager
                         .listed_token_number_by_collection_address
-                        .insert(&nft_contract_address, &listed_token_count_unwarp);
+                        .insert(nft_contract_address, &listed_token_count_unwarp);
                 }
             }
         }
@@ -1006,15 +1005,15 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
-        fn apply_discount(&self, staker: AccountId, input_fee: Balance) -> Balance {
-            let staked_amount = ArtZeroStakingRef::get_total_staked_by_account(&self.manager.staking_contract_address, staker);
+        fn apply_discount(&self, staker: &AccountId, input_fee: &Balance) -> Balance {
+            let staked_amount = ArtZeroStakingRef::get_total_staked_by_account(&self.manager.staking_contract_address, *staker);
             let length = self.manager.staking_discount_rate.len();
             for index in 0..length {
                 if staked_amount >= self.manager.staking_discount_criteria[index] as u64 {
-                    return (input_fee * (10000 - self.manager.staking_discount_rate[index] as u128)) / 10000
+                    return (*input_fee * (10000 - self.manager.staking_discount_rate[index] as u128)) / 10000
                 }
             }
-            return input_fee
+            return *input_fee
         }
     }
 }
