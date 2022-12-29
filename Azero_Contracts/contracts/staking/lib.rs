@@ -167,8 +167,8 @@ pub mod artzero_staking_nft {
 
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn start_reward_distribution(&mut self) -> Result<(), AccessControlError> {
-            assert!(self.manager.is_locked);
+        #[modifiers(only_locked)]
+        pub fn start_reward_distribution(&mut self) -> Result<(), Error> {
             self.manager.claimable_reward = self.manager.reward_pool;
             self.manager.reward_started = true;
             Ok(())
@@ -176,8 +176,8 @@ pub mod artzero_staking_nft {
 
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn stop_reward_distribution(&mut self) -> Result<(), AccessControlError> {
-            assert!(self.manager.is_locked); // Only allow adding reward when contract is locked
+        #[modifiers(only_locked)]
+        pub fn stop_reward_distribution(&mut self) -> Result<(), Error> {
             self.manager.reward_pool = self.manager.claimable_reward; // unclaimed Rewards send back to reward_pool
             self.manager.claimable_reward = 0;
             self.manager.reward_started = false;
@@ -186,10 +186,10 @@ pub mod artzero_staking_nft {
         /// Add reward to reward_pool
         #[ink(message)]
         #[ink(payable)]
+        #[modifiers(only_locked)]
         pub fn add_reward(&mut self) -> Result<(), Error> {
             let reward = self.env().transferred_value();
             assert!(reward > 0);
-            assert!(self.manager.is_locked); // Only allow adding reward when contract is locked
             assert!(self.manager.reward_started == false); // only when reward distribution is not started
             self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
             self.env().emit_event(AddReward {
@@ -202,8 +202,8 @@ pub mod artzero_staking_nft {
         /// Set Account so it can claim the reward. Must run by backend every month before add_reward
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), AccessControlError> {
-            assert!(self.manager.is_locked);
+        #[modifiers(only_locked)]
+        pub fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), Error> {
             assert!(self.manager.reward_started == false); // only when reward distribution is not started
             self.manager.is_claimed.insert(&staker, &false); // Can only claim once
             Ok(())
@@ -211,6 +211,7 @@ pub mod artzero_staking_nft {
 
         /// Claim Reward
         #[ink(message)]
+        #[modifiers(only_locked)]
         pub fn claim_reward(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
             let is_claimed = self.manager.is_claimed.get(&caller);
@@ -219,7 +220,6 @@ pub mod artzero_staking_nft {
             self.manager.is_claimed.insert(&caller, &true); // Can only claim once
 
             assert!(self.manager.total_staked > 0);
-            assert!(self.manager.is_locked); // Only allow when locked
             assert!(self.manager.reward_started); // Only allow when reward distribution is started
 
             let staked_amount = self.manager.staking_list.count(caller);
@@ -336,8 +336,8 @@ pub mod artzero_staking_nft {
 
         /// Stake multiple NFTs - Make sure approve this contract can send token on owner behalf
         #[ink(message)]
+        #[modifiers(only_not_locked)]
         pub fn stake(&mut self, token_ids: Vec<u64>) -> Result<(), Error> {
-            assert!(self.manager.is_locked == false);
             let caller = self.env().caller();
             let leng = token_ids.len();
 
@@ -386,8 +386,8 @@ pub mod artzero_staking_nft {
 
         /// Request Unstake multiple NFTs
         #[ink(message)]
+        #[modifiers(only_not_locked)]
         pub fn request_unstake(&mut self, token_ids: Vec<u64>) -> Result<(), Error> {
-            assert!(self.manager.is_locked == false);
             let caller = self.env().caller();
             let leng = token_ids.len();
 
@@ -424,8 +424,8 @@ pub mod artzero_staking_nft {
 
         /// Cancel Request
         #[ink(message)]
+        #[modifiers(only_not_locked)]
         pub fn cancel_request_unstake(&mut self, token_ids: Vec<u64>) -> Result<(), Error> {
-            assert!(self.manager.is_locked == false);
             let caller = self.env().caller();
             let leng = token_ids.len();
 
@@ -465,8 +465,8 @@ pub mod artzero_staking_nft {
 
         /// unStake multiple NFTs
         #[ink(message)]
+        #[modifiers(only_not_locked)]
         pub fn unstake(&mut self, token_ids: Vec<u64>) -> Result<(), Error> {
-            assert!(self.manager.is_locked == false);
             // Step 1 - Check if the token is belong to caller
             let caller = self.env().caller();
             let leng = token_ids.len();

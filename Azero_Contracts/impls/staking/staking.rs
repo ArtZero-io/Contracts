@@ -9,12 +9,42 @@ pub use crate::{
     traits::staking::*,
 };
 use openbrush::{
+    modifier_definition,
     contracts::access_control::*,
     traits::{
         Storage,
         AccountId,
     }
 };
+use crate::traits::error::*;
+
+/// Throws if is_locked is false
+#[modifier_definition]
+pub fn only_locked<T, F, R, E>(instance: &mut T, body: F) -> Result<R, E>
+where
+    T: Storage<Manager>,
+    F: FnOnce(&mut T) -> Result<R, E>,
+    E: From<LockError>,
+{
+    if instance.data().is_locked == false {
+        return Err(From::from(LockError::NotLocked))
+    }
+    body(instance)
+}
+
+/// Throws if is_locked is true
+#[modifier_definition]
+pub fn only_not_locked<T, F, R, E>(instance: &mut T, body: F) -> Result<R, E>
+where
+    T: Storage<Manager>,
+    F: FnOnce(&mut T) -> Result<R, E>,
+    E: From<LockError>,
+{
+    if instance.data().is_locked == true {
+        return Err(From::from(LockError::Locked))
+    }
+    body(instance)
+}
 
 // ADMINER RoleType = 3739740293
 pub const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
