@@ -116,7 +116,6 @@ pub mod artzero_launchpad_psp34 {
         #[ink(payable)]
         pub fn add_new_project(
             &mut self,
-            project_owner: AccountId,
             total_supply: u64,
             start_time: Timestamp,
             end_time: Timestamp,
@@ -129,8 +128,8 @@ pub mod artzero_launchpad_psp34 {
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Result<(), Error> {
-            // assert!(start_time > Self::env().block_timestamp());
             assert!(start_time < end_time && self.manager.project_adding_fee == self.env().transferred_value(), "invalid fee");
+            let project_owner = self.env().caller();
             let contract = LaunchPadPsp34NftStandardRef::new(
                 Self::env().account_id(),
                 self.manager.max_phases_per_project,
