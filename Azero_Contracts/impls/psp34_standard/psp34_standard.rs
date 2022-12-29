@@ -91,7 +91,7 @@ where
             return Err(Error::Custom(String::from("Token is locked")))
         }
         for (attribute, value) in &metadata {
-            add_attribute_name(self, attribute.clone().into_bytes());
+            add_attribute_name(self, &attribute.clone().into_bytes());
             self._set_attribute(token_id.clone(), attribute.clone().into_bytes(), value.clone().into_bytes());
         }
         Ok(())
@@ -143,13 +143,13 @@ where
 
 fn add_attribute_name<T: Storage<Manager>>(
     instance: &mut T,
-    attribute_input: Vec<u8>
+    attribute_input: &Vec<u8>
 ) {
     let mut exist: bool = false;
     for index in 0..instance.data::<Manager>().attribute_count {
         let attribute_name = instance.data::<Manager>().attribute_names.get(&(index + 1));
         if attribute_name.is_some() {
-            if attribute_name.unwrap() == attribute_input {
+            if attribute_name.unwrap() == *attribute_input {
                 exist = true;
                 break
             }

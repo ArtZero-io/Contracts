@@ -226,7 +226,7 @@ pub mod launchpad_psp34_nft_standard {
         ) -> Result<(), Error> {
             assert!(self.has_role(ADMINER, self.env().caller()) || self.env().caller() == self.manager.launchpad_contract_address);
             assert!(self.manager.active_phase_count.checked_add(1).unwrap() <= self.manager.limit_phase_count);
-            assert!(self.validate_phase_schedule(start_time, end_time));
+            assert!(self.validate_phase_schedule(&start_time, &end_time));
 
             let byte_phase_code = phase_code.into_bytes();
             self.manager.last_phase_id = self.manager.last_phase_id.checked_add(1).unwrap();
@@ -609,14 +609,14 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
-        fn validate_phase_schedule(&self, start_time: Timestamp, end_time: Timestamp) -> bool {
-            if start_time >= end_time {
+        fn validate_phase_schedule(&self, start_time: &Timestamp, end_time: &Timestamp) -> bool {
+            if *start_time >= *end_time {
                 return false;
             }
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
                 if phase.is_active && (
-                    (phase.start_time..=phase.end_time).contains(&start_time) || (phase.start_time..=phase.end_time).contains(&end_time)
+                    (phase.start_time..=phase.end_time).contains(start_time) || (phase.start_time..=phase.end_time).contains(end_time)
                 ) {
                     return false;
                 }
