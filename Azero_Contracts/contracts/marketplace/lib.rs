@@ -36,7 +36,10 @@ pub mod artzero_marketplace_psp34 {
     use artzero_project::{
         traits::{
             staking::ArtZeroStakingRef,
-            collection_manager::ArtZeroCollectionRef,
+            collection_manager::{
+                ArtZeroCollectionRef,
+                CollectionType,
+            },
             psp34_standard::*,
             admin::*,
             error::Error,
@@ -371,7 +374,7 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
                 ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == 1 || contract_type == 2); // psp34 only
+            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
@@ -524,7 +527,7 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
                 ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == 1 || contract_type >= 2); // psp34 only
+            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
                                                                // Step 1: Check if the token is for sale
             assert!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id));
             let new_bid = BidInformation {
@@ -598,8 +601,8 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
             ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == 1 || contract_type == 2); // psp34 only
-                                                               // Step 1: Check if the token is for sale
+            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
+            // Step 1: Check if the token is for sale
             assert_eq!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id), true);
 
             if self
@@ -674,8 +677,8 @@ pub mod artzero_marketplace_psp34 {
             )); // collection must be active
             let contract_type =
             ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type <= 2 && contract_type >= 1); // psp34 only
-                                                               // remove from market list
+            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
+            // remove from market list
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
