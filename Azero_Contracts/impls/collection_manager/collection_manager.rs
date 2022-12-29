@@ -41,9 +41,9 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
         return collection.is_active
     }
 
-    default fn get_contract_type(&self, nft_contract_address: AccountId) -> u8 {
+    default fn get_contract_type(&self, nft_contract_address: AccountId) -> CollectionType {
         if self.data::<Manager>().collections.get(&nft_contract_address).is_none() {
-            return 0
+            return CollectionType::Unknown
         }
         let collection = self.data::<Manager>().collections.get(&nft_contract_address).unwrap();
         return collection.contract_type

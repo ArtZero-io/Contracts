@@ -19,6 +19,7 @@ use openbrush::{
     }
 };
 use ink_prelude::string::String;
+use crate::traits::collection_manager::CollectionType;
 
 #[derive(
     Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode,
@@ -27,7 +28,7 @@ use ink_prelude::string::String;
 pub struct Collection {
     pub collection_owner: AccountId,     // to receive Royal Fee - OnlyAdmin can update
     pub nft_contract_address: AccountId, // OnlyAdmin can update
-    pub contract_type: u8,               // 1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
+    pub contract_type: CollectionType,   // 1 - PSP34 ERC721 Manual; 2 - PSP34 ERC721 Auto
     pub is_collect_royal_fee: bool,      // OnlyAdmin can update
     pub royal_fee: u32,                  // 100 = 1% 10000 = 100% OnlyAdmin
     pub is_active: bool,                 // OnlyAdmin can update

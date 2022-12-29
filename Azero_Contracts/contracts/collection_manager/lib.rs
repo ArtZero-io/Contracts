@@ -50,7 +50,7 @@ pub mod artzero_collection_manager {
     pub struct AddNewCollectionEvent {
         collection_owner: Option<AccountId>,
         nft_contract_address: Option<AccountId>,
-        contract_type: u8,
+        contract_type: CollectionType,
         is_active: bool,
         show_on_chain_metadata: bool,
     }
@@ -168,7 +168,7 @@ pub mod artzero_collection_manager {
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address: contract_account,
-                contract_type: 2,
+                contract_type: CollectionType::Psp34Auto,
                 is_collect_royal_fee,
                 royal_fee,
                 is_active: true,
@@ -185,7 +185,7 @@ pub mod artzero_collection_manager {
             self.env().emit_event(AddNewCollectionEvent {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(contract_account),
-                contract_type: 2,
+                contract_type: CollectionType::Psp34Auto,
                 is_active: true,
                 show_on_chain_metadata: true,
             });
@@ -241,7 +241,7 @@ pub mod artzero_collection_manager {
             let new_collection = Collection {
                 collection_owner,
                 nft_contract_address,
-                contract_type: 1,
+                contract_type: CollectionType::Psp34Manual,
                 is_collect_royal_fee,
                 royal_fee,
                 is_active: false,
@@ -258,7 +258,7 @@ pub mod artzero_collection_manager {
             self.env().emit_event(AddNewCollectionEvent {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(nft_contract_address),
-                contract_type: 1,
+                contract_type: CollectionType::Psp34Manual,
                 is_active: false,
                 show_on_chain_metadata: false,
             });
@@ -345,7 +345,7 @@ pub mod artzero_collection_manager {
             }
             ret
         }
-    
+
         // Find an attribute of an NFT Collection by key
         #[ink(message)]
         pub fn get_attribute(&self, contract_address: AccountId, attribute_key: String) -> String {
@@ -388,7 +388,7 @@ pub mod artzero_collection_manager {
         /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: u8) -> Result<(), AccessControlError> {
+        pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: CollectionType) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
