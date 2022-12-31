@@ -1,6 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
+#![allow(clippy::let_unit_value)]
+#![allow(clippy::inline_fn_without_body)]
+#![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_collection_manager {
     use ink_lang::ToAccountId;
@@ -151,18 +154,12 @@ pub mod artzero_collection_manager {
                 .collections_by_id
                 .insert(&self.manager.collection_count, &contract_account);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
-            if collections_by_owner.is_none() {
-                let mut collections = Vec::<AccountId>::new();
+            if let Some(mut collections) = collections_by_owner {
                 collections.push(contract_account);
-                self.manager
-                    .collections_by_owner
-                    .insert(&collection_owner, &collections);
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             } else {
-                let mut collections = collections_by_owner.unwrap();
-                collections.push(contract_account);
-                self.manager
-                    .collections_by_owner
-                    .insert(&collection_owner, &collections);
+                let collections = vec![contract_account];
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             }
             // Add collection information to collections mapping
             let new_collection = Collection {
@@ -225,17 +222,12 @@ pub mod artzero_collection_manager {
                 .collections_by_id
                 .insert(&self.manager.collection_count, &nft_contract_address);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
-            if collections_by_owner.is_none() {
-                let collections = vec![nft_contract_address];
-                self.manager
-                    .collections_by_owner
-                    .insert(&collection_owner, &collections);
-            } else {
-                let mut collections = collections_by_owner.unwrap();
+            if let Some(mut collections) = collections_by_owner {
                 collections.push(nft_contract_address);
-                self.manager
-                    .collections_by_owner
-                    .insert(&collection_owner, &collections);
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
+            } else {
+                let collections = vec![nft_contract_address];
+                self.manager.collections_by_owner.insert(&collection_owner, &collections);
             }
             // Add collection information to collections mapping
             let new_collection = Collection {
@@ -317,7 +309,7 @@ pub mod artzero_collection_manager {
             );
             let collection = self.manager.collections.get(&contract_address).unwrap();
             if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
-                let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or(Vec::new());
+                let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or_default();
                 for i in 0..attributes.len() {
                     let attribute = attributes[i].clone();
                     let value = values[i].clone();
@@ -331,17 +323,16 @@ pub mod artzero_collection_manager {
                 self.manager.attributes.insert(&contract_address, &collection_attributes);
                 Ok(())
             } else {
-                return Err(Error::CollectionOwnerAndAdmin)
+                Err(Error::CollectionOwnerAndAdmin)
             }
         }
 
         // Get attributes of an NFT Collection
         #[ink(message)]
         pub fn get_attributes(&self, contract_address: AccountId, attributes: Vec<String>) -> Vec<String> {
-            let length = attributes.len();
             let mut ret = Vec::<String>::new();
-            for i in 0..length {
-                ret.push(self.get_attribute(contract_address, attributes[i].clone()));
+            for item in attributes.iter().take(attributes.len()) {
+                ret.push(self.get_attribute(contract_address, item.clone()));
             }
             ret
         }
@@ -353,21 +344,21 @@ pub mod artzero_collection_manager {
                 return String::from("");
             }
             let collection_attributes = self.manager.attributes.get(&contract_address).unwrap();
-            for i in 0..collection_attributes.len() {
-                if collection_attributes[i].0 == attribute_key {
-                    return collection_attributes[i].1.clone();
+            for item in collection_attributes.iter().take(collection_attributes.len()) {
+                if item.0 == attribute_key {
+                    return item.1.clone();
                 }
             }
-            return String::from("");
+            String::from("")
         }
 
         /// Check collection has an attribute
         #[ink(message)]
         pub fn has_attribute(&self, contract_address: AccountId, attribute_key: String) -> bool {
             if self.manager.attributes.get(&contract_address).is_some() {
-                return self.manager.attributes.get(&contract_address).unwrap().iter().find(|&attribute| attribute.0 == attribute_key).is_some();
+                return self.manager.attributes.get(&contract_address).unwrap().iter().any(|attribute| attribute.0 == attribute_key);
             }
-            return false;
+            false
         }
 
         /// Get attribute index of collection
@@ -382,7 +373,7 @@ pub mod artzero_collection_manager {
             if self.manager.attributes.get(&contract_address).is_none() {
                 return Some(0);
             }
-            return Some(self.manager.attributes.get(&contract_address).unwrap().len() as u64);
+            Some(self.manager.attributes.get(&contract_address).unwrap().len() as u64)
         }
 
         /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
@@ -449,7 +440,7 @@ pub mod artzero_collection_manager {
                 self.manager.collections.insert(&contract_address, &collection);
                 Ok(())
             } else {
-                return Err(Error::OnlyAdmin)
+                Err(Error::OnlyAdmin)
             }
         }
 
@@ -464,7 +455,7 @@ pub mod artzero_collection_manager {
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             assert!(is_active != collection.is_active);
             collection.is_active = is_active;
-            if is_active == true {
+            if is_active {
                 self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
             } else {
                 self.manager.active_collection_count = self.manager.active_collection_count.checked_sub(1).unwrap();
@@ -517,61 +508,61 @@ pub mod artzero_collection_manager {
         /// Get Collection Information by Collection Address (NFT address)
         #[ink(message)]
         pub fn get_collection_by_address(&self, nft_contract_address: AccountId) -> Option<Collection> {
-            return self.manager.collections.get(&nft_contract_address)
+            self.manager.collections.get(&nft_contract_address)
         }
 
         /// Get All Collection Addresses by Owner Address
         #[ink(message)]
         pub fn get_collections_by_owner(&self, owner_address: AccountId) -> Option<Vec<AccountId>> {
-            return self.manager.collections_by_owner.get(&owner_address)
+            self.manager.collections_by_owner.get(&owner_address)
         }
 
         /// Get Standard Nft Hash
         #[ink(message)]
         pub fn get_standard_nft_hash(&self) -> Hash {
-            return self.manager.standard_nft_hash
+            self.manager.standard_nft_hash
         }
 
         /// Get Collection Contract by ID
         #[ink(message)]
         pub fn get_contract_by_id(&self, id: u64) -> Option<AccountId> {
-            return self.manager.collections_by_id.get(&id)
+            self.manager.collections_by_id.get(&id)
         }
 
         /// Get Collection Count
         #[ink(message)]
         pub fn get_collection_count(&self) -> u64 {
-            return self.manager.collection_count
+            self.manager.collection_count
         }
 
         /// Get Collection Count
         #[ink(message)]
         pub fn get_active_collection_count(&self) -> u64 {
-            return self.manager.active_collection_count
+            self.manager.active_collection_count
         }
 
         /// Get Simple Mode Adding Fee
         #[ink(message)]
         pub fn get_simple_mode_adding_fee(&self) -> Balance {
-            return self.manager.simple_mode_adding_fee
+            self.manager.simple_mode_adding_fee
         }
 
         /// Get Advance Mode Adding Fee
         #[ink(message)]
         pub fn get_advance_mode_adding_fee(&self) -> Balance {
-            return self.manager.advance_mode_adding_fee
+            self.manager.advance_mode_adding_fee
         }
 
         /// Get Admin Address
         #[ink(message)]
         pub fn get_admin_address(&self) -> AccountId {
-            return self.manager.admin_address
+            self.manager.admin_address
         }
 
         /// Get Royal Max Fee
         #[ink(message)]
         pub fn get_max_royal_fee_rate(&self) -> u32 {
-            return self.manager.max_royal_fee_rate
+            self.manager.max_royal_fee_rate
         }
     }
 }
