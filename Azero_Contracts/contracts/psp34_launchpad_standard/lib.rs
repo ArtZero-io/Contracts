@@ -5,6 +5,9 @@ pub use self::launchpad_psp34_nft_standard::{
     LaunchPadPsp34NftStandardRef,
 };
 
+#[allow(clippy::let_unit_value)]
+#[allow(clippy::inline_fn_without_body)]
+#[allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod launchpad_psp34_nft_standard {
     use ink_storage::{
@@ -200,12 +203,12 @@ pub mod launchpad_psp34_nft_standard {
                     for i in 0..phase_length {
                         assert!(instance.add_new_phase(
                             code_phases[i].clone(),
-                            is_public_phases[i].clone(),
-                            public_minting_fee_phases[i].clone(),
-                            public_minting_amount_phases[i].clone(),
-                            public_max_minting_amount_phases[i].clone(),
-                            start_time_phases[i].clone(),
-                            end_time_phases[i].clone()
+                            is_public_phases[i],
+                            public_minting_fee_phases[i],
+                            public_minting_amount_phases[i],
+                            public_max_minting_amount_phases[i],
+                            start_time_phases[i],
+                            end_time_phases[i]
                         ).is_ok());
                     }
                 }
@@ -238,22 +241,22 @@ pub mod launchpad_psp34_nft_standard {
                 Phase {
                     is_active: true,
                     title: byte_phase_code,
-                    is_public: is_public,
-                    public_minting_fee: public_minting_fee,
-                    public_minting_amount: public_minting_amount,
-                    public_max_minting_amount: public_max_minting_amount,
+                    is_public,
+                    public_minting_fee,
+                    public_minting_amount,
+                    public_max_minting_amount,
                     public_claimed_amount: 0,
                     whitelist_amount: 0,
                     claimed_amount: 0,
                     total_amount: public_minting_amount,
-                    start_time: start_time,
-                    end_time: end_time
+                    start_time,
+                    end_time
                 }
             } else {
                 Phase {
                     is_active: true,
                     title: byte_phase_code,
-                    is_public: is_public,
+                    is_public,
                     public_minting_fee: 0,
                     public_minting_amount: 0,
                     public_max_minting_amount: 0,
@@ -261,8 +264,8 @@ pub mod launchpad_psp34_nft_standard {
                     whitelist_amount: 0,
                     claimed_amount: 0,
                     total_amount: 0,
-                    start_time: start_time,
-                    end_time: end_time
+                    start_time,
+                    end_time
                 }
             };
             self.manager.phases.insert(&self.manager.last_phase_id, &phase);
@@ -318,7 +321,7 @@ pub mod launchpad_psp34_nft_standard {
             }
             self.manager.whitelist_count = self.manager.whitelist_count.checked_add(1).unwrap();
             let whitelist = Whitelist {
-                whitelist_amount: whitelist_amount,
+                whitelist_amount,
                 claimed_amount: 0,
                 minting_fee: whitelist_price
             };
@@ -343,7 +346,7 @@ pub mod launchpad_psp34_nft_standard {
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
                 if phase.is_active && current_time > phase.end_time {
-                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap()).unwrap();
+                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount).unwrap()).unwrap();
                 }
             }
             assert!(mint_amount <= available_amount.checked_sub(self.manager.owner_claimed_amount).unwrap());
@@ -406,7 +409,7 @@ pub mod launchpad_psp34_nft_standard {
                 self.manager.phases.insert(&phase_id, &phase);
                 Ok(())
             } else {
-                return Err(Error::PhaseExpired);
+                Err(Error::PhaseExpired)
             }
         }
 
@@ -458,7 +461,7 @@ pub mod launchpad_psp34_nft_standard {
                 self.manager.phases.insert(&phase_id, &phase);
                 Ok(())
             } else {
-                return Err(Error::PhaseExpired);
+                Err(Error::PhaseExpired)
             }
 
         }
@@ -530,23 +533,23 @@ pub mod launchpad_psp34_nft_standard {
             );
             phase.title = phase_code.clone().into_bytes();
             if phase.is_public && !is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount.clone()).unwrap();
-                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount.clone()).unwrap();
+                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount).unwrap();
+                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount).unwrap();
             } else if !phase.is_public && is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(public_minting_amount.clone()).unwrap();
-                phase.total_amount = phase.total_amount.checked_add(public_minting_amount.clone()).unwrap();
+                self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(public_minting_amount).unwrap();
+                phase.total_amount = phase.total_amount.checked_add(public_minting_amount).unwrap();
             } else if phase.is_public && is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount.clone()).unwrap().checked_sub(public_minting_amount.clone()).unwrap();
-                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount.clone()).unwrap().checked_add(public_minting_amount.clone()).unwrap();
+                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount).unwrap().checked_sub(public_minting_amount).unwrap();
+                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount).unwrap().checked_add(public_minting_amount).unwrap();
             }
-            phase.is_public = is_public.clone();
-            phase.start_time = start_time.clone();
-            phase.end_time = end_time.clone();
+            phase.is_public = is_public;
+            phase.start_time = start_time;
+            phase.end_time = end_time;
 
             if is_public {
-                phase.public_minting_fee = public_minting_fee.clone();
-                phase.public_minting_amount = public_minting_amount.clone();
-                phase.public_max_minting_amount = public_max_minting_amount.clone();
+                phase.public_minting_fee = public_minting_fee;
+                phase.public_minting_amount = public_minting_amount;
+                phase.public_max_minting_amount = public_max_minting_amount;
             } else {
                 phase.public_minting_fee = 0;
                 phase.public_minting_amount = 0;
@@ -582,14 +585,14 @@ pub mod launchpad_psp34_nft_standard {
             let phase_length = id_phases.len();
             for index in 0..phase_length {
                 if self.update_schedule_phase(
-                    id_phases[index + 1].clone(),
+                    id_phases[index + 1],
                     code_phases[index + 1].clone(),
-                    is_public_phases[index + 1].clone(),
-                    public_minting_fee_phases[index + 1].clone(),
-                    public_minting_amount_phases[index +1].clone(),
-                    public_max_minting_amount_phases[index + 1].clone(),
-                    start_time_phases[index + 1].clone(),
-                    end_time_phases[index + 1].clone()
+                    is_public_phases[index + 1],
+                    public_minting_fee_phases[index + 1],
+                    public_minting_amount_phases[index +1],
+                    public_max_minting_amount_phases[index + 1],
+                    start_time_phases[index + 1],
+                    end_time_phases[index + 1]
                 ).is_err(){
                     return Err(Error::UpdatePhase);
                 }
@@ -621,7 +624,7 @@ pub mod launchpad_psp34_nft_standard {
                     return false;
                 }
             }
-            return true;
+            true
         }
 
         /// Get owner claimed amount
@@ -629,7 +632,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_owner_claimed_amount(
             &self
         ) -> u64 {
-            return self.manager.owner_claimed_amount;
+            self.manager.owner_claimed_amount
         }
 
         /// Get owner available amount
@@ -642,10 +645,10 @@ pub mod launchpad_psp34_nft_standard {
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
                 if phase.is_active && current_time > phase.end_time {
-                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount.clone()).unwrap()).unwrap();
+                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount).unwrap()).unwrap();
                 }
             }
-            return available_amount;
+            available_amount
         }
 
         /// Get limit phase count
@@ -653,7 +656,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_limit_phase_count(
             &self
         ) -> u8 {
-            return self.manager.limit_phase_count;
+            self.manager.limit_phase_count
         }
 
         /// Get admin address
@@ -661,7 +664,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_admin_address(
             &self
         ) -> AccountId {
-            return self.manager.admin_address;
+            self.manager.admin_address
         }
 
         /// Get public minted count
@@ -669,7 +672,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_public_minted_count(
             &self
         ) -> u64 {
-            return self.manager.public_minted_count;
+            self.manager.public_minted_count
         }
 
         /// Get limit phase count
@@ -677,7 +680,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_project_info(
             &self
         ) -> Vec<u8> {
-            return self.manager.project_info.clone();
+            self.manager.project_info.clone()
         }
 
         /// Get Phase Schedule by Phase Id
@@ -686,7 +689,7 @@ pub mod launchpad_psp34_nft_standard {
             &self,
             phase_id: u8
         ) -> Option<Phase> {
-            return self.manager.phases.get(&phase_id);
+            self.manager.phases.get(&phase_id)
         }
 
         /// Get whitelist information by phase code
@@ -696,7 +699,7 @@ pub mod launchpad_psp34_nft_standard {
             account: AccountId,
             phase_id: u8
         ) -> Option<Whitelist> {
-            return self.manager.phase_whitelists_link.get(&(&account, &phase_id));
+            self.manager.phase_whitelists_link.get(&(&account, &phase_id))
         }
 
         /// Get phase Account Link
@@ -706,7 +709,7 @@ pub mod launchpad_psp34_nft_standard {
             phase_id: u8,
             account_index: u64
         ) -> AccountId {
-            return self.manager.phase_account_link.get_value(phase_id, &(account_index as u128)).unwrap();
+            self.manager.phase_account_link.get_value(phase_id, &(account_index as u128)).unwrap()
         }
 
         /// Get current phase
@@ -719,7 +722,7 @@ pub mod launchpad_psp34_nft_standard {
                     return Some(index + 1);
                 }
             }
-            return None;
+            None
         }
 
         /// Check time in a phase
@@ -731,7 +734,7 @@ pub mod launchpad_psp34_nft_standard {
                     return Some(index);
                 }
             }
-            return None;
+            None
         }
 
         /// Get Whitelist Count
@@ -739,49 +742,49 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_whitelist_count(
             &self
         ) -> u64 {
-            return self.manager.whitelist_count;
+            self.manager.whitelist_count
         }
 
         ///Get phase Count
         #[ink(message)]
         pub fn get_last_phase_id(&self) -> u8 {
-            return self.manager.last_phase_id;
+            self.manager.last_phase_id
         }
 
         ///Get active phase count
         #[ink(message)]
         pub fn get_active_phase_count(&self) -> u8 {
-            return self.manager.active_phase_count;
+            self.manager.active_phase_count
         }
 
         ///Get Token Count
         #[ink(message)]
         pub fn get_last_token_id(&self) -> u64 {
-            return self.manager_psp34_standard.last_token_id;
+            self.manager_psp34_standard.last_token_id
         }
 
         ///Get Phase Account Public Claimed Amount
         #[ink(message)]
         pub fn get_phase_account_public_claimed_amount(&self, account_id: AccountId, phase_id: u8) -> Option<u64> {
-            return Some(self.manager.phase_account_public_claimed_amount.get(&(&account_id, &phase_id)))?;
+            Some(self.manager.phase_account_public_claimed_amount.get(&(&account_id, &phase_id)))?
         }
 
         ///Get Phase Account Last Index by Phase Id
         #[ink(message)]
         pub fn get_phase_account_last_index(&self, phase_id: u8) -> u64 {
-            return self.manager.phase_account_link.count(phase_id) as u64;
+            self.manager.phase_account_link.count(phase_id) as u64
         }
 
         ///Get Total Supply
         #[ink(message)]
         pub fn get_total_supply(&self) -> u64 {
-            return self.manager.total_supply;
+            self.manager.total_supply
         }
 
         ///Get Available Token Amount
         #[ink(message)]
         pub fn get_available_token_amount(&self) -> u64 {
-            return self.manager.available_token_amount;
+            self.manager.available_token_amount
         }
     }
 

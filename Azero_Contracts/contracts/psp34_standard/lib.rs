@@ -5,6 +5,9 @@ pub use self::psp34_nft::{
     Psp34NftRef,
 };
 
+#[allow(clippy::let_unit_value)]
+#[allow(clippy::inline_fn_without_body)]
+#[allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod psp34_nft {
     use ink_prelude::{
