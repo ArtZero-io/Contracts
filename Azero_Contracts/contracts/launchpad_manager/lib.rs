@@ -1,6 +1,9 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![feature(min_specialization)]
 
+#![allow(clippy::let_unit_value)]
+#![allow(clippy::inline_fn_without_body)]
+#![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_launchpad_psp34 {
     use ink_lang::ToAccountId;
@@ -8,6 +11,7 @@ pub mod artzero_launchpad_psp34 {
         string::{
             String,
         },
+        vec,
         vec::Vec,
     };
     use ink_storage::{
@@ -159,22 +163,20 @@ pub mod artzero_launchpad_psp34 {
             self.manager.project_count = self.manager.project_count.checked_add(1).unwrap();
             self.manager.projects_by_id.insert(&self.manager.project_count, &contract_account);
             let projects_by_owner = self.manager.projects_by_owner.get(&project_owner);
-            if projects_by_owner.is_none() {
-                let mut projects = Vec::<AccountId>::new();
+            if let Some(mut projects) = projects_by_owner {
                 projects.push(contract_account);
                 self.manager.projects_by_owner.insert(&project_owner, &projects);
             } else {
-                let mut projects = projects_by_owner.unwrap();
-                projects.push(contract_account);
+                let projects = vec![contract_account];
                 self.manager.projects_by_owner.insert(&project_owner, &projects);
             }
 
             let new_project = Project {
                 is_active: false,
-                project_owner: project_owner,
-                total_supply: total_supply,
-                start_time: start_time,
-                end_time: end_time
+                project_owner,
+                total_supply,
+                start_time,
+                end_time
             };
             self.manager.projects.insert(&contract_account, &new_project);
             self.env().emit_event(AddNewProjectEvent {
@@ -295,7 +297,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_project_adding_fee(
             &self
         ) -> Balance {
-            return self.manager.project_adding_fee;
+            self.manager.project_adding_fee
         }
 
         /// Get active project count
@@ -303,7 +305,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_active_project_count(
             &self
         ) -> u64 {
-            return self.manager.active_project_count;
+            self.manager.active_project_count
         }
 
         /// Get admin address
@@ -311,7 +313,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_admin_address(
             &self
         ) -> AccountId {
-            return self.manager.admin_address;
+            self.manager.admin_address
         }
 
         /// Get project count
@@ -319,7 +321,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_project_count(
             &self
         ) -> u64 {
-            return self.manager.project_count;
+            self.manager.project_count
         }
 
         /// Get standard nft hash
@@ -327,7 +329,7 @@ pub mod artzero_launchpad_psp34 {
         pub fn get_standard_nft_hash(
             &self
         ) -> Hash {
-            return self.manager.standard_nft_hash;
+            self.manager.standard_nft_hash
         }
 
         // Get project by id
@@ -336,7 +338,7 @@ pub mod artzero_launchpad_psp34 {
             &self,
             id: u64
         ) -> Option<AccountId> {
-            return self.manager.projects_by_id.get(&id);
+            self.manager.projects_by_id.get(&id)
         }
 
         /// Get projects by owner address
@@ -345,7 +347,7 @@ pub mod artzero_launchpad_psp34 {
             &self,
             owner_address: AccountId
         ) -> Vec<AccountId> {
-            return self.manager.projects_by_owner.get(&owner_address).unwrap();
+            self.manager.projects_by_owner.get(&owner_address).unwrap()
         }
 
         /// Get project by NFT address
@@ -354,7 +356,7 @@ pub mod artzero_launchpad_psp34 {
             &self,
             nft_contract_address: AccountId
         ) -> Option<Project> {
-            return Some(self.manager.projects.get(&nft_contract_address))?;
+            Some(self.manager.projects.get(&nft_contract_address))?
         }
 
         /* END GETTERS*/
