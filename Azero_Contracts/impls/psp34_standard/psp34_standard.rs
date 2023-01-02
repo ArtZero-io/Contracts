@@ -61,7 +61,7 @@ where
 
     /// Get Locked Token Count
     default fn get_locked_token_count(&self) -> u64 {
-        return self.data::<Manager>().locked_token_count
+        self.data::<Manager>().locked_token_count
     }
 
     /// Burn NFT
@@ -69,6 +69,8 @@ where
         let caller = T::env().caller();
         let token_owner = self.owner_of(id.clone()).unwrap();
         assert!(caller == token_owner);
+        let mut data = self.data::<Manager>();
+        data.last_token_id = data.last_token_id.checked_sub(1).unwrap();
         self._burn_from(caller, id)
     }
 
@@ -132,12 +134,12 @@ where
         let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
         let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
         token_uri = token_uri + &token_id.to_string() + &String::from(".json");
-        return token_uri
+        token_uri
     }
 
     /// Get owner address
     default fn get_owner(&self) -> AccountId {
-        return self.owner()
+        self.owner()
     }
 }
 
