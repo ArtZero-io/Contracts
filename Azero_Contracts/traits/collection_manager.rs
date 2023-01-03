@@ -29,7 +29,7 @@ pub type ArtZeroCollectionRef = dyn ArtZeroCollectionTrait;
 pub trait ArtZeroCollectionTrait {
     /// This function returns royalty fee of a Collection
     #[ink(message)]
-    fn get_royal_fee(&self, nft_contract_address: AccountId) -> u32;
+    fn get_royalty_fee(&self, nft_contract_address: AccountId) -> u32;
     /// This function checks if the Collection is active or not. Only Active Collections can be seen on the Marketplace
     #[ink(message)]
     fn is_active(&self, nft_contract_address: AccountId) -> bool;

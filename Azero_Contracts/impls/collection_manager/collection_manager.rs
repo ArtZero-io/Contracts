@@ -21,15 +21,15 @@ pub const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
 
 impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
 
-    default fn get_royal_fee(&self, nft_contract_address: AccountId) -> u32 {
+    default fn get_royalty_fee(&self, nft_contract_address: AccountId) -> u32 {
         if self.data::<Manager>().collections.get(&nft_contract_address).is_none() {
             return 0
         }
         let collection = self.data::<Manager>().collections.get(&nft_contract_address).unwrap();
-        if !collection.is_collect_royal_fee || !collection.is_active {
+        if !collection.is_collect_royalty_fee || !collection.is_active {
             return 0
         } else {
-            collection.royal_fee
+            collection.royalty_fee
         }
     }
 

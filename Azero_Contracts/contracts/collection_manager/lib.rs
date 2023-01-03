@@ -73,7 +73,7 @@ pub mod artzero_collection_manager {
             standard_nft_hash: Hash,
             simple_mode_adding_fee: Balance,
             advance_mode_adding_fee: Balance,
-            max_royal_fee_rate: u32,
+            max_royalty_fee_rate: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 let caller = instance.env().caller();
@@ -86,7 +86,7 @@ pub mod artzero_collection_manager {
                         standard_nft_hash,
                         simple_mode_adding_fee,
                         advance_mode_adding_fee,
-                        max_royal_fee_rate,
+                        max_royalty_fee_rate,
                     )
                     .ok()
                     .unwrap();
@@ -101,7 +101,7 @@ pub mod artzero_collection_manager {
             standard_nft_hash: Hash,
             simple_mode_adding_fee: Balance,
             advance_mode_adding_fee: Balance,
-            max_royal_fee_rate: u32,
+            max_royalty_fee_rate: u32,
         ) -> Result<(), Error> {
             if self.manager.admin_address != ZERO_ADDRESS.into(){
                 return Err(Error::AlreadyInit);
@@ -112,7 +112,7 @@ pub mod artzero_collection_manager {
             self.manager.advance_mode_adding_fee = advance_mode_adding_fee;
             self.manager.admin_address = admin_address;
             self.manager.standard_nft_hash = standard_nft_hash;
-            self.manager.max_royal_fee_rate = max_royal_fee_rate;
+            self.manager.max_royalty_fee_rate = max_royalty_fee_rate;
             Ok(())
         }
 
@@ -125,8 +125,8 @@ pub mod artzero_collection_manager {
             nft_symbol: String,
             attributes: Vec<String>,
             attribute_vals: Vec<String>,
-            is_collect_royal_fee: bool,
-            royal_fee: u32,
+            is_collect_royalty_fee: bool,
+            royalty_fee: u32,
         ) -> Result<(), Error> {
             let collection_owner = self.env().caller();
             // Check if caller sends correct adding fee to the contract
@@ -135,7 +135,7 @@ pub mod artzero_collection_manager {
                 "invalid fee"
             );
             // Check if royalty fee is less than maximal value
-            assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
+            assert!(royalty_fee <= self.manager.max_royalty_fee_rate, "invalid royalty fee");
 
             // Create PSP34 Standard Contract using cross call to psp34_standard contract
             let contract = Psp34NftRef::new(collection_owner, nft_name, nft_symbol)
@@ -166,8 +166,8 @@ pub mod artzero_collection_manager {
                 collection_owner,
                 nft_contract_address: contract_account,
                 contract_type: CollectionType::Psp34Auto,
-                is_collect_royal_fee,
-                royal_fee,
+                is_collect_royalty_fee,
+                royalty_fee,
                 is_active: true,
                 show_on_chain_metadata: true,
             };
@@ -197,8 +197,8 @@ pub mod artzero_collection_manager {
             nft_contract_address: AccountId,
             attributes: Vec<String>,
             attribute_vals: Vec<String>,
-            is_collect_royal_fee: bool,
-            royal_fee: u32,
+            is_collect_royalty_fee: bool,
+            royalty_fee: u32,
         ) -> Result<(), Error> {
             // Check if caller sends correct adding fee to the contract
             assert!(
@@ -215,7 +215,7 @@ pub mod artzero_collection_manager {
             let collection_owner = Psp34Ref::get_owner(&nft_contract_address);
             assert!(collection_owner == self.env().caller());
             // Check if royalty fee is less than maximal value
-            assert!(royal_fee <= self.manager.max_royal_fee_rate, "invalid royal fee");
+            assert!(royalty_fee <= self.manager.max_royalty_fee_rate, "invalid royalty fee");
             self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
             // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
@@ -234,8 +234,8 @@ pub mod artzero_collection_manager {
                 collection_owner,
                 nft_contract_address,
                 contract_type: CollectionType::Psp34Manual,
-                is_collect_royal_fee,
-                royal_fee,
+                is_collect_royalty_fee,
+                royalty_fee,
                 is_active: false,
                 show_on_chain_metadata: false,
             };
@@ -393,17 +393,17 @@ pub mod artzero_collection_manager {
         /// Update Is Royalty Fee - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_is_collect_royal_fee(
+        pub fn update_is_collect_royalty_fee(
             &mut self,
             contract_address: AccountId,
-            is_collect_royal_fee: bool,
+            is_collect_royalty_fee: bool,
         ) -> Result<(), AccessControlError> {
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.is_collect_royal_fee = is_collect_royal_fee;
+            collection.is_collect_royalty_fee = is_collect_royalty_fee;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
         }
@@ -411,14 +411,14 @@ pub mod artzero_collection_manager {
         /// Update royalty fee of an NFT Collection - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_royal_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), AccessControlError> {
-            assert!(new_fee <= self.manager.max_royal_fee_rate, "invalid fee");
+        pub fn update_royalty_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), AccessControlError> {
+            assert!(new_fee <= self.manager.max_royalty_fee_rate, "invalid fee");
             assert!(
                 self.manager.collections.get(&contract_address).is_some(),
                 "collection not exist"
             );
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.royal_fee = new_fee;
+            collection.royalty_fee = new_fee;
             self.manager.collections.insert(&contract_address, &collection);
             Ok(())
         }
@@ -488,11 +488,11 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        /// Update Max Royal Fee Rate - only Owner
+        /// Update Max Royalty Fee Rate - only Owner
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn update_max_royal_fee_rate(&mut self, max_royal_fee_rate: u32) -> Result<(), Error> {
-            self.manager.max_royal_fee_rate = max_royal_fee_rate;
+        pub fn update_max_royalty_fee_rate(&mut self, max_royalty_fee_rate: u32) -> Result<(), Error> {
+            self.manager.max_royalty_fee_rate = max_royalty_fee_rate;
             Ok(())
         }
 
@@ -559,10 +559,10 @@ pub mod artzero_collection_manager {
             self.manager.admin_address
         }
 
-        /// Get Royal Max Fee
+        /// Get Royalty Max Fee
         #[ink(message)]
-        pub fn get_max_royal_fee_rate(&self) -> u32 {
-            self.manager.max_royal_fee_rate
+        pub fn get_max_royalty_fee_rate(&self) -> u32 {
+            self.manager.max_royalty_fee_rate
         }
     }
 }

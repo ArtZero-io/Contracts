@@ -153,7 +153,7 @@ pub mod artzero_marketplace_psp34 {
         token_id: Id,
         price: Balance,
         platform_fee: Balance,
-        royal_fee: Balance,
+        royalty_fee: Balance,
     }
     #[ink(event)]
     pub struct BidWinEvent {
@@ -163,7 +163,7 @@ pub mod artzero_marketplace_psp34 {
         token_id: Id,
         price: Balance,
         platform_fee: Balance,
-        royal_fee: Balance,
+        royalty_fee: Balance,
     }
 
     #[ink(event)]
@@ -265,7 +265,7 @@ pub mod artzero_marketplace_psp34 {
                     .sale_tokens_ids_last_index
                     .insert(&(&Some(&nft_contract_address), &Some(&caller)), &(last_index + 1));
                 let royalty_fee_rate =
-                    ArtZeroCollectionRef::get_royal_fee(&self.manager.collection_contract_address, nft_contract_address);
+                    ArtZeroCollectionRef::get_royalty_fee(&self.manager.collection_contract_address, nft_contract_address);
                 let new_sale = ForSaleItem {
                     nft_owner: token_owner,
                     listed_date: self.env().block_timestamp(),
@@ -449,7 +449,7 @@ pub mod artzero_marketplace_psp34 {
                 .current_profit
                 .checked_add(platform_fee_after_discount)
                 .unwrap();
-            let royal_fee = price
+            let royalty_fee = price
                 .checked_mul(sale_information.royalty_fee_at_listing as u128)
                 .unwrap()
                 .checked_div(10000)
@@ -458,12 +458,12 @@ pub mod artzero_marketplace_psp34 {
             let collection_owner =
                 ArtZeroCollectionRef::get_collection_owner(&self.manager.collection_contract_address, nft_contract_address);
             assert!(collection_owner != None);
-            if royal_fee > 0 {
-                assert!(self.env().transfer(collection_owner.unwrap(), royal_fee).is_ok());
+            if royalty_fee > 0 {
+                assert!(self.env().transfer(collection_owner.unwrap(), royalty_fee).is_ok());
             }
             // Send AZERO to seller
             let seller_fee = price
-                .checked_sub(royal_fee)
+                .checked_sub(royalty_fee)
                 .unwrap()
                 .checked_sub(platform_fee_after_discount)
                 .unwrap();
@@ -492,7 +492,7 @@ pub mod artzero_marketplace_psp34 {
                 token_id: token_id.clone(),
                 price,
                 platform_fee: platform_fee_after_discount,
-                royal_fee,
+                royalty_fee,
             });
             Ok(())
         }
@@ -740,7 +740,7 @@ pub mod artzero_marketplace_psp34 {
                             .current_profit
                             .checked_add(platform_fee_after_discount)
                             .unwrap();
-                        let royal_fee = price
+                        let royalty_fee = price
                             .checked_mul(sale_information.royalty_fee_at_listing as u128)
                             .unwrap()
                             .checked_div(10000)
@@ -751,12 +751,12 @@ pub mod artzero_marketplace_psp34 {
                             nft_contract_address,
                         );
                         assert!(collection_owner != None);
-                        if royal_fee > 0 {
-                            assert!(self.env().transfer(collection_owner.unwrap(), royal_fee).is_ok());
+                        if royalty_fee > 0 {
+                            assert!(self.env().transfer(collection_owner.unwrap(), royalty_fee).is_ok());
                         }
                         // Send AZERO to seller
                         let seller_fee = price
-                            .checked_sub(royal_fee)
+                            .checked_sub(royalty_fee)
                             .unwrap()
                             .checked_sub(platform_fee_after_discount)
                             .unwrap();
@@ -783,7 +783,7 @@ pub mod artzero_marketplace_psp34 {
                             token_id: token_id.clone(),
                             price,
                             platform_fee: platform_fee_after_discount,
-                            royal_fee,
+                            royalty_fee,
                         });
                     } else {
                         // SEnd AZero back to lost bidder
