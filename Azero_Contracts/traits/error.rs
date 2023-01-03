@@ -20,6 +20,7 @@ pub enum Error {
     NotEnoughBalance,
     AlreadyInit,
     NotOwner,
+    NotTokenOwner,
     ProjectNotExist,
     ProjectOwnerAndAdmin,
     InvalidStartTimeAndEndTime,

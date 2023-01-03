@@ -59,5 +59,5 @@ pub trait Psp34Traits {
     fn get_locked_token_count(&self) -> u64;
     /// This function allows NFT Owner to burn their NFT
     #[ink(message)]
-    fn burn(&mut self, id: Id) -> Result<(), PSP34Error>;
+    fn burn(&mut self, id: Id) -> Result<(), Error>;
 }

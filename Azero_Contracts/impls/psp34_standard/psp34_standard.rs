@@ -10,6 +10,7 @@ pub use crate::{
 };
 use openbrush::{
     modifiers,
+    modifier_definition,
     contracts::ownable::*,
     contracts::psp34::extensions::{
         enumerable::*,
@@ -29,6 +30,19 @@ use ink_prelude::{
 };
 use crate::traits::error::Error;
 
+#[modifier_definition]
+pub fn only_token_owner<T, F, R, E>(instance: &mut T, body: F, token_owner: AccountId) -> Result<R, E>
+where
+    T: Storage<Manager>,
+    F: FnOnce(&mut T) -> Result<R, E>,
+    E: From<Error>,
+{
+    if token_owner != T::env().caller() {
+        return Err(From::from(Error::NotTokenOwner))
+    }
+    body(instance)
+}
+
 impl<T: Storage<Manager>> Psp34Traits for T
 where
     T: PSP34 + psp34::Internal +
@@ -42,10 +56,8 @@ where
     }
 
     /// Lock nft - Only owner token
+    #[modifiers(only_token_owner(self.owner_of(token_id.clone()).unwrap()))]
     default fn lock(&mut self, token_id: Id) -> Result<(), Error> {
-        let caller = T::env().caller();
-        let token_owner = self.owner_of(token_id.clone()).unwrap();
-        assert!(caller == token_owner);
         self.data::<Manager>().locked_token_count = self.data::<Manager>().locked_token_count.checked_add(1).unwrap();
         self.data::<Manager>().locked_tokens.insert(&token_id, &true);
         Ok(())
@@ -65,13 +77,15 @@ where
     }
 
     /// Burn NFT
-    default fn burn(&mut self, id: Id) -> Result<(), PSP34Error> {
+    #[modifiers(only_token_owner(self.owner_of(id.clone()).unwrap()))]
+    default fn burn(&mut self, id: Id) -> Result<(), Error> {
         let caller = T::env().caller();
-        let token_owner = self.owner_of(id.clone()).unwrap();
-        assert!(caller == token_owner);
         let mut data = self.data::<Manager>();
         data.last_token_id = data.last_token_id.checked_sub(1).unwrap();
-        self._burn_from(caller, id)
+        if self._burn_from(caller, id).is_err(){
+            return Err(Error::Custom(String::from("Cannot burn")))
+        }
+        Ok(())
     }
 
     /// Change baseURI
