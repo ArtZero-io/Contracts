@@ -21,4 +21,4 @@ contracts/Collection_Management/Collection_Management.wasm
 contracts/ERC721/erc721.wasm
 contracts/ERC721/erc721.contract
 target
-
+node_modules
