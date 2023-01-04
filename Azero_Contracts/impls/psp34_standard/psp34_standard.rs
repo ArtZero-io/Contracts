@@ -102,7 +102,9 @@ where
         token_id: Id,
         metadata: Vec<(String, String)>
     ) -> Result<(), Error> {
-        assert!(token_id != Id::U64(0));
+        if token_id == Id::U64(0){
+            return Err(Error::InvalidInput)
+        }
         if self.is_locked_nft(token_id.clone()) {
             return Err(Error::Custom(String::from("Token is locked")))
         }

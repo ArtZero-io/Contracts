@@ -74,7 +74,9 @@ pub mod psp34_nft {
         pub fn mint(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
             self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
-            assert!(self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_ok());
+            if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
+                return Err(Error::Custom(String::from("Cannot mint")))
+            }
             Ok(())
         }
 
@@ -85,7 +87,9 @@ pub mod psp34_nft {
             let caller = self.env().caller();
             self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
             self._mint_to(caller, Id::U64(self.manager.last_token_id))?;
-            assert!(self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata).is_ok());
+            if self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata).is_err(){
+                return Err(Error::Custom(String::from("Cannot set attributes")))
+            }
             Ok(())
         }
     }

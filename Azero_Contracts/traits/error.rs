@@ -38,7 +38,8 @@ pub enum Error {
     NotListed,
     BidAlreadyExist,
     BidNotExist,
-
+    OwnableError(OwnableError),
+    AccessControlError(AccessControlError)
 }
 
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]
@@ -50,10 +51,7 @@ pub enum LockError {
 
 impl From<OwnableError> for Error {
     fn from(ownable: OwnableError) -> Self {
-        match ownable {
-            OwnableError::CallerIsNotOwner => Error::Custom(String::from("O::CallerIsNotOwner")),
-            OwnableError::NewOwnerIsZero => Error::Custom(String::from("O::NewOwnerIsZero")),
-        }
+        Error::OwnableError(ownable)
     }
 }
 impl From<LockError> for Error {
@@ -67,14 +65,6 @@ impl From<LockError> for Error {
 
 impl From<AccessControlError> for Error {
     fn from(access: AccessControlError) -> Self {
-        match access {
-            AccessControlError::MissingRole => Error::Custom(String::from("AC::MissingRole")),
-            AccessControlError::RoleRedundant => {
-                Error::Custom(String::from("AC::RoleRedundant"))
-            }
-            AccessControlError::InvalidCaller => {
-                Error::Custom(String::from("AC::InvalidCaller"))
-            }
-        }
+        Error::AccessControlError(access)
     }
 }
