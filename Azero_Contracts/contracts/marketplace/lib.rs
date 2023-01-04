@@ -10,6 +10,9 @@ pub mod artzero_marketplace_psp34 {
     use ink_prelude::{
         vec,
         vec::Vec,
+        string::{
+            String,
+        },
     };
     use ink_storage::{
         traits::{
@@ -193,9 +196,7 @@ pub mod artzero_marketplace_psp34 {
             platform_fee: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                if platform_fee >= 10000 { //must less than 100%
-                    return Err(Error::InvalidFee)
-                }
+                assert!(platform_fee < 10000);
                 let caller = instance.env().caller();
                 instance._init_with_owner(caller);
                 instance
