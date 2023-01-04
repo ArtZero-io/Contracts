@@ -193,7 +193,9 @@ pub mod artzero_marketplace_psp34 {
             platform_fee: u32,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                assert!(platform_fee < 10000); // must less than 100%
+                if platform_fee >= 10000 { //must less than 100%
+                    return Err(Error::InvalidFee)
+                }
                 let caller = instance.env().caller();
                 instance._init_with_owner(caller);
                 instance
@@ -236,11 +238,15 @@ pub mod artzero_marketplace_psp34 {
         /// List the NFT onto the marketplace - FREE of charge
         #[ink(message)]
         pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance) -> Result<(), Error> {
-            assert!(price > 0);
+            if price == 0 {
+                return Err(Error::InvalidInput)
+            }
             // Check if the caller is the owner of the token
             let caller = self.env().caller();
             let token_owner = Psp34Ref::owner_of(&nft_contract_address, token_id.clone()).unwrap();
-            assert!(caller == token_owner);
+            if caller != token_owner{
+                return Err(Error::NotTokenOwner)
+            }
             // Check if this contract has been approved to be able to transfer the NFT on owner behalf
             let allowance = Psp34Ref::allowance(
                 &nft_contract_address,
@@ -248,10 +254,14 @@ pub mod artzero_marketplace_psp34 {
                 self.env().account_id(),
                 Some(token_id.clone()),
             );
-            assert!(allowance);
+            if !allowance {
+                return Err(Error::NotApproved)
+            }
             // Check if the collection is active
             let is_active = ArtZeroCollectionRef::is_active(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(is_active);
+            if !is_active {
+                return Err(Error::CollectionNotActive)
+            }
 
             {
                 // Add NFT token_id to sale_tokens_ids and increase the counting in sale_tokens_ids_last_index
@@ -294,15 +304,17 @@ pub mod artzero_marketplace_psp34 {
                 self.update_listed_token_by_collection_address(&nft_contract_address, &true);
             }
             // Transfer Token from Caller to Marketplace Contract
-            assert!(Psp34Ref::transfer_builder(
-                &nft_contract_address,
-                self.env().account_id(),
-                token_id.clone(),
-                Vec::<u8>::new()
-            )
-            .call_flags(CallFlags::default().set_allow_reentry(true))
-            .fire()
-            .is_ok());
+            if Psp34Ref::transfer_builder(
+                    &nft_contract_address,
+                    self.env().account_id(),
+                    token_id.clone(),
+                    Vec::<u8>::new()
+                )
+                .call_flags(CallFlags::default().set_allow_reentry(true))
+                .fire()
+                .is_err(){
+                    return Err(Error::CannotTransfer)
+                }
             // Emit NewListEvent event for tracking purposes
             self.env().emit_event(NewListEvent {
                 trader: Some(caller),
@@ -317,11 +329,13 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         pub fn unlist(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(), Error> {
             // Check to make sure the NFT is for sale in the market
-            assert!(self
+            if self
                 .manager
                 .market_list
                 .get(&(&nft_contract_address, &token_id))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInMarket)
+                }
             let mut sale_information = self
                 .manager
                 .market_list
@@ -329,25 +343,33 @@ pub mod artzero_marketplace_psp34 {
                 .unwrap();
             let caller = self.env().caller();
             // General checking to ensure its from valid owner and sale is active
-            assert!(sale_information.nft_owner == caller);
-            assert!(sale_information.is_for_sale);
+            if sale_information.nft_owner != caller{
+                return Err(Error::NotTokenOwner)
+            }
+            if !sale_information.is_for_sale {
+                return Err(Error::NotForSale)
+            }
             // remove the NFT from market list by set is_for_sale to false
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
                 .insert(&(&nft_contract_address, &token_id), &sale_information);
             // Check if the token is for sale
-            assert!(self
+            if self
                 .manager
                 .sale_tokens_ids_last_index
                 .get(&(&Some(&nft_contract_address), &Some(&caller)))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInSaleList)
+                }
             let mut last_index = self
                 .manager
                 .sale_tokens_ids_last_index
                 .get(&(&Some(&nft_contract_address), &Some(&caller)))
                 .unwrap();
-            assert!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&caller)), &token_id.clone()));
+            if !self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&caller)), &token_id.clone()){
+                return Err(Error::NotInSaleList)
+            }
             self.manager.sale_tokens_ids.remove_value(
                 &(&Some(&nft_contract_address), &Some(&caller)),
                 &token_id.clone()
@@ -364,7 +386,9 @@ pub mod artzero_marketplace_psp34 {
                 .bidders
                 .insert(&(&nft_contract_address, &caller, &token_id.clone()), &bidders);
             // Send NFT back to caller or token_owner
-            assert!(Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_ok());
+            if Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_err(){
+                return Err(Error::CannotTransfer)
+            }
             self.update_listed_token_by_collection_address(&nft_contract_address, &false);
             self.env().emit_event(UnListEvent {
                 trader: Some(caller),
@@ -378,11 +402,13 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         #[ink(payable)]
         pub fn buy(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(), Error> {
-            assert!(self
+            if self
                 .manager
                 .market_list
                 .get(&(&nft_contract_address, &token_id))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInMarket)
+                }
             let mut sale_information = self
                 .manager
                 .market_list
@@ -392,37 +418,51 @@ pub mod artzero_marketplace_psp34 {
             let seller = sale_information.nft_owner;
             let price = sale_information.price;
             // Seller cannot buy his own NFT
-            assert!(seller != caller);
+            if seller == caller {
+                return Err(Error::InvalidCaller)
+            }
             // Check if the NFT is for sale
-            assert!(sale_information.is_for_sale);
+            if !sale_information.is_for_sale{
+                return Err(Error::NotForSale)
+            }
             // Check if the buyer provide enough AZERO to buy the NFT
-            assert!(price == self.env().transferred_value());
+            if price != self.env().transferred_value(){
+                return Err(Error::InvalidFee)
+            }
             // Collection must be active so NFTs can be traded
-            assert!(ArtZeroCollectionRef::is_active(
+            if !ArtZeroCollectionRef::is_active(
                 &self.manager.collection_contract_address,
                 nft_contract_address
-            ));
+            ){
+                return Err(Error::CollectionNotActive)
+            }
             // Check if the Collection Type is supported by this marketplace. Currently only PSP34
             let contract_type =
                 ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
+            if contract_type != CollectionType::Psp34Manual && contract_type != CollectionType::Psp34Auto{
+                return Err(Error::InvalidType)
+            }
             // Set NFT is not for sale
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
                 .insert(&(&nft_contract_address, &token_id), &sale_information); // remove from market list
             // Check if the token is in the sale_tokens_ids list
-            assert!(self
+            if self
                 .manager
                 .sale_tokens_ids_last_index
                 .get(&(&Some(&nft_contract_address), &Some(&seller)))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInSaleList)
+                }
             let mut last_index = self
                 .manager
                 .sale_tokens_ids_last_index
                 .get(&(&Some(&nft_contract_address), &Some(&seller)))
                 .unwrap();
-            assert!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id));
+            if !self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id){
+                return Err(Error::NotInSaleList)
+            }
             // Remove the NFT from sale_tokens_ids list
             self.manager.sale_tokens_ids.remove_value(
                 &(&Some(&nft_contract_address), &Some(&seller)),
@@ -484,9 +524,13 @@ pub mod artzero_marketplace_psp34 {
             // Send AZERO to collection owner as Royalty Fee
             let collection_owner =
                 ArtZeroCollectionRef::get_collection_owner(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(collection_owner != None);
+            if collection_owner == None{
+                return Err(Error::InvalidCollectionOwner)
+            }
             if royalty_fee > 0 {
-                assert!(self.env().transfer(collection_owner.unwrap(), royalty_fee).is_ok());
+                if self.env().transfer(collection_owner.unwrap(), royalty_fee).is_err(){
+                    return Err(Error::CannotTransfer)
+                }
             }
             // Send AZERO to seller after reduction of Royalty Fee and Platform Fee
             let seller_fee = price
@@ -496,7 +540,9 @@ pub mod artzero_marketplace_psp34 {
                 .unwrap();
 
             if seller_fee > 0 {
-                assert!(self.env().transfer(seller, seller_fee).is_ok());
+                if self.env().transfer(seller, seller_fee).is_err(){
+                    return Err(Error::CannotTransfer)
+                }
             }
             // Update Volumes for platform Statistics
             let collection_volume = self.manager.volume_by_collection.get(&nft_contract_address);
@@ -512,7 +558,9 @@ pub mod artzero_marketplace_psp34 {
             self.manager.volume_by_user.insert(&seller, &user_volume_unwrap);
             self.update_listed_token_by_collection_address(&nft_contract_address, &false);
             // Send NFT to Buyer
-            assert!(Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_ok());
+            if Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_err(){
+                return Err(Error::CannotTransfer)
+            }
             // Emit PurchaseEvent to the network
             self.env().emit_event(PurchaseEvent {
                 buyer: Some(caller),
@@ -529,11 +577,13 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         #[ink(payable)]
         pub fn bid(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(), Error> {
-            assert!(self
+            if self
                 .manager
                 .market_list
                 .get(&(&nft_contract_address, &token_id))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInMarket)
+                }
             let sale_information = self
                 .manager
                 .market_list
@@ -545,22 +595,34 @@ pub mod artzero_marketplace_psp34 {
             let bid_value = self.env().transferred_value();
             // General checking to ensure its from valid owner and sale is active
             // Seller cannot bid on his own NFT
-            assert!(seller != caller);
+            if seller == caller{
+                return Err(Error::InvalidCaller)
+            }
             // Make sure the NFT is for sale
-            assert!(sale_information.is_for_sale);
+            if !sale_information.is_for_sale{
+                return Err(Error::NotForSale)
+            }
             // Bidder can only bid the amount less than the selling price of the NFT
-            assert!(price > bid_value);
+            if price <= bid_value{
+                return Err(Error::InvalidFee)
+            }
             // Collection must be active at time of bidding
-            assert!(ArtZeroCollectionRef::is_active(
+            if !ArtZeroCollectionRef::is_active(
                 &self.manager.collection_contract_address,
                 nft_contract_address
-            ));
+            ){
+                return Err(Error::CollectionNotActive)
+            }
             // Check if the Collection Type is supported by this marketplace. Currently only PSP34
             let contract_type =
                 ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
+            if contract_type != CollectionType::Psp34Manual && contract_type != CollectionType::Psp34Auto{
+                return Err(Error::InvalidType)
+            }
             // Check if the NFT is in sale_tokens_ids list
-            assert!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id));
+            if !self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id){
+                return Err(Error::NotInSaleList)
+            }
             // Create new Bid Structure before saving to the mapping
             let new_bid = BidInformation {
                 bidder: caller,
@@ -582,7 +644,9 @@ pub mod artzero_marketplace_psp34 {
                 // Check if Bid already in the list --> not allow, have to remove bid and add new bid
                 let length = bidders.len();
                 // TODO: make 30 variable
-                assert!(length <= 30); // Only allow max 30 bids per token sale
+                if length > 30 { // Only allow max 30 bids per token sale
+                    return Err(Error::InvalidBidLength)
+                }
                 for index in 0..length {
                     if bidders[index as usize].bidder == caller {
                         return Err(Error::BidAlreadyExist)
@@ -614,11 +678,13 @@ pub mod artzero_marketplace_psp34 {
         /// Remove Bid From Active Sale
         #[ink(message)]
         pub fn remove_bid(&mut self, nft_contract_address: AccountId, token_id: Id) -> Result<(), Error> {
-            assert!(self
+            if self
                 .manager
                 .market_list
                 .get(&(&nft_contract_address, &token_id))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInMarket)
+                }
             let sale_information = self
                 .manager
                 .market_list
@@ -628,20 +694,30 @@ pub mod artzero_marketplace_psp34 {
             let seller = sale_information.nft_owner;
             // General checking to ensure its from valid owner and sale is active
             // Seller cannot bid on his own sale
-            assert!(seller != caller);
+            if seller == caller {
+                return Err(Error::InvalidCaller)
+            }
             // The NFT must be for sale
-            assert!(sale_information.is_for_sale);
+            if !sale_information.is_for_sale{
+                return Err(Error::NotForSale)
+            }
             // The NFT Collection must be active
-            assert!(ArtZeroCollectionRef::is_active(
+            if !ArtZeroCollectionRef::is_active(
                 &self.manager.collection_contract_address,
                 nft_contract_address
-            ));
+            ){
+                return Err(Error::CollectionNotActive)
+            }
             // Check if the Collection Type is supported by this marketplace. Currently only PSP34
             let contract_type =
             ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
+            if contract_type != CollectionType::Psp34Manual && contract_type != CollectionType::Psp34Auto{
+                return Err(Error::InvalidType)
+            }
             // Check if the token is in sale_tokens_ids list
-            assert!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id));
+            if !self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&seller)), &token_id){
+                return Err(Error::NotInSaleList)
+            }
 
             if self
                 .manager
@@ -665,15 +741,21 @@ pub mod artzero_marketplace_psp34 {
                         break
                     }
                 }
-                assert!(index_bid >= 0);
-                assert!(bid_value > 0);
+                if index_bid < 0{
+                    return Err(Error::Custom(String::from("invalid index bid")))
+                }
+                if bid_value <= 0{
+                    return Err(Error::Custom(String::from("invalid bid value")))
+                }
                 // remove bid from bidders list
                 bidders.remove(index_bid as usize);
                 self.manager
                     .bidders
                     .insert(&(&nft_contract_address, &seller, &token_id), &bidders);
                 // Send bid_value back to caller
-                assert!(self.env().transfer(caller, bid_value).is_ok());
+                if self.env().transfer(caller, bid_value).is_err(){
+                    return Err(Error::CannotTransfer)
+                }
                 // Emit the RemoveBidEvent to the network
                 self.env().emit_event(RemoveBidEvent {
                     bidder: Some(caller),
@@ -695,11 +777,13 @@ pub mod artzero_marketplace_psp34 {
             token_id: Id,
             bid_index: u32,
         ) -> Result<(), Error> {
-            assert!(self
+            if self
                 .manager
                 .market_list
                 .get(&(&nft_contract_address, &token_id))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInMarket)
+                }
             let mut sale_information = self
                 .manager
                 .market_list
@@ -709,35 +793,47 @@ pub mod artzero_marketplace_psp34 {
             let seller = sale_information.nft_owner;
             // General checking to ensure its from valid owner and sale is active
             // Only NFT seller can accept the bid
-            assert!(seller == caller);
-            // Make sure the NFT is for sale
-            assert!(sale_information.is_for_sale);
-            // Check if the NFT Collection is active
-            assert!(ArtZeroCollectionRef::is_active(
+            if seller != caller{
+                return Err(Error::InvalidCaller)
+            }
+            // The NFT must be for sale
+            if !sale_information.is_for_sale{
+                return Err(Error::NotForSale)
+            }
+            // The NFT Collection must be active
+            if !ArtZeroCollectionRef::is_active(
                 &self.manager.collection_contract_address,
                 nft_contract_address
-            ));
+            ){
+                return Err(Error::CollectionNotActive)
+            }
             // Check if the Collection Type is supported by this marketplace. Currently only PSP34
             let contract_type =
             ArtZeroCollectionRef::get_contract_type(&self.manager.collection_contract_address, nft_contract_address);
-            assert!(contract_type == CollectionType::Psp34Manual || contract_type == CollectionType::Psp34Auto); // psp34 only
+            if contract_type != CollectionType::Psp34Manual && contract_type != CollectionType::Psp34Auto{
+                return Err(Error::InvalidType)
+            }
             // remove from market list
             sale_information.is_for_sale = false;
             self.manager
                 .market_list
                 .insert(&(&nft_contract_address, &token_id), &sale_information);
             // Check if the token is in sale_tokens_ids
-            assert!(self
+            if self
                 .manager
                 .sale_tokens_ids_last_index
                 .get(&(&Some(&nft_contract_address), &Some(&caller)))
-                .is_some());
+                .is_none(){
+                    return Err(Error::NotInSaleList)
+                }
             let mut last_index = self
                 .manager
                 .sale_tokens_ids_last_index
                 .get(&(&Some(&nft_contract_address), &Some(&caller)))
                 .unwrap();
-            assert!(self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&caller)), &token_id.clone()));
+            if !self.manager.sale_tokens_ids.contains_value(&(&Some(&nft_contract_address), &Some(&caller)), &token_id.clone()){
+                return Err(Error::NotInSaleList)
+            }
             self.manager.sale_tokens_ids.remove_value(&(&Some(&nft_contract_address), &Some(&caller)), &token_id.clone());
             last_index = last_index.checked_sub(1).unwrap();
             self.manager
@@ -757,18 +853,22 @@ pub mod artzero_marketplace_psp34 {
                     .get(&(&nft_contract_address, &seller, &token_id.clone()))
                     .unwrap();
                 let bidders_length = bidders.len();
-                assert!(bid_index < bidders_length as u32);
+                if bid_index >= bidders_length as u32 {
+                    return Err(Error::Custom(String::from("invalid index bid")))
+                }
                 // Loop to all the bids in bidders mapping
                 for (index, item) in bidders.iter().enumerate() {
                     if index == bid_index as usize {
                         // Send NFT to bidder
-                        assert!(Psp34Ref::transfer(
+                        if Psp34Ref::transfer(
                             &nft_contract_address,
                             item.bidder,
                             token_id.clone(),
                             Vec::<u8>::new()
                         )
-                        .is_ok());
+                        .is_err(){
+                            return Err(Error::CannotTransfer)
+                        }
                         let price = item.bid_value;
                         // Calculate platform fee that seller has to pay
                         let platform_fee = price
@@ -800,9 +900,13 @@ pub mod artzero_marketplace_psp34 {
                             &self.manager.collection_contract_address,
                             nft_contract_address,
                         );
-                        assert!(collection_owner != None);
+                        if collection_owner == None{
+                            return Err(Error::InvalidCollectionOwner)
+                        }
                         if royalty_fee > 0 {
-                            assert!(self.env().transfer(collection_owner.unwrap(), royalty_fee).is_ok());
+                            if self.env().transfer(collection_owner.unwrap(), royalty_fee).is_err(){
+                                return Err(Error::CannotTransfer)
+                            }
                         }
                         // Send AZERO to seller
                         let seller_fee = price
@@ -812,7 +916,9 @@ pub mod artzero_marketplace_psp34 {
                             .unwrap();
 
                         if seller_fee > 0 {
-                            assert!(self.env().transfer(seller, seller_fee).is_ok());
+                            if self.env().transfer(seller, seller_fee).is_err(){
+                                return Err(Error::CannotTransfer)
+                            }
                         }
                         // Save all volume as platform Statistics
                         let collection_volume = self.manager.volume_by_collection.get(&nft_contract_address);
@@ -840,10 +946,12 @@ pub mod artzero_marketplace_psp34 {
                         });
                     } else {
                         // Send AZero back to lost bidders
-                        assert!(self
+                        if self
                             .env()
                             .transfer(item.bidder, item.bid_value)
-                            .is_ok());
+                            .is_err(){
+                                return Err(Error::CannotTransfer)
+                            }
                     }
                 }
                 // Clear Bidders
@@ -869,7 +977,9 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_platform_fee(&mut self, platform_fee: u32) -> Result<(), Error> {
-            assert!(platform_fee < 10000); // must less than 100%
+            if platform_fee >= 10000{ // must less than 100%
+                return Err(Error::InvalidFee)
+            }
             self.manager.platform_fee = platform_fee;
             Ok(())
         }
@@ -910,9 +1020,13 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn set_discount(&mut self, criteria: Vec<u8>, rates: Vec<u16>) -> Result<(), Error> {
-            assert!(criteria.len() == rates.len());
+            if criteria.len() != rates.len(){
+                return Err(Error::InvalidInput)
+            }
             for &item in rates.iter() {
-                assert!(item <= 10000);
+                if item > 10000{
+                    return Err(Error::InvalidInput)
+                }
             }
             self.manager.staking_discount_criteria = criteria;
             self.manager.staking_discount_rate = rates;
@@ -1039,7 +1153,9 @@ pub mod artzero_marketplace_psp34 {
                 return Err(Error::NotEnoughBalance)
             }
             self.manager.current_profit = self.manager.current_profit.checked_sub(value).unwrap();
-            assert!(self.env().transfer(reciever, value).is_ok());
+            if self.env().transfer(reciever, value).is_err(){
+                return Err(Error::CannotTransfer)
+            }
             Ok(())
         }
         // This function calculate the discount from the transaction fee based on number of PMP NFTs staked

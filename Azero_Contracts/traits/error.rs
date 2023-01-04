@@ -26,7 +26,9 @@ pub enum Error {
     ProjectOwnerAndAdmin,
     InvalidStartTimeAndEndTime,
     CollectionOwnerAndAdmin,
+    CollectionNotActive,
     InvalidInput,
+    InvalidType,
     ClaimedAll,
     TokenLimitReached,
     UpdatePhase,
@@ -39,6 +41,11 @@ pub enum Error {
     NotListed,
     BidAlreadyExist,
     BidNotExist,
+    NotInMarket,
+    NotForSale,
+    NotInSaleList,
+    InvalidBidLength,
+    InvalidCollectionOwner,
     OwnableError(OwnableError),
     AccessControlError(AccessControlError)
 }
