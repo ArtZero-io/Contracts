@@ -94,7 +94,16 @@ pub mod artzero_staking_nft {
         reward_amount: Balance,
         total_staked_amount: u64,
     }
-
+    // Staking contract allows PMP NFT owners to stake the NFT and earn AZERO as rewards
+    /* The Reward Distribution has 6 steps:
+        Step 1: Lock Staking Contract to make sure noone can stake or unstake during the reward distribution
+        Step 2: Add Rewards - ArtZero sends AZERO to the staking contract as Reward Pool
+        Step 3: Set all stakers Claimable - ArtZero runs a script on server to set all active stakers to be reward claimable
+        Step 4: Enable Reward Distribution - to allow stakers to claim the reward
+        Step 5: Stop Reward Distribution - Once the Reward Distribution period is over (around 3 days), Admin stops the process
+        Step 6: Unlock Staking Contract - Let stakers to stake/unstake their NFTs
+        Note: Any rewards that not been claimed by the stakers will be accumulated for next Reward Distribution
+    */
     impl ArtZeroStakingNFT {
         #[ink(constructor)]
         pub fn new(
@@ -215,29 +224,36 @@ pub mod artzero_staking_nft {
         pub fn claim_reward(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
             let is_claimed = self.manager.is_claimed.get(&caller);
+            // Check if the claim exist and must be FALSE
             assert!(is_claimed.is_some());
             assert!(!is_claimed.unwrap());
             self.manager.is_claimed.insert(&caller, &true); // Can only claim once
 
+            // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
             assert!(self.manager.total_staked > 0);
             assert!(self.manager.reward_started); // Only allow when reward distribution is started
 
+            // How many NFT the user staker, it must be greater than ZERO
             let staked_amount = self.manager.staking_list.count(caller);
             assert!(staked_amount > 0);
+            // Check if Reward Pool has balance to pay for stakers
             assert!(self.manager.reward_pool > 0);
-
+            // Calculate how much reward to pay for staker
             let reward =
                 (self.manager.reward_pool * staked_amount) / (self.manager.total_staked as u128);
 
             if self.manager.claimable_reward >= reward {
+                // Send the reward to the staker
                 self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
                 assert!(self.env().transfer(caller, reward).is_ok(),"error claim reward");
+                // Emit ClaimReward event to the network
                 self.env().emit_event(ClaimReward {
                     staker: Some(caller),
                     reward_amount: reward,
                     staked_amount: staked_amount as u64,
                 });
             } else {
+                // If there is not enough fund to pay, transfer everything in the pool to staker
                 assert!(self.env().transfer(caller, self.manager.claimable_reward).is_ok(),"error claim reward");
                 self.env().emit_event(ClaimReward {
                     staker: Some(caller),
@@ -373,11 +389,11 @@ pub mod artzero_staking_nft {
                         staker: Some(caller),
                         token_id: item,
                     });
-                
+
                 } else {
                     return Err(Error::CannotTransfer)
                 }
-               
+
             }
             if !self.manager.staked_accounts.contains_value(0, &caller) {
                 self.manager.staked_accounts.insert(0, &caller);
@@ -476,7 +492,7 @@ pub mod artzero_staking_nft {
                 let request_unstake_time = self.get_request_unstake_time(caller, item);
                 assert!(request_unstake_time > 0);
                 let current_time = Self::env().block_timestamp();
-            
+
                 if request_unstake_time + (self.manager.limit_unstake_time * 60000) > current_time {
                     return Err(Error::Custom(String::from("Not Enough Time Request Unstake")))
                 }
