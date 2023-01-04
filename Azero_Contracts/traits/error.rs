@@ -14,6 +14,7 @@ pub enum Error {
     OnlyOwner,
     OnlyAdmin,
     InvalidCaller,
+    InvalidFee,
     TokenOwnerNotMatch,
     NotApproved,
     CannotTransfer,

@@ -130,12 +130,13 @@ pub mod artzero_collection_manager {
         ) -> Result<(), Error> {
             let collection_owner = self.env().caller();
             // Check if caller sends correct adding fee to the contract
-            assert!(
-                self.manager.simple_mode_adding_fee == self.env().transferred_value(),
-                "invalid fee"
-            );
+            if self.manager.simple_mode_adding_fee != self.env().transferred_value(){
+                return Err(Error::InvalidFee)
+            }
             // Check if royalty fee is less than maximal value
-            assert!(royalty_fee <= self.manager.max_royalty_fee_rate, "invalid royalty fee");
+            if royalty_fee > self.manager.max_royalty_fee_rate{
+                return Err(Error::InvalidInput)
+            }
 
             // Create PSP34 Standard Contract using cross call to psp34_standard contract
             let contract = Psp34NftRef::new(collection_owner, nft_name, nft_symbol)
@@ -176,7 +177,7 @@ pub mod artzero_collection_manager {
                 .set_multiple_attributes(contract_account, attributes, attribute_vals)
                 .is_err()
             {
-                panic!("error set_multiple_attributes")
+                return Err(Error::Custom(String::from("Cannot set attributes")))
             };
             // Emit AddNewCollectionEvent event for tracking purposes
             self.env().emit_event(AddNewCollectionEvent {
@@ -201,21 +202,23 @@ pub mod artzero_collection_manager {
             royalty_fee: u32,
         ) -> Result<(), Error> {
             // Check if caller sends correct adding fee to the contract
-            assert!(
-                self.manager.advance_mode_adding_fee == self.env().transferred_value(),
-                "invalid fee"
-            );
+            if self.manager.advance_mode_adding_fee != self.env().transferred_value(){
+                return Err(Error::InvalidFee)
+            }
             // Check if the contract already exists
-            assert!(
-                self.manager.collections.get(&nft_contract_address).is_none(),
-                "address exists"
-            );
+            if self.manager.collections.get(&nft_contract_address).is_some(){
+                return Err(Error::Custom(String::from("Collection exists")))
+            }
 
             // Only the owner of the NFT contract collection can perform this call
             let collection_owner = Psp34Ref::get_owner(&nft_contract_address);
-            assert!(collection_owner == self.env().caller());
+            if collection_owner != self.env().caller(){
+                return Err(Error::NotOwner)
+            }
             // Check if royalty fee is less than maximal value
-            assert!(royalty_fee <= self.manager.max_royalty_fee_rate, "invalid royalty fee");
+            if royalty_fee > self.manager.max_royalty_fee_rate {
+                return Err(Error::InvalidInput)
+            }
             self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
             // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
@@ -244,7 +247,7 @@ pub mod artzero_collection_manager {
                 .set_multiple_attributes(nft_contract_address, attributes, attribute_vals)
                 .is_err()
             {
-                panic!("error set_multiple_attributes")
+                return Err(Error::Custom(String::from("Cannot set attributes")))
             };
             // Emit AddNewCollectionEvent event for tracking purposes
             self.env().emit_event(AddNewCollectionEvent {
@@ -265,11 +268,10 @@ pub mod artzero_collection_manager {
             &mut self,
             contract_address: AccountId,
             new_owner: AccountId,
-        ) -> Result<(), AccessControlError> {
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+        ) -> Result<(), Error> {
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             collection.collection_owner = new_owner;
             self.manager.collections.insert(&contract_address, &collection);
@@ -283,11 +285,10 @@ pub mod artzero_collection_manager {
             &mut self,
             contract_address: AccountId,
             nft_contract_address: AccountId,
-        ) -> Result<(), AccessControlError> {
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+        ) -> Result<(), Error> {
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             collection.nft_contract_address = nft_contract_address;
             self.manager.collections.insert(&contract_address, &collection);
@@ -302,11 +303,12 @@ pub mod artzero_collection_manager {
             attributes: Vec<String>,
             values: Vec<String>,
         ) -> Result<(), Error> {
-            assert!(attributes.len() == values.len(), "Inputs not same length");
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+            if attributes.len() != values.len(){
+                return Err(Error::InvalidInput)
+            }
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let collection = self.manager.collections.get(&contract_address).unwrap();
             if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
                 let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or_default();
@@ -379,11 +381,10 @@ pub mod artzero_collection_manager {
         /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: CollectionType) -> Result<(), AccessControlError> {
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+        pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: CollectionType) -> Result<(), Error> {
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             collection.contract_type = contract_type;
             self.manager.collections.insert(&contract_address, &collection);
@@ -397,11 +398,10 @@ pub mod artzero_collection_manager {
             &mut self,
             contract_address: AccountId,
             is_collect_royalty_fee: bool,
-        ) -> Result<(), AccessControlError> {
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+        ) -> Result<(), Error> {
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             collection.is_collect_royalty_fee = is_collect_royalty_fee;
             self.manager.collections.insert(&contract_address, &collection);
@@ -411,12 +411,13 @@ pub mod artzero_collection_manager {
         /// Update royalty fee of an NFT Collection - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_royalty_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), AccessControlError> {
-            assert!(new_fee <= self.manager.max_royalty_fee_rate, "invalid fee");
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+        pub fn update_royalty_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), Error> {
+            if new_fee > self.manager.max_royalty_fee_rate{
+                return Err(Error::InvalidFee)
+            }
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             collection.royalty_fee = new_fee;
             self.manager.collections.insert(&contract_address, &collection);
@@ -430,10 +431,9 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             show_on_chain_metadata: bool,
         ) -> Result<(), Error> {
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
             if self.env().caller() == collection.collection_owner || self.has_role(ADMINER, self.env().caller()) {
                 collection.show_on_chain_metadata = show_on_chain_metadata;
@@ -447,13 +447,14 @@ pub mod artzero_collection_manager {
         /// Update Active Status When its active, collection will be shown on the UI and will be tradable - only Admin can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_is_active(&mut self, contract_address: AccountId, is_active: bool) -> Result<(), AccessControlError> {
-            assert!(
-                self.manager.collections.get(&contract_address).is_some(),
-                "collection not exist"
-            );
+        pub fn update_is_active(&mut self, contract_address: AccountId, is_active: bool) -> Result<(), Error> {
+            if self.manager.collections.get(&contract_address).is_none(){
+                return Err(Error::Custom(String::from("Collection not exist")))
+            }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            assert!(is_active != collection.is_active);
+            if is_active == collection.is_active{
+                return Err(Error::InvalidInput)
+            }
             collection.is_active = is_active;
             if is_active {
                 self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();

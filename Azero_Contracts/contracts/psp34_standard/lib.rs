@@ -83,10 +83,12 @@ pub mod psp34_nft {
         /// This function let NFT Contract Owner to mint a new NFT with NFT Traits/Attributes
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), PSP34Error> {
+        pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), Error> {
             let caller = self.env().caller();
             self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
-            self._mint_to(caller, Id::U64(self.manager.last_token_id))?;
+            if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
+                return Err(Error::Custom(String::from("Cannot mint")))
+            }
             if self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata).is_err(){
                 return Err(Error::Custom(String::from("Cannot set attributes")))
             }
