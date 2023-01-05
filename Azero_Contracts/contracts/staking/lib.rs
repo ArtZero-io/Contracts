@@ -168,8 +168,10 @@ pub mod artzero_staking_nft {
         /// Update is locked - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_is_locked(&mut self, is_locked: bool) -> Result<(), AccessControlError> {
-            assert!(is_locked != self.manager.is_locked);
+        pub fn update_is_locked(&mut self, is_locked: bool) -> Result<(), Error> {
+            if is_locked == self.manager.is_locked {
+                return Err(Error::InvalidInput)
+            }
             self.manager.is_locked = is_locked;
             Ok(())
         }
@@ -198,8 +200,12 @@ pub mod artzero_staking_nft {
         #[modifiers(only_locked)]
         pub fn add_reward(&mut self) -> Result<(), Error> {
             let reward = self.env().transferred_value();
-            assert!(reward > 0);
-            assert!(!self.manager.reward_started); // only when reward distribution is not started
+            if reward <= 0 {
+                return Err(Error::InvalidInput)
+            }
+            if self.manager.reward_started { // only when reward distribution is not started
+                return Err(Error::RewardStarted)
+            }
             self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
             self.env().emit_event(AddReward {
                 reward_amount: reward,
@@ -213,7 +219,9 @@ pub mod artzero_staking_nft {
         #[modifiers(only_role(ADMINER))]
         #[modifiers(only_locked)]
         pub fn set_claimed_status(&mut self, staker: AccountId) -> Result<(), Error> {
-            assert!(!self.manager.reward_started); // only when reward distribution is not started
+            if self.manager.reward_started { // only when reward distribution is not started
+                return Err(Error::RewardStarted)
+            }
             self.manager.is_claimed.insert(&staker, &false); // Can only claim once
             Ok(())
         }
@@ -225,19 +233,30 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let is_claimed = self.manager.is_claimed.get(&caller);
             // Check if the claim exist and must be FALSE
-            assert!(is_claimed.is_some());
-            assert!(!is_claimed.unwrap());
+            if is_claimed.is_none(){
+                return Err(Error::ClaimMustBeFalse)
+            }
+            if is_claimed.unwrap() {
+                return Err(Error::ClaimMustBeFalse)
+            }
             self.manager.is_claimed.insert(&caller, &true); // Can only claim once
 
             // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
-            assert!(self.manager.total_staked > 0);
-            assert!(self.manager.reward_started); // Only allow when reward distribution is started
-
+            if self.manager.total_staked <= 0 {
+                return Err(Error::Custom(String::from("Invalid Total Stake")))
+            }
+            if !self.manager.reward_started { // Only allow when reward distribution is started
+                return Err(Error::RewardNotStarted)
+            }
             // How many NFT the user staker, it must be greater than ZERO
             let staked_amount = self.manager.staking_list.count(caller);
-            assert!(staked_amount > 0);
+            if staked_amount <= 0{
+                return Err(Error::Custom(String::from("Invalid User Stake")))
+            }
             // Check if Reward Pool has balance to pay for stakers
-            assert!(self.manager.reward_pool > 0);
+            if self.manager.reward_pool <= 0{
+                return Err(Error::Custom(String::from("Invalid Reward Pool")))
+            }
             // Calculate how much reward to pay for staker
             let reward =
                 (self.manager.reward_pool * staked_amount) / (self.manager.total_staked as u128);
@@ -245,7 +264,9 @@ pub mod artzero_staking_nft {
             if self.manager.claimable_reward >= reward {
                 // Send the reward to the staker
                 self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
-                assert!(self.env().transfer(caller, reward).is_ok(),"error claim reward");
+                if self.env().transfer(caller, reward).is_err(){
+                    return Err(Error::CannotTransfer)
+                }
                 // Emit ClaimReward event to the network
                 self.env().emit_event(ClaimReward {
                     staker: Some(caller),
@@ -254,7 +275,9 @@ pub mod artzero_staking_nft {
                 });
             } else {
                 // If there is not enough fund to pay, transfer everything in the pool to staker
-                assert!(self.env().transfer(caller, self.manager.claimable_reward).is_ok(),"error claim reward");
+                if self.env().transfer(caller, self.manager.claimable_reward).is_err() {
+                    return Err(Error::CannotTransfer)
+                }
                 self.env().emit_event(ClaimReward {
                     staker: Some(caller),
                     reward_amount: self.manager.claimable_reward,
@@ -362,7 +385,9 @@ pub mod artzero_staking_nft {
                 // Step 1 - Check if the token is belong to caller
                 let token_owner =
                     Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)).unwrap();
-                assert!(caller == token_owner);
+                if caller != token_owner {
+                    return Err(Error::NotTokenOwner)
+                }
                 // Step 2 - Check if this contract has been approved
                 let allowance = Psp34Ref::allowance(
                     &self.manager.nft_contract_address,
@@ -370,7 +395,9 @@ pub mod artzero_staking_nft {
                     self.env().account_id(),
                     Some(Id::U64(item)),
                 );
-                assert!(allowance);
+                if !allowance {
+                    return Err(Error::NotApproved)
+                }
                 self.manager.staking_list.insert(caller, &item);
                 // Step 3 - Transfer Token from Caller to Staking Contract
                 if PSP34Ref::transfer_builder(
@@ -413,9 +440,13 @@ pub mod artzero_staking_nft {
                 // Step 1 - Check owner token is Contract Staking
                 let token_owner =
                     Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)).unwrap();
-                assert!(self.env().account_id() == token_owner);
+                if self.env().account_id() != token_owner {
+                    return Err(Error::InvalidCaller)
+                }
                 // Setp 2 - Check staker
-                assert!(self.manager.staking_list.contains_value(caller, &item));
+                if !self.manager.staking_list.contains_value(caller, &item) {
+                    return Err(Error::InvalidInput)
+                }
                 // Step 3 - Remove token on staking_list
                 self.manager.staking_list.remove_value(caller, &item);
                 // Step 4 - Add token to pending unstaking list
@@ -447,14 +478,20 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let leng = token_ids.len();
 
-            assert!(self.manager.pending_unstaking_list.count(caller) > 0);
+            if self.manager.pending_unstaking_list.count(caller) <= 0 {
+                return Err(Error::InvalidInput)
+            }
             for &item in token_ids.iter() {
                 // Step 1 - Check owner token is Contract Staking
                 let token_owner =
                     Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)).unwrap();
-                assert!(self.env().account_id() == token_owner);
+                if self.env().account_id() != token_owner {
+                    return Err(Error::TokenOwnerNotMatch)
+                }
                 // Setp 2 - Check staker
-                assert!(self.manager.pending_unstaking_list.contains_value(caller, &item));
+                if !self.manager.pending_unstaking_list.contains_value(caller, &item) {
+                    return Err(Error::InvalidInput)
+                }
                 // Step 3 - Add token on staking_list
                 self.manager
                     .staking_list
@@ -485,25 +522,33 @@ pub mod artzero_staking_nft {
         pub fn unstake(&mut self, token_ids: Vec<u64>) -> Result<(), Error> {
             // Step 1 - Check if the token is belong to caller
             let caller = self.env().caller();
-            assert!(self.manager.pending_unstaking_list.count(caller) > 0);
+            if self.manager.pending_unstaking_list.count(caller) <= 0 {
+                return Err(Error::InvalidInput)
+            }
             for &item in token_ids.iter() {
                 // Setp 2 - Check request unstaked and time request unstaked
-                assert!(self.manager.pending_unstaking_list.contains_value(caller, &item));
+                if !self.manager.pending_unstaking_list.contains_value(caller, &item) {
+                    return Err(Error::InvalidInput)
+                }
                 let request_unstake_time = self.get_request_unstake_time(caller, item);
-                assert!(request_unstake_time > 0);
+                if request_unstake_time <= 0 {
+                    return Err(Error::InvalidTime)
+                }
                 let current_time = Self::env().block_timestamp();
 
                 if request_unstake_time + (self.manager.limit_unstake_time * 60000) > current_time {
                     return Err(Error::Custom(String::from("Not Enough Time Request Unstake")))
                 }
                 // Step 3 - transfer token to caller
-                assert!(Psp34Ref::transfer(
+                if Psp34Ref::transfer(
                     &self.manager.nft_contract_address,
                     caller,
                     Id::U64(item),
                     Vec::<u8>::new()
                 )
-                .is_ok());
+                .is_err(){
+                    return Err(Error::CannotTransfer)
+                }
                 // Step 4 - Remove from pending_unstaking_list and change request_unstaking_time to 0
                 self.manager.pending_unstaking_list.remove_value(caller, &item);
                 self.manager.request_unstaking_time.insert(&(&caller, &item), &0);

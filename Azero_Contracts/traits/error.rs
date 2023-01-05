@@ -46,6 +46,10 @@ pub enum Error {
     NotInSaleList,
     InvalidBidLength,
     InvalidCollectionOwner,
+    InvalidTime,
+    RewardStarted,
+    RewardNotStarted,
+    ClaimMustBeFalse,
     OwnableError(OwnableError),
     AccessControlError(AccessControlError)
 }
