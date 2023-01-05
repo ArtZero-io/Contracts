@@ -1224,6 +1224,18 @@ pub mod artzero_marketplace_psp34 {
             self.manager.hold_amount_bidders.get(&bidder)
         }
 
+        /// Get hold bidders last id
+        #[ink(message)]
+        pub fn get_hold_bidders_last_id(&self) -> u64 {
+            self.manager.hold_bidders_last_id
+        }
+
+         /// Get Hold Bidders
+         #[ink(message)]
+        pub fn get_hold_bidders(&self, index: u64) -> Option<AccountId> {
+            self.manager.hold_bidders.get(&index)
+        }
+
         /// Withdraw Profit - only Contract Owner.
         #[ink(message)]
         #[modifiers(only_owner)]
