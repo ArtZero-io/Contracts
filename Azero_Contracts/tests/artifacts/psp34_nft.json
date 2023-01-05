@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xbfb595e33a6caa970679a7dcf701df9028085de378117356b2557f10a148ca2c",
+    "hash": "0xbce8fc9919766a25ca36e90574b3f19fd2bf0df0a710363340e561ce883cdc41",
     "language": "ink! 3.4.0",
     "compiler": "rustc 1.65.0-nightly"
   },
@@ -96,43 +96,6 @@
           "selector": "0xf90b8f61"
         },
         {
-          "args": [
-            {
-              "label": "new_owner",
-              "type": {
-                "displayName": [
-                  "ownable_external",
-                  "TransferOwnershipInput1"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [
-            " Transfers ownership of the contract to a `new_owner`.",
-            " Can only be called by the current owner.",
-            "",
-            " On success a `OwnershipTransferred` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Panics with `CallerIsNotOwner` error if caller is not owner.",
-            "",
-            " Panics with `NewOwnerIsZero` error if new owner's address is zero."
-          ],
-          "label": "Ownable::transfer_ownership",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "TransferOwnershipOutput"
-            ],
-            "type": 40
-          },
-          "selector": "0x11f43efd"
-        },
-        {
           "args": [],
           "docs": [
             " Returns the address of the current owner."
@@ -179,32 +142,58 @@
         {
           "args": [
             {
-              "label": "owner",
+              "label": "new_owner",
               "type": {
                 "displayName": [
-                  "psp34_external",
-                  "BalanceOfInput1"
+                  "ownable_external",
+                  "TransferOwnershipInput1"
                 ],
                 "type": 8
               }
             }
           ],
           "docs": [
-            " Returns the balance of the owner.",
+            " Transfers ownership of the contract to a `new_owner`.",
+            " Can only be called by the current owner.",
             "",
-            " This represents the amount of unique tokens the owner has."
+            " On success a `OwnershipTransferred` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Panics with `CallerIsNotOwner` error if caller is not owner.",
+            "",
+            " Panics with `NewOwnerIsZero` error if new owner's address is zero."
           ],
-          "label": "PSP34::balance_of",
+          "label": "Ownable::transfer_ownership",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "TransferOwnershipOutput"
+            ],
+            "type": 40
+          },
+          "selector": "0x11f43efd"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Returns the collection `Id` of the NFT token.",
+            "",
+            " This can represents the relationship between tokens/contracts/pallets."
+          ],
+          "label": "PSP34::collection_id",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "BalanceOfOutput"
+              "CollectionIdOutput"
             ],
-            "type": 4
+            "type": 1
           },
-          "selector": "0xcde7e55f"
+          "selector": "0xffa27a5f"
         },
         {
           "args": [
@@ -322,51 +311,51 @@
           "selector": "0x3128d61b"
         },
         {
+          "args": [],
+          "docs": [
+            " Returns current NFT total supply."
+          ],
+          "label": "PSP34::total_supply",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "TotalSupplyOutput"
+            ],
+            "type": 6
+          },
+          "selector": "0x628413fe"
+        },
+        {
           "args": [
             {
-              "label": "id",
+              "label": "owner",
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "OwnerOfInput1"
+                  "BalanceOfInput1"
                 ],
-                "type": 1
+                "type": 8
               }
             }
           ],
           "docs": [
-            " Returns the owner of the token if any."
-          ],
-          "label": "PSP34::owner_of",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "OwnerOfOutput"
-            ],
-            "type": 19
-          },
-          "selector": "0x1168624d"
-        },
-        {
-          "args": [],
-          "docs": [
-            " Returns the collection `Id` of the NFT token.",
+            " Returns the balance of the owner.",
             "",
-            " This can represents the relationship between tokens/contracts/pallets."
+            " This represents the amount of unique tokens the owner has."
           ],
-          "label": "PSP34::collection_id",
+          "label": "PSP34::balance_of",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "CollectionIdOutput"
+              "BalanceOfOutput"
             ],
-            "type": 1
+            "type": 4
           },
-          "selector": "0xffa27a5f"
+          "selector": "0xcde7e55f"
         },
         {
           "args": [
@@ -418,21 +407,32 @@
           "selector": "0x4790f55a"
         },
         {
-          "args": [],
-          "docs": [
-            " Returns current NFT total supply."
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "OwnerOfInput1"
+                ],
+                "type": 1
+              }
+            }
           ],
-          "label": "PSP34::total_supply",
+          "docs": [
+            " Returns the owner of the token if any."
+          ],
+          "label": "PSP34::owner_of",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "TotalSupplyOutput"
+              "OwnerOfOutput"
             ],
-            "type": 6
+            "type": 19
           },
-          "selector": "0x628413fe"
+          "selector": "0x1168624d"
         },
         {
           "args": [
@@ -549,6 +549,124 @@
         {
           "args": [
             {
+              "label": "uri",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "SetBaseUriInput1"
+                ],
+                "type": 33
+              }
+            }
+          ],
+          "docs": [
+            " This function sets the baseURI for the NFT contract. Only Contract Owner can perform this function. baseURI is the location of the metadata files if the NFT collection use external source to keep their NFT artwork. ArtZero uses IPFS by default, the baseURI can have format like this: ipfs://<hash_ID>/"
+          ],
+          "label": "Psp34Traits::set_base_uri",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "SetBaseUriOutput"
+            ],
+            "type": 34
+          },
+          "selector": "0x4de6850b"
+        },
+        {
+          "args": [],
+          "docs": [
+            " This function return how many unique attributes in the contract"
+          ],
+          "label": "Psp34Traits::get_attribute_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetAttributeCountOutput"
+            ],
+            "type": 4
+          },
+          "selector": "0x61c50d69"
+        },
+        {
+          "args": [
+            {
+              "label": "index",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "GetAttributeNameInput1"
+                ],
+                "type": 4
+              }
+            }
+          ],
+          "docs": [
+            " This function return the attribute name using attribute index. Beacause attributes of an NFT can be set to anything by Contract Owner, AztZero uses this function to get all attributes of an NFT"
+          ],
+          "label": "Psp34Traits::get_attribute_name",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetAttributeNameOutput"
+            ],
+            "type": 33
+          },
+          "selector": "0xfcfe34de"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "TokenUriInput1"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "docs": [
+            " This function return the metadata location of an NFT. The format is baseURI/<token_id>.json"
+          ],
+          "label": "Psp34Traits::token_uri",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "TokenUriOutput"
+            ],
+            "type": 33
+          },
+          "selector": "0x249dfd4f"
+        },
+        {
+          "args": [],
+          "docs": [
+            " This function return the latest token ID, everytime new NFT is mint, last_token_id is increased by 1 in mint function. Note: This is not the same as the total supply return by the psp34 function as NFT can be burnt."
+          ],
+          "label": "Psp34Traits::get_last_token_id",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetLastTokenIdOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0x6f315836"
+        },
+        {
+          "args": [
+            {
               "label": "token_id",
               "type": {
                 "displayName": [
@@ -585,49 +703,60 @@
           "selector": "0x5bf8416b"
         },
         {
-          "args": [],
-          "docs": [
-            " This function return how many unique attributes in the contract"
-          ],
-          "label": "Psp34Traits::get_attribute_count",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetAttributeCountOutput"
-            ],
-            "type": 4
-          },
-          "selector": "0x61c50d69"
-        },
-        {
           "args": [
             {
               "label": "token_id",
               "type": {
                 "displayName": [
                   "psp34traits_external",
-                  "LockInput1"
+                  "IsLockedNftInput1"
                 ],
                 "type": 1
               }
             }
           ],
           "docs": [
-            " This function lets NFT owner to lock their NFT. Once locked, the NFT traits (attributes) can not be changed"
+            " This function check if an NFT is locked or not"
           ],
-          "label": "Psp34Traits::lock",
+          "label": "Psp34Traits::is_locked_nft",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "IsLockedNftOutput"
+            ],
+            "type": 30
+          },
+          "selector": "0x59271420"
+        },
+        {
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "BurnInput1"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [
+            " This function allows NFT Owner to burn their NFT"
+          ],
+          "label": "Psp34Traits::burn",
           "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34traits_external",
-              "LockOutput"
+              "BurnOutput"
             ],
             "type": 34
           },
-          "selector": "0xa7245b9b"
+          "selector": "0x25314263"
         },
         {
           "args": [
@@ -668,88 +797,21 @@
           "selector": "0x18209102"
         },
         {
-          "args": [
-            {
-              "label": "index",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "GetAttributeNameInput1"
-                ],
-                "type": 4
-              }
-            }
-          ],
+          "args": [],
           "docs": [
-            " This function return the attribute name using attribute index. Beacause attributes of an NFT can be set to anything by Contract Owner, AztZero uses this function to get all attributes of an NFT"
+            " This function returns how many NFTs have been locked by its owners"
           ],
-          "label": "Psp34Traits::get_attribute_name",
+          "label": "Psp34Traits::get_locked_token_count",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34traits_external",
-              "GetAttributeNameOutput"
+              "GetLockedTokenCountOutput"
             ],
-            "type": 33
+            "type": 5
           },
-          "selector": "0xfcfe34de"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "IsLockedNftInput1"
-                ],
-                "type": 1
-              }
-            }
-          ],
-          "docs": [
-            " This function check if an NFT is locked or not"
-          ],
-          "label": "Psp34Traits::is_locked_nft",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "IsLockedNftOutput"
-            ],
-            "type": 30
-          },
-          "selector": "0x59271420"
-        },
-        {
-          "args": [
-            {
-              "label": "uri",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "SetBaseUriInput1"
-                ],
-                "type": 33
-              }
-            }
-          ],
-          "docs": [
-            " This function sets the baseURI for the NFT contract. Only Contract Owner can perform this function. baseURI is the location of the metadata files if the NFT collection use external source to keep their NFT artwork. ArtZero uses IPFS by default, the baseURI can have format like this: ipfs://<hash_ID>/"
-          ],
-          "label": "Psp34Traits::set_base_uri",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "SetBaseUriOutput"
-            ],
-            "type": 34
-          },
-          "selector": "0x4de6850b"
+          "selector": "0x8fe2ce73"
         },
         {
           "args": [],
@@ -769,94 +831,32 @@
           "selector": "0x8e1d8d71"
         },
         {
-          "args": [],
-          "docs": [
-            " This function return the latest token ID, everytime new NFT is mint, last_token_id is increased by 1 in mint function. Note: This is not the same as the total supply return by the psp34 function as NFT can be burnt."
-          ],
-          "label": "Psp34Traits::get_last_token_id",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetLastTokenIdOutput"
-            ],
-            "type": 5
-          },
-          "selector": "0x6f315836"
-        },
-        {
-          "args": [],
-          "docs": [
-            " This function returns how many NFTs have been locked by its owners"
-          ],
-          "label": "Psp34Traits::get_locked_token_count",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetLockedTokenCountOutput"
-            ],
-            "type": 5
-          },
-          "selector": "0x8fe2ce73"
-        },
-        {
-          "args": [
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "BurnInput1"
-                ],
-                "type": 1
-              }
-            }
-          ],
-          "docs": [
-            " This function allows NFT Owner to burn their NFT"
-          ],
-          "label": "Psp34Traits::burn",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "BurnOutput"
-            ],
-            "type": 34
-          },
-          "selector": "0x25314263"
-        },
-        {
           "args": [
             {
               "label": "token_id",
               "type": {
                 "displayName": [
                   "psp34traits_external",
-                  "TokenUriInput1"
+                  "LockInput1"
                 ],
-                "type": 5
+                "type": 1
               }
             }
           ],
           "docs": [
-            " This function return the metadata location of an NFT. The format is baseURI/<token_id>.json"
+            " This function lets NFT owner to lock their NFT. Once locked, the NFT traits (attributes) can not be changed"
           ],
-          "label": "Psp34Traits::token_uri",
-          "mutates": false,
+          "label": "Psp34Traits::lock",
+          "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34traits_external",
-              "TokenUriOutput"
+              "LockOutput"
             ],
-            "type": 33
+            "type": 34
           },
-          "selector": "0x249dfd4f"
+          "selector": "0xa7245b9b"
         },
         {
           "args": [
@@ -895,54 +895,6 @@
             "type": 34
           },
           "selector": "0x07573e99"
-        },
-        {
-          "args": [
-            {
-              "label": "nft_contract_address",
-              "type": {
-                "displayName": [
-                  "admintrait_external",
-                  "TranferNftInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "admintrait_external",
-                  "TranferNftInput2"
-                ],
-                "type": 1
-              }
-            },
-            {
-              "label": "receiver",
-              "type": {
-                "displayName": [
-                  "admintrait_external",
-                  "TranferNftInput3"
-                ],
-                "type": 8
-              }
-            }
-          ],
-          "docs": [
-            " This function allow contract owner withdraw NFT to an account in case there is any NFT sent to contract by mistake"
-          ],
-          "label": "AdminTrait::tranfer_nft",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "admintrait_external",
-              "TranferNftOutput"
-            ],
-            "type": 34
-          },
-          "selector": "0xed1e1dfa"
         },
         {
           "args": [
@@ -991,6 +943,54 @@
             "type": 34
           },
           "selector": "0xd9aad284"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
+              "type": {
+                "displayName": [
+                  "admintrait_external",
+                  "TranferNftInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "admintrait_external",
+                  "TranferNftInput2"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "receiver",
+              "type": {
+                "displayName": [
+                  "admintrait_external",
+                  "TranferNftInput3"
+                ],
+                "type": 8
+              }
+            }
+          ],
+          "docs": [
+            " This function allow contract owner withdraw NFT to an account in case there is any NFT sent to contract by mistake"
+          ],
+          "label": "AdminTrait::tranfer_nft",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "admintrait_external",
+              "TranferNftOutput"
+            ],
+            "type": 34
+          },
+          "selector": "0xed1e1dfa"
         }
       ]
     },

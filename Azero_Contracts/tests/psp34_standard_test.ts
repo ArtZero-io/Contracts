@@ -14,7 +14,7 @@ let defaultSigner: KeyringPair;
 let alice: KeyringPair;
 let bob: KeyringPair;
 
-const TOKEN_ADDRESS = "5FaWTkstaaSXbporpTXvAVcAAinAj9Fd9FkDXJNMxHsthFhh";
+const TOKEN_ADDRESS = "5GA9BmAxWV8KtjENR4mW4wHCNLTFgsoNKMZW1wYkGm3oUs52";
 
 function setup() {
   signers = getSigners();
@@ -22,7 +22,7 @@ function setup() {
   alice = signers[0];
   bob = signers[1];
 }
-// Create new PSP34 Contract, this should be performed first then replace the new contract address to TOKEN_ADDRESS
+// Create new PSP34 Contract, this should be performed once then replace the new contract address to TOKEN_ADDRESS
 async function createNFTContract(){
   const constructors = new Constructors(api, defaultSigner);
   console.log('Creating PSP34 NFT contract...');
@@ -53,6 +53,94 @@ async function generalInfo() {
   console.log('NFT Total Supply:',totalSupply);
   const {value: contractOwner} = await contract.query['Psp34Traits::get_owner']();
   console.log('NFT Contract Owner:',contractOwner);
+}
+/*
+  testAdminTransferPSP22
+  Test case: transfer PSP22 from Contract to Alice Account
+  Pre-requisite: transfer tokens from PSP22 contract to NFT Contract
+  Expect: transfer from contract using bob fails and using defaultSigner ok
+*/
+async function testAdminTransferPSP22(){
+  //This test use PSP22 contract 5DthbdX2xEE7NsvCnHHxtw7fcr9KXJ6cnzS5dBaqgNc34hiX for testing
+  const psp22_contract = "5DthbdX2xEE7NsvCnHHxtw7fcr9KXJ6cnzS5dBaqgNc34hiX";
+  let contract = new Contract(TOKEN_ADDRESS, bob, api);
+  try {
+    console.log('Transfer Tokens to Alice account using Bob (should fail)');
+    const withdraw = await contract.tx["AdminTrait::tranfer_psp22" ](psp22_contract,100*10**9,alice.address,{
+      gasLimit : 100000000000
+    });
+    console.log('withdraw',withdraw.txHash);
+  }
+  catch (e:any){
+    //console.log(e.error.message);
+    console.log("Failed to excecute contract call");
+  }
+
+  console.log('Transfer Token to Alice account using defaultSigner');
+  contract = new Contract(TOKEN_ADDRESS, defaultSigner, api);
+  const withdraw = await contract.tx["AdminTrait::tranfer_psp22" ](psp22_contract,100*10**9,alice.address,{
+    gasLimit : 100000000000
+  });
+  console.log('withdraw',withdraw.txHash);
+}
+/*
+  testAdminTransfer
+  Test case: Mint new NFT, transfer NFT to contract, transfer NFT from contract to alice
+  Pre-requisite: none
+  Expect: mint OK, transfer NFT to contract OK, transfer from contract using bob fails and using defaultSigner ok
+*/
+async function testAdminTransfer() {
+  let contract = new Contract(TOKEN_ADDRESS, defaultSigner, api);
+  console.log('Minting a new NFT ...');
+  const mintTx = await contract.tx.mint({
+    gasLimit : 100000000000
+  });
+  console.log('mintTx',mintTx.txHash);
+  let {value: totalSupplyAfterMint} = await contract.query['PSP34::total_supply']();
+
+  {
+    let {value: ownerAddress} = await contract.query['PSP34::owner_of']({u64:totalSupplyAfterMint});
+    console.log(`Owner of NFT ${totalSupplyAfterMint} is ${ownerAddress}`);
+  }
+
+  console.log(`Transfer NFT ${totalSupplyAfterMint} to Contract ...`);
+
+  const transferTx = await contract.tx["PSP34::transfer"](TOKEN_ADDRESS,{u64:totalSupplyAfterMint},[],{
+    gasLimit : 100000000000
+  });
+
+  console.log('transferTx',transferTx.txHash);
+
+  {
+    let {value: ownerAddress} = await contract.query['PSP34::owner_of']({u64:totalSupplyAfterMint});
+    console.log(`Owner of NFT ${totalSupplyAfterMint} is ${ownerAddress}`);
+  }
+
+  try {
+    console.log('Transfer NFT to Alice account using Bob (should fail)');
+    contract = new Contract(TOKEN_ADDRESS, bob, api);
+    const withdraw = await contract.tx["AdminTrait::tranfer_nft" ](TOKEN_ADDRESS,{u64:totalSupplyAfterMint},alice.address,{
+      gasLimit : 100000000000
+    });
+    console.log('withdraw',withdraw.txHash);
+  }
+  catch (e:any){
+    //console.log(e.error.message);
+    console.log("Failed to excecute contract call");
+  }
+
+  console.log('Transfer NFT to Alice account using defaultSigner');
+  contract = new Contract(TOKEN_ADDRESS, defaultSigner, api);
+  const withdraw = await contract.tx["AdminTrait::tranfer_nft" ](TOKEN_ADDRESS,{u64:totalSupplyAfterMint},alice.address,{
+    gasLimit : 100000000000
+  });
+  console.log('withdraw',withdraw.txHash);
+
+  {
+    let {value: ownerAddress} = await contract.query['PSP34::owner_of']({u64:totalSupplyAfterMint});
+    console.log(`Owner of NFT ${totalSupplyAfterMint} is ${ownerAddress}`);
+  }
+
 }
 /*
   testLockNFT
@@ -126,7 +214,8 @@ async function testLockNFT(){
     //console.log(e.error.message);
     console.log("Failed to excecute contract call");
   }
-
+  const {value: lockNFTCount} = await contract.query['Psp34Traits::get_locked_token_count']();
+  console.log(`Total locked NFT: ${lockNFTCount}`);
 }
 /*
   testWithdrawFee
@@ -275,7 +364,9 @@ api.on("ready", async () => {
   //await testMintNotOwner();
   // await testWithdrawFee();
   // await testWithdrawFeeNoOwner();
-  await testLockNFT();
+  //await testLockNFT();
+  // await testAdminTransfer();
+  // await testAdminTransferPSP22();
 });
 
 api.on("error", (err) => {
