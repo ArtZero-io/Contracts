@@ -1,6 +1,6 @@
 use crate::{
     impls::admin::{
-        data::*,
+        data
     },
     traits::admin::*,
 };
@@ -9,6 +9,7 @@ use ink_prelude::{
     vec::Vec,
 };
 use openbrush::{
+    modifiers,
     traits::{
         Storage,
         Balance,
@@ -17,13 +18,15 @@ use openbrush::{
     contracts::{
         traits::psp34::{
             Id,
-        }
+        },
+        ownable::*,
     },
 };
 use crate::traits::psp34_standard::*;
 
-impl<T: Storage<Data>> AdminTrait for T {
-
+impl<T: Storage<data::Data> + Storage<ownable::Data>> AdminTrait for T
+{
+    #[modifiers(only_owner)]
     default fn withdraw_fee(&mut self, value: Balance, receiver: AccountId) -> Result<(), Error> {
         if value > T::env().balance() {
             return Err(Error::NotEnoughBalance);
@@ -34,6 +37,7 @@ impl<T: Storage<Data>> AdminTrait for T {
         Ok(())
     }
 
+    #[modifiers(only_owner)]
     default fn tranfer_nft(&mut self, nft_contract_address: AccountId, token_id: Id, receiver: AccountId) -> Result<(), Error> {
         if Psp34Ref::transfer(
             &nft_contract_address,
@@ -47,6 +51,7 @@ impl<T: Storage<Data>> AdminTrait for T {
         Ok(())
     }
 
+    #[modifiers(only_owner)]
     default fn tranfer_psp22(&mut self, psp22_contract_address: AccountId, amount: Balance, receiver: AccountId) -> Result<(), Error>{
         if Psp22Ref::transfer(
             &psp22_contract_address,
