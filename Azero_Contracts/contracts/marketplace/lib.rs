@@ -85,6 +85,9 @@ pub mod artzero_marketplace_psp34 {
         market_list: Mapping<(AccountId, Id), ForSaleItem, MarketListKeys>, /* NFT for sale in the marketplace, (NFT Contract Address, Token ID) */
         sale_tokens_ids: MultiMapping<(Option<AccountId>, Option<AccountId>), Id, SaleTokensIdsKey>,                 //(NFT Contract Address, Seller Address)
         sale_tokens_ids_last_index: Mapping<(Option<AccountId>, Option<AccountId>), u128, SaleTokensIdsLastIndexKeys>,
+        hold_amount_bidders: Mapping<AccountId, Balance>,
+        hold_bidders_last_id: u64,
+        hold_bidders: Mapping<u64, AccountId>,
         bidders: Mapping<(AccountId, AccountId, Id), Vec<BidInformation>, BiddersKeys>, /* Contract Address, Seller Address, token ID) */
         listed_token_number_by_collection_address: Mapping<AccountId, u64>, /* Number Listed Token (Collection Contract Address) */
         total_volume: Balance,
@@ -221,7 +224,7 @@ pub mod artzero_marketplace_psp34 {
             self.manager.collection_contract_address = collection_contract_address;
             self.manager.staking_contract_address = staking_contract_address;
             self.manager.platform_fee = platform_fee;
-
+            self.manager.hold_bidders_last_id = 0;
             // Set default discount rate for PMP Stakers.
             // >= 1 NFT - 30% off
             // >= 5 NFTs - 50% off
@@ -381,11 +384,33 @@ pub mod artzero_marketplace_psp34 {
                 .sale_tokens_ids_last_index
                 .insert(&(&Some(&nft_contract_address), &Some(&caller)), &last_index);
             // Clear Bidders
-            // TODO: Return all funds back to bidders
-            let bidders = Vec::<BidInformation>::new();
-            self.manager
+            if self
+                .manager
                 .bidders
-                .insert(&(&nft_contract_address, &caller, &token_id.clone()), &bidders);
+                .get(&(&nft_contract_address, &caller, &token_id.clone()))
+                .is_some()
+            {
+                let bidders: Vec<BidInformation> = self
+                    .manager
+                    .bidders
+                    .get(&(&nft_contract_address, &caller, &token_id.clone()))
+                    .unwrap();
+                for item in bidders.iter() {
+                    if self.manager.hold_amount_bidders.get(&item.bidder).is_some() {
+                        let hold_amount_bidder = self.manager.hold_amount_bidders.get(&item.bidder).unwrap().checked_add(item.bid_value).unwrap();
+                        self.manager.hold_amount_bidders.insert(&item.bidder, &hold_amount_bidder);
+                    } else {
+                        self.manager.hold_amount_bidders.insert(&item.bidder, &item.bid_value);
+                        self.manager.hold_bidders_last_id = self.manager.hold_bidders_last_id.checked_add(1).unwrap();
+                        self.manager.hold_bidders.insert(&self.manager.hold_bidders_last_id, &item.bidder);
+                    }
+                }
+                
+                let clear_bidders = Vec::<BidInformation>::new();
+                self.manager
+                    .bidders
+                    .insert(&(&nft_contract_address, &caller, &token_id.clone()), &clear_bidders);
+            }
             // Send NFT back to caller or token_owner
             if Psp34Ref::transfer(&nft_contract_address, caller, token_id.clone(), Vec::<u8>::new()).is_err(){
                 return Err(Error::CannotTransfer)
@@ -487,11 +512,16 @@ pub mod artzero_marketplace_psp34 {
                     .get(&(&nft_contract_address, &seller, &token_id.clone()))
                     .unwrap();
                 for item in bidders.iter() {
-                    assert!(self
-                        .env()
-                        .transfer(item.bidder, item.bid_value)
-                        .is_ok());
+                    if self.manager.hold_amount_bidders.get(&item.bidder).is_some() {
+                        let hold_amount_bidder = self.manager.hold_amount_bidders.get(&item.bidder).unwrap().checked_add(item.bid_value).unwrap();
+                        self.manager.hold_amount_bidders.insert(&item.bidder, &hold_amount_bidder);
+                    } else {
+                        self.manager.hold_amount_bidders.insert(&item.bidder, &item.bid_value);
+                        self.manager.hold_bidders_last_id = self.manager.hold_bidders_last_id.checked_add(1).unwrap();
+                        self.manager.hold_bidders.insert(&self.manager.hold_bidders_last_id, &item.bidder);
+                    }
                 }
+                
                 let clear_bidders = Vec::<BidInformation>::new();
                 self.manager
                     .bidders
@@ -528,10 +558,8 @@ pub mod artzero_marketplace_psp34 {
             if collection_owner == None{
                 return Err(Error::InvalidCollectionOwner)
             }
-            if royalty_fee > 0 {
-                if self.env().transfer(collection_owner.unwrap(), royalty_fee).is_err(){
-                    return Err(Error::CannotTransfer)
-                }
+            if royalty_fee > 0 && self.env().transfer(collection_owner.unwrap(), royalty_fee).is_err() {
+                return Err(Error::CannotTransfer)
             }
             // Send AZERO to seller after reduction of Royalty Fee and Platform Fee
             let seller_fee = price
@@ -540,10 +568,8 @@ pub mod artzero_marketplace_psp34 {
                 .checked_sub(platform_fee_after_discount)
                 .unwrap();
 
-            if seller_fee > 0 {
-                if self.env().transfer(seller, seller_fee).is_err(){
-                    return Err(Error::CannotTransfer)
-                }
+            if seller_fee > 0 && self.env().transfer(seller, seller_fee).is_err() {
+                return Err(Error::CannotTransfer)
             }
             // Update Volumes for platform Statistics
             let collection_volume = self.manager.volume_by_collection.get(&nft_contract_address);
@@ -742,10 +768,10 @@ pub mod artzero_marketplace_psp34 {
                         break
                     }
                 }
-                if index_bid < 0{
+                if index_bid < 0 {
                     return Err(Error::Custom(String::from("invalid index bid")))
                 }
-                if bid_value <= 0{
+                if bid_value == 0 {
                     return Err(Error::Custom(String::from("invalid bid value")))
                 }
                 // remove bid from bidders list
@@ -904,10 +930,8 @@ pub mod artzero_marketplace_psp34 {
                         if collection_owner == None{
                             return Err(Error::InvalidCollectionOwner)
                         }
-                        if royalty_fee > 0 {
-                            if self.env().transfer(collection_owner.unwrap(), royalty_fee).is_err(){
-                                return Err(Error::CannotTransfer)
-                            }
+                        if royalty_fee > 0 && self.env().transfer(collection_owner.unwrap(), royalty_fee).is_err() {
+                            return Err(Error::CannotTransfer)
                         }
                         // Send AZERO to seller
                         let seller_fee = price
@@ -916,10 +940,8 @@ pub mod artzero_marketplace_psp34 {
                             .checked_sub(platform_fee_after_discount)
                             .unwrap();
 
-                        if seller_fee > 0 {
-                            if self.env().transfer(seller, seller_fee).is_err(){
-                                return Err(Error::CannotTransfer)
-                            }
+                        if seller_fee > 0 && self.env().transfer(seller, seller_fee).is_err(){
+                            return Err(Error::CannotTransfer)
                         }
                         // Save all volume as platform Statistics
                         let collection_volume = self.manager.volume_by_collection.get(&nft_contract_address);
@@ -946,13 +968,15 @@ pub mod artzero_marketplace_psp34 {
                             royalty_fee,
                         });
                     } else {
-                        // Send AZero back to lost bidders
-                        if self
-                            .env()
-                            .transfer(item.bidder, item.bid_value)
-                            .is_err(){
-                                return Err(Error::CannotTransfer)
-                            }
+                        // Add bidder amount to hold_amount_bidders
+                        if self.manager.hold_amount_bidders.get(&item.bidder).is_some() {
+                            let hold_amount_bidder = self.manager.hold_amount_bidders.get(&item.bidder).unwrap().checked_add(item.bid_value).unwrap();
+                            self.manager.hold_amount_bidders.insert(&item.bidder, &hold_amount_bidder);
+                        } else {
+                            self.manager.hold_amount_bidders.insert(&item.bidder, &item.bid_value);
+                            self.manager.hold_bidders_last_id = self.manager.hold_bidders_last_id.checked_add(1).unwrap();
+                            self.manager.hold_bidders.insert(&self.manager.hold_bidders_last_id, &item.bidder);
+                        }
                     }
                 }
                 // Clear Bidders
@@ -1017,6 +1041,7 @@ pub mod artzero_marketplace_psp34 {
             self.manager.staking_contract_address = staking_contract_address;
             Ok(())
         }
+
         /// Set criteria and discount rate - Only Owner 2 vectors same size
         #[ink(message)]
         #[modifiers(only_owner)]
@@ -1031,6 +1056,53 @@ pub mod artzero_marketplace_psp34 {
             }
             self.manager.staking_discount_criteria = criteria;
             self.manager.staking_discount_rate = rates;
+            Ok(())
+        }
+
+        /// Clear hold amount bidders
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn clear_hold_amount_bidders(&mut self) -> Result<(), Error> {
+            for hold_bidders_index in 1..=self.manager.hold_bidders_last_id {
+                if self.manager.hold_bidders.get(&hold_bidders_index).is_some() {
+                    let receiver = self.manager.hold_bidders.get(&hold_bidders_index).unwrap();
+                    if self.manager.hold_amount_bidders.get(&receiver).is_some() {
+                        let hold_amount = self.manager.hold_amount_bidders.get(&receiver).unwrap();
+                        if hold_amount > 0 {
+                            assert!(self.env().transfer(receiver, hold_amount).is_ok());
+                            self.manager.hold_amount_bidders.insert(&receiver, &0);
+                        }
+                        
+                    }
+                }
+            }
+            Ok(())
+        }
+
+        /// Clear hold amount bidder
+        #[ink(message)]
+        #[modifiers(only_owner)]
+        pub fn clear_hold_amount_bidder(&mut self, bidder: AccountId) -> Result<(), Error> {
+            if self.manager.hold_amount_bidders.get(&bidder).is_some() {
+                let hold_amount = self.manager.hold_amount_bidders.get(&bidder).unwrap();
+                if hold_amount > 0 {
+                    assert!(self.env().transfer(bidder, hold_amount).is_ok());
+                    self.manager.hold_amount_bidders.insert(&bidder, &0);
+                }
+            }
+            Ok(())
+        }
+
+        #[ink(message)]
+        pub fn receive_hold_amount(&mut self) -> Result<(), Error> {
+            let receiver = self.env().caller();
+            if self.manager.hold_amount_bidders.get(&receiver).is_some() {
+                let hold_amount = self.manager.hold_amount_bidders.get(&receiver).unwrap();
+                if hold_amount > 0 {
+                    assert!(self.env().transfer(receiver, hold_amount).is_ok());
+                    self.manager.hold_amount_bidders.insert(&receiver, &0);
+                }
+            }
             Ok(())
         }
 
@@ -1144,6 +1216,12 @@ pub mod artzero_marketplace_psp34 {
         #[ink(message)]
         pub fn get_current_profit(&self) -> Balance {
             self.manager.current_profit
+        }
+
+        /// Get hold amount of bidder
+        #[ink(message)]
+        pub fn get_hold_amount_of_bidder(&self, bidder: AccountId) -> Option<Balance> {
+            self.manager.hold_amount_bidders.get(&bidder)
         }
 
         /// Withdraw Profit - only Contract Owner.
