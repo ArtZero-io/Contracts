@@ -23,7 +23,6 @@ pub mod artzero_collection_manager {
         modifiers,
         traits::{
             Storage,
-            ZERO_ADDRESS
         }
     };
     use artzero_project::{
@@ -75,6 +74,7 @@ pub mod artzero_collection_manager {
             advance_mode_adding_fee: Balance,
             max_royalty_fee_rate: u32,
         ) -> Self {
+            assert!(simple_mode_adding_fee > 0 && advance_mode_adding_fee > 0);
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
                 let caller = instance.env().caller();
                 instance._init_with_owner(caller);
@@ -82,7 +82,6 @@ pub mod artzero_collection_manager {
                 instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 instance
                     .initialize(
-                        admin_address,
                         standard_nft_hash,
                         simple_mode_adding_fee,
                         advance_mode_adding_fee,
@@ -97,20 +96,19 @@ pub mod artzero_collection_manager {
         #[modifiers(only_owner)]
         pub fn initialize(
             &mut self,
-            admin_address: AccountId,
             standard_nft_hash: Hash,
             simple_mode_adding_fee: Balance,
             advance_mode_adding_fee: Balance,
             max_royalty_fee_rate: u32,
         ) -> Result<(), Error> {
-            if self.manager.admin_address != ZERO_ADDRESS.into(){
+            //Fee will never set to Zero to prevent spamming the contract so can be used for checking
+            if self.manager.simple_mode_adding_fee > 0 || self.manager.advance_mode_adding_fee > 0 {
                 return Err(Error::AlreadyInit);
             }
             self.manager.collection_count = 0;
             self.manager.active_collection_count = 0;
             self.manager.simple_mode_adding_fee = simple_mode_adding_fee;
             self.manager.advance_mode_adding_fee = advance_mode_adding_fee;
-            self.manager.admin_address = admin_address;
             self.manager.standard_nft_hash = standard_nft_hash;
             self.manager.max_royalty_fee_rate = max_royalty_fee_rate;
             Ok(())
@@ -469,6 +467,9 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_simple_mode_adding_fee(&mut self, simple_mode_adding_fee: Balance) -> Result<(), Error> {
+            if simple_mode_adding_fee == 0{
+                return Err(Error::InvalidFee);
+            }
             self.manager.simple_mode_adding_fee = simple_mode_adding_fee;
             Ok(())
         }
@@ -485,6 +486,9 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_owner)]
         pub fn update_advance_mode_adding_fee(&mut self, advance_mode_adding_fee: Balance) -> Result<(), Error> {
+            if advance_mode_adding_fee == 0{
+                return Err(Error::InvalidFee);
+            }
             self.manager.advance_mode_adding_fee = advance_mode_adding_fee;
             Ok(())
         }
@@ -494,14 +498,6 @@ pub mod artzero_collection_manager {
         #[modifiers(only_owner)]
         pub fn update_max_royalty_fee_rate(&mut self, max_royalty_fee_rate: u32) -> Result<(), Error> {
             self.manager.max_royalty_fee_rate = max_royalty_fee_rate;
-            Ok(())
-        }
-
-        /// Update Admin Address - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
-            self.manager.admin_address = admin_address;
             Ok(())
         }
 
@@ -552,12 +548,6 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         pub fn get_advance_mode_adding_fee(&self) -> Balance {
             self.manager.advance_mode_adding_fee
-        }
-
-        /// Get Admin Address
-        #[ink(message)]
-        pub fn get_admin_address(&self) -> AccountId {
-            self.manager.admin_address
         }
 
         /// Get Royalty Max Fee
