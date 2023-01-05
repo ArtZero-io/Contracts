@@ -31,3 +31,12 @@ export function bytesToString(bytes: string): string {
 
   return result
 }
+
+export async function showAZBalance(api: any, address: string ) {
+  const { data: { free, reserved, miscFrozen } } = await api.query.system.account(address);
+  const balance =
+    new BN(free).div(new BN(10 ** 6)).toNumber() / 10 ** 6 -
+    new BN(miscFrozen).div(new BN(10 ** 6)).toNumber() / 10 ** 6;
+
+  return balance;
+}

@@ -83,6 +83,10 @@ export interface Error {
 	notInSaleList ? : null,
 	invalidBidLength ? : null,
 	invalidCollectionOwner ? : null,
+	invalidTime ? : null,
+	rewardStarted ? : null,
+	rewardNotStarted ? : null,
+	claimMustBeFalse ? : null,
 	ownableError ? : OwnableError,
 	accessControlError ? : AccessControlError
 }
@@ -266,6 +270,26 @@ export class ErrorBuilder {
 	static InvalidCollectionOwner(): Error {
 		return {
 			invalidCollectionOwner: null,
+		};
+	}
+	static InvalidTime(): Error {
+		return {
+			invalidTime: null,
+		};
+	}
+	static RewardStarted(): Error {
+		return {
+			rewardStarted: null,
+		};
+	}
+	static RewardNotStarted(): Error {
+		return {
+			rewardNotStarted: null,
+		};
+	}
+	static ClaimMustBeFalse(): Error {
+		return {
+			claimMustBeFalse: null,
 		};
 	}
 	static OwnableError(value: OwnableError): Error {

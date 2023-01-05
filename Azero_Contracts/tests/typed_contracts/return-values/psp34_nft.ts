@@ -11,15 +11,15 @@ export default interface OkishReturnValueTypes {
 	/** */
 	"8" : AccountId;
 	/** */
-	"30" : boolean;
+	"4" : number;
+	/** */
+	"41" : null;
 	/** */
 	"19" : AccountId | null;
 	/** */
 	"1" : Id;
 	/** */
-	"41" : null;
-	/** */
-	"4" : number;
+	"30" : boolean;
 	/** */
 	"6" : (string | number);
 	/** */
@@ -27,9 +27,9 @@ export default interface OkishReturnValueTypes {
 	/** */
 	"44" : Id;
 	/** */
-	"5" : number;
+	"45" : Array<string>;
 	/** */
 	"33" : string;
 	/** */
-	"45" : Array<string>;
+	"5" : number;
 };
