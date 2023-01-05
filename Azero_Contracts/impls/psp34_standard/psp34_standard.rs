@@ -80,8 +80,6 @@ where
     #[modifiers(only_token_owner(self.owner_of(id.clone()).unwrap()))]
     default fn burn(&mut self, id: Id) -> Result<(), Error> {
         let caller = T::env().caller();
-        let mut data = self.data::<Manager>();
-        data.last_token_id = data.last_token_id.checked_sub(1).unwrap();
         if self._burn_from(caller, id).is_err(){
             return Err(Error::Custom(String::from("Cannot burn")))
         }
