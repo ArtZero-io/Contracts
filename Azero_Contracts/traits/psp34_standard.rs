@@ -8,6 +8,9 @@ use openbrush::{
     contracts::psp34::extensions::{
         enumerable::*,
         metadata::*
+    },
+    traits::{
+        AccountId
     }
 };
 use crate::traits::error::Error;
@@ -39,6 +42,9 @@ pub trait Psp34Traits {
     /// This function return the metadata location of an NFT. The format is baseURI/<token_id>.json
     #[ink(message)]
     fn token_uri(&self, token_id: u64) -> String;
+    /// This function return the owner of the NFT Contract
+    #[ink(message)]
+    fn get_owner(&self) -> AccountId ;
     /// This function return the latest token ID, everytime new NFT is mint, last_token_id is increased by 1 in mint function. Note: This is not the same as the total supply return by the psp34 function as NFT can be burnt.
     #[ink(message)]
     fn get_last_token_id(&self) -> u64;

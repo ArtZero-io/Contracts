@@ -151,6 +151,10 @@ where
         token_uri
     }
 
+    /// Get owner address
+    default fn get_owner(&self) -> AccountId {
+        self.owner()
+    }
 }
 
 fn add_attribute_name<T: Storage<Manager>>(
