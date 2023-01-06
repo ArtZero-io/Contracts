@@ -37,7 +37,10 @@ pub mod launchpad_psp34_nft_standard {
             Mapping,
             TypeGuard
         },
-        traits::Storage,
+        traits::{
+            Storage,
+            DefaultEnv
+        },
         modifiers,
     };
     use artzero_project::{
@@ -362,7 +365,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn mint(&mut self, mint_amount: u64 ) -> Result<(), Error> {
             let caller = self.env().caller();
             assert!(self.manager_psp34_standard.last_token_id.checked_add(mint_amount).unwrap() <= self.manager.total_supply);
-            let current_time = Self::env().block_timestamp();
+            let current_time = self.env().block_timestamp();
             let mut available_amount: u64 = 0;
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
@@ -388,7 +391,7 @@ pub mod launchpad_psp34_nft_standard {
             }
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
             assert!(mint_amount <= phase.public_max_minting_amount, "PhasePublicMintLimitReached");
-            let current_time = Self::env().block_timestamp();
+            let current_time = self.env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
                 assert!(phase.is_public);
                 assert!(self.manager_psp34_standard.last_token_id.checked_add(mint_amount).unwrap() <= self.manager.total_supply);
@@ -442,7 +445,7 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist)
             }
             let phase = self.manager.phases.get(&phase_id).unwrap();
-            let current_time = Self::env().block_timestamp();
+            let current_time = self.env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
                 assert!(phase.claimed_amount.checked_add(mint_amount).unwrap() <= phase.total_amount);
                 assert!(self.manager_psp34_standard.last_token_id < self.manager.total_supply);
@@ -506,7 +509,7 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            assert!(phase.claimed_amount == 0 && self.manager.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp() && !phase.is_active);
+            assert!(phase.claimed_amount == 0 && self.manager.phase_account_link.count(phase_id) == 0 && phase.start_time > self.env().block_timestamp() && !phase.is_active);
             phase.is_active = false;
             self.manager.active_phase_count = self.manager.active_phase_count.checked_sub(1).unwrap();
             if phase.is_public {
@@ -550,7 +553,7 @@ pub mod launchpad_psp34_nft_standard {
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
             assert!(phase.is_active &&
                 phase.claimed_amount == 0 &&
-                self.manager.phase_account_link.count(phase_id) == 0 && phase.start_time > Self::env().block_timestamp()
+                self.manager.phase_account_link.count(phase_id) == 0 && phase.start_time > self.env().block_timestamp()
             );
             phase.title = phase_code.clone().into_bytes();
             if phase.is_public && !is_public {
@@ -661,7 +664,7 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_owner_available_amount(
             &self
         ) -> u64 {
-            let current_time = Self::env().block_timestamp();
+            let current_time = self.env().block_timestamp();
             let mut available_amount: u64 = 0;
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
@@ -736,7 +739,7 @@ pub mod launchpad_psp34_nft_standard {
         /// Get current phase
         #[ink(message)]
         pub fn get_current_phase(&self) -> Option<u8> {
-            let current_time = Self::env().block_timestamp();
+            let current_time = self.env().block_timestamp();
             for index in 0..self.manager.last_phase_id {
                 let phase = self.manager.phases.get(&(index+1)).unwrap();
                 if phase.is_active && (phase.start_time..=phase.end_time).contains(&current_time) {

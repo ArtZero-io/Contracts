@@ -167,7 +167,7 @@ pub mod artzero_collection_manager {
                 contract_type: CollectionType::Psp34Auto,
                 is_collect_royalty_fee,
                 royalty_fee,
-                is_active: true,
+                is_active: false,
                 show_on_chain_metadata: true,
             };
             self.manager.collections.insert(&contract_account, &new_collection);
@@ -182,7 +182,7 @@ pub mod artzero_collection_manager {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(contract_account),
                 contract_type: CollectionType::Psp34Auto,
-                is_active: true,
+                is_active: false,
                 show_on_chain_metadata: true,
             });
             Ok(())
