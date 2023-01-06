@@ -24,8 +24,12 @@ pub mod psp34_nft {
         contracts::psp34::extensions::{
             enumerable::*,
             metadata::*,
+            burnable::*,
         },
-        traits::Storage,
+        traits::{
+            Storage,
+            DefaultEnv
+        },
         modifiers,
     };
     use artzero_project::{
@@ -57,6 +61,26 @@ pub mod psp34_nft {
     impl PSP34Enumerable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
     impl AdminTrait for Psp34Nft {}
+
+    impl PSP34Burnable for Psp34Nft {
+        #[ink(message)]
+        fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error> {
+            let caller = Self::env().caller();
+            let token_owner = self.owner_of(id.clone()).unwrap();
+            if token_owner != account {
+                return Err(PSP34Error::Custom(String::from("not token owner").into_bytes()))
+            }
+
+            let allowance = self.allowance(account,caller,Some(id.clone()));
+
+            if caller == account || allowance {
+                self._burn_from(account, id)
+            }
+            else{
+                return Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
+            }
+        }
+    }
 
     impl Psp34Nft {
         #[ink(constructor)]

@@ -76,15 +76,15 @@ where
         self.data::<Manager>().locked_token_count
     }
 
-    /// Burn NFT
-    #[modifiers(only_token_owner(self.owner_of(id.clone()).unwrap()))]
-    default fn burn(&mut self, id: Id) -> Result<(), Error> {
-        let caller = T::env().caller();
-        if self._burn_from(caller, id).is_err(){
-            return Err(Error::Custom(String::from("Cannot burn")))
-        }
-        Ok(())
-    }
+    // /// Burn NFT
+    // #[modifiers(only_token_owner(self.owner_of(id.clone()).unwrap()))]
+    // default fn burn(&mut self, id: Id) -> Result<(), Error> {
+    //     let caller = T::env().caller();
+    //     if self._burn_from(caller, id).is_err(){
+    //         return Err(Error::Custom(String::from("Cannot burn")))
+    //     }
+    //     Ok(())
+    // }
 
     /// Change baseURI
     #[modifiers(only_owner)]

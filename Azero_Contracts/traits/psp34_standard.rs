@@ -51,7 +51,7 @@ pub trait Psp34Traits {
     /// This function returns how many NFTs have been locked by its owners
     #[ink(message)]
     fn get_locked_token_count(&self) -> u64;
-    /// This function allows NFT Owner to burn their NFT
-    #[ink(message)]
-    fn burn(&mut self, id: Id) -> Result<(), Error>;
+    // /// This function allows NFT Owner to burn their NFT
+    // #[ink(message)]
+    // fn burn(&mut self, id: Id) -> Result<(), Error>;
 }

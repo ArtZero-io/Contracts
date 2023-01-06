@@ -29,6 +29,7 @@ pub mod launchpad_psp34_nft_standard {
         contracts::psp34::extensions::{
             enumerable::*,
             metadata::*,
+            burnable::*,
         },
         storage::{
             MultiMapping,
@@ -161,6 +162,26 @@ pub mod launchpad_psp34_nft_standard {
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
     impl AdminTrait for LaunchPadPsp34NftStandard {}
+
+    impl PSP34Burnable for LaunchPadPsp34NftStandard {
+        #[ink(message)]
+        fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error> {
+            let caller = Self::env().caller();
+            let token_owner = self.owner_of(id.clone()).unwrap();
+            if token_owner != account {
+                return Err(PSP34Error::Custom(String::from("not token owner").into_bytes()))
+            }
+
+            let allowance = self.allowance(account,caller,Some(id.clone()));
+
+            if caller == account || allowance {
+                self._burn_from(account, id)
+            }
+            else{
+                return Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
+            }
+        }
+    }
 
     impl LaunchPadPsp34NftStandard {
 
