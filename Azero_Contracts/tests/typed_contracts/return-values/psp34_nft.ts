@@ -7,21 +7,21 @@ export default interface OkishReturnValueTypes {
 	/** */
 	"34" : null;
 	/** */
+	"40" : null;
+	/** */
 	"8" : AccountId;
 	/** */
-	"40" : null;
+	"19" : AccountId | null;
+	/** */
+	"30" : boolean;
 	/** */
 	"1" : Id;
 	/** */
 	"41" : null;
 	/** */
-	"6" : (string | number);
-	/** */
 	"4" : number;
 	/** */
-	"30" : boolean;
-	/** */
-	"19" : AccountId | null;
+	"6" : (string | number);
 	/** */
 	"43" : Array<(number | string | BN)> | null;
 	/** */

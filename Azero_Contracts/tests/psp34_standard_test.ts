@@ -1,8 +1,7 @@
-// In this example we will deploy & interact with psp22 token to mint some tokens to the owner and get total supply.
 import Contract from "./typed_contracts/contracts/psp34_nft";
-import {ApiPromise, WsProvider} from "@polkadot/api";
+import {ApiPromise} from "@polkadot/api";
 import Constructors from "./typed_contracts/constructors/psp34_nft";
-import { getSigners, showAZBalance } from './helpers'
+import { getSigners, showAZBalance, provider } from './helpers'
 import jsonrpc from "@polkadot/types/interfaces/jsonrpc";
 import '@polkadot/api-augment';
 import BN from 'bn.js'
@@ -14,7 +13,7 @@ let defaultSigner: KeyringPair;
 let alice: KeyringPair;
 let bob: KeyringPair;
 
-const TOKEN_ADDRESS = "5GA9BmAxWV8KtjENR4mW4wHCNLTFgsoNKMZW1wYkGm3oUs52";
+const TOKEN_ADDRESS = "5ErU3VCPM9JWBLyoZbzUEfwdBuTvqhh9aphM92A3MibgD6P2";
 
 function setup() {
   signers = getSigners();
@@ -51,8 +50,104 @@ async function generalInfo() {
   //Check the total supply and the balance of defaultSigner
   const {value: totalSupply} = await contract.query['PSP34::total_supply']();
   console.log('NFT Total Supply:',totalSupply);
-  const {value: contractOwner} = await contract.query['Psp34Traits::get_owner']();
-  console.log('NFT Contract Owner:',contractOwner);
+  const {value: contractOwner1} = await contract.query["Ownable::owner"]();
+  console.log(`Contract Owner is ${contractOwner1}`);
+}
+/*
+  testBurnNFT
+  Test case: mint 2 NFTs and burn 1
+  Pre-requisite: none
+  Expect: first mint ok, burn using Bob fails, burn using defaultSigner OK, mint new NFT, approve bob, use bob to burn new NFT OK,
+*/
+async function testBurnNFT(){
+  let contract = new Contract(TOKEN_ADDRESS, defaultSigner, api);
+  console.log('Minting a new NFT ...');
+  const mintTx = await contract.tx.mint({
+    gasLimit : 100000000000
+  });
+  console.log('transaction id',mintTx.txHash);
+
+  let {value: totalSupplyAfterMint} = await contract.query['PSP34::total_supply']();
+  console.log("Total Supply",totalSupplyAfterMint);
+
+  let {value: lastID} = await contract.query['Psp34Traits::get_last_token_id']();
+  console.log("Last NFT ID",lastID);
+  {
+    let {value: ownerAddress} = await contract.query['PSP34::owner_of']({u64:lastID});
+    console.log(`Owner of NFT ${lastID} is ${ownerAddress}`);
+  }
+
+  try {
+    console.log('Burn NFT to using Bob (should fail)');
+    contract = new Contract(TOKEN_ADDRESS, bob, api);
+    const trans = await contract.tx["PSP34Burnable::burn" ](defaultSigner.address,{u64:lastID},{
+      gasLimit : 100000000000
+    });
+    console.log('transaction id',trans.txHash);
+  }
+  catch (e:any){
+    //console.log(e.error.message);
+    console.log("Failed to excecute contract call");
+  }
+
+  contract = new Contract(TOKEN_ADDRESS, defaultSigner, api);
+  try {
+    console.log('Burn NFT to using defaultSigner but input alice address in burn (should fail)', lastID);
+    const trans = await contract.tx["PSP34Burnable::burn" ](alice.address,{u64:lastID},{
+      gasLimit : 100000000000
+    });
+    console.log('transaction id',trans.txHash);
+  }
+  catch (e:any){
+    //console.log(e.error.message);
+    console.log("Failed to excecute contract call");
+  }
+
+  console.log('Burn NFT to using defaultSigner (should OK)', lastID);
+  const trans = await contract.tx["PSP34Burnable::burn" ](defaultSigner.address,{u64:lastID},{
+    gasLimit : 100000000000
+  });
+  console.log('transaction id',trans.txHash);
+  //Mint new NFT and approve to burn
+  {
+    console.log('Minting a new NFT ...');
+    const mintTx = await contract.tx.mint({
+      gasLimit : 100000000000
+    });
+    console.log('transaction id',mintTx.txHash);
+
+    let {value: lastID} = await contract.query['Psp34Traits::get_last_token_id']();
+    let {value: ownerAddress} = await contract.query['PSP34::owner_of']({u64:lastID});
+    console.log(`Owner of NFT ${lastID} is ${ownerAddress}`);
+
+    //Approve Bob
+    try {
+      console.log('Approve Bob to control the NFT...');
+      const trans = await contract.tx["PSP34::approve" ](bob.address,{u64:lastID},true,{
+        gasLimit : 100000000000
+      });
+      console.log('transaction id',trans.txHash);
+    }
+    catch (e:any){
+      //console.log(e.error.message);
+      console.log("Failed to excecute contract call");
+    }
+    //Bob to burn the NFT
+    console.log('Burn NFT to using Bob (should OK)');
+    contract = new Contract(TOKEN_ADDRESS, bob, api);
+    const trans = await contract.tx["PSP34Burnable::burn" ](defaultSigner.address,{u64:lastID},{
+      gasLimit : 100000000000
+    });
+    console.log('transaction id',trans.txHash);
+  }
+
+  // {
+  //   let {value: totalSupplyAfterMint} = await contract.query['PSP34::total_supply']();
+  //   console.log("Total Supply",totalSupplyAfterMint);
+  //
+  //   //Psp34Traits::get_last_token_id
+  // }
+
 }
 /*
   testAdminTransferPSP22
@@ -344,7 +439,6 @@ async function testMint() {
 
 }
 
-const provider = new WsProvider("wss://ws.test.azero.dev");
 const api = new ApiPromise({
   provider,
   rpc: jsonrpc
@@ -358,8 +452,8 @@ api.on("connected", () => {
 api.on("ready", async () => {
   console.log("Testnet AZERO Ready. Running Test Now...");
   setup();
-  // await createNFTContract();
-  await generalInfo();
+  await createNFTContract();
+  // await generalInfo();
   //await testMint();
   //await testMintNotOwner();
   // await testWithdrawFee();
@@ -367,6 +461,7 @@ api.on("ready", async () => {
   //await testLockNFT();
   // await testAdminTransfer();
   // await testAdminTransferPSP22();
+  // await testBurnNFT();
 });
 
 api.on("error", (err) => {

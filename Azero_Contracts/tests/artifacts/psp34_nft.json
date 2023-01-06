@@ -1,6 +1,6 @@
 {
   "source": {
-    "hash": "0xbce8fc9919766a25ca36e90574b3f19fd2bf0df0a710363340e561ce883cdc41",
+    "hash": "0xe18b958e0d6f0e9210eca1d231756f7cd3fe33067e22bddeb0c07331ad43d344",
     "language": "ink! 3.4.0",
     "compiler": "rustc 1.65.0-nightly"
   },
@@ -98,23 +98,6 @@
         {
           "args": [],
           "docs": [
-            " Returns the address of the current owner."
-          ],
-          "label": "Ownable::owner",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "ownable_external",
-              "OwnerOutput"
-            ],
-            "type": 8
-          },
-          "selector": "0x4fa43c8c"
-        },
-        {
-          "args": [],
-          "docs": [
             " Leaves the contract without owner. It will not be possible to call",
             " owner's functions anymore. Can only be called by the current owner.",
             "",
@@ -179,6 +162,100 @@
         {
           "args": [],
           "docs": [
+            " Returns the address of the current owner."
+          ],
+          "label": "Ownable::owner",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "ownable_external",
+              "OwnerOutput"
+            ],
+            "type": 8
+          },
+          "selector": "0x4fa43c8c"
+        },
+        {
+          "args": [
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "OwnerOfInput1"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [
+            " Returns the owner of the token if any."
+          ],
+          "label": "PSP34::owner_of",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "OwnerOfOutput"
+            ],
+            "type": 19
+          },
+          "selector": "0x1168624d"
+        },
+        {
+          "args": [
+            {
+              "label": "owner",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "AllowanceInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "operator",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "AllowanceInput2"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34_external",
+                  "AllowanceInput3"
+                ],
+                "type": 14
+              }
+            }
+          ],
+          "docs": [
+            " Returns `true` if the operator is approved by the owner to withdraw `id` token.",
+            " If `id` is `None`, returns `true` if the operator is approved to withdraw all owner's tokens."
+          ],
+          "label": "PSP34::allowance",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "AllowanceOutput"
+            ],
+            "type": 30
+          },
+          "selector": "0x4790f55a"
+        },
+        {
+          "args": [],
+          "docs": [
             " Returns the collection `Id` of the NFT token.",
             "",
             " This can represents the relationship between tokens/contracts/pallets."
@@ -194,63 +271,6 @@
             "type": 1
           },
           "selector": "0xffa27a5f"
-        },
-        {
-          "args": [
-            {
-              "label": "operator",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput2"
-                ],
-                "type": 14
-              }
-            },
-            {
-              "label": "approved",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "ApproveInput3"
-                ],
-                "type": 30
-              }
-            }
-          ],
-          "docs": [
-            " Approves `operator` to withdraw the `id` token from the caller's account.",
-            " If `id` is `None` approves or disapproves the operator for all tokens of the caller.",
-            "",
-            " On success a `Approval` event is emitted.",
-            "",
-            " # Errors",
-            "",
-            " Returns `SelfApprove` error if it is self approve.",
-            "",
-            " Returns `NotApproved` error if caller is not owner of `id`."
-          ],
-          "label": "PSP34::approve",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "ApproveOutput"
-            ],
-            "type": 41
-          },
-          "selector": "0x1932a8b0"
         },
         {
           "args": [
@@ -311,23 +331,6 @@
           "selector": "0x3128d61b"
         },
         {
-          "args": [],
-          "docs": [
-            " Returns current NFT total supply."
-          ],
-          "label": "PSP34::total_supply",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "TotalSupplyOutput"
-            ],
-            "type": 6
-          },
-          "selector": "0x628413fe"
-        },
-        {
           "args": [
             {
               "label": "owner",
@@ -360,21 +363,11 @@
         {
           "args": [
             {
-              "label": "owner",
-              "type": {
-                "displayName": [
-                  "psp34_external",
-                  "AllowanceInput1"
-                ],
-                "type": 8
-              }
-            },
-            {
               "label": "operator",
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "AllowanceInput2"
+                  "ApproveInput1"
                 ],
                 "type": 8
               }
@@ -384,55 +377,62 @@
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "AllowanceInput3"
+                  "ApproveInput2"
                 ],
                 "type": 14
               }
-            }
-          ],
-          "docs": [
-            " Returns `true` if the operator is approved by the owner to withdraw `id` token.",
-            " If `id` is `None`, returns `true` if the operator is approved to withdraw all owner's tokens."
-          ],
-          "label": "PSP34::allowance",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34_external",
-              "AllowanceOutput"
-            ],
-            "type": 30
-          },
-          "selector": "0x4790f55a"
-        },
-        {
-          "args": [
+            },
             {
-              "label": "id",
+              "label": "approved",
               "type": {
                 "displayName": [
                   "psp34_external",
-                  "OwnerOfInput1"
+                  "ApproveInput3"
                 ],
-                "type": 1
+                "type": 30
               }
             }
           ],
           "docs": [
-            " Returns the owner of the token if any."
+            " Approves `operator` to withdraw the `id` token from the caller's account.",
+            " If `id` is `None` approves or disapproves the operator for all tokens of the caller.",
+            "",
+            " On success a `Approval` event is emitted.",
+            "",
+            " # Errors",
+            "",
+            " Returns `SelfApprove` error if it is self approve.",
+            "",
+            " Returns `NotApproved` error if caller is not owner of `id`."
           ],
-          "label": "PSP34::owner_of",
+          "label": "PSP34::approve",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34_external",
+              "ApproveOutput"
+            ],
+            "type": 41
+          },
+          "selector": "0x1932a8b0"
+        },
+        {
+          "args": [],
+          "docs": [
+            " Returns current NFT total supply."
+          ],
+          "label": "PSP34::total_supply",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34_external",
-              "OwnerOfOutput"
+              "TotalSupplyOutput"
             ],
-            "type": 19
+            "type": 6
           },
-          "selector": "0x1168624d"
+          "selector": "0x628413fe"
         },
         {
           "args": [
@@ -575,96 +575,6 @@
           "selector": "0x4de6850b"
         },
         {
-          "args": [],
-          "docs": [
-            " This function return how many unique attributes in the contract"
-          ],
-          "label": "Psp34Traits::get_attribute_count",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetAttributeCountOutput"
-            ],
-            "type": 4
-          },
-          "selector": "0x61c50d69"
-        },
-        {
-          "args": [
-            {
-              "label": "index",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "GetAttributeNameInput1"
-                ],
-                "type": 4
-              }
-            }
-          ],
-          "docs": [
-            " This function return the attribute name using attribute index. Beacause attributes of an NFT can be set to anything by Contract Owner, AztZero uses this function to get all attributes of an NFT"
-          ],
-          "label": "Psp34Traits::get_attribute_name",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetAttributeNameOutput"
-            ],
-            "type": 33
-          },
-          "selector": "0xfcfe34de"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "TokenUriInput1"
-                ],
-                "type": 5
-              }
-            }
-          ],
-          "docs": [
-            " This function return the metadata location of an NFT. The format is baseURI/<token_id>.json"
-          ],
-          "label": "Psp34Traits::token_uri",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "TokenUriOutput"
-            ],
-            "type": 33
-          },
-          "selector": "0x249dfd4f"
-        },
-        {
-          "args": [],
-          "docs": [
-            " This function return the latest token ID, everytime new NFT is mint, last_token_id is increased by 1 in mint function. Note: This is not the same as the total supply return by the psp34 function as NFT can be burnt."
-          ],
-          "label": "Psp34Traits::get_last_token_id",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetLastTokenIdOutput"
-            ],
-            "type": 5
-          },
-          "selector": "0x6f315836"
-        },
-        {
           "args": [
             {
               "label": "token_id",
@@ -705,113 +615,30 @@
         {
           "args": [
             {
-              "label": "token_id",
+              "label": "index",
               "type": {
                 "displayName": [
                   "psp34traits_external",
-                  "IsLockedNftInput1"
+                  "GetAttributeNameInput1"
                 ],
-                "type": 1
+                "type": 4
               }
             }
           ],
           "docs": [
-            " This function check if an NFT is locked or not"
+            " This function return the attribute name using attribute index. Beacause attributes of an NFT can be set to anything by Contract Owner, AztZero uses this function to get all attributes of an NFT"
           ],
-          "label": "Psp34Traits::is_locked_nft",
+          "label": "Psp34Traits::get_attribute_name",
           "mutates": false,
           "payable": false,
           "returnType": {
             "displayName": [
               "psp34traits_external",
-              "IsLockedNftOutput"
+              "GetAttributeNameOutput"
             ],
-            "type": 30
+            "type": 33
           },
-          "selector": "0x59271420"
-        },
-        {
-          "args": [
-            {
-              "label": "id",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "BurnInput1"
-                ],
-                "type": 1
-              }
-            }
-          ],
-          "docs": [
-            " This function allows NFT Owner to burn their NFT"
-          ],
-          "label": "Psp34Traits::burn",
-          "mutates": true,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "BurnOutput"
-            ],
-            "type": 34
-          },
-          "selector": "0x25314263"
-        },
-        {
-          "args": [
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "GetAttributesInput1"
-                ],
-                "type": 1
-              }
-            },
-            {
-              "label": "attributes",
-              "type": {
-                "displayName": [
-                  "psp34traits_external",
-                  "GetAttributesInput2"
-                ],
-                "type": 45
-              }
-            }
-          ],
-          "docs": [
-            " This function returns all available attributes of each NFT"
-          ],
-          "label": "Psp34Traits::get_attributes",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetAttributesOutput"
-            ],
-            "type": 45
-          },
-          "selector": "0x18209102"
-        },
-        {
-          "args": [],
-          "docs": [
-            " This function returns how many NFTs have been locked by its owners"
-          ],
-          "label": "Psp34Traits::get_locked_token_count",
-          "mutates": false,
-          "payable": false,
-          "returnType": {
-            "displayName": [
-              "psp34traits_external",
-              "GetLockedTokenCountOutput"
-            ],
-            "type": 5
-          },
-          "selector": "0x8fe2ce73"
+          "selector": "0xfcfe34de"
         },
         {
           "args": [],
@@ -859,15 +686,170 @@
           "selector": "0xa7245b9b"
         },
         {
+          "args": [],
+          "docs": [
+            " This function returns how many NFTs have been locked by its owners"
+          ],
+          "label": "Psp34Traits::get_locked_token_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetLockedTokenCountOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0x8fe2ce73"
+        },
+        {
           "args": [
             {
-              "label": "value",
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "GetAttributesInput1"
+                ],
+                "type": 1
+              }
+            },
+            {
+              "label": "attributes",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "GetAttributesInput2"
+                ],
+                "type": 45
+              }
+            }
+          ],
+          "docs": [
+            " This function returns all available attributes of each NFT"
+          ],
+          "label": "Psp34Traits::get_attributes",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetAttributesOutput"
+            ],
+            "type": 45
+          },
+          "selector": "0x18209102"
+        },
+        {
+          "args": [],
+          "docs": [
+            " This function return how many unique attributes in the contract"
+          ],
+          "label": "Psp34Traits::get_attribute_count",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetAttributeCountOutput"
+            ],
+            "type": 4
+          },
+          "selector": "0x61c50d69"
+        },
+        {
+          "args": [],
+          "docs": [
+            " This function return the latest token ID, everytime new NFT is mint, last_token_id is increased by 1 in mint function. Note: This is not the same as the total supply return by the psp34 function as NFT can be burnt."
+          ],
+          "label": "Psp34Traits::get_last_token_id",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "GetLastTokenIdOutput"
+            ],
+            "type": 5
+          },
+          "selector": "0x6f315836"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "IsLockedNftInput1"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [
+            " This function check if an NFT is locked or not"
+          ],
+          "label": "Psp34Traits::is_locked_nft",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "IsLockedNftOutput"
+            ],
+            "type": 30
+          },
+          "selector": "0x59271420"
+        },
+        {
+          "args": [
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "psp34traits_external",
+                  "TokenUriInput1"
+                ],
+                "type": 5
+              }
+            }
+          ],
+          "docs": [
+            " This function return the metadata location of an NFT. The format is baseURI/<token_id>.json"
+          ],
+          "label": "Psp34Traits::token_uri",
+          "mutates": false,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34traits_external",
+              "TokenUriOutput"
+            ],
+            "type": 33
+          },
+          "selector": "0x249dfd4f"
+        },
+        {
+          "args": [
+            {
+              "label": "nft_contract_address",
               "type": {
                 "displayName": [
                   "admintrait_external",
-                  "WithdrawFeeInput1"
+                  "TranferNftInput1"
                 ],
-                "type": 6
+                "type": 8
+              }
+            },
+            {
+              "label": "token_id",
+              "type": {
+                "displayName": [
+                  "admintrait_external",
+                  "TranferNftInput2"
+                ],
+                "type": 1
               }
             },
             {
@@ -875,26 +857,26 @@
               "type": {
                 "displayName": [
                   "admintrait_external",
-                  "WithdrawFeeInput2"
+                  "TranferNftInput3"
                 ],
                 "type": 8
               }
             }
           ],
           "docs": [
-            " This function allows contract owner to withdraw contract balance to his account."
+            " This function allow contract owner withdraw NFT to an account in case there is any NFT sent to contract by mistake"
           ],
-          "label": "AdminTrait::withdraw_fee",
+          "label": "AdminTrait::tranfer_nft",
           "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "admintrait_external",
-              "WithdrawFeeOutput"
+              "TranferNftOutput"
             ],
             "type": 34
           },
-          "selector": "0x07573e99"
+          "selector": "0xed1e1dfa"
         },
         {
           "args": [
@@ -947,23 +929,13 @@
         {
           "args": [
             {
-              "label": "nft_contract_address",
+              "label": "value",
               "type": {
                 "displayName": [
                   "admintrait_external",
-                  "TranferNftInput1"
+                  "WithdrawFeeInput1"
                 ],
-                "type": 8
-              }
-            },
-            {
-              "label": "token_id",
-              "type": {
-                "displayName": [
-                  "admintrait_external",
-                  "TranferNftInput2"
-                ],
-                "type": 1
+                "type": 6
               }
             },
             {
@@ -971,26 +943,62 @@
               "type": {
                 "displayName": [
                   "admintrait_external",
-                  "TranferNftInput3"
+                  "WithdrawFeeInput2"
                 ],
                 "type": 8
               }
             }
           ],
           "docs": [
-            " This function allow contract owner withdraw NFT to an account in case there is any NFT sent to contract by mistake"
+            " This function allows contract owner to withdraw contract balance to his account."
           ],
-          "label": "AdminTrait::tranfer_nft",
+          "label": "AdminTrait::withdraw_fee",
           "mutates": true,
           "payable": false,
           "returnType": {
             "displayName": [
               "admintrait_external",
-              "TranferNftOutput"
+              "WithdrawFeeOutput"
             ],
             "type": 34
           },
-          "selector": "0xed1e1dfa"
+          "selector": "0x07573e99"
+        },
+        {
+          "args": [
+            {
+              "label": "account",
+              "type": {
+                "displayName": [
+                  "psp34burnable_external",
+                  "BurnInput1"
+                ],
+                "type": 8
+              }
+            },
+            {
+              "label": "id",
+              "type": {
+                "displayName": [
+                  "psp34burnable_external",
+                  "BurnInput2"
+                ],
+                "type": 1
+              }
+            }
+          ],
+          "docs": [],
+          "label": "PSP34Burnable::burn",
+          "mutates": true,
+          "payable": false,
+          "returnType": {
+            "displayName": [
+              "psp34burnable_external",
+              "BurnOutput"
+            ],
+            "type": 41
+          },
+          "selector": "0x63c9877a"
         }
       ]
     },

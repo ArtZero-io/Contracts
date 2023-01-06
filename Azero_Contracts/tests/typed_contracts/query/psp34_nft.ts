@@ -40,13 +40,6 @@ export default class Methods {
 	}
 
 	/** */
-	"Ownable::owner" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["8"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
-	}
-
-	/** */
 	"Ownable::renounce_ownership" (
 		__options ? : GasLimit,
 	): Promise< QueryReturnType< OkishReturns["40"] > >{
@@ -66,61 +59,22 @@ export default class Methods {
 	}
 
 	/** */
-	"PSP34::collection_id" (
+	"Ownable::owner" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["1"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::collectionId", [], __options);
+	): Promise< QueryReturnType< OkishReturns["8"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
 	}
 
 	/**
 	 * @arg: args: [
-	 * 0: operator,
-	 * 1: id,
-	 * 2: approved,
+	 * 0: id,
 	 * ]
 	 */
-	"PSP34::approve" (
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
-		approved: ArgumentsTypes[30],
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["41"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34::approve", [operator, id, approved], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: to,
-	 * 1: id,
-	 * 2: data,
-	 * ]
-	 */
-	"PSP34::transfer" (
-		to: ArgumentsTypes[8],
+	"PSP34::owner_of" (
 		id: ArgumentsTypes[1],
-		data: ArgumentsTypes[7],
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["41"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34::transfer", [to, id, data], __options);
-	}
-
-	/** */
-	"PSP34::total_supply" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["6"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::totalSupply", [], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * ]
-	 */
-	"PSP34::balance_of" (
-		owner: ArgumentsTypes[8],
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::balanceOf", [owner], __options);
+	): Promise< QueryReturnType< OkishReturns["19"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::ownerOf", [id], __options);
 	}
 
 	/**
@@ -139,16 +93,62 @@ export default class Methods {
 		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::allowance", [owner, operator, id], __options);
 	}
 
+	/** */
+	"PSP34::collection_id" (
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["1"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::collectionId", [], __options);
+	}
+
 	/**
 	 * @arg: args: [
-	 * 0: id,
+	 * 0: to,
+	 * 1: id,
+	 * 2: data,
 	 * ]
 	 */
-	"PSP34::owner_of" (
+	"PSP34::transfer" (
+		to: ArgumentsTypes[8],
 		id: ArgumentsTypes[1],
+		data: ArgumentsTypes[7],
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["19"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::ownerOf", [id], __options);
+	): Promise< QueryReturnType< OkishReturns["41"] > >{
+		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34::transfer", [to, id, data], __options);
+	}
+
+	/**
+	 * @arg: args: [
+	 * 0: owner,
+	 * ]
+	 */
+	"PSP34::balance_of" (
+		owner: ArgumentsTypes[8],
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["4"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::balanceOf", [owner], __options);
+	}
+
+	/**
+	 * @arg: args: [
+	 * 0: operator,
+	 * 1: id,
+	 * 2: approved,
+	 * ]
+	 */
+	"PSP34::approve" (
+		operator: ArgumentsTypes[8],
+		id: ArgumentsTypes[14],
+		approved: ArgumentsTypes[30],
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["41"] > >{
+		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34::approve", [operator, id, approved], __options);
+	}
+
+	/** */
+	"PSP34::total_supply" (
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["6"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::totalSupply", [], __options);
 	}
 
 	/**
@@ -203,44 +203,6 @@ export default class Methods {
 		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::setBaseUri", [uri], __options);
 	}
 
-	/** */
-	"Psp34Traits::get_attribute_count" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeCount", [], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"Psp34Traits::get_attribute_name" (
-		index: ArgumentsTypes[4],
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["33"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeName", [index], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::token_uri" (
-		tokenId: ArgumentsTypes[5],
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["33"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::tokenUri", [tokenId], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_last_token_id" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLastTokenId", [], __options);
-	}
-
 	/**
 	 * @arg: args: [
 	 * 0: tokenId,
@@ -257,47 +219,14 @@ export default class Methods {
 
 	/**
 	 * @arg: args: [
-	 * 0: tokenId,
+	 * 0: index,
 	 * ]
 	 */
-	"Psp34Traits::is_locked_nft" (
-		tokenId: ArgumentsTypes[1],
+	"Psp34Traits::get_attribute_name" (
+		index: ArgumentsTypes[4],
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["30"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::isLockedNft", [tokenId], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"Psp34Traits::burn" (
-		id: ArgumentsTypes[1],
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::burn", [id], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: attributes,
-	 * ]
-	 */
-	"Psp34Traits::get_attributes" (
-		tokenId: ArgumentsTypes[1],
-		attributes: ArgumentsTypes[45],
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["45"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributes", [tokenId, attributes], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_locked_token_count" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLockedTokenCount", [], __options);
+	): Promise< QueryReturnType< OkishReturns["33"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeName", [index], __options);
 	}
 
 	/** */
@@ -319,18 +248,79 @@ export default class Methods {
 		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::lock", [tokenId], __options);
 	}
 
+	/** */
+	"Psp34Traits::get_locked_token_count" (
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["5"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLockedTokenCount", [], __options);
+	}
+
 	/**
 	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
+	 * 0: tokenId,
+	 * 1: attributes,
 	 * ]
 	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[6],
+	"Psp34Traits::get_attributes" (
+		tokenId: ArgumentsTypes[1],
+		attributes: ArgumentsTypes[45],
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["45"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributes", [tokenId, attributes], __options);
+	}
+
+	/** */
+	"Psp34Traits::get_attribute_count" (
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["4"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeCount", [], __options);
+	}
+
+	/** */
+	"Psp34Traits::get_last_token_id" (
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["5"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLastTokenId", [], __options);
+	}
+
+	/**
+	 * @arg: args: [
+	 * 0: tokenId,
+	 * ]
+	 */
+	"Psp34Traits::is_locked_nft" (
+		tokenId: ArgumentsTypes[1],
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["30"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::isLockedNft", [tokenId], __options);
+	}
+
+	/**
+	 * @arg: args: [
+	 * 0: tokenId,
+	 * ]
+	 */
+	"Psp34Traits::token_uri" (
+		tokenId: ArgumentsTypes[5],
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["33"] > >{
+		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::tokenUri", [tokenId], __options);
+	}
+
+	/**
+	 * @arg: args: [
+	 * 0: nftContractAddress,
+	 * 1: tokenId,
+	 * 2: receiver,
+	 * ]
+	 */
+	"AdminTrait::tranfer_nft" (
+		nftContractAddress: ArgumentsTypes[8],
+		tokenId: ArgumentsTypes[1],
 		receiver: ArgumentsTypes[8],
 		__options ? : GasLimit,
 	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::withdrawFee", [value, receiver], __options);
+		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
 	}
 
 	/**
@@ -351,18 +341,30 @@ export default class Methods {
 
 	/**
 	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
+	 * 0: value,
+	 * 1: receiver,
 	 * ]
 	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[8],
-		tokenId: ArgumentsTypes[1],
+	"AdminTrait::withdraw_fee" (
+		value: ArgumentsTypes[6],
 		receiver: ArgumentsTypes[8],
 		__options ? : GasLimit,
 	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::withdrawFee", [value, receiver], __options);
+	}
+
+	/**
+	 * @arg: args: [
+	 * 0: account,
+	 * 1: id,
+	 * ]
+	 */
+	"PSP34Burnable::burn" (
+		account: ArgumentsTypes[8],
+		id: ArgumentsTypes[1],
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< OkishReturns["41"] > >{
+		return queryOkJSON( this.__nativeContract, this.__callerAddress, "psp34Burnable::burn", [account, id], __options);
 	}
 
 }
