@@ -22,8 +22,7 @@ pub mod artzero_launchpad_psp34 {
         contracts::ownable::*,
         modifiers,
         traits::{
-            Storage,
-            ZERO_ADDRESS
+            Storage
         }
     };
     use artzero_project::{
@@ -73,13 +72,13 @@ pub mod artzero_launchpad_psp34 {
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
                 assert!(project_mint_fee_rate < 10000);
+                assert!(project_adding_fee > 0);
                 let caller = _instance.env().caller();
                 _instance._init_with_owner(caller);
                 _instance._init_with_admin(caller);
                 _instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
                 _instance.initialize(
                     max_phases_per_project,
-                    admin_address,
                     standard_nft_hash,
                     project_adding_fee,
                     project_mint_fee_rate,
@@ -93,16 +92,15 @@ pub mod artzero_launchpad_psp34 {
         pub fn initialize(
             &mut self,
             max_phases_per_project: u8,
-            admin_address: AccountId,
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
             project_mint_fee_rate: u32,
             public_max_minting_amount: u64
         ) -> Result<(), Error> {
-            if self.manager.admin_address != ZERO_ADDRESS.into(){
+            //Project Adding Fee will not be set to Zero to prevent spamming the contract
+            if self.manager.project_adding_fee > 0 {
                 return Err(Error::AlreadyInit);
             }
-            self.manager.admin_address = admin_address;
             self.manager.standard_nft_hash = standard_nft_hash;
             self.manager.project_count = 0;
             self.manager.active_project_count = 0;
@@ -209,16 +207,6 @@ pub mod artzero_launchpad_psp34 {
         /* END EXECUTE FUNCTION*/
 
         /* SETTERS */
-        /// Update admin address - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn update_admin_address(
-            &mut self,
-            admin_address: AccountId
-        ) -> Result<(), Error>  {
-            self.manager.admin_address = admin_address;
-            Ok(())
-        }
 
         /// Update project adding fee - Only Admin Role can change
         #[ink(message)]
@@ -226,7 +214,10 @@ pub mod artzero_launchpad_psp34 {
         pub fn update_project_adding_fee(
             &mut self,
             project_adding_fee: Balance
-        ) -> Result<(), AccessControlError> {
+        ) -> Result<(), Error> {
+            if project_adding_fee == 0 {
+                return Err(Error::InvalidFee);
+            }
             self.manager.project_adding_fee = project_adding_fee;
             Ok(())
         }
@@ -306,14 +297,6 @@ pub mod artzero_launchpad_psp34 {
             &self
         ) -> u64 {
             self.manager.active_project_count
-        }
-
-        /// Get admin address
-        #[ink(message)]
-        pub fn get_admin_address(
-            &self
-        ) -> AccountId {
-            self.manager.admin_address
         }
 
         /// Get project count

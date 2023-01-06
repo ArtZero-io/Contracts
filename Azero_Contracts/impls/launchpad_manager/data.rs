@@ -45,7 +45,6 @@ pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 #[derive(Default)]
 #[openbrush::upgradeable_storage(STORAGE_KEY)]
 pub struct Manager {
-    pub admin_address: AccountId,
     pub standard_nft_hash: Hash,
     pub project_count: u64,
     pub projects: Mapping<AccountId, Project>,
