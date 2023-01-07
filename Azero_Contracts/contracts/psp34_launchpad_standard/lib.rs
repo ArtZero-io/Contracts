@@ -107,7 +107,6 @@ pub mod launchpad_psp34_nft_standard {
     #[derive(Default)]
     #[openbrush::upgradeable_storage(STORAGE_KEY)]
     pub struct Manager {
-        pub admin_address: AccountId,
         pub total_supply: u64,
         pub last_phase_id: u8,
         pub whitelist_count: u64,
@@ -490,14 +489,6 @@ pub mod launchpad_psp34_nft_standard {
 
         }
 
-        /// Update admin address
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
-            self.manager.admin_address = admin_address;
-            Ok(())
-        }
-
         /// Deactive Phase - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
@@ -681,14 +672,6 @@ pub mod launchpad_psp34_nft_standard {
             &self
         ) -> u8 {
             self.manager.limit_phase_count
-        }
-
-        /// Get admin address
-        #[ink(message)]
-        pub fn get_admin_address(
-            &self
-        ) -> AccountId {
-            self.manager.admin_address
         }
 
         /// Get public minted count
