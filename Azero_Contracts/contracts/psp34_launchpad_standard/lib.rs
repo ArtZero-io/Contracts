@@ -408,6 +408,9 @@ pub mod launchpad_psp34_nft_standard {
                     .checked_div(10000)
                     .unwrap();
                 if project_mint_fee > 0 {
+                    if project_mint_fee > self.env().balance() {
+                        return Err(Error::NotEnoughBalance);
+                    }
                     assert!(self
                         .env()
                         .transfer(self.manager.launchpad_contract_address, project_mint_fee)
@@ -467,6 +470,9 @@ pub mod launchpad_psp34_nft_standard {
                     .checked_div(10000)
                     .unwrap();
                 if project_mint_fee > 0 {
+                    if project_mint_fee > self.env().balance() {
+                        return Err(Error::NotEnoughBalance);
+                    }
                     assert!(self
                         .env()
                         .transfer(self.manager.launchpad_contract_address, project_mint_fee)
