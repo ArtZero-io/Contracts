@@ -86,8 +86,7 @@ pub mod artzero_marketplace_psp34 {
         sale_tokens_ids: MultiMapping<(Option<AccountId>, Option<AccountId>), Id, SaleTokensIdsKey>,                 //(NFT Contract Address, Seller Address)
         sale_tokens_ids_last_index: Mapping<(Option<AccountId>, Option<AccountId>), u128, SaleTokensIdsLastIndexKeys>,
         hold_amount_bidders: Mapping<AccountId, Balance>,
-        hold_bidders_last_id: u64,
-        hold_bidders: Mapping<u64, AccountId>,
+        hold_bidders: MultiMapping<u8, AccountId>,
         bidders: Mapping<(AccountId, AccountId, Id), Vec<BidInformation>, BiddersKeys>, /* Contract Address, Seller Address, token ID) */
         listed_token_number_by_collection_address: Mapping<AccountId, u64>, /* Number Listed Token (Collection Contract Address) */
         total_volume: Balance,
@@ -224,7 +223,7 @@ pub mod artzero_marketplace_psp34 {
             self.manager.collection_contract_address = collection_contract_address;
             self.manager.staking_contract_address = staking_contract_address;
             self.manager.platform_fee = platform_fee;
-            self.manager.hold_bidders_last_id = 0;
+            
             // Set default discount rate for PMP Stakers.
             // >= 1 NFT - 30% off
             // >= 5 NFTs - 50% off
@@ -401,8 +400,7 @@ pub mod artzero_marketplace_psp34 {
                         self.manager.hold_amount_bidders.insert(&item.bidder, &hold_amount_bidder);
                     } else {
                         self.manager.hold_amount_bidders.insert(&item.bidder, &item.bid_value);
-                        self.manager.hold_bidders_last_id = self.manager.hold_bidders_last_id.checked_add(1).unwrap();
-                        self.manager.hold_bidders.insert(&self.manager.hold_bidders_last_id, &item.bidder);
+                        self.manager.hold_bidders.insert(&1, &item.bidder);
                     }
                 }
                 
@@ -517,8 +515,7 @@ pub mod artzero_marketplace_psp34 {
                         self.manager.hold_amount_bidders.insert(&item.bidder, &hold_amount_bidder);
                     } else {
                         self.manager.hold_amount_bidders.insert(&item.bidder, &item.bid_value);
-                        self.manager.hold_bidders_last_id = self.manager.hold_bidders_last_id.checked_add(1).unwrap();
-                        self.manager.hold_bidders.insert(&self.manager.hold_bidders_last_id, &item.bidder);
+                        self.manager.hold_bidders.insert(&1, &item.bidder);
                     }
                 }
                 
@@ -974,8 +971,7 @@ pub mod artzero_marketplace_psp34 {
                             self.manager.hold_amount_bidders.insert(&item.bidder, &hold_amount_bidder);
                         } else {
                             self.manager.hold_amount_bidders.insert(&item.bidder, &item.bid_value);
-                            self.manager.hold_bidders_last_id = self.manager.hold_bidders_last_id.checked_add(1).unwrap();
-                            self.manager.hold_bidders.insert(&self.manager.hold_bidders_last_id, &item.bidder);
+                            self.manager.hold_bidders.insert(&1, &item.bidder);
                         }
                     }
                 }
@@ -1059,48 +1055,14 @@ pub mod artzero_marketplace_psp34 {
             Ok(())
         }
 
-        /// Clear hold amount bidders
         #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn clear_hold_amount_bidders(&mut self) -> Result<(), Error> {
-            for hold_bidders_index in 1..=self.manager.hold_bidders_last_id {
-                if self.manager.hold_bidders.get(&hold_bidders_index).is_some() {
-                    let receiver = self.manager.hold_bidders.get(&hold_bidders_index).unwrap();
-                    if self.manager.hold_amount_bidders.get(&receiver).is_some() {
-                        let hold_amount = self.manager.hold_amount_bidders.get(&receiver).unwrap();
-                        if hold_amount > 0 {
-                            assert!(self.env().transfer(receiver, hold_amount).is_ok());
-                            self.manager.hold_amount_bidders.insert(&receiver, &0);
-                        }
-                        
-                    }
-                }
-            }
-            Ok(())
-        }
-
-        /// Clear hold amount bidder
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn clear_hold_amount_bidder(&mut self, bidder: AccountId) -> Result<(), Error> {
-            if self.manager.hold_amount_bidders.get(&bidder).is_some() {
-                let hold_amount = self.manager.hold_amount_bidders.get(&bidder).unwrap();
-                if hold_amount > 0 {
-                    assert!(self.env().transfer(bidder, hold_amount).is_ok());
-                    self.manager.hold_amount_bidders.insert(&bidder, &0);
-                }
-            }
-            Ok(())
-        }
-
-        #[ink(message)]
-        pub fn receive_hold_amount(&mut self) -> Result<(), Error> {
-            let receiver = self.env().caller();
+        pub fn receive_hold_amount(&mut self, receiver: AccountId) -> Result<(), Error> {
             if self.manager.hold_amount_bidders.get(&receiver).is_some() {
                 let hold_amount = self.manager.hold_amount_bidders.get(&receiver).unwrap();
                 if hold_amount > 0 {
                     assert!(self.env().transfer(receiver, hold_amount).is_ok());
-                    self.manager.hold_amount_bidders.insert(&receiver, &0);
+                    self.manager.hold_amount_bidders.remove(&receiver);
+                    self.manager.hold_bidders.remove_value(&1, &receiver);
                 }
             }
             Ok(())
@@ -1224,16 +1186,16 @@ pub mod artzero_marketplace_psp34 {
             self.manager.hold_amount_bidders.get(&bidder)
         }
 
-        /// Get hold bidders last id
+        /// Get Hold Bidders by Index
         #[ink(message)]
-        pub fn get_hold_bidders_last_id(&self) -> u64 {
-            self.manager.hold_bidders_last_id
+        pub fn get_hold_bidders_by_index(&self, index: u64) -> Option<AccountId> {
+            self.manager.hold_bidders.get_value(&1, &(index as u128))
         }
 
-         /// Get Hold Bidders
-         #[ink(message)]
-        pub fn get_hold_bidders(&self, index: u64) -> Option<AccountId> {
-            self.manager.hold_bidders.get(&index)
+        /// Get Hold Bidder Count
+        #[ink(message)]
+        pub fn get_hold_bidder_count(&self) -> u64 {
+            self.manager.hold_bidders.count(&1) as u64
         }
 
         /// Withdraw Profit - only Contract Owner.
