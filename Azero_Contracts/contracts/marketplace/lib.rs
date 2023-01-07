@@ -86,7 +86,7 @@ pub mod artzero_marketplace_psp34 {
         sale_tokens_ids: MultiMapping<(Option<AccountId>, Option<AccountId>), Id, SaleTokensIdsKey>,                 //(NFT Contract Address, Seller Address)
         sale_tokens_ids_last_index: Mapping<(Option<AccountId>, Option<AccountId>), u128, SaleTokensIdsLastIndexKeys>,
         hold_amount_bidders: Mapping<AccountId, Balance>,
-        hold_bidders: MultiMapping<u8, AccountId>,
+        hold_bidders: MultiMapping<u8, AccountId, ValueGuard<u8>>,
         bidders: Mapping<(AccountId, AccountId, Id), Vec<BidInformation>, BiddersKeys>, /* Contract Address, Seller Address, token ID) */
         listed_token_number_by_collection_address: Mapping<AccountId, u64>, /* Number Listed Token (Collection Contract Address) */
         total_volume: Balance,
