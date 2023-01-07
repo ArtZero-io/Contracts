@@ -264,6 +264,9 @@ pub mod artzero_staking_nft {
             if self.manager.claimable_reward >= reward {
                 // Send the reward to the staker
                 self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
+                if reward > self.env().balance() {
+                    return Err(Error::NotEnoughBalance)
+                }
                 if self.env().transfer(caller, reward).is_err(){
                     return Err(Error::CannotTransfer)
                 }
@@ -274,6 +277,9 @@ pub mod artzero_staking_nft {
                     staked_amount: staked_amount as u64,
                 });
             } else {
+                if self.manager.claimable_reward > self.env().balance() {
+                    return Err(Error::NotEnoughBalance)
+                }
                 // If there is not enough fund to pay, transfer everything in the pool to staker
                 if self.env().transfer(caller, self.manager.claimable_reward).is_err() {
                     return Err(Error::CannotTransfer)
