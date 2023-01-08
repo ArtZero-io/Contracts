@@ -203,7 +203,9 @@ pub mod launchpad_psp34_nft_standard {
             end_time_phases: Vec<Timestamp>
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
+                let caller = instance.env().caller();            
                 instance._init_with_owner(contract_owner);
+                access_control::Internal::_init_with_admin(instance, caller);
                 instance._init_with_admin(contract_owner);
                 instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
                 instance.manager.launchpad_contract_address = launchpad_contract_address;
@@ -215,7 +217,8 @@ pub mod launchpad_psp34_nft_standard {
                 instance.manager.public_minted_count = 0;
                 instance.manager.owner_claimed_amount = 0;
                 instance.manager.available_token_amount = total_supply;
-                if code_phases.len() == start_time_phases.len() &&
+                if code_phases.len() > 0 && 
+                    code_phases.len() == start_time_phases.len() &&
                     code_phases.len() == is_public_phases.len() &&
                     code_phases.len() == public_minting_fee_phases.len() &&
                     code_phases.len() == public_minting_amount_phases.len() &&
@@ -253,7 +256,6 @@ pub mod launchpad_psp34_nft_standard {
             assert!(self.has_role(ADMINER, self.env().caller()) || self.env().caller() == self.manager.launchpad_contract_address);
             assert!(self.manager.active_phase_count.checked_add(1).unwrap() <= self.manager.limit_phase_count);
             assert!(self.validate_phase_schedule(&start_time, &end_time));
-
             let byte_phase_code = phase_code.into_bytes();
             self.manager.last_phase_id = self.manager.last_phase_id.checked_add(1).unwrap();
             self.manager.active_phase_count = self.manager.active_phase_count.checked_add(1).unwrap();
