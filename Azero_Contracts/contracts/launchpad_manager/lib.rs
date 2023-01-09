@@ -71,12 +71,8 @@ pub mod artzero_launchpad_psp34 {
             public_max_minting_amount: u64
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
-                if project_mint_fee_rate >= 10000 {
-                    return Err(Error::InvalidInput);
-                }
-                if project_adding_fee == 0 {
-                    return Err(Error::InvalidInput);
-                }
+                assert!(project_mint_fee_rate < 10000);
+                assert!(project_adding_fee > 0);
                 let caller = _instance.env().caller();
                 _instance._init_with_owner(caller);
                 _instance._init_with_admin(caller);
@@ -87,7 +83,7 @@ pub mod artzero_launchpad_psp34 {
                     project_adding_fee,
                     project_mint_fee_rate,
                     public_max_minting_amount
-                ).ok().unwrap()
+                ).ok().unwrap();
             })
         }
 
@@ -273,7 +269,7 @@ pub mod artzero_launchpad_psp34 {
             &mut self,
             is_active: bool,
             contract_address: AccountId
-        ) -> Result<(), AccessControlError>  {
+        ) -> Result<(), Error>  {
             if self.manager.projects.get(&contract_address).is_none(){
                 return Err(Error::InvalidInput);
             }
