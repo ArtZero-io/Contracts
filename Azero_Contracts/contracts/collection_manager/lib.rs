@@ -76,16 +76,14 @@ pub mod artzero_collection_manager {
         ) -> Self {
             assert!(simple_mode_adding_fee > 0 && advance_mode_adding_fee > 0);
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                let caller = instance.env().caller();
-                instance._init_with_owner(caller);
-                instance._init_with_admin(caller);
-                instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
+                instance._init_with_owner(instance.env().caller());
                 instance
                     .initialize(
                         standard_nft_hash,
                         simple_mode_adding_fee,
                         advance_mode_adding_fee,
                         max_royalty_fee_rate,
+                        admin_address
                     )
                     .ok()
                     .unwrap();
@@ -100,6 +98,7 @@ pub mod artzero_collection_manager {
             simple_mode_adding_fee: Balance,
             advance_mode_adding_fee: Balance,
             max_royalty_fee_rate: u32,
+            admin_address: AccountId
         ) -> Result<(), Error> {
             //Fee will never set to Zero to prevent spamming the contract so can be used for checking
             if self.manager.simple_mode_adding_fee > 0 || self.manager.advance_mode_adding_fee > 0 {
@@ -111,6 +110,8 @@ pub mod artzero_collection_manager {
             self.manager.advance_mode_adding_fee = advance_mode_adding_fee;
             self.manager.standard_nft_hash = standard_nft_hash;
             self.manager.max_royalty_fee_rate = max_royalty_fee_rate;
+            self._init_with_admin(self.env().caller());
+            self.grant_role(ADMINER, admin_address).expect("Should grant the role");
             Ok(())
         }
 

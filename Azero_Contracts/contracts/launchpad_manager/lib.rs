@@ -73,16 +73,14 @@ pub mod artzero_launchpad_psp34 {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
                 assert!(project_mint_fee_rate < 10000);
                 assert!(project_adding_fee > 0);
-                let caller = _instance.env().caller();
-                _instance._init_with_owner(caller);
-                _instance._init_with_admin(caller);
-                _instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
+                _instance._init_with_owner(_instance.env().caller());
                 _instance.initialize(
                     max_phases_per_project,
                     standard_nft_hash,
                     project_adding_fee,
                     project_mint_fee_rate,
-                    public_max_minting_amount
+                    public_max_minting_amount,
+                    admin_address
                 ).ok().unwrap();
             })
         }
@@ -95,7 +93,8 @@ pub mod artzero_launchpad_psp34 {
             standard_nft_hash: Hash,
             project_adding_fee: Balance,
             project_mint_fee_rate: u32,
-            public_max_minting_amount: u64
+            public_max_minting_amount: u64,
+            admin_address: AccountId
         ) -> Result<(), Error> {
             //Project Adding Fee will not be set to Zero to prevent spamming the contract
             if self.manager.project_adding_fee > 0 {
@@ -108,6 +107,8 @@ pub mod artzero_launchpad_psp34 {
             self.manager.project_adding_fee = project_adding_fee;
             self.manager.project_mint_fee_rate = project_mint_fee_rate;
             self.manager.public_max_minting_amount = public_max_minting_amount;
+            self._init_with_admin(self.env().caller());
+            self.grant_role(ADMINER, admin_address).expect("Should grant the role");
             Ok(())
         }
 

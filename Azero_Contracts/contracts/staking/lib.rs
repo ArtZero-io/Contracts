@@ -112,10 +112,7 @@ pub mod artzero_staking_nft {
             limit_unstake_time: u64,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                let caller = instance.env().caller();
-                instance._init_with_owner(caller);
-                instance._init_with_admin(caller);
-                instance.grant_role(ADMINER, admin_address).expect("Should grant the role");
+                instance._init_with_owner(caller = instance.env().caller());
                 instance
                     .initialize(artzero_nft_contract, limit_unstake_time, admin_address)
                     .ok()
@@ -138,6 +135,8 @@ pub mod artzero_staking_nft {
             self.manager.limit_unstake_time = limit_unstake_time;
             self.manager.admin_address = admin_address;
             self.manager.is_locked = false;
+            self._init_with_admin(self.env().caller());
+            self.grant_role(ADMINER, admin_address).expect("Should grant the role");
             Ok(())
         }
 
