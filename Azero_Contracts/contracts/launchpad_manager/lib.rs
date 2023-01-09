@@ -71,8 +71,12 @@ pub mod artzero_launchpad_psp34 {
             public_max_minting_amount: u64
         ) -> Self {
             ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
-                assert!(project_mint_fee_rate < 10000);
-                assert!(project_adding_fee > 0);
+                if project_mint_fee_rate >= 10000 {
+                    return Err(Error::InvalidInput);
+                }
+                if project_adding_fee == 0 {
+                    return Err(Error::InvalidInput);
+                }
                 let caller = _instance.env().caller();
                 _instance._init_with_owner(caller);
                 _instance._init_with_admin(caller);
@@ -184,7 +188,7 @@ pub mod artzero_launchpad_psp34 {
             Ok(())
         }
 
-        /// Edit a project - Only Admin Role can change
+        /// Edit a project Start Time and End Time - Only Admin Role can change
         #[ink(message)]
         pub fn edit_project(
             &mut self,
@@ -192,12 +196,19 @@ pub mod artzero_launchpad_psp34 {
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
-            if self.manager.projects.get(&contract_address).is_none(){
+            if self.manager.projects.get(&contract_address).is_none() {
                 return Err(Error::ProjectNotExist);
             }
-            assert!(start_time < end_time);
+            if start_time >= end_time {
+                return Err(Error::InvalidTime);
+            }
             let mut project = self.manager.projects.get(&contract_address).unwrap();
-            assert!(self.has_role(ADMINER, self.env().caller()) && project.end_time > Self::env().block_timestamp());
+            if !self.has_role(ADMINER, self.env().caller()) {
+                return Err(Error::OnlyAdmin);
+            }
+            if project.end_time <= Self::env().block_timestamp() {
+                return Err(Error::InvalidTime);
+            }
             project.end_time = end_time;
             project.start_time = start_time;
             self.manager.projects.insert(&contract_address, &project);
@@ -263,9 +274,13 @@ pub mod artzero_launchpad_psp34 {
             is_active: bool,
             contract_address: AccountId
         ) -> Result<(), AccessControlError>  {
-            assert!(self.manager.projects.get(&contract_address).is_some());
+            if self.manager.projects.get(&contract_address).is_none(){
+                return Err(Error::InvalidInput);
+            }
             let mut project = self.manager.projects.get(&contract_address).unwrap();
-            assert!(is_active != project.is_active);
+            if is_active == project.is_active{
+                return Err(Error::InvalidInput);
+            }
             project.is_active = is_active;
 
             if is_active {
@@ -276,8 +291,6 @@ pub mod artzero_launchpad_psp34 {
             self.manager.projects.insert(&contract_address, &project);
             Ok(())
         }
-
-
 
         /* END SETTERS */
 
@@ -341,6 +354,15 @@ pub mod artzero_launchpad_psp34 {
         ) -> Option<Project> {
             Some(self.manager.projects.get(&nft_contract_address))?
         }
+
+        // Get project by id
+        #[ink(message)]
+        pub fn get_max_phases_per_project(
+            &self
+        ) -> u8 {
+            self.manager.max_phases_per_project
+        }
+
 
         /* END GETTERS*/
     }

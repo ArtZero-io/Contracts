@@ -203,10 +203,9 @@ pub mod launchpad_psp34_nft_standard {
             end_time_phases: Vec<Timestamp>
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                let caller = instance.env().caller();            
+                let caller = instance.env().caller();
                 instance._init_with_owner(contract_owner);
                 access_control::Internal::_init_with_admin(instance, caller);
-                instance._init_with_admin(contract_owner);
                 instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
                 instance.manager.launchpad_contract_address = launchpad_contract_address;
                 instance.manager.total_supply = total_supply;
@@ -217,7 +216,7 @@ pub mod launchpad_psp34_nft_standard {
                 instance.manager.public_minted_count = 0;
                 instance.manager.owner_claimed_amount = 0;
                 instance.manager.available_token_amount = total_supply;
-                if code_phases.len() > 0 && 
+                if code_phases.len() > 0 &&
                     code_phases.len() == start_time_phases.len() &&
                     code_phases.len() == is_public_phases.len() &&
                     code_phases.len() == public_minting_fee_phases.len() &&
