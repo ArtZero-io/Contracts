@@ -112,7 +112,7 @@ pub mod artzero_staking_nft {
             limit_unstake_time: u64,
         ) -> Self {
             ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._init_with_owner(caller = instance.env().caller());
+                instance._init_with_owner(instance.env().caller());
                 instance
                     .initialize(artzero_nft_contract, limit_unstake_time, admin_address)
                     .ok()
