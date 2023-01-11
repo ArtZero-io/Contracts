@@ -773,7 +773,7 @@ pub mod launchpad_psp34_nft_standard {
             phase_id: u8,
             account_index: u64
         ) -> AccountId {
-            self.manager.phase_account_link.get_value(phase_id, &(account_index as u128)).unwrap()
+            self.manager.phase_account_link.get_value(phase_id, &(account_index as u128)).unwrap_or_default()
         }
 
         /// Get current phase

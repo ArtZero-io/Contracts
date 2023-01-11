@@ -340,7 +340,7 @@ pub mod artzero_launchpad_psp34 {
             &self,
             owner_address: AccountId
         ) -> Vec<AccountId> {
-            self.manager.projects_by_owner.get(&owner_address).unwrap()
+            self.manager.projects_by_owner.get(&owner_address).unwrap_or_default()
         }
 
         /// Get project by NFT address

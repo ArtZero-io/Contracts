@@ -1137,11 +1137,11 @@ pub mod artzero_marketplace_psp34 {
             nft_contract_address: AccountId,
             user_account: AccountId,
             index: u128,
-        ) -> Id {
-            self.manager
+        ) -> Option<Id> {
+            Some(self.manager
                 .sale_tokens_ids
                 .get_value(&(&Some(&nft_contract_address), &Some(&user_account)), &index)
-                .unwrap()
+                .unwrap())
         }
 
         /// Get get total sale token ids of user account in a contract
