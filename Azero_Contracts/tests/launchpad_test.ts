@@ -197,8 +197,8 @@ api.on("ready", async () => {
   // await createLP_PSP34Contracts();
   // await createLPContracts();
 
-  // await generalInfo();
-  // await testCreateProject();
+  await generalInfo();
+  await testCreateProject();
 });
 
 api.on("error", (err) => {

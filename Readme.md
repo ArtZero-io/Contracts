@@ -1,34 +1,34 @@
 Code Hashes and Contract Addresses:
 
 # Proxy Contract Hash Code
-0x99ad5611a138f138b8d93b761a88fc613b9a5a81f64c6f9e0d88d120efdf11b1
+0x48e108bb86bf0f8a175bdfda8fca2cfba7818109eb4b9eb2429f629f8514b66a
 
 # Profile Contract
-0x4c58ada7f10f297657723545030e61f1f54acc9da67187dd240ee1b87fafda6b
-5CCL6cQK6PNfW12n5edkyN3RkMmpQ7EQoWBKtyRTtZinNtWp
+0x443be41163188d9619be0f70ee55d38bb31b83fb49ec46bf103cee1e3adbb7ae
+5HgU7daGv8RGptsBZbr5HQZRZekNajtYfTwYfwynLTWdxiLv
 
 # ArtZero NFT Staking Contract (PROXY)
-0x138fbdb374051261d2ad3e142054fdeffa61b022b27611d715a963734d930557
-5EUbfR22NYBVZzzfyu6Ejk6dwKtPB186RFuzfbgZyJB6e7n1
+0x5df2f28fdd161ac3a67798f6f85f2c76f5b1f4ae7bc7900fec60676842fd62b3
+5FUc1TGwQ2ja97nbnHgN6hoHiHmGa257JJBLTYaHxjxd45ed
 
 # Marketplace Contract (PROXY)
-0x9a35960c48dd6bcf460a63061bf43a213ea2409cd81e82e1367867e1e7667859
-5EZfvhudx5SCjcvpMCoPjph5bTmyTRj8VD98V1C6WT5qST58
+0x0fd6ab341e7f67702a8f44c11ca9e46b1816a449aef918ca4680c2b5d7077923
+5DZ77zL63Px9W2249z7qPfo9sipvn75ZtuxoR14L1crspYjG
 
 # LaunchPad Manager (PROXY)
-0x80146f15cca2ddf149fd47c3aeda9871d5a6dcebe9c4dc2fa311e246e047ffc1
-5G6PsbKCfFh1jBgtQG26vKXoaG3ZdmEjMtSgKA79pMfe44sY
+0xc7b31c720a0e8290f9fcc511fe09725f56f5dc76f7c0a9dfe438e2dc03d9c3c3
+5Fpg4nsq2YZDrAPHL4XcMKSJbq6ndygMKJLQ8PZ8uV91SZvV
 
 # Collection Manager (PROXY)
-0x4b39fd3b387908c96cdb1b8fc543074ef1b3b9ff79aba97f66da26076965d40d
-5F2QffMSC6V7tjXhJJvCk6vaBPZShLjjNPTB5AwQPPNATx5Y
+0x74684aaee538f3bb6fd7460270eea2b72a43213207d6966729afc2b0b00f3952
+5CrRtY6u5QhRXuTUeYmEcnny8ZojXB7eyqQWoqVcQBN1RKf5
 
 # Standard Contract
 # LaunchPad Standard Contract
-0xc855a97183b38f6316bc27430da0d3a519a7261a95064928831c0132f7d94e35
+0x66c5352ad353e258009186352e9b35a91b1e1e8d006a6711a87f2ebcd4c54248
 
 # NFT Standard Contract
-0x782af77975b6ab3e15796810adcd9559119a293fbf61fa9e9a83435adfcedfda
+0xcaad9aa5004361356acebcfa1a3b03ec6144aa52a359926a6fb88b3859a7fe8a
 
 Deploy Steps:
 1. Deploy Profile Contract
@@ -38,7 +38,7 @@ Deploy Steps:
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
 Add PMP Project -> create Collection -> Update base URI -> Update admin address
 Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-PMP Address : 5Hg1xe6JAGZj92wxtj1ykAfQpwwRNqzAnvhZ3TuXZEmLU1Vw
+PMP Address : 5DsTndtehokTZt2sP3EVRdEAGuKUD9rreGC483EXpyHkQNAL
 Owner: 5EfUESCp28GXw1v9CXmpAL5BfoCNW2y4skipcEoKAbN5Ykfn
 6. Deploy Staking Contract via Proxy
 With Address of PMP Project
