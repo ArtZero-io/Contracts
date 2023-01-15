@@ -206,6 +206,7 @@ pub mod launchpad_psp34_nft_standard {
                 let caller = instance.env().caller();
                 instance._init_with_owner(contract_owner);
                 access_control::Internal::_init_with_admin(instance, caller);
+                access_control::Internal::_init_with_admin(instance, contract_owner);
                 instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
                 instance.manager.launchpad_contract_address = launchpad_contract_address;
                 instance.manager.total_supply = total_supply;
