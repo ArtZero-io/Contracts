@@ -552,7 +552,7 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist);
             }
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            if phase.claimed_amount != 0 || self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() || phase.is_active{
+            if phase.claimed_amount != 0 || self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() || !phase.is_active{
                 return Err(Error::Custom(String::from("cannot deactivate phase")))
             }
             phase.is_active = false;
