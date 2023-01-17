@@ -3,7 +3,7 @@ import { KeyringPair } from '@polkadot/keyring/types'
 import { Keyring } from '@polkadot/keyring'
 import {WsProvider} from "@polkadot/api";
 
-export const provider = new WsProvider("wss://ws.test.azero.dev");
+export const provider = new WsProvider("wss://ws-smartnet.test.azero.dev");
 
 export const bnArg = (value: number | string | number[] | Uint8Array | Buffer | BN, len = 32) => {
   return new BN(value, undefined, 'le').toArray('le', len)
