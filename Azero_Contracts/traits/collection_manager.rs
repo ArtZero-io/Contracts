@@ -3,15 +3,12 @@ use openbrush::{
         AccountId,
     }
 };
-use ink_storage::{
-    traits::{
-        PackedLayout,
-        SpreadLayout,
-    },
-};
 
-#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode)]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+#[cfg(feature = "std")]
+use ink::storage::traits::StorageLayout;
+
+#[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode)]
+#[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
 pub enum CollectionType {
     Unknown         = 0,
     Psp34Manual     = 1,

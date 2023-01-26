@@ -5,10 +5,10 @@ use crate::{
     traits::admin::*,
 };
 use crate::traits::error::Error;
-use ink_prelude::{
+use ink::prelude::{
     vec::Vec,
 };
-use ink_env::CallFlags;
+use ink::env::CallFlags;
 use openbrush::{
     modifiers,
     traits::{

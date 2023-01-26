@@ -6,15 +6,15 @@
 #![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_launchpad_psp34 {
-    use ink_lang::ToAccountId;
-    use ink_prelude::{
+    use ink::ToAccountId;
+    use ink::{
         string::{
             String,
         },
         vec,
         vec::Vec,
     };
-    use ink_storage::{
+    use ink::{
         traits::SpreadAllocate
     };
     use openbrush::{
@@ -47,7 +47,7 @@ pub mod artzero_launchpad_psp34 {
         admin_data: artzero_project::impls::admin::data::Data,
     }
     // ADMINER RoleType = 3739740293
-    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+    const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
     impl AccessControl for ArtZeroLaunchPadPSP34 {}
     impl Ownable for ArtZeroLaunchPadPSP34 {}

@@ -5,7 +5,7 @@ use openbrush::{
     },
 };
 
-use ink_prelude::{
+use ink::prelude::{
     vec::Vec,
 };
 use openbrush::{

@@ -10,13 +10,11 @@ use openbrush::{
         Mapping
     }
 };
-use ink_storage::{
-    traits::{
-        PackedLayout,
-        SpreadLayout,
-    }
+use ink::prelude::{
+    vec::Vec,
 };
-use ink_prelude::vec::Vec;
+#[cfg(feature = "std")]
+use ink::storage::traits::StorageLayout;
 
 #[derive(
     Clone,
@@ -26,12 +24,10 @@ use ink_prelude::vec::Vec;
     Eq,
     PartialEq,
     Default,
-    PackedLayout,
-    SpreadLayout,
     scale::Encode,
     scale::Decode,
 )]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+#[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
 pub struct Project {
     pub is_active: bool,
     pub project_owner: AccountId,

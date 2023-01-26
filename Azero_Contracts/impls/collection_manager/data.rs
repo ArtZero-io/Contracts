@@ -1,12 +1,6 @@
 
-use ink_prelude::{
+use ink::prelude::{
     vec::Vec,
-};
-use ink_storage::{
-    traits::{
-        PackedLayout,
-        SpreadLayout,
-    },
 };
 use openbrush::{
     storage::{
@@ -15,16 +9,19 @@ use openbrush::{
     traits::{
         AccountId,
         Hash,
-        Balance
+        Balance,
+        String
     }
 };
-use ink_prelude::string::String;
 use crate::traits::collection_manager::CollectionType;
 
+#[cfg(feature = "std")]
+use ink::storage::traits::StorageLayout;
+
 #[derive(
-    Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode,
+    Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode,
 )]
-#[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+#[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
 pub struct Collection {
     pub collection_owner: AccountId,     // to receive Royalty Fee - OnlyAdmin can update
     pub nft_contract_address: AccountId, // OnlyAdmin can update
@@ -37,7 +34,7 @@ pub struct Collection {
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 #[openbrush::upgradeable_storage(STORAGE_KEY)]
 pub struct Manager {
     pub standard_nft_hash: Hash,

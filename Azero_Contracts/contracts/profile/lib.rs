@@ -6,18 +6,16 @@
 #[allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod profile_manager {
-    use ink_prelude::{
+    use ink::prelude::{
         string::{
             String,
         },
-        vec::Vec,
-    };
-    use ink_storage::{
-        traits::SpreadAllocate,
+        vec::Vec
     };
     use openbrush::{
         contracts::ownable::*,
         traits::{
+            DefaultEnv,
             Storage
         },
         storage::{
@@ -39,7 +37,7 @@ pub mod profile_manager {
         attributes: Mapping<(AccountId, Vec<u8>), Vec<u8>>
     }
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ProfileManager {
         #[storage_field]
@@ -54,10 +52,11 @@ pub mod profile_manager {
 
     impl ProfileManager {
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId) -> Self {
-            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._init_with_owner(contract_owner);
-            })
+        pub fn new() -> Self {
+            let mut instance = Self::default();
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(caller);
+            instance
         }
 
         /// Set multiple profile attributes

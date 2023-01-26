@@ -47,7 +47,7 @@ where
 }
 
 // ADMINER RoleType = 3739740293
-pub const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+pub const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
 impl<T: Storage<Manager>> ArtZeroStakingTrait for T {
     /// Get User NFT staked in the contract

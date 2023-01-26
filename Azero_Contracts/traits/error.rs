@@ -2,7 +2,7 @@ use openbrush::{
     contracts::ownable::*,
     contracts::access_control::*,
 };
-use ink_prelude::{
+use ink::prelude::{
     string::String,
 };
 

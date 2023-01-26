@@ -6,15 +6,15 @@
 #![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_collection_manager {
-    use ink_lang::ToAccountId;
-    use ink_prelude::{
+    use ink::ToAccountId;
+    use ink::{
         string::{
             String,
         },
         vec,
         vec::Vec,
     };
-    use ink_storage::{
+    use ink::{
         traits::SpreadAllocate
     };
     use openbrush::{
