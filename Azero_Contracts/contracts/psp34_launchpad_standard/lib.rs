@@ -10,14 +10,7 @@ pub use self::launchpad_psp34_nft_standard::{
 #[allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod launchpad_psp34_nft_standard {
-    use ink_storage::{
-        traits::{
-            PackedLayout,
-            SpreadAllocate,
-            SpreadLayout,
-        }
-    };
-    use ink_prelude::{
+    use ink::prelude::{
         string::{
             String,
         },
@@ -52,6 +45,9 @@ pub mod launchpad_psp34_nft_standard {
         }
     };
 
+    #[cfg(feature = "std")]
+    use ink::storage::traits::StorageLayout;
+
     #[derive(
         Copy,
         Clone,
@@ -61,12 +57,10 @@ pub mod launchpad_psp34_nft_standard {
         Eq,
         PartialEq,
         Default,
-        PackedLayout,
-        SpreadLayout,
         scale::Encode,
         scale::Decode,
     )]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
     pub struct Whitelist {
         whitelist_amount: u64,
         claimed_amount: u64,
@@ -81,12 +75,10 @@ pub mod launchpad_psp34_nft_standard {
         Eq,
         PartialEq,
         Default,
-        PackedLayout,
-        SpreadLayout,
         scale::Encode,
         scale::Decode,
     )]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
     pub struct Phase {
         is_active: bool,
         title: Vec<u8>,
@@ -136,7 +128,7 @@ pub mod launchpad_psp34_nft_standard {
         type Type = &'a (&'a AccountId, &'a u8);
     }
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
         #[storage_field]
@@ -155,7 +147,7 @@ pub mod launchpad_psp34_nft_standard {
         admin_data: artzero_project::impls::admin::data::Data,
     }
 
-    const ADMINER: RoleType = ink_lang::selector_id!("ADMINER");
+    const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
     impl Ownable for LaunchPadPsp34NftStandard {}
     impl PSP34 for LaunchPadPsp34NftStandard {}
@@ -202,43 +194,43 @@ pub mod launchpad_psp34_nft_standard {
             start_time_phases: Vec<Timestamp>,
             end_time_phases: Vec<Timestamp>
         ) -> Self {
-            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                let caller = instance.env().caller();
-                instance._init_with_owner(contract_owner);
-                access_control::Internal::_init_with_admin(instance, caller);
-                access_control::Internal::_init_with_admin(instance, contract_owner);
-                instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
-                instance.manager.launchpad_contract_address = launchpad_contract_address;
-                instance.manager.total_supply = total_supply;
-                instance.manager.last_phase_id = 0;
-                instance.manager.active_phase_count = 0;
-                instance.manager.project_info = project_info.into_bytes();
-                instance.manager.limit_phase_count = limit_phase_count;
-                instance.manager.public_minted_count = 0;
-                instance.manager.owner_claimed_amount = 0;
-                instance.manager.available_token_amount = total_supply;
-                if code_phases.len() > 0 &&
-                    code_phases.len() == start_time_phases.len() &&
-                    code_phases.len() == is_public_phases.len() &&
-                    code_phases.len() == public_minting_fee_phases.len() &&
-                    code_phases.len() == public_minting_amount_phases.len() &&
-                    code_phases.len() == public_max_minting_amount_phases.len() &&
-                    code_phases.len() == end_time_phases.len() &&
-                    code_phases.len() as u8 <= limit_phase_count {
-                    let phase_length = code_phases.len();
-                    for i in 0..phase_length {
-                        assert!(instance.add_new_phase(
-                            code_phases[i].clone(),
-                            is_public_phases[i],
-                            public_minting_fee_phases[i],
-                            public_minting_amount_phases[i],
-                            public_max_minting_amount_phases[i],
-                            start_time_phases[i],
-                            end_time_phases[i]
-                        ).is_ok());
-                    }
+            let mut instance = Self::default();
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(contract_owner);
+            access_control::Internal::_init_with_admin(&mut instance, caller);
+            access_control::Internal::_init_with_admin(&mut instance, contract_owner);
+            instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
+            instance.manager.launchpad_contract_address = launchpad_contract_address;
+            instance.manager.total_supply = total_supply;
+            instance.manager.last_phase_id = 0;
+            instance.manager.active_phase_count = 0;
+            instance.manager.project_info = project_info.into_bytes();
+            instance.manager.limit_phase_count = limit_phase_count;
+            instance.manager.public_minted_count = 0;
+            instance.manager.owner_claimed_amount = 0;
+            instance.manager.available_token_amount = total_supply;
+            if code_phases.len() > 0 &&
+                code_phases.len() == start_time_phases.len() &&
+                code_phases.len() == is_public_phases.len() &&
+                code_phases.len() == public_minting_fee_phases.len() &&
+                code_phases.len() == public_minting_amount_phases.len() &&
+                code_phases.len() == public_max_minting_amount_phases.len() &&
+                code_phases.len() == end_time_phases.len() &&
+                code_phases.len() as u8 <= limit_phase_count {
+                let phase_length = code_phases.len();
+                for i in 0..phase_length {
+                    assert!(instance.add_new_phase(
+                        code_phases[i].clone(),
+                        is_public_phases[i],
+                        public_minting_fee_phases[i],
+                        public_minting_amount_phases[i],
+                        public_max_minting_amount_phases[i],
+                        start_time_phases[i],
+                        end_time_phases[i]
+                    ).is_ok());
                 }
-            })
+            }
+            instance
         }
 
         ///Add new phare
