@@ -10,14 +10,11 @@ pub use self::psp34_nft::{
 #[allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod psp34_nft {
-    use ink_prelude::{
+    use ink::prelude::{
         string::{
             String,
         },
         vec::Vec,
-    };
-    use ink_storage::{
-        traits::SpreadAllocate,
     };
     use openbrush::{
         contracts::ownable::*,
@@ -40,7 +37,7 @@ pub mod psp34_nft {
         }
     };
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct Psp34Nft {
         #[storage_field]
@@ -85,11 +82,11 @@ pub mod psp34_nft {
     impl Psp34Nft {
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
-            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
-                instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
-                instance._init_with_owner(contract_owner);
-            })
+            let mut instance = Self::default();
+            instance._init_with_owner(contract_owner);
+            instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
+            instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
+            instance
         }
 
         /// This function let NFT Contract Owner to mint a new NFT without providing NFT Traits/Attributes
