@@ -7,22 +7,20 @@
 #[openbrush::contract]
 pub mod artzero_launchpad_psp34 {
     use ink::ToAccountId;
-    use ink::{
+    use ink::prelude::{
         string::{
             String,
         },
         vec,
         vec::Vec,
     };
-    use ink::{
-        traits::SpreadAllocate
-    };
     use openbrush::{
         contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
         traits::{
-            Storage
+            Storage,
+            DefaultEnv
         }
     };
     use artzero_project::{
@@ -34,7 +32,7 @@ pub mod artzero_launchpad_psp34 {
     };
     use launchpad_psp34_nft_standard::launchpad_psp34_nft_standard::LaunchPadPsp34NftStandardRef;
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ArtZeroLaunchPadPSP34 {
         #[storage_field]
@@ -70,19 +68,20 @@ pub mod artzero_launchpad_psp34 {
             project_mint_fee_rate: u32, //1% = 100
             public_max_minting_amount: u64
         ) -> Self {
-            ink_lang::codegen::initialize_contract(|_instance: &mut Self| {
-                assert!(project_mint_fee_rate < 10000);
-                assert!(project_adding_fee > 0);
-                _instance._init_with_owner(_instance.env().caller());
-                _instance.initialize(
-                    max_phases_per_project,
-                    standard_nft_hash,
-                    project_adding_fee,
-                    project_mint_fee_rate,
-                    public_max_minting_amount,
-                    admin_address
-                ).ok().unwrap();
-            })
+            assert!(project_mint_fee_rate < 10000);
+            assert!(project_adding_fee > 0);
+            let mut instance = Self::default();
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(caller);
+            instance.initialize(
+                max_phases_per_project,
+                standard_nft_hash,
+                project_adding_fee,
+                project_mint_fee_rate,
+                public_max_minting_amount,
+                admin_address
+            ).ok().unwrap();
+            instance
         }
 
         #[ink(message)]
@@ -136,7 +135,7 @@ pub mod artzero_launchpad_psp34 {
             }
             let project_owner = self.env().caller();
             let contract = LaunchPadPsp34NftStandardRef::new(
-                Self::env().account_id(),
+                <ArtZeroLaunchPadPSP34 as DefaultEnv>::env().account_id(),
                 self.manager.max_phases_per_project,
                 project_owner,
                 total_supply,
@@ -203,7 +202,7 @@ pub mod artzero_launchpad_psp34 {
             if !self.has_role(ADMINER, self.env().caller()) {
                 return Err(Error::OnlyAdmin);
             }
-            if project.end_time <= Self::env().block_timestamp() {
+            if project.end_time <= <ArtZeroLaunchPadPSP34 as DefaultEnv>::env().block_timestamp() {
                 return Err(Error::InvalidTime);
             }
             project.end_time = end_time;
