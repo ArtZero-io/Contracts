@@ -6,13 +6,10 @@
 #![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_staking_nft {
-    use ink_env::CallFlags;
-    use ink_prelude::{
+    use ink::env::CallFlags;
+    use ink::prelude::{
         string::String,
         vec::Vec,
-    };
-    use ink_storage::{
-        traits::SpreadAllocate
     };
     use openbrush::{
         contracts::{
@@ -27,6 +24,7 @@ pub mod artzero_staking_nft {
         },
         traits::{
             Storage,
+            DefaultEnv,
             ZERO_ADDRESS
         },
         modifiers,
@@ -48,7 +46,7 @@ pub mod artzero_staking_nft {
     impl ArtZeroStakingTrait for ArtZeroStakingNFT {}
     impl AdminTrait for ArtZeroStakingNFT {}
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ArtZeroStakingNFT {
         #[storage_field]
@@ -111,13 +109,14 @@ pub mod artzero_staking_nft {
             artzero_nft_contract: AccountId,
             limit_unstake_time: u64,
         ) -> Self {
-            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._init_with_owner(instance.env().caller());
-                instance
-                    .initialize(artzero_nft_contract, limit_unstake_time, admin_address)
-                    .ok()
-                    .unwrap();
-            })
+            let mut instance = Self::default();
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(caller);
+            instance
+                .initialize(artzero_nft_contract, limit_unstake_time, admin_address)
+                .ok()
+                .unwrap();
+            instance
         }
 
         #[ink(message)]
@@ -455,7 +454,7 @@ pub mod artzero_staking_nft {
                 // Step 3 - Remove token on staking_list
                 self.manager.staking_list.remove_value(caller, &item);
                 // Step 4 - Add token to pending unstaking list
-                let current_time = Self::env().block_timestamp();
+                let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
                 self.manager.request_unstaking_time.insert(&(&caller, &item), &current_time);
                 self.manager.pending_unstaking_list.insert(caller, &item);
                 self.env().emit_event(RequestUnstakeEvent {
@@ -539,7 +538,7 @@ pub mod artzero_staking_nft {
                 if request_unstake_time <= 0 {
                     return Err(Error::InvalidTime)
                 }
-                let current_time = Self::env().block_timestamp();
+                let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
 
                 if request_unstake_time + (self.manager.limit_unstake_time * 60000) > current_time {
                     return Err(Error::Custom(String::from("Not Enough Time Request Unstake")))
