@@ -7,21 +7,19 @@
 #[openbrush::contract]
 pub mod artzero_collection_manager {
     use ink::ToAccountId;
-    use ink::{
+    use ink::prelude::{
         string::{
             String,
         },
         vec,
         vec::Vec,
     };
-    use ink::{
-        traits::SpreadAllocate
-    };
     use openbrush::{
         contracts::access_control::*,
         contracts::ownable::*,
         modifiers,
         traits::{
+            DefaultEnv,
             Storage,
         }
     };
@@ -35,7 +33,7 @@ pub mod artzero_collection_manager {
     use psp34_nft::psp34_nft::Psp34NftRef;
     use artzero_project::traits::psp34_standard::*;
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ArtZeroCollectionManager {
         #[storage_field]
@@ -75,19 +73,20 @@ pub mod artzero_collection_manager {
             max_royalty_fee_rate: u32,
         ) -> Self {
             assert!(simple_mode_adding_fee > 0 && advance_mode_adding_fee > 0);
-            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                instance._init_with_owner(instance.env().caller());
-                instance
-                    .initialize(
-                        standard_nft_hash,
-                        simple_mode_adding_fee,
-                        advance_mode_adding_fee,
-                        max_royalty_fee_rate,
-                        admin_address
-                    )
-                    .ok()
-                    .unwrap();
-            })
+            let mut instance = Self::default();
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(caller);
+            instance
+                .initialize(
+                    standard_nft_hash,
+                    simple_mode_adding_fee,
+                    advance_mode_adding_fee,
+                    max_royalty_fee_rate,
+                    admin_address
+                )
+                .ok()
+                .unwrap();
+            instance
         }
 
         #[ink(message)]
@@ -316,9 +315,9 @@ pub mod artzero_collection_manager {
                     let value = values[i].clone();
                     if self.has_attribute(contract_address, attribute.clone()) {
                         let index = self.get_collection_attribute_index(contract_address, attribute.clone()).unwrap();
-                        collection_attributes[index as usize] = (attribute, value);
+                        collection_attributes[index as usize] = (attribute.into(), value.into());
                     } else {
-                        collection_attributes.push((attribute, value));
+                        collection_attributes.push((attribute.into(), value.into()));
                     }
                 }
                 self.manager.attributes.insert(&contract_address, &collection_attributes);
@@ -346,8 +345,8 @@ pub mod artzero_collection_manager {
             }
             let collection_attributes = self.manager.attributes.get(&contract_address).unwrap();
             for item in collection_attributes.iter().take(collection_attributes.len()) {
-                if item.0 == attribute_key {
-                    return item.1.clone();
+                if item.0 == attribute_key.clone().into_bytes() {
+                    return String::from_utf8(item.1.clone()).unwrap();
                 }
             }
             String::from("")
@@ -357,7 +356,7 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         pub fn has_attribute(&self, contract_address: AccountId, attribute_key: String) -> bool {
             if self.manager.attributes.get(&contract_address).is_some() {
-                return self.manager.attributes.get(&contract_address).unwrap().iter().any(|attribute| attribute.0 == attribute_key);
+                return self.manager.attributes.get(&contract_address).unwrap().iter().any(|attribute| attribute.0 == attribute_key.clone().into_bytes());
             }
             false
         }
@@ -365,7 +364,7 @@ pub mod artzero_collection_manager {
         /// Get attribute index of collection
         #[ink(message)]
         pub fn get_collection_attribute_index(&self, contract_address: AccountId, attribute_key: String) -> Option<u64> {
-            return Some(self.manager.attributes.get(&contract_address).unwrap().iter().position(|attribute| attribute.0 == attribute_key).unwrap() as u64);
+            return Some(self.manager.attributes.get(&contract_address).unwrap().iter().position(|attribute| attribute.0 == attribute_key.clone().into_bytes()).unwrap() as u64);
         }
 
         /// Count attributes of collection
