@@ -25,7 +25,24 @@ rustup component add rustfmt --toolchain nightly
 cargo +nightly fmt
 cargo clippy
 ```
-## Contract Deployment
+
+## Contract Build and Deploy Instructions
+
+Before building your smart contract on Aleph Zero, you will first need to install some development tools. The comprehensive guide can be found at:
+https://docs.alephzero.org/aleph-zero/build/installing-required-tools
+
+Go to the contract folder you want to build under **contracts** and run
+```
+cargo +nightly contract build
+```
+or if you want to build the release version
+```
+cargo +nightly contract build --release
+```
+After the contract is built successfully, You will see under target/ink 3 files: **contract_name.wasm contract_name.contract and metadata.json**. Follow this instruction to deploy the contract:
+https://docs.alephzero.org/aleph-zero/build/deploying-your-contract-to-aleph-zero-testnet
+
+## Contract Deployment Steps
 
 1. Deploy Profile Contract
 2. Deploy NFT Standard Contract
@@ -39,32 +56,33 @@ NFT Mainnet: To be updated
 With Address of PMP Project
 7. Deploy Marketplace Contract via Proxy
 
-## Public Guide to deploy customized NFT contract
+## Deploy customized NFT contract
 
 You can customize the **psp34_standard** contract to create your own version of NFT Contract. Please check this guide for more information
 https://medium.com/@artzero_io/how-to-create-nft-contract-on-azero-to-work-with-artzero-a14c8f17f90a
 
-## Code Hashes and Contract Addresses <TestNet>
+## Code Hashes and Contract Addresses for TestNet
 
 - Proxy Contract Hash Code
-
+**To be updated**
 - Profile Hash Code and Contract
-
+**To be updated**
 - ArtZero NFT Staking Hash Code and Contract
-
+**To be updated**
 - Marketplace Hash Code and Contract
-
+**To be updated**
 - LaunchPad Manager Hash Code and Contract
-
+**To be updated**
 - Collection Manager Hash Code and Contract
-
+**To be updated**
 - LaunchPad Standard Hash Code
-
+**To be updated**
 - NFT Standard Hash Code
+**To be updated**
 
-## Code Hashes and Contract Addresses <MainNet>
+## Code Hashes and Contract Addresses for MainNet
 
-To be updated
+**To be updated**
 
 ## Test
 
