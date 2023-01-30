@@ -1,53 +1,86 @@
-Code Hashes and Contract Addresses:
+# ArtZero Contracts Repo
 
-# Proxy Contract Hash Code
-0x48e108bb86bf0f8a175bdfda8fca2cfba7818109eb4b9eb2429f629f8514b66a
+## Introduction
 
-# Profile Contract
-0x443be41163188d9619be0f70ee55d38bb31b83fb49ec46bf103cee1e3adbb7ae
-5HgU7daGv8RGptsBZbr5HQZRZekNajtYfTwYfwynLTWdxiLv
+The ArtZero platform aims to be a decentralized NFT marketplace on the AlephZero blockchain. It aims to allow the users to list their NFT collections to be tradeable on the platform for a fee and to create their NFT collection via the ArtZero contracts. The users can create the collections as standard NFT collections or in an advanced mode, which also serves as a launchpad for such projects. The platform also comes with its native NFT Collection, which owners can stake for platform fees and other perks.
 
-# ArtZero NFT Staking Contract (PROXY)
-0x5df2f28fdd161ac3a67798f6f85f2c76f5b1f4ae7bc7900fec60676842fd62b3
-5GQZbtqkagF9pZFYCwx5hg9WmXYTsWpW4EAZiwDiCdpQQoSD
+## Contracts
 
-# Marketplace Contract (PROXY)
-0x0fd6ab341e7f67702a8f44c11ca9e46b1816a449aef918ca4680c2b5d7077923
-5GpE91q3a7qYoRdQuBcUBpJ1aEJpEkJ4yfWo2iCLE51ghsJ3
+The main implementation of ArtZero smart contracts are in /contracts folder and contains following contracts:
+- Collection Manager (audited)
+- LaunchPad Manager (audited)
+- Marketplace PSP34 (audited)
+- PMP Staking Contract (audited)
+- Standard Launchpad Contract (audited)
+- Standard NFT Contract (audited)
+- Proxy contract (clone from OpenBrush)
+- Profile Contract
+The traits and implemenation of traits locate in **impls** and **traits** folders.
 
-# LaunchPad Manager (PROXY)
-0xc7b31c720a0e8290f9fcc511fe09725f56f5dc76f7c0a9dfe438e2dc03d9c3c3
-5GwR3miDmYH1HUisnevmN3KBQdUA3Qug46E27wrU2sswHUXN
+## Code standard
 
-# Collection Manager (PROXY)
-0x74684aaee538f3bb6fd7460270eea2b72a43213207d6966729afc2b0b00f3952
-5GTZSrBCYJTFZQE6TjfCePq2XLxp37adLXTH2wCv5hBaYMBV
+ink! is an EDSL based on Rust; therefore, we use clippy and rustfmt to make sure code is in compliance with Rust idioms.
+```
+rustup component add rustfmt --toolchain nightly
+cargo +nightly fmt
+cargo clippy
+```
+## Contract Deployment
 
-# Standard Contract
-# LaunchPad Standard Contract
-0x8f97550ed3f75d55400b349449d8248a191b6be9316fd5621d20d2ce7450ae89
-
-# NFT Standard Contract
-0xcaad9aa5004361356acebcfa1a3b03ec6144aa52a359926a6fb88b3859a7fe8a
-
-Deploy Steps:
 1. Deploy Profile Contract
 2. Deploy NFT Standard Contract
 3. Deploy Collection Contract via Proxy
 4. Deploy LaunchPad Standard Contract
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
 Add PMP Project -> create Collection -> Update base URI -> Update admin address
-Pinana Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-PMP Address : 5G2G9PvqWMivKsXd9NfWjdyfdFHsgQSUzAacpkXhQGEZHnia
-Owner: 5EfUESCp28GXw1v9CXmpAL5BfoCNW2y4skipcEoKAbN5Ykfn
+NFT Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
+NFT Mainnet: To be updated
 6. Deploy Staking Contract via Proxy
 With Address of PMP Project
 7. Deploy Marketplace Contract via Proxy
 
-rustup component add rustfmt --toolchain nightly
-cargo +nightly fmt
+## Public Guide to deploy customized NFT contract
 
-# Unused 
-# ArtZero NFT Contract / Mint (PROXY)
-0x1958af8a820b5b6689a84fb4974a8a1bb7457eb7933933e51dc82a45fb198b18
-5EuozqMa5FEVt3FGFRRddUhZCpH7N5VDNvipNsTcFFRSN7Lp
+You can customize the **psp34_standard** contract to create your own version of NFT Contract. Please check this guide for more information
+https://medium.com/@artzero_io/how-to-create-nft-contract-on-azero-to-work-with-artzero-a14c8f17f90a
+
+## Code Hashes and Contract Addresses <TestNet>
+
+- Proxy Contract Hash Code
+
+- Profile Hash Code and Contract
+
+- ArtZero NFT Staking Hash Code and Contract
+
+- Marketplace Hash Code and Contract
+
+- LaunchPad Manager Hash Code and Contract
+
+- Collection Manager Hash Code and Contract
+
+- LaunchPad Standard Hash Code
+
+- NFT Standard Hash Code
+
+## Code Hashes and Contract Addresses <MainNet>
+
+To be updated
+
+## Test
+
+The general quick tests for contracts can be found in **tests* folder
+
+## Works are in Progress
+
+- Marketplace for PSP37 (ERC1155 equivalence)
+- Multichain support
+- NFT Staking (can be found in InkWhale project repo) https://github.com/InkWhale-net
+
+## Support
+
+If you need futher support from us, please contact us using:
+- Telegram: https://t.me/artzero_io
+- Discord: https://discord.gg/wzkZ2JTvN4
+- Twitter: https://twitter.com/ArtZero_io
+- Email: support@artzero.io
+or read our articles at https://medium.com/@artzero_io
