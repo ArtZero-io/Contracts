@@ -6,20 +6,13 @@
 #![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_marketplace_psp34 {
-    use ink_env::CallFlags;
-    use ink_prelude::{
+    use ink::env::CallFlags;
+    use ink::prelude::{
         vec,
         vec::Vec,
         string::{
             String,
         },
-    };
-    use ink_storage::{
-        traits::{
-            PackedLayout,
-            SpreadAllocate,
-            SpreadLayout,
-        }
     };
     use openbrush::{
         contracts::{
@@ -30,6 +23,7 @@ pub mod artzero_marketplace_psp34 {
         },
         traits::{
             Storage,
+            DefaultEnv,
             ZERO_ADDRESS
         },
         storage::{
@@ -53,10 +47,13 @@ pub mod artzero_marketplace_psp34 {
         }
     };
 
+    #[cfg(feature = "std")]
+    use ink::storage::traits::StorageLayout;
+
     #[derive(
-        Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode,
+        Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode,
     )]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
+    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
     pub struct ForSaleItem {
         nft_owner: AccountId,
         listed_date: u64,
@@ -66,7 +63,7 @@ pub mod artzero_marketplace_psp34 {
     }
 
     #[derive(
-        Clone, Debug, Ord, PartialOrd, Eq, PartialEq, PackedLayout, SpreadLayout, scale::Encode, scale::Decode,
+        Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode,
     )]
     #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
     pub struct BidInformation {
@@ -124,7 +121,7 @@ pub mod artzero_marketplace_psp34 {
         type Type = &'a (&'a AccountId, &'a AccountId, &'a Id);
     }
 
-    #[derive(Default, SpreadAllocate, Storage)]
+    #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ArtZeroMarketplacePSP34 {
         #[storage_field]
@@ -198,15 +195,15 @@ pub mod artzero_marketplace_psp34 {
             staking_contract_address: AccountId,
             platform_fee: u32,
         ) -> Self {
-            ink_lang::codegen::initialize_contract(|instance: &mut Self| {
-                assert!(platform_fee < 10000);
-                let caller = instance.env().caller();
-                instance._init_with_owner(caller);
-                instance
-                    .initialize(collection_contract_address, staking_contract_address, platform_fee)
-                    .ok()
-                    .unwrap();
-            })
+            assert!(platform_fee < 10000);
+            let mut instance = Self::default();
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(caller);
+            instance
+                .initialize(collection_contract_address, staking_contract_address, platform_fee)
+                .ok()
+                .unwrap();
+            instance
         }
 
         #[ink(message)]
