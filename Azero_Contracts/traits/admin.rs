@@ -28,4 +28,7 @@ pub trait AdminTrait {
     /// This function allow contract owner withdraw PSP22 to an account in case there is any token sent to contract by mistake
     #[ink(message)]
     fn tranfer_psp22(&mut self, psp22_contract_address: AccountId, amount: Balance, receiver: AccountId) -> Result<(), Error>;
+    /// This function allow contract owner oodifies the code which is used to execute calls to this contract address (`AccountId`).
+    #[ink(message)]
+    fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), Error>;
 }
