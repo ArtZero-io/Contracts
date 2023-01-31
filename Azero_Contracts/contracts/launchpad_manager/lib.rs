@@ -27,6 +27,7 @@ pub mod artzero_launchpad_psp34 {
         impls::launchpad_manager::*,
         traits::{
             admin::*,
+            upgradable::*,
             error::Error,
         }
     };
@@ -43,6 +44,8 @@ pub mod artzero_launchpad_psp34 {
         manager: artzero_project::impls::launchpad_manager::data::Manager,
         #[storage_field]
         admin_data: artzero_project::impls::admin::data::Data,
+        #[storage_field]
+        upgradable_data: artzero_project::impls::upgradable::data::Data,
     }
     // ADMINER RoleType = 3739740293
     const ADMINER: RoleType = ink::selector_id!("ADMINER");
@@ -51,7 +54,8 @@ pub mod artzero_launchpad_psp34 {
     impl Ownable for ArtZeroLaunchPadPSP34 {}
     impl ArtZeroLaunchPadTrait for ArtZeroLaunchPadPSP34 {}
     impl AdminTrait for ArtZeroLaunchPadPSP34 {}
-
+    impl UpgradableTrait for ArtZeroLaunchPadPSP34 {}
+    
     #[ink(event)]
     pub struct AddNewProjectEvent {
         project_id: u64,

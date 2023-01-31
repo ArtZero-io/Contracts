@@ -36,6 +36,7 @@ pub mod artzero_staking_nft {
         traits::{
             psp34_standard::*,
             admin::*,
+            upgradable::*,
             error::Error,
         },
 
@@ -45,7 +46,8 @@ pub mod artzero_staking_nft {
     impl Ownable for ArtZeroStakingNFT {}
     impl ArtZeroStakingTrait for ArtZeroStakingNFT {}
     impl AdminTrait for ArtZeroStakingNFT {}
-
+    impl UpgradableTrait for ArtZeroStakingNFT {}
+    
     #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ArtZeroStakingNFT {
@@ -57,6 +59,8 @@ pub mod artzero_staking_nft {
         manager: artzero_project::impls::staking::data::Manager,
         #[storage_field]
         admin_data: artzero_project::impls::admin::data::Data,
+        #[storage_field]
+        upgradable_data: artzero_project::impls::upgradable::data::Data,
     }
 
     #[ink(event)]

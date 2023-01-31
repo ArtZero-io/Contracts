@@ -25,6 +25,7 @@ pub mod profile_manager {
     use artzero_project::{
         traits::{
             admin::*,
+            upgradable::*,
             error::Error,
         }
     };
@@ -44,11 +45,14 @@ pub mod profile_manager {
         ownable: ownable::Data,
         #[storage_field]
         admin_data: artzero_project::impls::admin::data::Data,
+        #[storage_field]
+        upgradable_data: artzero_project::impls::upgradable::data::Data,
         manager: Manager,
     }
 
     impl Ownable for ProfileManager {}
     impl AdminTrait for ProfileManager {}
+    impl UpgradableTrait for ProfileManager {}
 
     impl ProfileManager {
         #[ink(constructor)]

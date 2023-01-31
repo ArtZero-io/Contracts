@@ -27,6 +27,7 @@ pub mod artzero_collection_manager {
         impls::collection_manager::*,
         traits::{
             admin::*,
+            upgradable::*,
             error::Error,
         }
     };
@@ -44,6 +45,8 @@ pub mod artzero_collection_manager {
         manager: artzero_project::impls::collection_manager::data::Manager,
         #[storage_field]
         admin_data: artzero_project::impls::admin::data::Data,
+        #[storage_field]
+        upgradable_data: artzero_project::impls::upgradable::data::Data,
     }
 
     #[ink(event)]
@@ -59,6 +62,7 @@ pub mod artzero_collection_manager {
     impl Ownable for ArtZeroCollectionManager {}
     impl ArtZeroCollectionTrait for ArtZeroCollectionManager {}
     impl AdminTrait for ArtZeroCollectionManager {}
+    impl UpgradableTrait for ArtZeroCollectionManager {}
 
     impl ArtZeroCollectionManager {
         /// Collection Contract Manager manages all collections on ArtZero platform. User can create in simple mode or in advanced mode

@@ -43,6 +43,7 @@ pub mod artzero_marketplace_psp34 {
             },
             psp34_standard::*,
             admin::*,
+            upgradable::*,
             error::Error,
         }
     };
@@ -128,12 +129,14 @@ pub mod artzero_marketplace_psp34 {
         ownable: ownable::Data,
         #[storage_field]
         admin_data: artzero_project::impls::admin::data::Data,
+        #[storage_field]
+        upgradable_data: artzero_project::impls::upgradable::data::Data,
         manager: Manager,
-
     }
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
     impl AdminTrait for ArtZeroMarketplacePSP34 {}
+    impl UpgradableTrait for ArtZeroMarketplacePSP34 {}
 
     #[ink(event)]
     pub struct NewListEvent {
