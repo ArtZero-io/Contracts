@@ -24,3 +24,4 @@ import Constructors from "./typed_contracts/constructors/psp34_nft";
 
 psp34_standand_test.ts
 collection_manager_test.ts
+launchpad_test.ts
