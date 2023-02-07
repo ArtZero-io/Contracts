@@ -141,7 +141,7 @@ pub mod artzero_collection_manager {
             }
 
             // Create PSP34 Standard Contract using cross call to psp34_standard contract
-            let contract = Psp34NftRef::new(nft_name, nft_symbol)
+            let contract = Psp34NftRef::new(collection_owner, nft_name, nft_symbol)
                 .endowment(0)
                 .code_hash(self.manager.standard_nft_hash)
                 .salt_bytes(self.manager.collection_count.to_le_bytes())

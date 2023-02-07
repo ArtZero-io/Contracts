@@ -196,9 +196,10 @@ pub mod launchpad_psp34_nft_standard {
         ) -> Self {
             let mut instance = Self::default();
             let caller = <Self as DefaultEnv>::env().caller();
-            instance._init_with_owner(caller);
+            instance._init_with_owner(contract_owner);
             access_control::Internal::_init_with_admin(&mut instance, caller);
-            instance.grant_role(ADMINER, caller).expect("Should grant the role");
+            access_control::Internal::_init_with_admin(&mut instance, contract_owner);
+            instance.grant_role(ADMINER, contract_owner).expect("Should grant the role");
             instance.manager.launchpad_contract_address = launchpad_contract_address;
             instance.manager.total_supply = total_supply;
             instance.manager.last_phase_id = 0;
