@@ -141,7 +141,6 @@ pub mod artzero_launchpad_psp34 {
             let contract = LaunchPadPsp34NftStandardRef::new(
                 <ArtZeroLaunchPadPSP34 as DefaultEnv>::env().account_id(),
                 self.manager.max_phases_per_project,
-                project_owner,
                 total_supply,
                 project_info,
                 code_phases,

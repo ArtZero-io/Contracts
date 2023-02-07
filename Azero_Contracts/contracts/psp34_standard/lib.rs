@@ -81,9 +81,10 @@ pub mod psp34_nft {
 
     impl Psp34Nft {
         #[ink(constructor)]
-        pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
+        pub fn new(name: String, symbol: String) -> Self {
             let mut instance = Self::default();
-            instance._init_with_owner(contract_owner);
+            let caller = <Self as DefaultEnv>::env().caller();
+            instance._init_with_owner(caller);
             instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
             instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
             instance
