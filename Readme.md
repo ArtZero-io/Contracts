@@ -46,15 +46,14 @@ https://docs.alephzero.org/aleph-zero/build/deploying-your-contract-to-aleph-zer
 
 1. Deploy Profile Contract
 2. Deploy NFT Standard Contract
-3. Deploy Collection Contract via Proxy
-4. Deploy LaunchPad Standard Contract
+3. Deploy Collection Contract
+4. Deploy LaunchPad Standard Contract using any launchpad_contract_address. The purpose is to get the Hash Code of the contract.
 5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
-Add PMP Project -> create Collection -> Update base URI -> Update admin address
-NFT Smartnet: ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/
-NFT Mainnet: To be updated
-6. Deploy Staking Contract via Proxy
-With Address of PMP Project
-7. Deploy Marketplace Contract via Proxy
+6. Add PMP Project -> create Collection -> Update base URI -> Update admin address
+NFT Smartnet: **ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/**
+NFT Mainnet: **To be updated**
+7. Deploy Staking Contract With Address of PMP Project
+8. Deploy Marketplace Contract with staking and collection manager contract addresses
 
 ## Deploy customized NFT contract
 
@@ -63,22 +62,25 @@ https://medium.com/@artzero_io/how-to-create-nft-contract-on-azero-to-work-with-
 
 ## Code Hashes and Contract Addresses for TestNet
 
-- Proxy Contract Hash Code
-**To be updated**
 - Profile Hash Code and Contract
-**To be updated**
+**0xd9e66c2e777c1705ba62e2e6e60027cab28b383e9a5d9b7bf6ebcca0d4337c35**
+**5FUXaNYkcdvwYurXXxzU4cdLsVFViE2xEbNnUZLBoi41axUx**
 - ArtZero NFT Staking Hash Code and Contract
-**To be updated**
+**0x0af3d8ee0d28afdc39f23128b634cbe61673e8a19c8ebb7c22817aade1c5d41d**
+**5DHfvGcjXoUb7e1am1cSxcZ4w9ErC3omNp6exk2AibMn75kt**
 - Marketplace Hash Code and Contract
-**To be updated**
+**0xeefdf4ee2b22e6e32895115a912015f5afc91bca34845d292f03fed0dd08c968**
+**5F8gyvsfuCqpvNywyRdUHy1EGvHG5GaUpVS64Tej6mAbwJ38**
 - LaunchPad Manager Hash Code and Contract
-**To be updated**
+**0x0837d0b95b94e620dc19103852bd83c4bd86eb34e9a5b00fd27210d969965007**
+**5D4rYbyX36woCv4ECwrp71rKRmixhy94xdR34YtwgmvaCpo3**
 - Collection Manager Hash Code and Contract
-**To be updated**
+**0xe2ad960fec296abb4a1e984b3e81f82f10e860cfc5d30320260a9921846b00bd**
+**5EeLsoPYu4QJnQR1YKqPgr5iEbfVhyVqdGMAAam7a8qyK4Ee**
 - LaunchPad Standard Hash Code
-**To be updated**
+**0x34a8a19142dfc443a3be1291b5730d59bae45ad7d70134a5e0b371b6977c40db**
 - NFT Standard Hash Code
-**To be updated**
+**0x24d21481b424ff012033c304de701f4016c5328788fbb62706d3477dea9b88a2**
 
 ## Code Hashes and Contract Addresses for MainNet
 
