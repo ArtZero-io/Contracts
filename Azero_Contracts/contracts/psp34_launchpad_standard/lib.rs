@@ -399,6 +399,9 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::PhaseNotExist)
             }
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
+            if !phase.is_active {
+                return Err(Error::PhaseDeactive);
+            }
             if mint_amount > phase.public_max_minting_amount {
                 return Err(Error::InvalidInput);
             }
@@ -470,9 +473,12 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(payable)]
         pub fn whitelist_mint(&mut self, phase_id: u8, mint_amount: u64) -> Result<(), Error> {
             if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist)
+                return Err(Error::PhaseNotExist);
             }
             let phase = self.manager.phases.get(&phase_id).unwrap();
+            if !phase.is_active {
+                return Err(Error::PhaseDeactive);
+            }
             let current_time = self.env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {
                 if phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.total_amount {
