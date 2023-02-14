@@ -400,7 +400,7 @@ pub mod launchpad_psp34_nft_standard {
             }
             let mut phase = self.manager.phases.get(&phase_id).unwrap();
             if !phase.is_active {
-                return Err(Error::PhaseDeactive);
+                return Err(Error::PhaseDeactivate);
             }
             if mint_amount > phase.public_max_minting_amount {
                 return Err(Error::InvalidInput);
@@ -477,7 +477,7 @@ pub mod launchpad_psp34_nft_standard {
             }
             let phase = self.manager.phases.get(&phase_id).unwrap();
             if !phase.is_active {
-                return Err(Error::PhaseDeactive);
+                return Err(Error::PhaseDeactivate);
             }
             let current_time = self.env().block_timestamp();
             if (phase.start_time..=phase.end_time).contains(&current_time) {

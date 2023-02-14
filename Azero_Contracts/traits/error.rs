@@ -38,7 +38,7 @@ pub enum Error {
     UpdatePhase,
     PhaseNotExist,
     PhaseExpired,
-    PhaseDeactive,
+    PhaseDeactivate,
     WhitelistNotExist,
     WithdrawFeeError,
     WithdrawNFTError,
