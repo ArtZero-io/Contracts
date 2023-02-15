@@ -1,751 +1,817 @@
 /* This file is auto-generated */
 
 import type { ContractPromise } from '@polkadot/api-contract';
-import type { ArgumentsTypes } from '../arguments/launchpad_psp34_nft_standard';
-import type { GasLimit, GasLimitAndRequiredValue } from '../_sdk/types';
-import { buildSubmittableExtrinsic } from '../_sdk/tx';
+import type { GasLimit, GasLimitAndRequiredValue } from '@727-ventures/typechain-types';
+import { buildSubmittableExtrinsic } from '@727-ventures/typechain-types';
+import type * as ArgumentTypes from '../types-arguments/launchpad_psp34_nft_standard';
+import type BN from 'bn.js';
+import type { ApiPromise } from '@polkadot/api';
+
 
 
 export default class Methods {
 	private __nativeContract : ContractPromise;
+	private __apiPromise: ApiPromise;
 
 	constructor(
 		nativeContract : ContractPromise,
+		apiPromise: ApiPromise,
 	) {
 		this.__nativeContract = nativeContract;
+		this.__apiPromise = apiPromise;
 	}
 	/**
-	 * @arg: args: [
-	 * 0: phaseCode,
-	 * 1: isPublic,
-	 * 2: publicMintingFee,
-	 * 3: publicMintingAmount,
-	 * 4: publicMaxMintingAmount,
-	 * 5: startTime,
-	 * 6: endTime,
-	 * ]
-	 */
-	"add_new_phase" (
-		phaseCode: ArgumentsTypes[55],
-		isPublic: ArgumentsTypes[43],
-		publicMintingFee: ArgumentsTypes[6],
-		publicMintingAmount: ArgumentsTypes[5],
-		publicMaxMintingAmount: ArgumentsTypes[5],
-		startTime: ArgumentsTypes[5],
-		endTime: ArgumentsTypes[5],
+	 * addNewPhase
+	 *
+	 * @param { string } phaseCode,
+	 * @param { boolean } isPublic,
+	 * @param { (string | number | BN) } publicMintingFee,
+	 * @param { (number | string | BN) } publicMintingAmount,
+	 * @param { (number | string | BN) } publicMaxMintingAmount,
+	 * @param { (number | string | BN) } startTime,
+	 * @param { (number | string | BN) } endTime,
+	*/
+	"addNewPhase" (
+		phaseCode: string,
+		isPublic: boolean,
+		publicMintingFee: (string | number | BN),
+		publicMintingAmount: (number | string | BN),
+		publicMaxMintingAmount: (number | string | BN),
+		startTime: (number | string | BN),
+		endTime: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "addNewPhase", [phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "addNewPhase", [phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: phaseId,
-	 * 2: whitelistAmount,
-	 * 3: whitelistPrice,
-	 * ]
-	 */
-	"update_whitelist" (
-		account: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
-		whitelistAmount: ArgumentsTypes[5],
-		whitelistPrice: ArgumentsTypes[6],
+	 * updateWhitelist
+	 *
+	 * @param { ArgumentTypes.AccountId } account,
+	 * @param { (number | string | BN) } phaseId,
+	 * @param { (number | string | BN) } whitelistAmount,
+	 * @param { (string | number | BN) } whitelistPrice,
+	*/
+	"updateWhitelist" (
+		account: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
+		whitelistAmount: (number | string | BN),
+		whitelistPrice: (string | number | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "updateWhitelist", [account, phaseId, whitelistAmount, whitelistPrice], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "updateWhitelist", [account, phaseId, whitelistAmount, whitelistPrice], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: phaseId,
-	 * 2: whitelistAmount,
-	 * 3: whitelistPrice,
-	 * ]
-	 */
-	"add_whitelist" (
-		account: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
-		whitelistAmount: ArgumentsTypes[5],
-		whitelistPrice: ArgumentsTypes[6],
+	 * addWhitelist
+	 *
+	 * @param { ArgumentTypes.AccountId } account,
+	 * @param { (number | string | BN) } phaseId,
+	 * @param { (number | string | BN) } whitelistAmount,
+	 * @param { (string | number | BN) } whitelistPrice,
+	*/
+	"addWhitelist" (
+		account: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
+		whitelistAmount: (number | string | BN),
+		whitelistPrice: (string | number | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "addWhitelist", [account, phaseId, whitelistAmount, whitelistPrice], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "addWhitelist", [account, phaseId, whitelistAmount, whitelistPrice], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: mintAmount,
-	 * ]
-	 */
+	 * mint
+	 *
+	 * @param { (number | string | BN) } mintAmount,
+	*/
 	"mint" (
-		mintAmount: ArgumentsTypes[5],
+		mintAmount: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "mint", [mintAmount], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "mint", [mintAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: mintAmount,
-	 * ]
-	 */
-	"public_mint" (
-		phaseId: ArgumentsTypes[2],
-		mintAmount: ArgumentsTypes[5],
+	 * publicMint
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	 * @param { (number | string | BN) } mintAmount,
+	*/
+	"publicMint" (
+		phaseId: (number | string | BN),
+		mintAmount: (number | string | BN),
 		__options: GasLimitAndRequiredValue,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "publicMint", [phaseId, mintAmount], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "publicMint", [phaseId, mintAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: mintAmount,
-	 * ]
-	 */
-	"whitelist_mint" (
-		phaseId: ArgumentsTypes[2],
-		mintAmount: ArgumentsTypes[5],
+	 * whitelistMint
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	 * @param { (number | string | BN) } mintAmount,
+	*/
+	"whitelistMint" (
+		phaseId: (number | string | BN),
+		mintAmount: (number | string | BN),
 		__options: GasLimitAndRequiredValue,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "whitelistMint", [phaseId, mintAmount], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "whitelistMint", [phaseId, mintAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * ]
-	 */
-	"deactive_phase" (
-		phaseId: ArgumentsTypes[2],
+	 * deactivePhase
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	*/
+	"deactivePhase" (
+		phaseId: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "deactivePhase", [phaseId], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "deactivePhase", [phaseId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: phaseCode,
-	 * 2: isPublic,
-	 * 3: publicMintingFee,
-	 * 4: publicMintingAmount,
-	 * 5: publicMaxMintingAmount,
-	 * 6: startTime,
-	 * 7: endTime,
-	 * ]
-	 */
-	"update_schedule_phase" (
-		phaseId: ArgumentsTypes[2],
-		phaseCode: ArgumentsTypes[55],
-		isPublic: ArgumentsTypes[43],
-		publicMintingFee: ArgumentsTypes[6],
-		publicMintingAmount: ArgumentsTypes[5],
-		publicMaxMintingAmount: ArgumentsTypes[5],
-		startTime: ArgumentsTypes[5],
-		endTime: ArgumentsTypes[5],
+	 * updateSchedulePhase
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	 * @param { string } phaseCode,
+	 * @param { boolean } isPublic,
+	 * @param { (string | number | BN) } publicMintingFee,
+	 * @param { (number | string | BN) } publicMintingAmount,
+	 * @param { (number | string | BN) } publicMaxMintingAmount,
+	 * @param { (number | string | BN) } startTime,
+	 * @param { (number | string | BN) } endTime,
+	*/
+	"updateSchedulePhase" (
+		phaseId: (number | string | BN),
+		phaseCode: string,
+		isPublic: boolean,
+		publicMintingFee: (string | number | BN),
+		publicMintingAmount: (number | string | BN),
+		publicMaxMintingAmount: (number | string | BN),
+		startTime: (number | string | BN),
+		endTime: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "updateSchedulePhase", [phaseId, phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "updateSchedulePhase", [phaseId, phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: idPhases,
-	 * 1: codePhases,
-	 * 2: isPublicPhases,
-	 * 3: publicMintingFeePhases,
-	 * 4: publicMintingAmountPhases,
-	 * 5: publicMaxMintingAmountPhases,
-	 * 6: startTimePhases,
-	 * 7: endTimePhases,
-	 * ]
-	 */
-	"update_schedule_phases" (
-		idPhases: ArgumentsTypes[7],
-		codePhases: ArgumentsTypes[56],
-		isPublicPhases: ArgumentsTypes[57],
-		publicMintingFeePhases: ArgumentsTypes[58],
-		publicMintingAmountPhases: ArgumentsTypes[59],
-		publicMaxMintingAmountPhases: ArgumentsTypes[59],
-		startTimePhases: ArgumentsTypes[59],
-		endTimePhases: ArgumentsTypes[59],
+	 * updateSchedulePhases
+	 *
+	 * @param { Array<(number | string | BN)> } idPhases,
+	 * @param { Array<string> } codePhases,
+	 * @param { Array<boolean> } isPublicPhases,
+	 * @param { Array<(string | number | BN)> } publicMintingFeePhases,
+	 * @param { Array<(number | string | BN)> } publicMintingAmountPhases,
+	 * @param { Array<(number | string | BN)> } publicMaxMintingAmountPhases,
+	 * @param { Array<(number | string | BN)> } startTimePhases,
+	 * @param { Array<(number | string | BN)> } endTimePhases,
+	*/
+	"updateSchedulePhases" (
+		idPhases: Array<(number | string | BN)>,
+		codePhases: Array<string>,
+		isPublicPhases: Array<boolean>,
+		publicMintingFeePhases: Array<(string | number | BN)>,
+		publicMintingAmountPhases: Array<(number | string | BN)>,
+		publicMaxMintingAmountPhases: Array<(number | string | BN)>,
+		startTimePhases: Array<(number | string | BN)>,
+		endTimePhases: Array<(number | string | BN)>,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "updateSchedulePhases", [idPhases, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "updateSchedulePhases", [idPhases, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: projectInfo,
-	 * ]
-	 */
-	"edit_project_information" (
-		projectInfo: ArgumentsTypes[55],
+	 * editProjectInformation
+	 *
+	 * @param { string } projectInfo,
+	*/
+	"editProjectInformation" (
+		projectInfo: string,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "editProjectInformation", [projectInfo], __options);
-	}
-
-	/** */
-	"get_owner_claimed_amount" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getOwnerClaimedAmount", [], __options);
-	}
-
-	/** */
-	"get_owner_available_amount" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getOwnerAvailableAmount", [], __options);
-	}
-
-	/** */
-	"get_limit_phase_count" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getLimitPhaseCount", [], __options);
-	}
-
-	/** */
-	"get_public_minted_count" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getPublicMintedCount", [], __options);
-	}
-
-	/** */
-	"get_project_info" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getProjectInfo", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "editProjectInformation", [projectInfo], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * ]
-	 */
-	"get_phase_schedule_by_id" (
-		phaseId: ArgumentsTypes[2],
+	 * getOwnerClaimedAmount
+	 *
+	*/
+	"getOwnerClaimedAmount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getPhaseScheduleById", [phaseId], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getOwnerClaimedAmount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: phaseId,
-	 * ]
-	 */
-	"get_whitelist_by_account_id" (
-		account: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
+	 * getOwnerAvailableAmount
+	 *
+	*/
+	"getOwnerAvailableAmount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getWhitelistByAccountId", [account, phaseId], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getOwnerAvailableAmount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: accountIndex,
-	 * ]
-	 */
-	"get_phase_account_link" (
-		phaseId: ArgumentsTypes[2],
-		accountIndex: ArgumentsTypes[5],
+	 * getLimitPhaseCount
+	 *
+	*/
+	"getLimitPhaseCount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getPhaseAccountLink", [phaseId, accountIndex], __options);
-	}
-
-	/** */
-	"get_current_phase" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getCurrentPhase", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getLimitPhaseCount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: time,
-	 * ]
-	 */
-	"is_in_schedule_phase" (
-		time: ArgumentsTypes[5],
+	 * getPublicMintedCount
+	 *
+	*/
+	"getPublicMintedCount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "isInSchedulePhase", [time], __options);
-	}
-
-	/** */
-	"get_whitelist_count" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getWhitelistCount", [], __options);
-	}
-
-	/** */
-	"get_last_phase_id" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getLastPhaseId", [], __options);
-	}
-
-	/** */
-	"get_active_phase_count" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getActivePhaseCount", [], __options);
-	}
-
-	/** */
-	"get_last_token_id" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getLastTokenId", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getPublicMintedCount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: accountId,
-	 * 1: phaseId,
-	 * ]
-	 */
-	"get_phase_account_public_claimed_amount" (
-		accountId: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
+	 * getProjectInfo
+	 *
+	*/
+	"getProjectInfo" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getPhaseAccountPublicClaimedAmount", [accountId, phaseId], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getProjectInfo", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * ]
-	 */
-	"get_phase_account_last_index" (
-		phaseId: ArgumentsTypes[2],
+	 * getPhaseScheduleById
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	*/
+	"getPhaseScheduleById" (
+		phaseId: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getPhaseAccountLastIndex", [phaseId], __options);
-	}
-
-	/** */
-	"get_total_supply" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getTotalSupply", [], __options);
-	}
-
-	/** */
-	"get_available_token_amount" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "getAvailableTokenAmount", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getPhaseScheduleById", [phaseId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: newOwner,
-	 * ]
-	 */
-	"Ownable::transfer_ownership" (
-		newOwner: ArgumentsTypes[8],
+	 * getWhitelistByAccountId
+	 *
+	 * @param { ArgumentTypes.AccountId } account,
+	 * @param { (number | string | BN) } phaseId,
+	*/
+	"getWhitelistByAccountId" (
+		account: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "ownable::transferOwnership", [newOwner], __options);
-	}
-
-	/** */
-	"Ownable::renounce_ownership" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "ownable::renounceOwnership", [], __options);
-	}
-
-	/** */
-	"Ownable::owner" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "ownable::owner", [], __options);
-	}
-
-	/** */
-	"PSP34::total_supply" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::totalSupply", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getWhitelistByAccountId", [account, phaseId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: operator,
-	 * 1: id,
-	 * 2: approved,
-	 * ]
-	 */
-	"PSP34::approve" (
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
-		approved: ArgumentsTypes[43],
+	 * getPhaseAccountLink
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	 * @param { (number | string | BN) } accountIndex,
+	*/
+	"getPhaseAccountLink" (
+		phaseId: (number | string | BN),
+		accountIndex: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::approve", [operator, id, approved], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getPhaseAccountLink", [phaseId, accountIndex], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: to,
-	 * 1: id,
-	 * 2: data,
-	 * ]
-	 */
-	"PSP34::transfer" (
-		to: ArgumentsTypes[8],
-		id: ArgumentsTypes[1],
-		data: ArgumentsTypes[7],
+	 * getCurrentPhase
+	 *
+	*/
+	"getCurrentPhase" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::transfer", [to, id, data], __options);
-	}
-
-	/** */
-	"PSP34::collection_id" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::collectionId", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getCurrentPhase", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * ]
-	 */
-	"PSP34::balance_of" (
-		owner: ArgumentsTypes[8],
+	 * isInSchedulePhase
+	 *
+	 * @param { (number | string | BN) } time,
+	*/
+	"isInSchedulePhase" (
+		time: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::balanceOf", [owner], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "isInSchedulePhase", [time], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"PSP34::owner_of" (
-		id: ArgumentsTypes[1],
+	 * getWhitelistCount
+	 *
+	*/
+	"getWhitelistCount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::ownerOf", [id], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getWhitelistCount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * 1: operator,
-	 * 2: id,
-	 * ]
-	 */
-	"PSP34::allowance" (
-		owner: ArgumentsTypes[8],
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
+	 * getLastPhaseId
+	 *
+	*/
+	"getLastPhaseId" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34::allowance", [owner, operator, id], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getLastPhaseId", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * 1: key,
-	 * ]
-	 */
-	"PSP34Metadata::get_attribute" (
-		id: ArgumentsTypes[1],
-		key: ArgumentsTypes[7],
+	 * getActivePhaseCount
+	 *
+	*/
+	"getActivePhaseCount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Metadata::getAttribute", [id, key], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getActivePhaseCount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * 1: index,
-	 * ]
-	 */
-	"PSP34Enumerable::owners_token_by_index" (
-		owner: ArgumentsTypes[8],
-		index: ArgumentsTypes[6],
+	 * getLastTokenId
+	 *
+	*/
+	"getLastTokenId" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Enumerable::ownersTokenByIndex", [owner, index], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getLastTokenId", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"PSP34Enumerable::token_by_index" (
-		index: ArgumentsTypes[6],
+	 * getPhaseAccountPublicClaimedAmount
+	 *
+	 * @param { ArgumentTypes.AccountId } accountId,
+	 * @param { (number | string | BN) } phaseId,
+	*/
+	"getPhaseAccountPublicClaimedAmount" (
+		accountId: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Enumerable::tokenByIndex", [index], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getPhaseAccountPublicClaimedAmount", [accountId, phaseId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: uri,
-	 * ]
-	 */
-	"Psp34Traits::set_base_uri" (
-		uri: ArgumentsTypes[55],
+	 * getPhaseAccountLastIndex
+	 *
+	 * @param { (number | string | BN) } phaseId,
+	*/
+	"getPhaseAccountLastIndex" (
+		phaseId: (number | string | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::setBaseUri", [uri], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_locked_token_count" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::getLockedTokenCount", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getPhaseAccountLastIndex", [phaseId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"Psp34Traits::get_attribute_name" (
-		index: ArgumentsTypes[4],
+	 * getTotalSupply
+	 *
+	*/
+	"getTotalSupply" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::getAttributeName", [index], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_owner" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::getOwner", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getTotalSupply", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: attributes,
-	 * ]
-	 */
-	"Psp34Traits::get_attributes" (
-		tokenId: ArgumentsTypes[1],
-		attributes: ArgumentsTypes[56],
+	 * getAvailableTokenAmount
+	 *
+	*/
+	"getAvailableTokenAmount" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::getAttributes", [tokenId, attributes], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "getAvailableTokenAmount", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: metadata,
-	 * ]
-	 */
-	"Psp34Traits::set_multiple_attributes" (
-		tokenId: ArgumentsTypes[1],
-		metadata: ArgumentsTypes[74],
+	 * owner
+	 *
+	*/
+	"owner" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::setMultipleAttributes", [tokenId, metadata], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "ownable::owner", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::token_uri" (
-		tokenId: ArgumentsTypes[5],
+	 * renounceOwnership
+	 *
+	*/
+	"renounceOwnership" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::tokenUri", [tokenId], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "ownable::renounceOwnership", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::is_locked_nft" (
-		tokenId: ArgumentsTypes[1],
+	 * transferOwnership
+	 *
+	 * @param { ArgumentTypes.AccountId } newOwner,
+	*/
+	"transferOwnership" (
+		newOwner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::isLockedNft", [tokenId], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_attribute_count" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::getAttributeCount", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "ownable::transferOwnership", [newOwner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::lock" (
-		tokenId: ArgumentsTypes[1],
+	 * balanceOf
+	 *
+	 * @param { ArgumentTypes.AccountId } owner,
+	*/
+	"balanceOf" (
+		owner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::lock", [tokenId], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_last_token_id" (
-		__options: GasLimit,
-	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Traits::getLastTokenId", [], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::balanceOf", [owner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::grant_role" (
-		role: ArgumentsTypes[4],
-		account: ArgumentsTypes[8],
+	 * totalSupply
+	 *
+	*/
+	"totalSupply" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "accessControl::grantRole", [role, account], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::totalSupply", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: address,
-	 * ]
-	 */
-	"AccessControl::has_role" (
-		role: ArgumentsTypes[4],
-		address: ArgumentsTypes[8],
+	 * allowance
+	 *
+	 * @param { ArgumentTypes.AccountId } owner,
+	 * @param { ArgumentTypes.AccountId } operator,
+	 * @param { ArgumentTypes.Id | null } id,
+	*/
+	"allowance" (
+		owner: ArgumentTypes.AccountId,
+		operator: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id | null,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "accessControl::hasRole", [role, address], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::allowance", [owner, operator, id], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * ]
-	 */
-	"AccessControl::get_role_admin" (
-		role: ArgumentsTypes[4],
+	 * approve
+	 *
+	 * @param { ArgumentTypes.AccountId } operator,
+	 * @param { ArgumentTypes.Id | null } id,
+	 * @param { boolean } approved,
+	*/
+	"approve" (
+		operator: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id | null,
+		approved: boolean,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "accessControl::getRoleAdmin", [role], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::approve", [operator, id, approved], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::revoke_role" (
-		role: ArgumentsTypes[4],
-		account: ArgumentsTypes[8],
+	 * collectionId
+	 *
+	*/
+	"collectionId" (
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "accessControl::revokeRole", [role, account], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::collectionId", [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::renounce_role" (
-		role: ArgumentsTypes[4],
-		account: ArgumentsTypes[8],
+	 * transfer
+	 *
+	 * @param { ArgumentTypes.AccountId } to,
+	 * @param { ArgumentTypes.Id } id,
+	 * @param { Array<(number | string | BN)> } data,
+	*/
+	"transfer" (
+		to: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id,
+		data: Array<(number | string | BN)>,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "accessControl::renounceRole", [role, account], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::transfer", [to, id, data], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[8],
-		tokenId: ArgumentsTypes[1],
-		receiver: ArgumentsTypes[8],
+	 * ownerOf
+	 *
+	 * @param { ArgumentTypes.Id } id,
+	*/
+	"ownerOf" (
+		id: ArgumentTypes.Id,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34::ownerOf", [id], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
-	 * ]
-	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[6],
-		receiver: ArgumentsTypes[8],
+	 * getAttribute
+	 *
+	 * @param { ArgumentTypes.Id } id,
+	 * @param { Array<(number | string | BN)> } key,
+	*/
+	"getAttribute" (
+		id: ArgumentTypes.Id,
+		key: Array<(number | string | BN)>,
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "adminTrait::withdrawFee", [value, receiver], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Metadata::getAttribute", [id, key], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: psp22ContractAddress,
-	 * 1: amount,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_psp22" (
-		psp22ContractAddress: ArgumentsTypes[8],
-		amount: ArgumentsTypes[6],
-		receiver: ArgumentsTypes[8],
+	 * tokenByIndex
+	 *
+	 * @param { (string | number | BN) } index,
+	*/
+	"tokenByIndex" (
+		index: (string | number | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Enumerable::tokenByIndex", [index], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: id,
-	 * ]
-	 */
-	"PSP34Burnable::burn" (
-		account: ArgumentsTypes[8],
-		id: ArgumentsTypes[1],
+	 * ownersTokenByIndex
+	 *
+	 * @param { ArgumentTypes.AccountId } owner,
+	 * @param { (string | number | BN) } index,
+	*/
+	"ownersTokenByIndex" (
+		owner: ArgumentTypes.AccountId,
+		index: (string | number | BN),
 		__options: GasLimit,
 	){
-		return buildSubmittableExtrinsic( this.__nativeContract, "psp34Burnable::burn", [account, id], __options);
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Enumerable::ownersTokenByIndex", [owner, index], __options);
+	}
+
+	/**
+	 * getAttributeCount
+	 *
+	*/
+	"getAttributeCount" (
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::getAttributeCount", [], __options);
+	}
+
+	/**
+	 * lock
+	 *
+	 * @param { ArgumentTypes.Id } tokenId,
+	*/
+	"lock" (
+		tokenId: ArgumentTypes.Id,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::lock", [tokenId], __options);
+	}
+
+	/**
+	 * getLockedTokenCount
+	 *
+	*/
+	"getLockedTokenCount" (
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::getLockedTokenCount", [], __options);
+	}
+
+	/**
+	 * psp34Traits::getLastTokenId
+	 *
+	*/
+	"psp34Traits::getLastTokenId" (
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::getLastTokenId", [], __options);
+	}
+
+	/**
+	 * isLockedNft
+	 *
+	 * @param { ArgumentTypes.Id } tokenId,
+	*/
+	"isLockedNft" (
+		tokenId: ArgumentTypes.Id,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::isLockedNft", [tokenId], __options);
+	}
+
+	/**
+	 * getAttributes
+	 *
+	 * @param { ArgumentTypes.Id } tokenId,
+	 * @param { Array<string> } attributes,
+	*/
+	"getAttributes" (
+		tokenId: ArgumentTypes.Id,
+		attributes: Array<string>,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::getAttributes", [tokenId, attributes], __options);
+	}
+
+	/**
+	 * getOwner
+	 *
+	*/
+	"getOwner" (
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::getOwner", [], __options);
+	}
+
+	/**
+	 * getAttributeName
+	 *
+	 * @param { (number | string | BN) } index,
+	*/
+	"getAttributeName" (
+		index: (number | string | BN),
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::getAttributeName", [index], __options);
+	}
+
+	/**
+	 * tokenUri
+	 *
+	 * @param { (number | string | BN) } tokenId,
+	*/
+	"tokenUri" (
+		tokenId: (number | string | BN),
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::tokenUri", [tokenId], __options);
+	}
+
+	/**
+	 * setBaseUri
+	 *
+	 * @param { string } uri,
+	*/
+	"setBaseUri" (
+		uri: string,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::setBaseUri", [uri], __options);
+	}
+
+	/**
+	 * setMultipleAttributes
+	 *
+	 * @param { ArgumentTypes.Id } tokenId,
+	 * @param { Array<[string, string]> } metadata,
+	*/
+	"setMultipleAttributes" (
+		tokenId: ArgumentTypes.Id,
+		metadata: Array<[string, string]>,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Traits::setMultipleAttributes", [tokenId, metadata], __options);
+	}
+
+	/**
+	 * revokeRole
+	 *
+	 * @param { (number | string | BN) } role,
+	 * @param { ArgumentTypes.AccountId } account,
+	*/
+	"revokeRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "accessControl::revokeRole", [role, account], __options);
+	}
+
+	/**
+	 * grantRole
+	 *
+	 * @param { (number | string | BN) } role,
+	 * @param { ArgumentTypes.AccountId } account,
+	*/
+	"grantRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "accessControl::grantRole", [role, account], __options);
+	}
+
+	/**
+	 * getRoleAdmin
+	 *
+	 * @param { (number | string | BN) } role,
+	*/
+	"getRoleAdmin" (
+		role: (number | string | BN),
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "accessControl::getRoleAdmin", [role], __options);
+	}
+
+	/**
+	 * hasRole
+	 *
+	 * @param { (number | string | BN) } role,
+	 * @param { ArgumentTypes.AccountId } address,
+	*/
+	"hasRole" (
+		role: (number | string | BN),
+		address: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "accessControl::hasRole", [role, address], __options);
+	}
+
+	/**
+	 * renounceRole
+	 *
+	 * @param { (number | string | BN) } role,
+	 * @param { ArgumentTypes.AccountId } account,
+	*/
+	"renounceRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "accessControl::renounceRole", [role, account], __options);
+	}
+
+	/**
+	 * tranferNft
+	 *
+	 * @param { ArgumentTypes.AccountId } nftContractAddress,
+	 * @param { ArgumentTypes.Id } tokenId,
+	 * @param { ArgumentTypes.AccountId } receiver,
+	*/
+	"tranferNft" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		tokenId: ArgumentTypes.Id,
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+	}
+
+	/**
+	 * tranferPsp22
+	 *
+	 * @param { ArgumentTypes.AccountId } psp22ContractAddress,
+	 * @param { (string | number | BN) } amount,
+	 * @param { ArgumentTypes.AccountId } receiver,
+	*/
+	"tranferPsp22" (
+		psp22ContractAddress: ArgumentTypes.AccountId,
+		amount: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+	}
+
+	/**
+	 * withdrawFee
+	 *
+	 * @param { (string | number | BN) } value,
+	 * @param { ArgumentTypes.AccountId } receiver,
+	*/
+	"withdrawFee" (
+		value: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "adminTrait::withdrawFee", [value, receiver], __options);
+	}
+
+	/**
+	 * burn
+	 *
+	 * @param { ArgumentTypes.AccountId } account,
+	 * @param { ArgumentTypes.Id } id,
+	*/
+	"burn" (
+		account: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id,
+		__options: GasLimit,
+	){
+		return buildSubmittableExtrinsic( this.__apiPromise, this.__nativeContract, "psp34Burnable::burn", [account, id], __options);
 	}
 
 }

@@ -3,12 +3,19 @@
 import type { ContractPromise } from '@polkadot/api-contract';
 import type { ApiPromise } from '@polkadot/api';
 import type { KeyringPair } from '@polkadot/keyring/types';
-import type { ArgumentsTypes } from '../arguments/psp34_nft';
-import type OkishReturns from '../return-values/psp34_nft';
-import type { GasLimit, GasLimitAndRequiredValue } from '../_sdk/types';
-import type { QueryReturnType } from '../_sdk/query';
-import { queryJSON } from '../_sdk/query';
-import { txSignAndSend } from '../_sdk/tx';
+import type { GasLimit, GasLimitAndRequiredValue, Result } from '@727-ventures/typechain-types';
+import type { QueryReturnType } from '@727-ventures/typechain-types';
+import { queryOkJSON, queryJSON, handleReturnType } from '@727-ventures/typechain-types';
+import { txSignAndSend } from '@727-ventures/typechain-types';
+import type * as ArgumentTypes from '../types-arguments/psp34_nft';
+import type * as ReturnTypes from '../types-returns/psp34_nft';
+import type BN from 'bn.js';
+//@ts-ignore
+import {ReturnNumber} from '@727-ventures/typechain-types';
+import {getTypeDescription} from './../shared/utils';
+// @ts-ignore
+import type {EventRecord} from "@polkadot/api/submittable";
+import {decodeEvents} from "../shared/utils";
 
 
 export default class Methods {
@@ -28,351 +35,434 @@ export default class Methods {
 		this.__callerAddress = keyringPair.address;
 	}
 
-	/** */
+	/**
+	* mint
+	*
+	* @returns { void }
+	*/
 	"mint" (
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "mint", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "mint", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: metadata,
-	 * ]
-	 */
-	"mint_with_attributes" (
-		metadata: ArgumentsTypes[38],
+	* mintWithAttributes
+	*
+	* @param { Array<[string, string]> } metadata,
+	* @returns { void }
+	*/
+	"mintWithAttributes" (
+		metadata: Array<[string, string]>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "mintWithAttributes", [metadata], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "mintWithAttributes", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [metadata], __options);
 	}
 
-	/** */
-	"Ownable::renounce_ownership" (
+	/**
+	* transferOwnership
+	*
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { void }
+	*/
+	"transferOwnership" (
+		newOwner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [newOwner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: newOwner,
-	 * ]
-	 */
-	"Ownable::transfer_ownership" (
-		newOwner: ArgumentsTypes[8],
+	* owner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"owner" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options, (result) => { return handleReturnType(result, getTypeDescription(22, 'psp34_nft')); });
+	}
+
+	/**
+	* renounceOwnership
+	*
+	* @returns { void }
+	*/
+	"renounceOwnership" (
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", [newOwner], __options);
-	}
-
-	/** */
-	"Ownable::owner" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["8"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"PSP34::owner_of" (
-		id: ArgumentsTypes[1],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["19"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::ownerOf", [id], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * 1: operator,
-	 * 2: id,
-	 * ]
-	 */
-	"PSP34::allowance" (
-		owner: ArgumentsTypes[8],
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["30"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::allowance", [owner, operator, id], __options);
-	}
-
-	/** */
-	"PSP34::collection_id" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["1"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::collectionId", [], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: to,
-	 * 1: id,
-	 * 2: data,
-	 * ]
-	 */
-	"PSP34::transfer" (
-		to: ArgumentsTypes[8],
-		id: ArgumentsTypes[1],
-		data: ArgumentsTypes[7],
+	* approve
+	*
+	* @param { ArgumentTypes.AccountId } operator,
+	* @param { ArgumentTypes.Id | null } id,
+	* @param { boolean } approved,
+	* @returns { void }
+	*/
+	"approve" (
+		operator: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id | null,
+		approved: boolean,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::transfer", [to, id, data], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::approve", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [operator, id, approved], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * ]
-	 */
-	"PSP34::balance_of" (
-		owner: ArgumentsTypes[8],
+	* totalSupply
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"totalSupply" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::balanceOf", [owner], __options);
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::totalSupply", [], __options, (result) => { return handleReturnType(result, getTypeDescription(28, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: operator,
-	 * 1: id,
-	 * 2: approved,
-	 * ]
-	 */
-	"PSP34::approve" (
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
-		approved: ArgumentsTypes[30],
+	* transfer
+	*
+	* @param { ArgumentTypes.AccountId } to,
+	* @param { ArgumentTypes.Id } id,
+	* @param { Array<(number | string | BN)> } data,
+	* @returns { void }
+	*/
+	"transfer" (
+		to: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id,
+		data: Array<(number | string | BN)>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::approve", [operator, id, approved], __options);
-	}
-
-	/** */
-	"PSP34::total_supply" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["6"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::totalSupply", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::transfer", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [to, id, data], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * 1: key,
-	 * ]
-	 */
-	"PSP34Metadata::get_attribute" (
-		id: ArgumentsTypes[1],
-		key: ArgumentsTypes[7],
+	* collectionId
+	*
+	* @returns { Result<ReturnTypes.Id, ReturnTypes.LangError> }
+	*/
+	"collectionId" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Metadata::getAttribute", [id, key], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Id, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::collectionId", [], __options, (result) => { return handleReturnType(result, getTypeDescription(29, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * 1: index,
-	 * ]
-	 */
-	"PSP34Enumerable::owners_token_by_index" (
-		owner: ArgumentsTypes[8],
-		index: ArgumentsTypes[6],
+	* balanceOf
+	*
+	* @param { ArgumentTypes.AccountId } owner,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"balanceOf" (
+		owner: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["44"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Enumerable::ownersTokenByIndex", [owner, index], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::balanceOf", [owner], __options, (result) => { return handleReturnType(result, getTypeDescription(30, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"PSP34Enumerable::token_by_index" (
-		index: ArgumentsTypes[6],
+	* ownerOf
+	*
+	* @param { ArgumentTypes.Id } id,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"ownerOf" (
+		id: ArgumentTypes.Id,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["44"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Enumerable::tokenByIndex", [index], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::ownerOf", [id], __options, (result) => { return handleReturnType(result, getTypeDescription(31, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: uri,
-	 * ]
-	 */
-	"Psp34Traits::set_base_uri" (
-		uri: ArgumentsTypes[33],
+	* allowance
+	*
+	* @param { ArgumentTypes.AccountId } owner,
+	* @param { ArgumentTypes.AccountId } operator,
+	* @param { ArgumentTypes.Id | null } id,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"allowance" (
+		owner: ArgumentTypes.AccountId,
+		operator: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id | null,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::allowance", [owner, operator, id], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'psp34_nft')); });
+	}
+
+	/**
+	* getAttribute
+	*
+	* @param { ArgumentTypes.Id } id,
+	* @param { Array<(number | string | BN)> } key,
+	* @returns { Result<Array<number> | null, ReturnTypes.LangError> }
+	*/
+	"getAttribute" (
+		id: ArgumentTypes.Id,
+		key: Array<(number | string | BN)>,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<Array<number> | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Metadata::getAttribute", [id, key], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'psp34_nft')); });
+	}
+
+	/**
+	* tokenByIndex
+	*
+	* @param { (string | number | BN) } index,
+	* @returns { Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> }
+	*/
+	"tokenByIndex" (
+		index: (string | number | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Enumerable::tokenByIndex", [index], __options, (result) => { return handleReturnType(result, getTypeDescription(36, 'psp34_nft')); });
+	}
+
+	/**
+	* ownersTokenByIndex
+	*
+	* @param { ArgumentTypes.AccountId } owner,
+	* @param { (string | number | BN) } index,
+	* @returns { Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> }
+	*/
+	"ownersTokenByIndex" (
+		owner: ArgumentTypes.AccountId,
+		index: (string | number | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Enumerable::ownersTokenByIndex", [owner, index], __options, (result) => { return handleReturnType(result, getTypeDescription(36, 'psp34_nft')); });
+	}
+
+	/**
+	* setMultipleAttributes
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { Array<[string, string]> } metadata,
+	* @returns { void }
+	*/
+	"setMultipleAttributes" (
+		tokenId: ArgumentTypes.Id,
+		metadata: Array<[string, string]>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setBaseUri", [uri], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setMultipleAttributes", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [tokenId, metadata], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: metadata,
-	 * ]
-	 */
-	"Psp34Traits::set_multiple_attributes" (
-		tokenId: ArgumentsTypes[1],
-		metadata: ArgumentsTypes[38],
+	* getAttributes
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { Array<string> } attributes,
+	* @returns { Result<Array<string>, ReturnTypes.LangError> }
+	*/
+	"getAttributes" (
+		tokenId: ArgumentTypes.Id,
+		attributes: Array<string>,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<Array<string>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributes", [tokenId, attributes], __options, (result) => { return handleReturnType(result, getTypeDescription(39, 'psp34_nft')); });
+	}
+
+	/**
+	* getLockedTokenCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getLockedTokenCount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getLockedTokenCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(40, 'psp34_nft')); });
+	}
+
+	/**
+	* lock
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @returns { void }
+	*/
+	"lock" (
+		tokenId: ArgumentTypes.Id,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setMultipleAttributes", [tokenId, metadata], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::lock", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [tokenId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"Psp34Traits::get_attribute_name" (
-		index: ArgumentsTypes[4],
+	* getOwner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"getOwner" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["33"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeName", [index], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_owner" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["8"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getOwner", [], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getOwner", [], __options, (result) => { return handleReturnType(result, getTypeDescription(22, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::lock" (
-		tokenId: ArgumentsTypes[1],
+	* getAttributeCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getAttributeCount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(30, 'psp34_nft')); });
+	}
+
+	/**
+	* setBaseUri
+	*
+	* @param { string } uri,
+	* @returns { void }
+	*/
+	"setBaseUri" (
+		uri: string,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::lock", [tokenId], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_locked_token_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLockedTokenCount", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setBaseUri", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [uri], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: attributes,
-	 * ]
-	 */
-	"Psp34Traits::get_attributes" (
-		tokenId: ArgumentsTypes[1],
-		attributes: ArgumentsTypes[45],
+	* isLockedNft
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"isLockedNft" (
+		tokenId: ArgumentTypes.Id,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["45"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributes", [tokenId, attributes], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_attribute_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeCount", [], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_last_token_id" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLastTokenId", [], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::isLockedNft", [tokenId], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::is_locked_nft" (
-		tokenId: ArgumentsTypes[1],
+	* getLastTokenId
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getLastTokenId" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["30"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::isLockedNft", [tokenId], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getLastTokenId", [], __options, (result) => { return handleReturnType(result, getTypeDescription(40, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::token_uri" (
-		tokenId: ArgumentsTypes[5],
+	* tokenUri
+	*
+	* @param { (number | string | BN) } tokenId,
+	* @returns { Result<string, ReturnTypes.LangError> }
+	*/
+	"tokenUri" (
+		tokenId: (number | string | BN),
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["33"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::tokenUri", [tokenId], __options);
+	): Promise< QueryReturnType< Result<string, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::tokenUri", [tokenId], __options, (result) => { return handleReturnType(result, getTypeDescription(41, 'psp34_nft')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[8],
-		tokenId: ArgumentsTypes[1],
-		receiver: ArgumentsTypes[8],
+	* getAttributeName
+	*
+	* @param { (number | string | BN) } index,
+	* @returns { Result<string, ReturnTypes.LangError> }
+	*/
+	"getAttributeName" (
+		index: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<string, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeName", [index], __options, (result) => { return handleReturnType(result, getTypeDescription(41, 'psp34_nft')); });
+	}
+
+	/**
+	* tranferNft
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferNft" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		tokenId: ArgumentTypes.Id,
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [nftContractAddress, tokenId, receiver], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: psp22ContractAddress,
-	 * 1: amount,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_psp22" (
-		psp22ContractAddress: ArgumentsTypes[8],
-		amount: ArgumentsTypes[6],
-		receiver: ArgumentsTypes[8],
+	* tranferPsp22
+	*
+	* @param { ArgumentTypes.AccountId } psp22ContractAddress,
+	* @param { (string | number | BN) } amount,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferPsp22" (
+		psp22ContractAddress: ArgumentTypes.AccountId,
+		amount: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [psp22ContractAddress, amount, receiver], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
-	 * ]
-	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[6],
-		receiver: ArgumentsTypes[8],
+	* withdrawFee
+	*
+	* @param { (string | number | BN) } value,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"withdrawFee" (
+		value: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", [value, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [value, receiver], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: id,
-	 * ]
-	 */
-	"PSP34Burnable::burn" (
-		account: ArgumentsTypes[8],
-		id: ArgumentsTypes[1],
+	* burn
+	*
+	* @param { ArgumentTypes.AccountId } account,
+	* @param { ArgumentTypes.Id } id,
+	* @returns { void }
+	*/
+	"burn" (
+		account: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Burnable::burn", [account, id], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Burnable::burn", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "psp34_nft");
+		}, [account, id], __options);
 	}
 
 }

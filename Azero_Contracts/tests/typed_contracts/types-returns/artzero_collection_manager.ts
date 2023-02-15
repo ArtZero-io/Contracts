@@ -1,27 +1,12 @@
 import type BN from 'bn.js';
+import type {ReturnNumber} from '@727-ventures/typechain-types';
 
 export type AccountId = string | number[]
 
 export type Hash = string | number[]
 
-export type Collection = {
-	collectionOwner: AccountId,
-	nftContractAddress: AccountId,
-	contractType: CollectionType,
-	isCollectRoyaltyFee: boolean,
-	royaltyFee: number,
-	isActive: boolean,
-	showOnChainMetadata: boolean
-}
-
-export enum CollectionType {
-	unknown = 'Unknown',
-	psp34Manual = 'Psp34Manual',
-	psp34Auto = 'Psp34Auto',
-	psp1155Manual = 'Psp1155Manual',
-	psp1155Auto = 'Psp1155Auto',
-	reserved1 = 'Reserved1',
-	reserved2 = 'Reserved2'
+export enum LangError {
+	couldNotReadInput = 'CouldNotReadInput'
 }
 
 export interface Error {
@@ -33,13 +18,17 @@ export interface Error {
 	tokenOwnerNotMatch ? : null,
 	notApproved ? : null,
 	cannotTransfer ? : null,
+	cannotMint ? : null,
+	notPublicMint ? : null,
 	notEnoughBalance ? : null,
+	maxSupply ? : null,
 	alreadyInit ? : null,
 	notOwner ? : null,
 	notTokenOwner ? : null,
 	projectNotExist ? : null,
 	projectOwnerAndAdmin ? : null,
 	invalidStartTimeAndEndTime ? : null,
+	invalidPhaseCount ? : null,
 	collectionOwnerAndAdmin ? : null,
 	collectionNotActive ? : null,
 	invalidInput ? : null,
@@ -110,9 +99,24 @@ export class ErrorBuilder {
 			cannotTransfer: null,
 		};
 	}
+	static CannotMint(): Error {
+		return {
+			cannotMint: null,
+		};
+	}
+	static NotPublicMint(): Error {
+		return {
+			notPublicMint: null,
+		};
+	}
 	static NotEnoughBalance(): Error {
 		return {
 			notEnoughBalance: null,
+		};
+	}
+	static MaxSupply(): Error {
+		return {
+			maxSupply: null,
 		};
 	}
 	static AlreadyInit(): Error {
@@ -143,6 +147,11 @@ export class ErrorBuilder {
 	static InvalidStartTimeAndEndTime(): Error {
 		return {
 			invalidStartTimeAndEndTime: null,
+		};
+	}
+	static InvalidPhaseCount(): Error {
+		return {
+			invalidPhaseCount: null,
 		};
 	}
 	static CollectionOwnerAndAdmin(): Error {
@@ -293,12 +302,32 @@ export enum AccessControlError {
 	roleRedundant = 'RoleRedundant'
 }
 
+export enum CollectionType {
+	unknown = 'Unknown',
+	psp34Manual = 'Psp34Manual',
+	psp34Auto = 'Psp34Auto',
+	psp1155Manual = 'Psp1155Manual',
+	psp1155Auto = 'Psp1155Auto',
+	reserved1 = 'Reserved1',
+	reserved2 = 'Reserved2'
+}
+
+export type Collection = {
+	collectionOwner: AccountId,
+	nftContractAddress: AccountId,
+	contractType: CollectionType,
+	isCollectRoyaltyFee: boolean,
+	royaltyFee: number,
+	isActive: boolean,
+	showOnChainMetadata: boolean
+}
+
 export interface Id {
 	u8 ? : number,
 	u16 ? : number,
 	u32 ? : number,
 	u64 ? : number,
-	u128 ? : (string | number),
+	u128 ? : ReturnNumber,
 	bytes ? : Array<number>
 }
 
@@ -323,7 +352,7 @@ export class IdBuilder {
 			u64: value,
 		};
 	}
-	static U128(value: (string | number)): Id {
+	static U128(value: ReturnNumber): Id {
 		return {
 			u128: value,
 		};

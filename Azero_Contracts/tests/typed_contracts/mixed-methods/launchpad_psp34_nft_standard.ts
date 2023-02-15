@@ -3,12 +3,19 @@
 import type { ContractPromise } from '@polkadot/api-contract';
 import type { ApiPromise } from '@polkadot/api';
 import type { KeyringPair } from '@polkadot/keyring/types';
-import type { ArgumentsTypes } from '../arguments/launchpad_psp34_nft_standard';
-import type OkishReturns from '../return-values/launchpad_psp34_nft_standard';
-import type { GasLimit, GasLimitAndRequiredValue } from '../_sdk/types';
-import type { QueryReturnType } from '../_sdk/query';
-import { queryJSON } from '../_sdk/query';
-import { txSignAndSend } from '../_sdk/tx';
+import type { GasLimit, GasLimitAndRequiredValue, Result } from '@727-ventures/typechain-types';
+import type { QueryReturnType } from '@727-ventures/typechain-types';
+import { queryOkJSON, queryJSON, handleReturnType } from '@727-ventures/typechain-types';
+import { txSignAndSend } from '@727-ventures/typechain-types';
+import type * as ArgumentTypes from '../types-arguments/launchpad_psp34_nft_standard';
+import type * as ReturnTypes from '../types-returns/launchpad_psp34_nft_standard';
+import type BN from 'bn.js';
+//@ts-ignore
+import {ReturnNumber} from '@727-ventures/typechain-types';
+import {getTypeDescription} from './../shared/utils';
+// @ts-ignore
+import type {EventRecord} from "@polkadot/api/submittable";
+import {decodeEvents} from "../shared/utils";
 
 
 export default class Methods {
@@ -29,737 +36,906 @@ export default class Methods {
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseCode,
-	 * 1: isPublic,
-	 * 2: publicMintingFee,
-	 * 3: publicMintingAmount,
-	 * 4: publicMaxMintingAmount,
-	 * 5: startTime,
-	 * 6: endTime,
-	 * ]
-	 */
-	"add_new_phase" (
-		phaseCode: ArgumentsTypes[55],
-		isPublic: ArgumentsTypes[43],
-		publicMintingFee: ArgumentsTypes[6],
-		publicMintingAmount: ArgumentsTypes[5],
-		publicMaxMintingAmount: ArgumentsTypes[5],
-		startTime: ArgumentsTypes[5],
-		endTime: ArgumentsTypes[5],
+	* addNewPhase
+	*
+	* @param { string } phaseCode,
+	* @param { boolean } isPublic,
+	* @param { (string | number | BN) } publicMintingFee,
+	* @param { (number | string | BN) } publicMintingAmount,
+	* @param { (number | string | BN) } publicMaxMintingAmount,
+	* @param { (number | string | BN) } startTime,
+	* @param { (number | string | BN) } endTime,
+	* @returns { void }
+	*/
+	"addNewPhase" (
+		phaseCode: string,
+		isPublic: boolean,
+		publicMintingFee: (string | number | BN),
+		publicMintingAmount: (number | string | BN),
+		publicMaxMintingAmount: (number | string | BN),
+		startTime: (number | string | BN),
+		endTime: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addNewPhase", [phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addNewPhase", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: phaseId,
-	 * 2: whitelistAmount,
-	 * 3: whitelistPrice,
-	 * ]
-	 */
-	"update_whitelist" (
-		account: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
-		whitelistAmount: ArgumentsTypes[5],
-		whitelistPrice: ArgumentsTypes[6],
+	* updateWhitelist
+	*
+	* @param { ArgumentTypes.AccountId } account,
+	* @param { (number | string | BN) } phaseId,
+	* @param { (number | string | BN) } whitelistAmount,
+	* @param { (string | number | BN) } whitelistPrice,
+	* @returns { void }
+	*/
+	"updateWhitelist" (
+		account: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
+		whitelistAmount: (number | string | BN),
+		whitelistPrice: (string | number | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateWhitelist", [account, phaseId, whitelistAmount, whitelistPrice], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateWhitelist", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [account, phaseId, whitelistAmount, whitelistPrice], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: phaseId,
-	 * 2: whitelistAmount,
-	 * 3: whitelistPrice,
-	 * ]
-	 */
-	"add_whitelist" (
-		account: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
-		whitelistAmount: ArgumentsTypes[5],
-		whitelistPrice: ArgumentsTypes[6],
+	* addWhitelist
+	*
+	* @param { ArgumentTypes.AccountId } account,
+	* @param { (number | string | BN) } phaseId,
+	* @param { (number | string | BN) } whitelistAmount,
+	* @param { (string | number | BN) } whitelistPrice,
+	* @returns { void }
+	*/
+	"addWhitelist" (
+		account: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
+		whitelistAmount: (number | string | BN),
+		whitelistPrice: (string | number | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addWhitelist", [account, phaseId, whitelistAmount, whitelistPrice], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addWhitelist", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [account, phaseId, whitelistAmount, whitelistPrice], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: mintAmount,
-	 * ]
-	 */
+	* mint
+	*
+	* @param { (number | string | BN) } mintAmount,
+	* @returns { void }
+	*/
 	"mint" (
-		mintAmount: ArgumentsTypes[5],
+		mintAmount: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "mint", [mintAmount], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "mint", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [mintAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: mintAmount,
-	 * ]
-	 */
-	"public_mint" (
-		phaseId: ArgumentsTypes[2],
-		mintAmount: ArgumentsTypes[5],
+	* publicMint
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @param { (number | string | BN) } mintAmount,
+	* @returns { void }
+	*/
+	"publicMint" (
+		phaseId: (number | string | BN),
+		mintAmount: (number | string | BN),
 		__options: GasLimitAndRequiredValue,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "publicMint", [phaseId, mintAmount], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "publicMint", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [phaseId, mintAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: mintAmount,
-	 * ]
-	 */
-	"whitelist_mint" (
-		phaseId: ArgumentsTypes[2],
-		mintAmount: ArgumentsTypes[5],
+	* whitelistMint
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @param { (number | string | BN) } mintAmount,
+	* @returns { void }
+	*/
+	"whitelistMint" (
+		phaseId: (number | string | BN),
+		mintAmount: (number | string | BN),
 		__options: GasLimitAndRequiredValue,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "whitelistMint", [phaseId, mintAmount], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "whitelistMint", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [phaseId, mintAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * ]
-	 */
-	"deactive_phase" (
-		phaseId: ArgumentsTypes[2],
+	* deactivePhase
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @returns { void }
+	*/
+	"deactivePhase" (
+		phaseId: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "deactivePhase", [phaseId], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "deactivePhase", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [phaseId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: phaseCode,
-	 * 2: isPublic,
-	 * 3: publicMintingFee,
-	 * 4: publicMintingAmount,
-	 * 5: publicMaxMintingAmount,
-	 * 6: startTime,
-	 * 7: endTime,
-	 * ]
-	 */
-	"update_schedule_phase" (
-		phaseId: ArgumentsTypes[2],
-		phaseCode: ArgumentsTypes[55],
-		isPublic: ArgumentsTypes[43],
-		publicMintingFee: ArgumentsTypes[6],
-		publicMintingAmount: ArgumentsTypes[5],
-		publicMaxMintingAmount: ArgumentsTypes[5],
-		startTime: ArgumentsTypes[5],
-		endTime: ArgumentsTypes[5],
+	* updateSchedulePhase
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @param { string } phaseCode,
+	* @param { boolean } isPublic,
+	* @param { (string | number | BN) } publicMintingFee,
+	* @param { (number | string | BN) } publicMintingAmount,
+	* @param { (number | string | BN) } publicMaxMintingAmount,
+	* @param { (number | string | BN) } startTime,
+	* @param { (number | string | BN) } endTime,
+	* @returns { void }
+	*/
+	"updateSchedulePhase" (
+		phaseId: (number | string | BN),
+		phaseCode: string,
+		isPublic: boolean,
+		publicMintingFee: (string | number | BN),
+		publicMintingAmount: (number | string | BN),
+		publicMaxMintingAmount: (number | string | BN),
+		startTime: (number | string | BN),
+		endTime: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateSchedulePhase", [phaseId, phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateSchedulePhase", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [phaseId, phaseCode, isPublic, publicMintingFee, publicMintingAmount, publicMaxMintingAmount, startTime, endTime], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: idPhases,
-	 * 1: codePhases,
-	 * 2: isPublicPhases,
-	 * 3: publicMintingFeePhases,
-	 * 4: publicMintingAmountPhases,
-	 * 5: publicMaxMintingAmountPhases,
-	 * 6: startTimePhases,
-	 * 7: endTimePhases,
-	 * ]
-	 */
-	"update_schedule_phases" (
-		idPhases: ArgumentsTypes[7],
-		codePhases: ArgumentsTypes[56],
-		isPublicPhases: ArgumentsTypes[57],
-		publicMintingFeePhases: ArgumentsTypes[58],
-		publicMintingAmountPhases: ArgumentsTypes[59],
-		publicMaxMintingAmountPhases: ArgumentsTypes[59],
-		startTimePhases: ArgumentsTypes[59],
-		endTimePhases: ArgumentsTypes[59],
+	* updateSchedulePhases
+	*
+	* @param { Array<(number | string | BN)> } idPhases,
+	* @param { Array<string> } codePhases,
+	* @param { Array<boolean> } isPublicPhases,
+	* @param { Array<(string | number | BN)> } publicMintingFeePhases,
+	* @param { Array<(number | string | BN)> } publicMintingAmountPhases,
+	* @param { Array<(number | string | BN)> } publicMaxMintingAmountPhases,
+	* @param { Array<(number | string | BN)> } startTimePhases,
+	* @param { Array<(number | string | BN)> } endTimePhases,
+	* @returns { void }
+	*/
+	"updateSchedulePhases" (
+		idPhases: Array<(number | string | BN)>,
+		codePhases: Array<string>,
+		isPublicPhases: Array<boolean>,
+		publicMintingFeePhases: Array<(string | number | BN)>,
+		publicMintingAmountPhases: Array<(number | string | BN)>,
+		publicMaxMintingAmountPhases: Array<(number | string | BN)>,
+		startTimePhases: Array<(number | string | BN)>,
+		endTimePhases: Array<(number | string | BN)>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateSchedulePhases", [idPhases, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateSchedulePhases", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [idPhases, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: projectInfo,
-	 * ]
-	 */
-	"edit_project_information" (
-		projectInfo: ArgumentsTypes[55],
+	* editProjectInformation
+	*
+	* @param { string } projectInfo,
+	* @returns { void }
+	*/
+	"editProjectInformation" (
+		projectInfo: string,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "editProjectInformation", [projectInfo], __options);
-	}
-
-	/** */
-	"get_owner_claimed_amount" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getOwnerClaimedAmount", [], __options);
-	}
-
-	/** */
-	"get_owner_available_amount" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getOwnerAvailableAmount", [], __options);
-	}
-
-	/** */
-	"get_limit_phase_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["2"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getLimitPhaseCount", [], __options);
-	}
-
-	/** */
-	"get_public_minted_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getPublicMintedCount", [], __options);
-	}
-
-	/** */
-	"get_project_info" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["7"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getProjectInfo", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "editProjectInformation", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [projectInfo], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * ]
-	 */
-	"get_phase_schedule_by_id" (
-		phaseId: ArgumentsTypes[2],
+	* getOwnerClaimedAmount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getOwnerClaimedAmount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["65"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getPhaseScheduleById", [phaseId], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getOwnerClaimedAmount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: phaseId,
-	 * ]
-	 */
-	"get_whitelist_by_account_id" (
-		account: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
+	* getOwnerAvailableAmount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getOwnerAvailableAmount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["66"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getWhitelistByAccountId", [account, phaseId], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getOwnerAvailableAmount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * 1: accountIndex,
-	 * ]
-	 */
-	"get_phase_account_link" (
-		phaseId: ArgumentsTypes[2],
-		accountIndex: ArgumentsTypes[5],
+	* getLimitPhaseCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getLimitPhaseCount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["8"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getPhaseAccountLink", [phaseId, accountIndex], __options);
-	}
-
-	/** */
-	"get_current_phase" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["67"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCurrentPhase", [], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getLimitPhaseCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: time,
-	 * ]
-	 */
-	"is_in_schedule_phase" (
-		time: ArgumentsTypes[5],
+	* getPublicMintedCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getPublicMintedCount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["67"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "isInSchedulePhase", [time], __options);
-	}
-
-	/** */
-	"get_whitelist_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getWhitelistCount", [], __options);
-	}
-
-	/** */
-	"get_last_phase_id" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["2"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getLastPhaseId", [], __options);
-	}
-
-	/** */
-	"get_active_phase_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["2"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getActivePhaseCount", [], __options);
-	}
-
-	/** */
-	"get_last_token_id" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getLastTokenId", [], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getPublicMintedCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: accountId,
-	 * 1: phaseId,
-	 * ]
-	 */
-	"get_phase_account_public_claimed_amount" (
-		accountId: ArgumentsTypes[8],
-		phaseId: ArgumentsTypes[2],
+	* getProjectInfo
+	*
+	* @returns { Result<Array<number>, ReturnTypes.LangError> }
+	*/
+	"getProjectInfo" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["68"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getPhaseAccountPublicClaimedAmount", [accountId, phaseId], __options);
+	): Promise< QueryReturnType< Result<Array<number>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getProjectInfo", [], __options, (result) => { return handleReturnType(result, getTypeDescription(26, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: phaseId,
-	 * ]
-	 */
-	"get_phase_account_last_index" (
-		phaseId: ArgumentsTypes[2],
+	* getPhaseScheduleById
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @returns { Result<ReturnTypes.Phase | null, ReturnTypes.LangError> }
+	*/
+	"getPhaseScheduleById" (
+		phaseId: (number | string | BN),
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getPhaseAccountLastIndex", [phaseId], __options);
-	}
-
-	/** */
-	"get_total_supply" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getTotalSupply", [], __options);
-	}
-
-	/** */
-	"get_available_token_amount" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAvailableTokenAmount", [], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Phase | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getPhaseScheduleById", [phaseId], __options, (result) => { return handleReturnType(result, getTypeDescription(27, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: newOwner,
-	 * ]
-	 */
-	"Ownable::transfer_ownership" (
-		newOwner: ArgumentsTypes[8],
+	* getWhitelistByAccountId
+	*
+	* @param { ArgumentTypes.AccountId } account,
+	* @param { (number | string | BN) } phaseId,
+	* @returns { Result<ReturnTypes.Whitelist | null, ReturnTypes.LangError> }
+	*/
+	"getWhitelistByAccountId" (
+		account: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.Whitelist | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getWhitelistByAccountId", [account, phaseId], __options, (result) => { return handleReturnType(result, getTypeDescription(30, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getPhaseAccountLink
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @param { (number | string | BN) } accountIndex,
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"getPhaseAccountLink" (
+		phaseId: (number | string | BN),
+		accountIndex: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getPhaseAccountLink", [phaseId, accountIndex], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getCurrentPhase
+	*
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"getCurrentPhase" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCurrentPhase", [], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* isInSchedulePhase
+	*
+	* @param { (number | string | BN) } time,
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"isInSchedulePhase" (
+		time: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "isInSchedulePhase", [time], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getWhitelistCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getWhitelistCount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getWhitelistCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getLastPhaseId
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getLastPhaseId" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getLastPhaseId", [], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getActivePhaseCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getActivePhaseCount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getActivePhaseCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getLastTokenId
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getLastTokenId" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getLastTokenId", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getPhaseAccountPublicClaimedAmount
+	*
+	* @param { ArgumentTypes.AccountId } accountId,
+	* @param { (number | string | BN) } phaseId,
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"getPhaseAccountPublicClaimedAmount" (
+		accountId: ArgumentTypes.AccountId,
+		phaseId: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getPhaseAccountPublicClaimedAmount", [accountId, phaseId], __options, (result) => { return handleReturnType(result, getTypeDescription(36, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getPhaseAccountLastIndex
+	*
+	* @param { (number | string | BN) } phaseId,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getPhaseAccountLastIndex" (
+		phaseId: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getPhaseAccountLastIndex", [phaseId], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getTotalSupply
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getTotalSupply" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getTotalSupply", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getAvailableTokenAmount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getAvailableTokenAmount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAvailableTokenAmount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* owner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"owner" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* renounceOwnership
+	*
+	* @returns { void }
+	*/
+	"renounceOwnership" (
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", [newOwner], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [], __options);
 	}
 
-	/** */
-	"Ownable::renounce_ownership" (
+	/**
+	* transferOwnership
+	*
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { void }
+	*/
+	"transferOwnership" (
+		newOwner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", [], __options);
-	}
-
-	/** */
-	"Ownable::owner" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["8"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
-	}
-
-	/** */
-	"PSP34::total_supply" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["6"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::totalSupply", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [newOwner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: operator,
-	 * 1: id,
-	 * 2: approved,
-	 * ]
-	 */
-	"PSP34::approve" (
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
-		approved: ArgumentsTypes[43],
+	* balanceOf
+	*
+	* @param { ArgumentTypes.AccountId } owner,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"balanceOf" (
+		owner: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::balanceOf", [owner], __options, (result) => { return handleReturnType(result, getTypeDescription(40, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* totalSupply
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"totalSupply" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::totalSupply", [], __options, (result) => { return handleReturnType(result, getTypeDescription(41, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* allowance
+	*
+	* @param { ArgumentTypes.AccountId } owner,
+	* @param { ArgumentTypes.AccountId } operator,
+	* @param { ArgumentTypes.Id | null } id,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"allowance" (
+		owner: ArgumentTypes.AccountId,
+		operator: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id | null,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::allowance", [owner, operator, id], __options, (result) => { return handleReturnType(result, getTypeDescription(44, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* approve
+	*
+	* @param { ArgumentTypes.AccountId } operator,
+	* @param { ArgumentTypes.Id | null } id,
+	* @param { boolean } approved,
+	* @returns { void }
+	*/
+	"approve" (
+		operator: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id | null,
+		approved: boolean,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::approve", [operator, id, approved], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::approve", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [operator, id, approved], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: to,
-	 * 1: id,
-	 * 2: data,
-	 * ]
-	 */
-	"PSP34::transfer" (
-		to: ArgumentsTypes[8],
-		id: ArgumentsTypes[1],
-		data: ArgumentsTypes[7],
+	* collectionId
+	*
+	* @returns { Result<ReturnTypes.Id, ReturnTypes.LangError> }
+	*/
+	"collectionId" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.Id, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::collectionId", [], __options, (result) => { return handleReturnType(result, getTypeDescription(48, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* transfer
+	*
+	* @param { ArgumentTypes.AccountId } to,
+	* @param { ArgumentTypes.Id } id,
+	* @param { Array<(number | string | BN)> } data,
+	* @returns { void }
+	*/
+	"transfer" (
+		to: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id,
+		data: Array<(number | string | BN)>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::transfer", [to, id, data], __options);
-	}
-
-	/** */
-	"PSP34::collection_id" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["1"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::collectionId", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34::transfer", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [to, id, data], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * ]
-	 */
-	"PSP34::balance_of" (
-		owner: ArgumentsTypes[8],
+	* ownerOf
+	*
+	* @param { ArgumentTypes.Id } id,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"ownerOf" (
+		id: ArgumentTypes.Id,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::balanceOf", [owner], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34::ownerOf", [id], __options, (result) => { return handleReturnType(result, getTypeDescription(49, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"PSP34::owner_of" (
-		id: ArgumentsTypes[1],
+	* getAttribute
+	*
+	* @param { ArgumentTypes.Id } id,
+	* @param { Array<(number | string | BN)> } key,
+	* @returns { Result<Array<number> | null, ReturnTypes.LangError> }
+	*/
+	"getAttribute" (
+		id: ArgumentTypes.Id,
+		key: Array<(number | string | BN)>,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["19"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::ownerOf", [id], __options);
+	): Promise< QueryReturnType< Result<Array<number> | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Metadata::getAttribute", [id, key], __options, (result) => { return handleReturnType(result, getTypeDescription(51, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * 1: operator,
-	 * 2: id,
-	 * ]
-	 */
-	"PSP34::allowance" (
-		owner: ArgumentsTypes[8],
-		operator: ArgumentsTypes[8],
-		id: ArgumentsTypes[14],
+	* tokenByIndex
+	*
+	* @param { (string | number | BN) } index,
+	* @returns { Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> }
+	*/
+	"tokenByIndex" (
+		index: (string | number | BN),
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34::allowance", [owner, operator, id], __options);
+	): Promise< QueryReturnType< Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Enumerable::tokenByIndex", [index], __options, (result) => { return handleReturnType(result, getTypeDescription(53, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * 1: key,
-	 * ]
-	 */
-	"PSP34Metadata::get_attribute" (
-		id: ArgumentsTypes[1],
-		key: ArgumentsTypes[7],
+	* ownersTokenByIndex
+	*
+	* @param { ArgumentTypes.AccountId } owner,
+	* @param { (string | number | BN) } index,
+	* @returns { Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> }
+	*/
+	"ownersTokenByIndex" (
+		owner: ArgumentTypes.AccountId,
+		index: (string | number | BN),
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["72"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Metadata::getAttribute", [id, key], __options);
+	): Promise< QueryReturnType< Result<Result<ReturnTypes.Id, ReturnTypes.PSP34Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Enumerable::ownersTokenByIndex", [owner, index], __options, (result) => { return handleReturnType(result, getTypeDescription(53, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: owner,
-	 * 1: index,
-	 * ]
-	 */
-	"PSP34Enumerable::owners_token_by_index" (
-		owner: ArgumentsTypes[8],
-		index: ArgumentsTypes[6],
+	* getAttributeCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getAttributeCount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["73"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Enumerable::ownersTokenByIndex", [owner, index], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(40, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"PSP34Enumerable::token_by_index" (
-		index: ArgumentsTypes[6],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["73"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Enumerable::tokenByIndex", [index], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: uri,
-	 * ]
-	 */
-	"Psp34Traits::set_base_uri" (
-		uri: ArgumentsTypes[55],
+	* lock
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @returns { void }
+	*/
+	"lock" (
+		tokenId: ArgumentTypes.Id,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setBaseUri", [uri], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_locked_token_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLockedTokenCount", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::lock", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [tokenId], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: index,
-	 * ]
-	 */
-	"Psp34Traits::get_attribute_name" (
-		index: ArgumentsTypes[4],
+	* getLockedTokenCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getLockedTokenCount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["55"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeName", [index], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_owner" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["8"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getOwner", [], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getLockedTokenCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: attributes,
-	 * ]
-	 */
-	"Psp34Traits::get_attributes" (
-		tokenId: ArgumentsTypes[1],
-		attributes: ArgumentsTypes[56],
+	* psp34Traits::getLastTokenId
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"psp34Traits::getLastTokenId" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["56"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributes", [tokenId, attributes], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getLastTokenId", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * 1: metadata,
-	 * ]
-	 */
-	"Psp34Traits::set_multiple_attributes" (
-		tokenId: ArgumentsTypes[1],
-		metadata: ArgumentsTypes[74],
+	* isLockedNft
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"isLockedNft" (
+		tokenId: ArgumentTypes.Id,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::isLockedNft", [tokenId], __options, (result) => { return handleReturnType(result, getTypeDescription(44, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getAttributes
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { Array<string> } attributes,
+	* @returns { Result<Array<string>, ReturnTypes.LangError> }
+	*/
+	"getAttributes" (
+		tokenId: ArgumentTypes.Id,
+		attributes: Array<string>,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<Array<string>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributes", [tokenId, attributes], __options, (result) => { return handleReturnType(result, getTypeDescription(55, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getOwner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"getOwner" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getOwner", [], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* getAttributeName
+	*
+	* @param { (number | string | BN) } index,
+	* @returns { Result<string, ReturnTypes.LangError> }
+	*/
+	"getAttributeName" (
+		index: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<string, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeName", [index], __options, (result) => { return handleReturnType(result, getTypeDescription(56, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* tokenUri
+	*
+	* @param { (number | string | BN) } tokenId,
+	* @returns { Result<string, ReturnTypes.LangError> }
+	*/
+	"tokenUri" (
+		tokenId: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<string, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "psp34Traits::tokenUri", [tokenId], __options, (result) => { return handleReturnType(result, getTypeDescription(56, 'launchpad_psp34_nft_standard')); });
+	}
+
+	/**
+	* setBaseUri
+	*
+	* @param { string } uri,
+	* @returns { void }
+	*/
+	"setBaseUri" (
+		uri: string,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setMultipleAttributes", [tokenId, metadata], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setBaseUri", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [uri], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::token_uri" (
-		tokenId: ArgumentsTypes[5],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["55"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::tokenUri", [tokenId], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::is_locked_nft" (
-		tokenId: ArgumentsTypes[1],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::isLockedNft", [tokenId], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_attribute_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getAttributeCount", [], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: tokenId,
-	 * ]
-	 */
-	"Psp34Traits::lock" (
-		tokenId: ArgumentsTypes[1],
+	* setMultipleAttributes
+	*
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { Array<[string, string]> } metadata,
+	* @returns { void }
+	*/
+	"setMultipleAttributes" (
+		tokenId: ArgumentTypes.Id,
+		metadata: Array<[string, string]>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::lock", [tokenId], __options);
-	}
-
-	/** */
-	"Psp34Traits::get_last_token_id" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "psp34Traits::getLastTokenId", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Traits::setMultipleAttributes", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [tokenId, metadata], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::grant_role" (
-		role: ArgumentsTypes[4],
-		account: ArgumentsTypes[8],
+	* revokeRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"revokeRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::grantRole", [role, account], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::revokeRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: address,
-	 * ]
-	 */
-	"AccessControl::has_role" (
-		role: ArgumentsTypes[4],
-		address: ArgumentsTypes[8],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * ]
-	 */
-	"AccessControl::get_role_admin" (
-		role: ArgumentsTypes[4],
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["4"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::revoke_role" (
-		role: ArgumentsTypes[4],
-		account: ArgumentsTypes[8],
+	* grantRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"grantRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::revokeRole", [role, account], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::grantRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::renounce_role" (
-		role: ArgumentsTypes[4],
-		account: ArgumentsTypes[8],
+	* getRoleAdmin
+	*
+	* @param { (number | string | BN) } role,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getRoleAdmin" (
+		role: (number | string | BN),
 		__options: GasLimit,
-	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::renounceRole", [role, account], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options, (result) => { return handleReturnType(result, getTypeDescription(40, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[8],
-		tokenId: ArgumentsTypes[1],
-		receiver: ArgumentsTypes[8],
+	* hasRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } address,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"hasRole" (
+		role: (number | string | BN),
+		address: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options, (result) => { return handleReturnType(result, getTypeDescription(44, 'launchpad_psp34_nft_standard')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
-	 * ]
-	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[6],
-		receiver: ArgumentsTypes[8],
+	* renounceRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"renounceRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", [value, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::renounceRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: psp22ContractAddress,
-	 * 1: amount,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_psp22" (
-		psp22ContractAddress: ArgumentsTypes[8],
-		amount: ArgumentsTypes[6],
-		receiver: ArgumentsTypes[8],
+	* tranferNft
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferNft" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		tokenId: ArgumentTypes.Id,
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [nftContractAddress, tokenId, receiver], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: account,
-	 * 1: id,
-	 * ]
-	 */
-	"PSP34Burnable::burn" (
-		account: ArgumentsTypes[8],
-		id: ArgumentsTypes[1],
+	* tranferPsp22
+	*
+	* @param { ArgumentTypes.AccountId } psp22ContractAddress,
+	* @param { (string | number | BN) } amount,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferPsp22" (
+		psp22ContractAddress: ArgumentTypes.AccountId,
+		amount: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Burnable::burn", [account, id], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [psp22ContractAddress, amount, receiver], __options);
+	}
+
+	/**
+	* withdrawFee
+	*
+	* @param { (string | number | BN) } value,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"withdrawFee" (
+		value: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [value, receiver], __options);
+	}
+
+	/**
+	* burn
+	*
+	* @param { ArgumentTypes.AccountId } account,
+	* @param { ArgumentTypes.Id } id,
+	* @returns { void }
+	*/
+	"burn" (
+		account: ArgumentTypes.AccountId,
+		id: ArgumentTypes.Id,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "psp34Burnable::burn", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "launchpad_psp34_nft_standard");
+		}, [account, id], __options);
 	}
 
 }

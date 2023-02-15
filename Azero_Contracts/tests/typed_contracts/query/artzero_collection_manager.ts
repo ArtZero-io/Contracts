@@ -1,579 +1,670 @@
 /* This file is auto-generated */
 
 import type { ContractPromise } from '@polkadot/api-contract';
-import type { ArgumentsTypes } from '../arguments/artzero_collection_manager';
-import type OkishReturns from '../return-values/artzero_collection_manager';
-import type { GasLimit, GasLimitAndRequiredValue } from '../_sdk/types';
-import type { QueryReturnType } from '../_sdk/query';
-import { queryJSON, queryOkJSON } from '../_sdk/query';
+import type { ApiPromise } from '@polkadot/api';
+import type { GasLimit, GasLimitAndRequiredValue, Result } from '@727-ventures/typechain-types';
+import type { QueryReturnType } from '@727-ventures/typechain-types';
+import { queryJSON, queryOkJSON, handleReturnType } from '@727-ventures/typechain-types';
+import type * as ArgumentTypes from '../types-arguments/artzero_collection_manager';
+import type * as ReturnTypes from '../types-returns/artzero_collection_manager';
+import type BN from 'bn.js';
+//@ts-ignore
+import {ReturnNumber} from '@727-ventures/typechain-types';
+import {getTypeDescription} from './../shared/utils';
 
 
 export default class Methods {
 	private __nativeContract : ContractPromise;
+	private __apiPromise: ApiPromise;
 	private __callerAddress : string;
 
 	constructor(
 		nativeContract : ContractPromise,
+		nativeApi : ApiPromise,
 		callerAddress : string,
 	) {
 		this.__nativeContract = nativeContract;
 		this.__callerAddress = callerAddress;
+		this.__apiPromise = nativeApi;
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: standardNftHash,
-	 * 1: simpleModeAddingFee,
-	 * 2: advanceModeAddingFee,
-	 * 3: maxRoyaltyFeeRate,
-	 * ]
-	 */
+	* initialize
+	*
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @param { (string | number | BN) } simpleModeAddingFee,
+	* @param { (string | number | BN) } advanceModeAddingFee,
+	* @param { (number | string | BN) } maxRoyaltyFeeRate,
+	* @param { ArgumentTypes.AccountId } adminAddress,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
 	"initialize" (
-		standardNftHash: ArgumentsTypes[12],
-		simpleModeAddingFee: ArgumentsTypes[14],
-		advanceModeAddingFee: ArgumentsTypes[14],
-		maxRoyaltyFeeRate: ArgumentsTypes[5],
+		standardNftHash: ArgumentTypes.Hash,
+		simpleModeAddingFee: (string | number | BN),
+		advanceModeAddingFee: (string | number | BN),
+		maxRoyaltyFeeRate: (number | string | BN),
+		adminAddress: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "initialize", [standardNftHash, simpleModeAddingFee, advanceModeAddingFee, maxRoyaltyFeeRate], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "initialize", [standardNftHash, simpleModeAddingFee, advanceModeAddingFee, maxRoyaltyFeeRate, adminAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftName,
-	 * 1: nftSymbol,
-	 * 2: attributes,
-	 * 3: attributeVals,
-	 * 4: isCollectRoyaltyFee,
-	 * 5: royaltyFee,
-	 * ]
-	 */
-	"auto_new_collection" (
-		nftName: ArgumentsTypes[31],
-		nftSymbol: ArgumentsTypes[31],
-		attributes: ArgumentsTypes[38],
-		attributeVals: ArgumentsTypes[38],
-		isCollectRoyaltyFee: ArgumentsTypes[18],
-		royaltyFee: ArgumentsTypes[5],
+	* autoNewCollection
+	*
+	* @param { string } nftName,
+	* @param { string } nftSymbol,
+	* @param { Array<string> } attributes,
+	* @param { Array<string> } attributeVals,
+	* @param { boolean } isCollectRoyaltyFee,
+	* @param { (number | string | BN) } royaltyFee,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"autoNewCollection" (
+		nftName: string,
+		nftSymbol: string,
+		attributes: Array<string>,
+		attributeVals: Array<string>,
+		isCollectRoyaltyFee: boolean,
+		royaltyFee: (number | string | BN),
 		__options ? : GasLimitAndRequiredValue,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "autoNewCollection", [nftName, nftSymbol, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "autoNewCollection", [nftName, nftSymbol, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: attributes,
-	 * 2: attributeVals,
-	 * 3: isCollectRoyaltyFee,
-	 * 4: royaltyFee,
-	 * ]
-	 */
-	"add_new_collection" (
-		nftContractAddress: ArgumentsTypes[0],
-		attributes: ArgumentsTypes[38],
-		attributeVals: ArgumentsTypes[38],
-		isCollectRoyaltyFee: ArgumentsTypes[18],
-		royaltyFee: ArgumentsTypes[5],
+	* addNewCollection
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { Array<string> } attributes,
+	* @param { Array<string> } attributeVals,
+	* @param { boolean } isCollectRoyaltyFee,
+	* @param { (number | string | BN) } royaltyFee,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"addNewCollection" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		attributes: Array<string>,
+		attributeVals: Array<string>,
+		isCollectRoyaltyFee: boolean,
+		royaltyFee: (number | string | BN),
 		__options ? : GasLimitAndRequiredValue,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "addNewCollection", [nftContractAddress, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "addNewCollection", [nftContractAddress, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: newOwner,
-	 * ]
-	 */
-	"update_collection_owner" (
-		contractAddress: ArgumentsTypes[0],
-		newOwner: ArgumentsTypes[0],
+	* updateCollectionOwner
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateCollectionOwner" (
+		contractAddress: ArgumentTypes.AccountId,
+		newOwner: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateCollectionOwner", [contractAddress, newOwner], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateCollectionOwner", [contractAddress, newOwner], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: nftContractAddress,
-	 * ]
-	 */
-	"update_nft_contract_address" (
-		contractAddress: ArgumentsTypes[0],
-		nftContractAddress: ArgumentsTypes[0],
+	* updateNftContractAddress
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateNftContractAddress" (
+		contractAddress: ArgumentTypes.AccountId,
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateNftContractAddress", [contractAddress, nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateNftContractAddress", [contractAddress, nftContractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributes,
-	 * 2: values,
-	 * ]
-	 */
-	"set_multiple_attributes" (
-		contractAddress: ArgumentsTypes[0],
-		attributes: ArgumentsTypes[38],
-		values: ArgumentsTypes[38],
+	* setMultipleAttributes
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { Array<string> } attributes,
+	* @param { Array<string> } values,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"setMultipleAttributes" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributes: Array<string>,
+		values: Array<string>,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "setMultipleAttributes", [contractAddress, attributes, values], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "setMultipleAttributes", [contractAddress, attributes, values], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributes,
-	 * ]
-	 */
-	"get_attributes" (
-		contractAddress: ArgumentsTypes[0],
-		attributes: ArgumentsTypes[38],
+	* getAttributes
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { Array<string> } attributes,
+	* @returns { Result<Array<string>, ReturnTypes.LangError> }
+	*/
+	"getAttributes" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributes: Array<string>,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["38"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAttributes", [contractAddress, attributes], __options);
+	): Promise< QueryReturnType< Result<Array<string>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAttributes", [contractAddress, attributes], __options , (result) => { return handleReturnType(result, getTypeDescription(22, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributeKey,
-	 * ]
-	 */
-	"get_attribute" (
-		contractAddress: ArgumentsTypes[0],
-		attributeKey: ArgumentsTypes[31],
+	* getAttribute
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { string } attributeKey,
+	* @returns { Result<string, ReturnTypes.LangError> }
+	*/
+	"getAttribute" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributeKey: string,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["31"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAttribute", [contractAddress, attributeKey], __options);
+	): Promise< QueryReturnType< Result<string, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAttribute", [contractAddress, attributeKey], __options , (result) => { return handleReturnType(result, getTypeDescription(23, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributeKey,
-	 * ]
-	 */
-	"has_attribute" (
-		contractAddress: ArgumentsTypes[0],
-		attributeKey: ArgumentsTypes[31],
+	* hasAttribute
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { string } attributeKey,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"hasAttribute" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributeKey: string,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["18"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "hasAttribute", [contractAddress, attributeKey], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "hasAttribute", [contractAddress, attributeKey], __options , (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributeKey,
-	 * ]
-	 */
-	"get_collection_attribute_index" (
-		contractAddress: ArgumentsTypes[0],
-		attributeKey: ArgumentsTypes[31],
+	* getCollectionAttributeIndex
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { string } attributeKey,
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionAttributeIndex" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributeKey: string,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["39"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionAttributeIndex", [contractAddress, attributeKey], __options);
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionAttributeIndex", [contractAddress, attributeKey], __options , (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * ]
-	 */
-	"get_collection_attribute_count" (
-		contractAddress: ArgumentsTypes[0],
+	* getCollectionAttributeCount
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionAttributeCount" (
+		contractAddress: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["39"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionAttributeCount", [contractAddress], __options);
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionAttributeCount", [contractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: contractType,
-	 * ]
-	 */
-	"update_contract_type" (
-		contractAddress: ArgumentsTypes[0],
-		contractType: ArgumentsTypes[17],
+	* updateContractType
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { ArgumentTypes.CollectionType } contractType,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateContractType" (
+		contractAddress: ArgumentTypes.AccountId,
+		contractType: ArgumentTypes.CollectionType,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateContractType", [contractAddress, contractType], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateContractType", [contractAddress, contractType], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: isCollectRoyaltyFee,
-	 * ]
-	 */
-	"update_is_collect_royalty_fee" (
-		contractAddress: ArgumentsTypes[0],
-		isCollectRoyaltyFee: ArgumentsTypes[18],
+	* updateIsCollectRoyaltyFee
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { boolean } isCollectRoyaltyFee,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateIsCollectRoyaltyFee" (
+		contractAddress: ArgumentTypes.AccountId,
+		isCollectRoyaltyFee: boolean,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateIsCollectRoyaltyFee", [contractAddress, isCollectRoyaltyFee], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateIsCollectRoyaltyFee", [contractAddress, isCollectRoyaltyFee], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: newFee,
-	 * ]
-	 */
-	"update_royalty_fee" (
-		contractAddress: ArgumentsTypes[0],
-		newFee: ArgumentsTypes[5],
+	* updateRoyaltyFee
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { (number | string | BN) } newFee,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateRoyaltyFee" (
+		contractAddress: ArgumentTypes.AccountId,
+		newFee: (number | string | BN),
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateRoyaltyFee", [contractAddress, newFee], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateRoyaltyFee", [contractAddress, newFee], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: showOnChainMetadata,
-	 * ]
-	 */
-	"update_show_on_chain_metadata" (
-		contractAddress: ArgumentsTypes[0],
-		showOnChainMetadata: ArgumentsTypes[18],
+	* updateShowOnChainMetadata
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { boolean } showOnChainMetadata,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateShowOnChainMetadata" (
+		contractAddress: ArgumentTypes.AccountId,
+		showOnChainMetadata: boolean,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateShowOnChainMetadata", [contractAddress, showOnChainMetadata], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateShowOnChainMetadata", [contractAddress, showOnChainMetadata], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: isActive,
-	 * ]
-	 */
-	"update_is_active" (
-		contractAddress: ArgumentsTypes[0],
-		isActive: ArgumentsTypes[18],
+	* updateIsActive
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { boolean } isActive,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateIsActive" (
+		contractAddress: ArgumentTypes.AccountId,
+		isActive: boolean,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateIsActive", [contractAddress, isActive], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateIsActive", [contractAddress, isActive], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: simpleModeAddingFee,
-	 * ]
-	 */
-	"update_simple_mode_adding_fee" (
-		simpleModeAddingFee: ArgumentsTypes[14],
+	* updateSimpleModeAddingFee
+	*
+	* @param { (string | number | BN) } simpleModeAddingFee,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateSimpleModeAddingFee" (
+		simpleModeAddingFee: (string | number | BN),
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateSimpleModeAddingFee", [simpleModeAddingFee], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateSimpleModeAddingFee", [simpleModeAddingFee], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: standardNftHash,
-	 * ]
-	 */
-	"update_standard_nft_hash" (
-		standardNftHash: ArgumentsTypes[12],
+	* updateStandardNftHash
+	*
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateStandardNftHash" (
+		standardNftHash: ArgumentTypes.Hash,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateStandardNftHash", [standardNftHash], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateStandardNftHash", [standardNftHash], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: advanceModeAddingFee,
-	 * ]
-	 */
-	"update_advance_mode_adding_fee" (
-		advanceModeAddingFee: ArgumentsTypes[14],
+	* updateAdvanceModeAddingFee
+	*
+	* @param { (string | number | BN) } advanceModeAddingFee,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateAdvanceModeAddingFee" (
+		advanceModeAddingFee: (string | number | BN),
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateAdvanceModeAddingFee", [advanceModeAddingFee], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateAdvanceModeAddingFee", [advanceModeAddingFee], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: maxRoyaltyFeeRate,
-	 * ]
-	 */
-	"update_max_royalty_fee_rate" (
-		maxRoyaltyFeeRate: ArgumentsTypes[5],
+	* updateMaxRoyaltyFeeRate
+	*
+	* @param { (number | string | BN) } maxRoyaltyFeeRate,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"updateMaxRoyaltyFeeRate" (
+		maxRoyaltyFeeRate: (number | string | BN),
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "updateMaxRoyaltyFeeRate", [maxRoyaltyFeeRate], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "updateMaxRoyaltyFeeRate", [maxRoyaltyFeeRate], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"get_collection_by_address" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getCollectionByAddress
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.Collection | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionByAddress" (
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["40"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionByAddress", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Collection | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionByAddress", [nftContractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(28, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: ownerAddress,
-	 * ]
-	 */
-	"get_collections_by_owner" (
-		ownerAddress: ArgumentsTypes[0],
+	* getCollectionsByOwner
+	*
+	* @param { ArgumentTypes.AccountId } ownerAddress,
+	* @returns { Result<Array<ReturnTypes.AccountId> | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionsByOwner" (
+		ownerAddress: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["41"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionsByOwner", [ownerAddress], __options);
-	}
-
-	/** */
-	"get_standard_nft_hash" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["12"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getStandardNftHash", [], __options);
+	): Promise< QueryReturnType< Result<Array<ReturnTypes.AccountId> | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionsByOwner", [ownerAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(31, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"get_contract_by_id" (
-		id: ArgumentsTypes[13],
+	* getStandardNftHash
+	*
+	* @returns { Result<ReturnTypes.Hash, ReturnTypes.LangError> }
+	*/
+	"getStandardNftHash" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["42"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getContractById", [id], __options);
-	}
-
-	/** */
-	"get_collection_count" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionCount", [], __options);
-	}
-
-	/** */
-	"get_active_collection_count" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getActiveCollectionCount", [], __options);
-	}
-
-	/** */
-	"get_simple_mode_adding_fee" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["14"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getSimpleModeAddingFee", [], __options);
-	}
-
-	/** */
-	"get_advance_mode_adding_fee" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["14"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAdvanceModeAddingFee", [], __options);
-	}
-
-	/** */
-	"get_max_royalty_fee_rate" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getMaxRoyaltyFeeRate", [], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Hash, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getStandardNftHash", [], __options , (result) => { return handleReturnType(result, getTypeDescription(33, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * ]
-	 */
-	"AccessControl::get_role_admin" (
-		role: ArgumentsTypes[5],
+	* getContractById
+	*
+	* @param { (number | string | BN) } id,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"getContractById" (
+		id: (number | string | BN),
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getContractById", [id], __options , (result) => { return handleReturnType(result, getTypeDescription(34, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::grant_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* getCollectionCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getCollectionCount" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "accessControl::grantRole", [role, account], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionCount", [], __options , (result) => { return handleReturnType(result, getTypeDescription(36, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::renounce_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* getActiveCollectionCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getActiveCollectionCount" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "accessControl::renounceRole", [role, account], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getActiveCollectionCount", [], __options , (result) => { return handleReturnType(result, getTypeDescription(36, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: address,
-	 * ]
-	 */
-	"AccessControl::has_role" (
-		role: ArgumentsTypes[5],
-		address: ArgumentsTypes[0],
+	* getSimpleModeAddingFee
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"getSimpleModeAddingFee" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["18"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options);
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getSimpleModeAddingFee", [], __options , (result) => { return handleReturnType(result, getTypeDescription(37, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::revoke_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* getAdvanceModeAddingFee
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"getAdvanceModeAddingFee" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["43"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "accessControl::revokeRole", [role, account], __options);
-	}
-
-	/** */
-	"Ownable::owner" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["0"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAdvanceModeAddingFee", [], __options , (result) => { return handleReturnType(result, getTypeDescription(37, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: newOwner,
-	 * ]
-	 */
-	"Ownable::transfer_ownership" (
-		newOwner: ArgumentsTypes[0],
+	* getMaxRoyaltyFeeRate
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getMaxRoyaltyFeeRate" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["44"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "ownable::transferOwnership", [newOwner], __options);
-	}
-
-	/** */
-	"Ownable::renounce_ownership" (
-		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["44"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "ownable::renounceOwnership", [], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getMaxRoyaltyFeeRate", [], __options , (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::get_collection_owner" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getRoleAdmin
+	*
+	* @param { (number | string | BN) } role,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getRoleAdmin" (
+		role: (number | string | BN),
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["42"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getCollectionOwner", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options , (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::is_active" (
-		nftContractAddress: ArgumentsTypes[0],
+	* grantRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { Result<Result<null, ReturnTypes.AccessControlError>, ReturnTypes.LangError> }
+	*/
+	"grantRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["18"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::isActive", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.AccessControlError>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::grantRole", [role, account], __options , (result) => { return handleReturnType(result, getTypeDescription(39, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::get_royalty_fee" (
-		nftContractAddress: ArgumentsTypes[0],
+	* renounceRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { Result<Result<null, ReturnTypes.AccessControlError>, ReturnTypes.LangError> }
+	*/
+	"renounceRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getRoyaltyFee", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.AccessControlError>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::renounceRole", [role, account], __options , (result) => { return handleReturnType(result, getTypeDescription(39, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::get_contract_type" (
-		nftContractAddress: ArgumentsTypes[0],
+	* hasRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } address,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"hasRole" (
+		role: (number | string | BN),
+		address: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["17"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getContractType", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options , (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
-	 * ]
-	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[14],
-		receiver: ArgumentsTypes[0],
+	* revokeRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { Result<Result<null, ReturnTypes.AccessControlError>, ReturnTypes.LangError> }
+	*/
+	"revokeRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::withdrawFee", [value, receiver], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.AccessControlError>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::revokeRole", [role, account], __options , (result) => { return handleReturnType(result, getTypeDescription(39, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[0],
-		tokenId: ArgumentsTypes[45],
-		receiver: ArgumentsTypes[0],
+	* owner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"owner" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options , (result) => { return handleReturnType(result, getTypeDescription(41, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: psp22ContractAddress,
-	 * 1: amount,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_psp22" (
-		psp22ContractAddress: ArgumentsTypes[0],
-		amount: ArgumentsTypes[14],
-		receiver: ArgumentsTypes[0],
+	* renounceOwnership
+	*
+	* @returns { Result<Result<null, ReturnTypes.OwnableError>, ReturnTypes.LangError> }
+	*/
+	"renounceOwnership" (
 		__options ? : GasLimit,
-	): Promise< QueryReturnType< OkishReturns["34"] > >{
-		return queryOkJSON( this.__nativeContract, this.__callerAddress, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.OwnableError>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::renounceOwnership", [], __options , (result) => { return handleReturnType(result, getTypeDescription(42, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* transferOwnership
+	*
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { Result<Result<null, ReturnTypes.OwnableError>, ReturnTypes.LangError> }
+	*/
+	"transferOwnership" (
+		newOwner: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.OwnableError>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::transferOwnership", [newOwner], __options , (result) => { return handleReturnType(result, getTypeDescription(42, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getContractType
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.CollectionType, ReturnTypes.LangError> }
+	*/
+	"getContractType" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.CollectionType, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getContractType", [nftContractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(44, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* isActive
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"isActive" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::isActive", [nftContractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getCollectionOwner
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionOwner" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getCollectionOwner", [nftContractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(34, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getRoyaltyFee
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getRoyaltyFee" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getRoyaltyFee", [nftContractAddress], __options , (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* tranferPsp22
+	*
+	* @param { ArgumentTypes.AccountId } psp22ContractAddress,
+	* @param { (string | number | BN) } amount,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"tranferPsp22" (
+		psp22ContractAddress: ArgumentTypes.AccountId,
+		amount: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* tranferNft
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"tranferNft" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		tokenId: ArgumentTypes.Id,
+		receiver: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* withdrawFee
+	*
+	* @param { (string | number | BN) } value,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"withdrawFee" (
+		value: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "adminTrait::withdrawFee", [value, receiver], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* setCode
+	*
+	* @param { Array<(number | string | BN)> } codeHash,
+	* @returns { Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> }
+	*/
+	"setCode" (
+		codeHash: Array<(number | string | BN)>,
+		__options ? : GasLimit,
+	): Promise< QueryReturnType< Result<Result<null, ReturnTypes.Error>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "upgradableTrait::setCode", [codeHash], __options , (result) => { return handleReturnType(result, getTypeDescription(15, 'artzero_collection_manager')); });
 	}
 
 }

@@ -2,9 +2,11 @@ import {CodePromise} from "@polkadot/api-contract";
 import type {KeyringPair} from "@polkadot/keyring/types";
 import Files from "fs";
 import type {ApiPromise} from "@polkadot/api";
-import {_signAndSend, SignAndSendSuccessResponse} from "../_sdk/tx";
-import type {ConstructorOptions} from "../_sdk/types";
-import type { ArgumentsTypes } from '../arguments/launchpad_psp34_nft_standard';
+import {_genValidGasLimitAndValue, _signAndSend, SignAndSendSuccessResponse} from "@727-ventures/typechain-types";
+import type {ConstructorOptions} from "@727-ventures/typechain-types";
+import type {WeightV2} from "@polkadot/types/interfaces";
+import type * as ArgumentTypes from '../types-arguments/launchpad_psp34_nft_standard';
+import type BN from 'bn.js';
 
 export default class Constructors {
 	readonly nativeAPI: ApiPromise;
@@ -18,59 +20,56 @@ export default class Constructors {
 		this.signer = signer;
 	}
 
-    	/**
-    	 * @arg: args: [
-    	 * 0: launchpadContractAddress - 8,
-    	 * 1: limitPhaseCount - 2,
-    	 * 2: contractOwner - 8,
-    	 * 3: totalSupply - 5,
-    	 * 4: projectInfo - 55,
-    	 * 5: codePhases - 56,
-    	 * 6: isPublicPhases - 57,
-    	 * 7: publicMintingFeePhases - 58,
-    	 * 8: publicMintingAmountPhases - 59,
-    	 * 9: publicMaxMintingAmountPhases - 59,
-    	 * 10: startTimePhases - 59,
-    	 * 11: endTimePhases - 59,
-    	 * ]
-    	 */
-    	async "new" (
-    		launchpadContractAddress: ArgumentsTypes[8],
-    		limitPhaseCount: ArgumentsTypes[2],
-    		contractOwner: ArgumentsTypes[8],
-    		totalSupply: ArgumentsTypes[5],
-    		projectInfo: ArgumentsTypes[55],
-    		codePhases: ArgumentsTypes[56],
-    		isPublicPhases: ArgumentsTypes[57],
-    		publicMintingFeePhases: ArgumentsTypes[58],
-    		publicMintingAmountPhases: ArgumentsTypes[59],
-    		publicMaxMintingAmountPhases: ArgumentsTypes[59],
-    		startTimePhases: ArgumentsTypes[59],
-    		endTimePhases: ArgumentsTypes[59],
-    		__options ? : ConstructorOptions,
-    	) {
-    		const __contract = JSON.parse(Files.readFileSync("./artifacts/launchpad_psp34_nft_standard.contract").toString());
+	/**
+	* new
+	*
+	* @param { ArgumentTypes.AccountId } launchpadContractAddress,
+	* @param { (number | string | BN) } limitPhaseCount,
+	* @param { ArgumentTypes.AccountId } contractOwner,
+	* @param { (number | string | BN) } totalSupply,
+	* @param { string } projectInfo,
+	* @param { Array<string> } codePhases,
+	* @param { Array<boolean> } isPublicPhases,
+	* @param { Array<(string | number | BN)> } publicMintingFeePhases,
+	* @param { Array<(number | string | BN)> } publicMintingAmountPhases,
+	* @param { Array<(number | string | BN)> } publicMaxMintingAmountPhases,
+	* @param { Array<(number | string | BN)> } startTimePhases,
+	* @param { Array<(number | string | BN)> } endTimePhases,
+	*/
+   	async "new" (
+		launchpadContractAddress: ArgumentTypes.AccountId,
+		limitPhaseCount: (number | string | BN),
+		contractOwner: ArgumentTypes.AccountId,
+		totalSupply: (number | string | BN),
+		projectInfo: string,
+		codePhases: Array<string>,
+		isPublicPhases: Array<boolean>,
+		publicMintingFeePhases: Array<(string | number | BN)>,
+		publicMintingAmountPhases: Array<(number | string | BN)>,
+		publicMaxMintingAmountPhases: Array<(number | string | BN)>,
+		startTimePhases: Array<(number | string | BN)>,
+		endTimePhases: Array<(number | string | BN)>,
+		__options ? : ConstructorOptions,
+   	) {
+   		const __contract = JSON.parse(Files.readFileSync("./artifacts/launchpad_psp34_nft_standard.contract").toString());
+		const code = new CodePromise(this.nativeAPI, __contract, __contract.source.wasm);
+		const gasLimit = (await _genValidGasLimitAndValue(this.nativeAPI, __options)).gasLimit as WeightV2;
 
-			const code = new CodePromise(this.nativeAPI, __contract, __contract.source.wasm);
-
-			const gasLimit = 100000 * 1000000 || __options?.gasLimit;
-			const storageDepositLimit = __options?.storageDepositLimit;
-
+		const storageDepositLimit = __options?.storageDepositLimit;
 			const tx = code.tx["new"]!({ gasLimit, storageDepositLimit, value: __options?.value }, launchpadContractAddress, limitPhaseCount, contractOwner, totalSupply, projectInfo, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases);
-
 			let response;
+
 			try {
-				response = await _signAndSend(this.nativeAPI.registry, tx, this.signer);
+				response = await _signAndSend(this.nativeAPI.registry, tx, this.signer, (event: any) => event);
 			}
 			catch (error) {
 				console.log(error);
 			}
 
-			return {
-				result: response as SignAndSendSuccessResponse,
-				// @ts-ignore
-				address: (response as SignAndSendSuccessResponse)!.result!.contract.address.toString(),
-			}
-    	}
-
+		return {
+			result: response as SignAndSendSuccessResponse,
+			// @ts-ignore
+			address: (response as SignAndSendSuccessResponse)!.result!.contract.address.toString(),
+		};
+	}
 }
