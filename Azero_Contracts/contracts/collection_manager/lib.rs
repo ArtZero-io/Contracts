@@ -146,7 +146,7 @@ pub mod artzero_collection_manager {
                 .code_hash(self.manager.standard_nft_hash)
                 .salt_bytes(self.manager.collection_count.to_le_bytes())
                 .instantiate()
-                .unwrap_or_else(|error| panic!("failed at instantiating the NFT contract: {:?}", error));
+                .unwrap_or_else(|error| panic!("failed at instantiating the NFT contract: {error:?}"));
             let contract_account: AccountId = contract.to_account_id();
 
             self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
