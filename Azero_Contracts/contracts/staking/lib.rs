@@ -202,7 +202,7 @@ pub mod artzero_staking_nft {
         #[modifiers(only_locked)]
         pub fn add_reward(&mut self) -> Result<(), Error> {
             let reward = self.env().transferred_value();
-            if reward <= 0 {
+            if reward == 0 {
                 return Err(Error::InvalidInput)
             }
             if self.manager.reward_started { // only when reward distribution is not started
@@ -244,7 +244,7 @@ pub mod artzero_staking_nft {
             self.manager.is_claimed.insert(&caller, &true); // Can only claim once
 
             // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
-            if self.manager.total_staked <= 0 {
+            if self.manager.total_staked == 0 {
                 return Err(Error::Custom(String::from("Invalid Total Stake")))
             }
             if !self.manager.reward_started { // Only allow when reward distribution is started
@@ -252,11 +252,11 @@ pub mod artzero_staking_nft {
             }
             // How many NFT the user staker, it must be greater than ZERO
             let staked_amount = self.manager.staking_list.count(caller);
-            if staked_amount <= 0{
+            if staked_amount == 0{
                 return Err(Error::Custom(String::from("Invalid User Stake")))
             }
             // Check if Reward Pool has balance to pay for stakers
-            if self.manager.reward_pool <= 0{
+            if self.manager.reward_pool == 0{
                 return Err(Error::Custom(String::from("Invalid Reward Pool")))
             }
             // Calculate how much reward to pay for staker
@@ -486,7 +486,7 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let leng = token_ids.len();
 
-            if self.manager.pending_unstaking_list.count(caller) <= 0 {
+            if self.manager.pending_unstaking_list.count(caller) == 0 {
                 return Err(Error::InvalidInput)
             }
             for &item in token_ids.iter() {
@@ -530,7 +530,7 @@ pub mod artzero_staking_nft {
         pub fn unstake(&mut self, token_ids: Vec<u64>) -> Result<(), Error> {
             // Step 1 - Check if the token is belong to caller
             let caller = self.env().caller();
-            if self.manager.pending_unstaking_list.count(caller) <= 0 {
+            if self.manager.pending_unstaking_list.count(caller) == 0 {
                 return Err(Error::InvalidInput)
             }
             for &item in token_ids.iter() {
@@ -539,7 +539,7 @@ pub mod artzero_staking_nft {
                     return Err(Error::InvalidInput)
                 }
                 let request_unstake_time = self.get_request_unstake_time(caller, item);
-                if request_unstake_time <= 0 {
+                if request_unstake_time == 0 {
                     return Err(Error::InvalidTime)
                 }
                 let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
