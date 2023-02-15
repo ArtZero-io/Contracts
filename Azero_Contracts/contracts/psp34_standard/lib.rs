@@ -72,9 +72,8 @@ pub mod psp34_nft {
 
             if caller == account || allowance {
                 self._burn_from(account, id)
-            }
-            else{
-                return Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
+            } else{
+                Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
             }
         }
     }

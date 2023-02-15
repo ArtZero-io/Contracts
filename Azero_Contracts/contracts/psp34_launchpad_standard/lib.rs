@@ -170,9 +170,8 @@ pub mod launchpad_psp34_nft_standard {
 
             if caller == account || allowance {
                 self._burn_from(account, id)
-            }
-            else{
-                return Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
+            } else{
+                Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
             }
         }
     }
@@ -209,7 +208,7 @@ pub mod launchpad_psp34_nft_standard {
             instance.manager.public_minted_count = 0;
             instance.manager.owner_claimed_amount = 0;
             instance.manager.available_token_amount = total_supply;
-            if code_phases.len() > 0 &&
+            if !code_phases.is_empty() &&
                 code_phases.len() == start_time_phases.len() &&
                 code_phases.len() == is_public_phases.len() &&
                 code_phases.len() == public_minting_fee_phases.len() &&
