@@ -1,15 +1,11 @@
 import type BN from 'bn.js';
 
-export type AccountId = string
+export type AccountId = string | number[]
 
-export type Hash = string
+export type Hash = string | number[]
 
-export type Project = {
-	isActive: boolean,
-	projectOwner: AccountId,
-	totalSupply: (number | string | BN),
-	startTime: (number | string | BN),
-	endTime: (number | string | BN)
+export enum LangError {
+	couldNotReadInput = 'CouldNotReadInput'
 }
 
 export interface Error {
@@ -21,13 +17,17 @@ export interface Error {
 	tokenOwnerNotMatch ? : null,
 	notApproved ? : null,
 	cannotTransfer ? : null,
+	cannotMint ? : null,
+	notPublicMint ? : null,
 	notEnoughBalance ? : null,
+	maxSupply ? : null,
 	alreadyInit ? : null,
 	notOwner ? : null,
 	notTokenOwner ? : null,
 	projectNotExist ? : null,
 	projectOwnerAndAdmin ? : null,
 	invalidStartTimeAndEndTime ? : null,
+	invalidPhaseCount ? : null,
 	collectionOwnerAndAdmin ? : null,
 	collectionNotActive ? : null,
 	invalidInput ? : null,
@@ -98,9 +98,24 @@ export class ErrorBuilder {
 			cannotTransfer: null,
 		};
 	}
+	static CannotMint(): Error {
+		return {
+			cannotMint: null,
+		};
+	}
+	static NotPublicMint(): Error {
+		return {
+			notPublicMint: null,
+		};
+	}
 	static NotEnoughBalance(): Error {
 		return {
 			notEnoughBalance: null,
+		};
+	}
+	static MaxSupply(): Error {
+		return {
+			maxSupply: null,
 		};
 	}
 	static AlreadyInit(): Error {
@@ -131,6 +146,11 @@ export class ErrorBuilder {
 	static InvalidStartTimeAndEndTime(): Error {
 		return {
 			invalidStartTimeAndEndTime: null,
+		};
+	}
+	static InvalidPhaseCount(): Error {
+		return {
+			invalidPhaseCount: null,
 		};
 	}
 	static CollectionOwnerAndAdmin(): Error {
@@ -279,6 +299,14 @@ export enum AccessControlError {
 	invalidCaller = 'InvalidCaller',
 	missingRole = 'MissingRole',
 	roleRedundant = 'RoleRedundant'
+}
+
+export type Project = {
+	isActive: boolean,
+	projectOwner: AccountId,
+	totalSupply: (number | string | BN),
+	startTime: (number | string | BN),
+	endTime: (number | string | BN)
 }
 
 export interface Id {

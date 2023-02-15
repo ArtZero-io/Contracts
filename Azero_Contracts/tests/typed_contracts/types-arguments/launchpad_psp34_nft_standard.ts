@@ -1,73 +1,10 @@
 import type BN from 'bn.js';
 
-export interface Id {
-	u8 ? : (number | string | BN),
-	u16 ? : (number | string | BN),
-	u32 ? : (number | string | BN),
-	u64 ? : (number | string | BN),
-	u128 ? : (string | number | BN),
-	bytes ? : Array<(number | string | BN)>
+export type AccountId = string | number[]
+
+export enum LangError {
+	couldNotReadInput = 'CouldNotReadInput'
 }
-
-export class IdBuilder {
-	static U8(value: (number | string | BN)): Id {
-		return {
-			u8: value,
-		};
-	}
-	static U16(value: (number | string | BN)): Id {
-		return {
-			u16: value,
-		};
-	}
-	static U32(value: (number | string | BN)): Id {
-		return {
-			u32: value,
-		};
-	}
-	static U64(value: (number | string | BN)): Id {
-		return {
-			u64: value,
-		};
-	}
-	static U128(value: (string | number | BN)): Id {
-		return {
-			u128: value,
-		};
-	}
-	static Bytes(value: Array<(number | string | BN)>): Id {
-		return {
-			bytes: value,
-		};
-	}
-}
-
-export type AccountId = string
-
-export type multi_mapping_MultiMapping = Array<[AccountId | null, Id]>;
-
-export type Whitelist = {
-	whitelistAmount: (number | string | BN),
-	claimedAmount: (number | string | BN),
-	mintingFee: (string | number | BN)
-}
-
-export type Phase = {
-	isActive: boolean,
-	title: Array<(number | string | BN)>,
-	isPublic: boolean,
-	publicMintingFee: (string | number | BN),
-	publicMintingAmount: (number | string | BN),
-	publicMaxMintingAmount: (number | string | BN),
-	publicClaimedAmount: (number | string | BN),
-	whitelistAmount: (number | string | BN),
-	claimedAmount: (number | string | BN),
-	totalAmount: (number | string | BN),
-	startTime: (number | string | BN),
-	endTime: (number | string | BN)
-}
-
-export type multi_mapping_MultiMapping = Array<[(number | string | BN), AccountId]>;
 
 export interface Error {
 	custom ? : string,
@@ -78,13 +15,17 @@ export interface Error {
 	tokenOwnerNotMatch ? : null,
 	notApproved ? : null,
 	cannotTransfer ? : null,
+	cannotMint ? : null,
+	notPublicMint ? : null,
 	notEnoughBalance ? : null,
+	maxSupply ? : null,
 	alreadyInit ? : null,
 	notOwner ? : null,
 	notTokenOwner ? : null,
 	projectNotExist ? : null,
 	projectOwnerAndAdmin ? : null,
 	invalidStartTimeAndEndTime ? : null,
+	invalidPhaseCount ? : null,
 	collectionOwnerAndAdmin ? : null,
 	collectionNotActive ? : null,
 	invalidInput ? : null,
@@ -155,9 +96,24 @@ export class ErrorBuilder {
 			cannotTransfer: null,
 		};
 	}
+	static CannotMint(): Error {
+		return {
+			cannotMint: null,
+		};
+	}
+	static NotPublicMint(): Error {
+		return {
+			notPublicMint: null,
+		};
+	}
 	static NotEnoughBalance(): Error {
 		return {
 			notEnoughBalance: null,
+		};
+	}
+	static MaxSupply(): Error {
+		return {
+			maxSupply: null,
 		};
 	}
 	static AlreadyInit(): Error {
@@ -188,6 +144,11 @@ export class ErrorBuilder {
 	static InvalidStartTimeAndEndTime(): Error {
 		return {
 			invalidStartTimeAndEndTime: null,
+		};
+	}
+	static InvalidPhaseCount(): Error {
+		return {
+			invalidPhaseCount: null,
 		};
 	}
 	static CollectionOwnerAndAdmin(): Error {
@@ -336,6 +297,69 @@ export enum AccessControlError {
 	invalidCaller = 'InvalidCaller',
 	missingRole = 'MissingRole',
 	roleRedundant = 'RoleRedundant'
+}
+
+export type Phase = {
+	isActive: boolean,
+	title: Array<(number | string | BN)>,
+	isPublic: boolean,
+	publicMintingFee: (string | number | BN),
+	publicMintingAmount: (number | string | BN),
+	publicMaxMintingAmount: (number | string | BN),
+	publicClaimedAmount: (number | string | BN),
+	whitelistAmount: (number | string | BN),
+	claimedAmount: (number | string | BN),
+	totalAmount: (number | string | BN),
+	startTime: (number | string | BN),
+	endTime: (number | string | BN)
+}
+
+export type Whitelist = {
+	whitelistAmount: (number | string | BN),
+	claimedAmount: (number | string | BN),
+	mintingFee: (string | number | BN)
+}
+
+export interface Id {
+	u8 ? : (number | string | BN),
+	u16 ? : (number | string | BN),
+	u32 ? : (number | string | BN),
+	u64 ? : (number | string | BN),
+	u128 ? : (string | number | BN),
+	bytes ? : Array<(number | string | BN)>
+}
+
+export class IdBuilder {
+	static U8(value: (number | string | BN)): Id {
+		return {
+			u8: value,
+		};
+	}
+	static U16(value: (number | string | BN)): Id {
+		return {
+			u16: value,
+		};
+	}
+	static U32(value: (number | string | BN)): Id {
+		return {
+			u32: value,
+		};
+	}
+	static U64(value: (number | string | BN)): Id {
+		return {
+			u64: value,
+		};
+	}
+	static U128(value: (string | number | BN)): Id {
+		return {
+			u128: value,
+		};
+	}
+	static Bytes(value: Array<(number | string | BN)>): Id {
+		return {
+			bytes: value,
+		};
+	}
 }
 
 export interface PSP34Error {

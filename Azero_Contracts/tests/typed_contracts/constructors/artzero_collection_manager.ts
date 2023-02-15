@@ -2,9 +2,11 @@ import {CodePromise} from "@polkadot/api-contract";
 import type {KeyringPair} from "@polkadot/keyring/types";
 import Files from "fs";
 import type {ApiPromise} from "@polkadot/api";
-import {_signAndSend, SignAndSendSuccessResponse} from "../_sdk/tx";
-import type {ConstructorOptions} from "../_sdk/types";
-import type { ArgumentsTypes } from '../arguments/artzero_collection_manager';
+import {_genValidGasLimitAndValue, _signAndSend, SignAndSendSuccessResponse} from "@727-ventures/typechain-types";
+import type {ConstructorOptions} from "@727-ventures/typechain-types";
+import type {WeightV2} from "@polkadot/types/interfaces";
+import type * as ArgumentTypes from '../types-arguments/artzero_collection_manager';
+import type BN from 'bn.js';
 
 export default class Constructors {
 	readonly nativeAPI: ApiPromise;
@@ -18,45 +20,42 @@ export default class Constructors {
 		this.signer = signer;
 	}
 
-    	/**
-    	 * @arg: args: [
-    	 * 0: adminAddress - 0,
-    	 * 1: standardNftHash - 12,
-    	 * 2: simpleModeAddingFee - 14,
-    	 * 3: advanceModeAddingFee - 14,
-    	 * 4: maxRoyaltyFeeRate - 5,
-    	 * ]
-    	 */
-    	async "new" (
-    		adminAddress: ArgumentsTypes[0],
-    		standardNftHash: ArgumentsTypes[12],
-    		simpleModeAddingFee: ArgumentsTypes[14],
-    		advanceModeAddingFee: ArgumentsTypes[14],
-    		maxRoyaltyFeeRate: ArgumentsTypes[5],
-    		__options ? : ConstructorOptions,
-    	) {
-    		const __contract = JSON.parse(Files.readFileSync("./artifacts/artzero_collection_manager.contract").toString());
+	/**
+	* new
+	*
+	* @param { ArgumentTypes.AccountId } adminAddress,
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @param { (string | number | BN) } simpleModeAddingFee,
+	* @param { (string | number | BN) } advanceModeAddingFee,
+	* @param { (number | string | BN) } maxRoyaltyFeeRate,
+	*/
+   	async "new" (
+		adminAddress: ArgumentTypes.AccountId,
+		standardNftHash: ArgumentTypes.Hash,
+		simpleModeAddingFee: (string | number | BN),
+		advanceModeAddingFee: (string | number | BN),
+		maxRoyaltyFeeRate: (number | string | BN),
+		__options ? : ConstructorOptions,
+   	) {
+   		const __contract = JSON.parse(Files.readFileSync("./artifacts/artzero_collection_manager.contract").toString());
+		const code = new CodePromise(this.nativeAPI, __contract, __contract.source.wasm);
+		const gasLimit = (await _genValidGasLimitAndValue(this.nativeAPI, __options)).gasLimit as WeightV2;
 
-			const code = new CodePromise(this.nativeAPI, __contract, __contract.source.wasm);
-
-			const gasLimit = 100000 * 1000000 || __options?.gasLimit;
-			const storageDepositLimit = __options?.storageDepositLimit;
-
+		const storageDepositLimit = __options?.storageDepositLimit;
 			const tx = code.tx["new"]!({ gasLimit, storageDepositLimit, value: __options?.value }, adminAddress, standardNftHash, simpleModeAddingFee, advanceModeAddingFee, maxRoyaltyFeeRate);
-
 			let response;
+
 			try {
-				response = await _signAndSend(this.nativeAPI.registry, tx, this.signer);
+				response = await _signAndSend(this.nativeAPI.registry, tx, this.signer, (event: any) => event);
 			}
 			catch (error) {
 				console.log(error);
 			}
 
-			return {
-				result: response as SignAndSendSuccessResponse,
-				// @ts-ignore
-				address: (response as SignAndSendSuccessResponse)!.result!.contract.address.toString(),
-			}
-    	}
-
+		return {
+			result: response as SignAndSendSuccessResponse,
+			// @ts-ignore
+			address: (response as SignAndSendSuccessResponse)!.result!.contract.address.toString(),
+		};
+	}
 }

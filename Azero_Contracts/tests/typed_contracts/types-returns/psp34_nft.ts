@@ -1,50 +1,11 @@
 import type BN from 'bn.js';
-
-export interface Id {
-	u8 ? : number,
-	u16 ? : number,
-	u32 ? : number,
-	u64 ? : number,
-	u128 ? : (string | number),
-	bytes ? : Array<number>
-}
-
-export class IdBuilder {
-	static U8(value: number): Id {
-		return {
-			u8: value,
-		};
-	}
-	static U16(value: number): Id {
-		return {
-			u16: value,
-		};
-	}
-	static U32(value: number): Id {
-		return {
-			u32: value,
-		};
-	}
-	static U64(value: number): Id {
-		return {
-			u64: value,
-		};
-	}
-	static U128(value: (string | number)): Id {
-		return {
-			u128: value,
-		};
-	}
-	static Bytes(value: Array<number>): Id {
-		return {
-			bytes: value,
-		};
-	}
-}
+import type {ReturnNumber} from '@727-ventures/typechain-types';
 
 export type AccountId = string | number[]
 
-export type MultiMapping = Array<[AccountId | null, Id]>;
+export enum LangError {
+	couldNotReadInput = 'CouldNotReadInput'
+}
 
 export interface Error {
 	custom ? : string,
@@ -55,13 +16,17 @@ export interface Error {
 	tokenOwnerNotMatch ? : null,
 	notApproved ? : null,
 	cannotTransfer ? : null,
+	cannotMint ? : null,
+	notPublicMint ? : null,
 	notEnoughBalance ? : null,
+	maxSupply ? : null,
 	alreadyInit ? : null,
 	notOwner ? : null,
 	notTokenOwner ? : null,
 	projectNotExist ? : null,
 	projectOwnerAndAdmin ? : null,
 	invalidStartTimeAndEndTime ? : null,
+	invalidPhaseCount ? : null,
 	collectionOwnerAndAdmin ? : null,
 	collectionNotActive ? : null,
 	invalidInput ? : null,
@@ -132,9 +97,24 @@ export class ErrorBuilder {
 			cannotTransfer: null,
 		};
 	}
+	static CannotMint(): Error {
+		return {
+			cannotMint: null,
+		};
+	}
+	static NotPublicMint(): Error {
+		return {
+			notPublicMint: null,
+		};
+	}
 	static NotEnoughBalance(): Error {
 		return {
 			notEnoughBalance: null,
+		};
+	}
+	static MaxSupply(): Error {
+		return {
+			maxSupply: null,
 		};
 	}
 	static AlreadyInit(): Error {
@@ -165,6 +145,11 @@ export class ErrorBuilder {
 	static InvalidStartTimeAndEndTime(): Error {
 		return {
 			invalidStartTimeAndEndTime: null,
+		};
+	}
+	static InvalidPhaseCount(): Error {
+		return {
+			invalidPhaseCount: null,
 		};
 	}
 	static CollectionOwnerAndAdmin(): Error {
@@ -313,6 +298,48 @@ export enum AccessControlError {
 	invalidCaller = 'InvalidCaller',
 	missingRole = 'MissingRole',
 	roleRedundant = 'RoleRedundant'
+}
+
+export interface Id {
+	u8 ? : number,
+	u16 ? : number,
+	u32 ? : number,
+	u64 ? : number,
+	u128 ? : ReturnNumber,
+	bytes ? : Array<number>
+}
+
+export class IdBuilder {
+	static U8(value: number): Id {
+		return {
+			u8: value,
+		};
+	}
+	static U16(value: number): Id {
+		return {
+			u16: value,
+		};
+	}
+	static U32(value: number): Id {
+		return {
+			u32: value,
+		};
+	}
+	static U64(value: number): Id {
+		return {
+			u64: value,
+		};
+	}
+	static U128(value: ReturnNumber): Id {
+		return {
+			u128: value,
+		};
+	}
+	static Bytes(value: Array<number>): Id {
+		return {
+			bytes: value,
+		};
+	}
 }
 
 export interface PSP34Error {

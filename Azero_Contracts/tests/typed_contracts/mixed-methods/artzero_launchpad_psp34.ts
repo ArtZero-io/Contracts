@@ -3,12 +3,19 @@
 import type { ContractPromise } from '@polkadot/api-contract';
 import type { ApiPromise } from '@polkadot/api';
 import type { KeyringPair } from '@polkadot/keyring/types';
-import type { ArgumentsTypes } from '../arguments/artzero_launchpad_psp34';
-import type OkishReturns from '../return-values/artzero_launchpad_psp34';
-import type { GasLimit, GasLimitAndRequiredValue } from '../_sdk/types';
-import type { QueryReturnType } from '../_sdk/query';
-import { queryJSON } from '../_sdk/query';
-import { txSignAndSend } from '../_sdk/tx';
+import type { GasLimit, GasLimitAndRequiredValue, Result } from '@727-ventures/typechain-types';
+import type { QueryReturnType } from '@727-ventures/typechain-types';
+import { queryOkJSON, queryJSON, handleReturnType } from '@727-ventures/typechain-types';
+import { txSignAndSend } from '@727-ventures/typechain-types';
+import type * as ArgumentTypes from '../types-arguments/artzero_launchpad_psp34';
+import type * as ReturnTypes from '../types-returns/artzero_launchpad_psp34';
+import type BN from 'bn.js';
+//@ts-ignore
+import {ReturnNumber} from '@727-ventures/typechain-types';
+import {getTypeDescription} from './../shared/utils';
+// @ts-ignore
+import type {EventRecord} from "@polkadot/api/submittable";
+import {decodeEvents} from "../shared/utils";
 
 
 export default class Methods {
@@ -29,358 +36,463 @@ export default class Methods {
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: maxPhasesPerProject,
-	 * 1: standardNftHash,
-	 * 2: projectAddingFee,
-	 * 3: projectMintFeeRate,
-	 * 4: publicMaxMintingAmount,
-	 * ]
-	 */
+	* initialize
+	*
+	* @param { (number | string | BN) } maxPhasesPerProject,
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @param { (string | number | BN) } projectAddingFee,
+	* @param { (number | string | BN) } projectMintFeeRate,
+	* @param { (number | string | BN) } publicMaxMintingAmount,
+	* @param { ArgumentTypes.AccountId } adminAddress,
+	* @returns { void }
+	*/
 	"initialize" (
-		maxPhasesPerProject: ArgumentsTypes[2],
-		standardNftHash: ArgumentsTypes[12],
-		projectAddingFee: ArgumentsTypes[26],
-		projectMintFeeRate: ArgumentsTypes[5],
-		publicMaxMintingAmount: ArgumentsTypes[13],
+		maxPhasesPerProject: (number | string | BN),
+		standardNftHash: ArgumentTypes.Hash,
+		projectAddingFee: (string | number | BN),
+		projectMintFeeRate: (number | string | BN),
+		publicMaxMintingAmount: (number | string | BN),
+		adminAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "initialize", [maxPhasesPerProject, standardNftHash, projectAddingFee, projectMintFeeRate, publicMaxMintingAmount], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "initialize", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [maxPhasesPerProject, standardNftHash, projectAddingFee, projectMintFeeRate, publicMaxMintingAmount, adminAddress], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: totalSupply,
-	 * 1: startTime,
-	 * 2: endTime,
-	 * 3: projectInfo,
-	 * 4: codePhases,
-	 * 5: isPublicPhases,
-	 * 6: publicMintingFeePhases,
-	 * 7: publicMintingAmountPhases,
-	 * 8: publicMaxMintingAmountPhases,
-	 * 9: startTimePhases,
-	 * 10: endTimePhases,
-	 * ]
-	 */
-	"add_new_project" (
-		totalSupply: ArgumentsTypes[13],
-		startTime: ArgumentsTypes[13],
-		endTime: ArgumentsTypes[13],
-		projectInfo: ArgumentsTypes[29],
-		codePhases: ArgumentsTypes[32],
-		isPublicPhases: ArgumentsTypes[33],
-		publicMintingFeePhases: ArgumentsTypes[34],
-		publicMintingAmountPhases: ArgumentsTypes[35],
-		publicMaxMintingAmountPhases: ArgumentsTypes[35],
-		startTimePhases: ArgumentsTypes[35],
-		endTimePhases: ArgumentsTypes[35],
+	* addNewProject
+	*
+	* @param { (number | string | BN) } totalSupply,
+	* @param { (number | string | BN) } startTime,
+	* @param { (number | string | BN) } endTime,
+	* @param { string } projectInfo,
+	* @param { Array<string> } codePhases,
+	* @param { Array<boolean> } isPublicPhases,
+	* @param { Array<(string | number | BN)> } publicMintingFeePhases,
+	* @param { Array<(number | string | BN)> } publicMintingAmountPhases,
+	* @param { Array<(number | string | BN)> } publicMaxMintingAmountPhases,
+	* @param { Array<(number | string | BN)> } startTimePhases,
+	* @param { Array<(number | string | BN)> } endTimePhases,
+	* @returns { void }
+	*/
+	"addNewProject" (
+		totalSupply: (number | string | BN),
+		startTime: (number | string | BN),
+		endTime: (number | string | BN),
+		projectInfo: string,
+		codePhases: Array<string>,
+		isPublicPhases: Array<boolean>,
+		publicMintingFeePhases: Array<(string | number | BN)>,
+		publicMintingAmountPhases: Array<(number | string | BN)>,
+		publicMaxMintingAmountPhases: Array<(number | string | BN)>,
+		startTimePhases: Array<(number | string | BN)>,
+		endTimePhases: Array<(number | string | BN)>,
 		__options: GasLimitAndRequiredValue,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addNewProject", [totalSupply, startTime, endTime, projectInfo, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addNewProject", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [totalSupply, startTime, endTime, projectInfo, codePhases, isPublicPhases, publicMintingFeePhases, publicMintingAmountPhases, publicMaxMintingAmountPhases, startTimePhases, endTimePhases], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: startTime,
-	 * 2: endTime,
-	 * ]
-	 */
-	"edit_project" (
-		contractAddress: ArgumentsTypes[0],
-		startTime: ArgumentsTypes[13],
-		endTime: ArgumentsTypes[13],
+	* editProject
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { (number | string | BN) } startTime,
+	* @param { (number | string | BN) } endTime,
+	* @returns { void }
+	*/
+	"editProject" (
+		contractAddress: ArgumentTypes.AccountId,
+		startTime: (number | string | BN),
+		endTime: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "editProject", [contractAddress, startTime, endTime], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "editProject", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [contractAddress, startTime, endTime], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: projectAddingFee,
-	 * ]
-	 */
-	"update_project_adding_fee" (
-		projectAddingFee: ArgumentsTypes[26],
+	* updateProjectAddingFee
+	*
+	* @param { (string | number | BN) } projectAddingFee,
+	* @returns { void }
+	*/
+	"updateProjectAddingFee" (
+		projectAddingFee: (string | number | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateProjectAddingFee", [projectAddingFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateProjectAddingFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [projectAddingFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: publicMaxMintingAmount,
-	 * ]
-	 */
-	"update_public_max_minting_amount" (
-		publicMaxMintingAmount: ArgumentsTypes[13],
+	* updatePublicMaxMintingAmount
+	*
+	* @param { (number | string | BN) } publicMaxMintingAmount,
+	* @returns { void }
+	*/
+	"updatePublicMaxMintingAmount" (
+		publicMaxMintingAmount: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updatePublicMaxMintingAmount", [publicMaxMintingAmount], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updatePublicMaxMintingAmount", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [publicMaxMintingAmount], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: projectMintFeeRate,
-	 * ]
-	 */
-	"update_project_mint_fee_rate" (
-		projectMintFeeRate: ArgumentsTypes[5],
+	* updateProjectMintFeeRate
+	*
+	* @param { (number | string | BN) } projectMintFeeRate,
+	* @returns { void }
+	*/
+	"updateProjectMintFeeRate" (
+		projectMintFeeRate: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateProjectMintFeeRate", [projectMintFeeRate], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateProjectMintFeeRate", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [projectMintFeeRate], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: standardNftHash,
-	 * ]
-	 */
-	"update_standard_nft_hash" (
-		standardNftHash: ArgumentsTypes[12],
+	* updateStandardNftHash
+	*
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @returns { void }
+	*/
+	"updateStandardNftHash" (
+		standardNftHash: ArgumentTypes.Hash,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateStandardNftHash", [standardNftHash], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateStandardNftHash", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [standardNftHash], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: isActive,
-	 * 1: contractAddress,
-	 * ]
-	 */
-	"update_is_active_project" (
-		isActive: ArgumentsTypes[16],
-		contractAddress: ArgumentsTypes[0],
+	* updateIsActiveProject
+	*
+	* @param { boolean } isActive,
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @returns { void }
+	*/
+	"updateIsActiveProject" (
+		isActive: boolean,
+		contractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateIsActiveProject", [isActive, contractAddress], __options);
-	}
-
-	/** */
-	"get_project_adding_fee" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["26"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getProjectAddingFee", [], __options);
-	}
-
-	/** */
-	"get_active_project_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getActiveProjectCount", [], __options);
-	}
-
-	/** */
-	"get_project_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getProjectCount", [], __options);
-	}
-
-	/** */
-	"get_standard_nft_hash" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["12"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getStandardNftHash", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateIsActiveProject", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [isActive, contractAddress], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"get_project_by_id" (
-		id: ArgumentsTypes[13],
+	* getProjectAddingFee
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"getProjectAddingFee" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["37"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getProjectById", [id], __options);
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getProjectAddingFee", [], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_launchpad_psp34')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: ownerAddress,
-	 * ]
-	 */
-	"get_projects_by_owner" (
-		ownerAddress: ArgumentsTypes[0],
+	* getActiveProjectCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getActiveProjectCount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["23"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getProjectsByOwner", [ownerAddress], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getActiveProjectCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_launchpad_psp34')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"get_project_by_nft_address" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getProjectCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getProjectCount" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["38"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getProjectByNftAddress", [nftContractAddress], __options);
-	}
-
-	/** */
-	"get_max_phases_per_project" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["2"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getMaxPhasesPerProject", [], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getProjectCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_launchpad_psp34')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: address,
-	 * ]
-	 */
-	"AccessControl::has_role" (
-		role: ArgumentsTypes[5],
-		address: ArgumentsTypes[0],
+	* getStandardNftHash
+	*
+	* @returns { Result<ReturnTypes.Hash, ReturnTypes.LangError> }
+	*/
+	"getStandardNftHash" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["16"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Hash, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getStandardNftHash", [], __options, (result) => { return handleReturnType(result, getTypeDescription(26, 'artzero_launchpad_psp34')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * ]
-	 */
-	"AccessControl::get_role_admin" (
-		role: ArgumentsTypes[5],
+	* getProjectById
+	*
+	* @param { (number | string | BN) } id,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"getProjectById" (
+		id: (number | string | BN),
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getProjectById", [id], __options, (result) => { return handleReturnType(result, getTypeDescription(27, 'artzero_launchpad_psp34')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::grant_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* getProjectsByOwner
+	*
+	* @param { ArgumentTypes.AccountId } ownerAddress,
+	* @returns { Result<Array<ReturnTypes.AccountId>, ReturnTypes.LangError> }
+	*/
+	"getProjectsByOwner" (
+		ownerAddress: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<Array<ReturnTypes.AccountId>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getProjectsByOwner", [ownerAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(29, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* getProjectByNftAddress
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.Project | null, ReturnTypes.LangError> }
+	*/
+	"getProjectByNftAddress" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.Project | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getProjectByNftAddress", [nftContractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(30, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* getMaxPhasesPerProject
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getMaxPhasesPerProject" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getMaxPhasesPerProject", [], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* getRoleAdmin
+	*
+	* @param { (number | string | BN) } role,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getRoleAdmin" (
+		role: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* grantRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"grantRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::grantRole", [role, account], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::grantRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::revoke_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* renounceRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"renounceRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::revokeRole", [role, account], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::renounceRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::renounce_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* revokeRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"revokeRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::renounceRole", [role, account], __options);
-	}
-
-	/** */
-	"Ownable::owner" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["0"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::revokeRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: newOwner,
-	 * ]
-	 */
-	"Ownable::transfer_ownership" (
-		newOwner: ArgumentsTypes[0],
+	* hasRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } address,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"hasRole" (
+		role: (number | string | BN),
+		address: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", [newOwner], __options);
-	}
-
-	/** */
-	"Ownable::renounce_ownership" (
-		__options: GasLimit,
-	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", [], __options);
-	}
-
-	/** */
-	"ArtZeroLaunchPadTrait::get_project_mint_fee_rate" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroLaunchPadTrait::getProjectMintFeeRate", [], __options);
-	}
-
-	/** */
-	"ArtZeroLaunchPadTrait::get_public_max_minting_amount" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroLaunchPadTrait::getPublicMaxMintingAmount", [], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options, (result) => { return handleReturnType(result, getTypeDescription(35, 'artzero_launchpad_psp34')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
-	 * ]
-	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[26],
-		receiver: ArgumentsTypes[0],
+	* renounceOwnership
+	*
+	* @returns { void }
+	*/
+	"renounceOwnership" (
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", [value, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: psp22ContractAddress,
-	 * 1: amount,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_psp22" (
-		psp22ContractAddress: ArgumentsTypes[0],
-		amount: ArgumentsTypes[26],
-		receiver: ArgumentsTypes[0],
+	* transferOwnership
+	*
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { void }
+	*/
+	"transferOwnership" (
+		newOwner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [newOwner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[0],
-		tokenId: ArgumentsTypes[40],
-		receiver: ArgumentsTypes[0],
+	* owner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"owner" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options, (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* getProjectMintFeeRate
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getProjectMintFeeRate" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroLaunchPadTrait::getProjectMintFeeRate", [], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* getPublicMaxMintingAmount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getPublicMaxMintingAmount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroLaunchPadTrait::getPublicMaxMintingAmount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_launchpad_psp34')); });
+	}
+
+	/**
+	* withdrawFee
+	*
+	* @param { (string | number | BN) } value,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"withdrawFee" (
+		value: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [value, receiver], __options);
+	}
+
+	/**
+	* tranferNft
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferNft" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		tokenId: ArgumentTypes.Id,
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [nftContractAddress, tokenId, receiver], __options);
+	}
+
+	/**
+	* tranferPsp22
+	*
+	* @param { ArgumentTypes.AccountId } psp22ContractAddress,
+	* @param { (string | number | BN) } amount,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferPsp22" (
+		psp22ContractAddress: ArgumentTypes.AccountId,
+		amount: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [psp22ContractAddress, amount, receiver], __options);
+	}
+
+	/**
+	* setCode
+	*
+	* @param { Array<(number | string | BN)> } codeHash,
+	* @returns { void }
+	*/
+	"setCode" (
+		codeHash: Array<(number | string | BN)>,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "upgradableTrait::setCode", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_launchpad_psp34");
+		}, [codeHash], __options);
 	}
 
 }

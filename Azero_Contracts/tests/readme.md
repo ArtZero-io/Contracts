@@ -18,10 +18,10 @@ https://github.com/727-Ventures/openbrush-contracts/tree/main/tests/e2e
 For example:
 import Contract from "./typed_contracts/contracts/psp34_nft";
 import Constructors from "./typed_contracts/constructors/psp34_nft";
-5. Create test file in .ts and **run npx ts-node <test_file>.ts**
+5. Create test file in .ts
+6. Run **npm install**
+7. Run all tests **npm run test:mocha**
 
 ## Test Files
 
-psp34_standand_test.ts
-collection_manager_test.ts
-launchpad_test.ts
+

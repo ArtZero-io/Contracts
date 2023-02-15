@@ -48,7 +48,7 @@ https://docs.alephzero.org/aleph-zero/build/deploying-your-contract-to-aleph-zer
 2. Deploy NFT Standard Contract
 3. Deploy Collection Contract
 4. Deploy LaunchPad Standard Contract using any launchpad_contract_address. The purpose is to get the Hash Code of the contract.
-5. LaunchPad Manager via Proxy with Code Hash of LaunchPad Standard
+5. LaunchPad Manager with Code Hash of LaunchPad Standard
 6. Add PMP Project -> create Collection -> Update base URI -> Update admin address
 NFT Smartnet: **ipfs://QmXtnr9aEJVywiLs1keZdyiKbQwignZT3FhwKYivF15oZp/**
 NFT Mainnet: **To be updated**

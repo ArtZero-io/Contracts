@@ -3,12 +3,19 @@
 import type { ContractPromise } from '@polkadot/api-contract';
 import type { ApiPromise } from '@polkadot/api';
 import type { KeyringPair } from '@polkadot/keyring/types';
-import type { ArgumentsTypes } from '../arguments/artzero_collection_manager';
-import type OkishReturns from '../return-values/artzero_collection_manager';
-import type { GasLimit, GasLimitAndRequiredValue } from '../_sdk/types';
-import type { QueryReturnType } from '../_sdk/query';
-import { queryJSON } from '../_sdk/query';
-import { txSignAndSend } from '../_sdk/tx';
+import type { GasLimit, GasLimitAndRequiredValue, Result } from '@727-ventures/typechain-types';
+import type { QueryReturnType } from '@727-ventures/typechain-types';
+import { queryOkJSON, queryJSON, handleReturnType } from '@727-ventures/typechain-types';
+import { txSignAndSend } from '@727-ventures/typechain-types';
+import type * as ArgumentTypes from '../types-arguments/artzero_collection_manager';
+import type * as ReturnTypes from '../types-returns/artzero_collection_manager';
+import type BN from 'bn.js';
+//@ts-ignore
+import {ReturnNumber} from '@727-ventures/typechain-types';
+import {getTypeDescription} from './../shared/utils';
+// @ts-ignore
+import type {EventRecord} from "@polkadot/api/submittable";
+import {decodeEvents} from "../shared/utils";
 
 
 export default class Methods {
@@ -29,559 +36,690 @@ export default class Methods {
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: standardNftHash,
-	 * 1: simpleModeAddingFee,
-	 * 2: advanceModeAddingFee,
-	 * 3: maxRoyaltyFeeRate,
-	 * ]
-	 */
+	* initialize
+	*
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @param { (string | number | BN) } simpleModeAddingFee,
+	* @param { (string | number | BN) } advanceModeAddingFee,
+	* @param { (number | string | BN) } maxRoyaltyFeeRate,
+	* @param { ArgumentTypes.AccountId } adminAddress,
+	* @returns { void }
+	*/
 	"initialize" (
-		standardNftHash: ArgumentsTypes[12],
-		simpleModeAddingFee: ArgumentsTypes[14],
-		advanceModeAddingFee: ArgumentsTypes[14],
-		maxRoyaltyFeeRate: ArgumentsTypes[5],
+		standardNftHash: ArgumentTypes.Hash,
+		simpleModeAddingFee: (string | number | BN),
+		advanceModeAddingFee: (string | number | BN),
+		maxRoyaltyFeeRate: (number | string | BN),
+		adminAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "initialize", [standardNftHash, simpleModeAddingFee, advanceModeAddingFee, maxRoyaltyFeeRate], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "initialize", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [standardNftHash, simpleModeAddingFee, advanceModeAddingFee, maxRoyaltyFeeRate, adminAddress], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftName,
-	 * 1: nftSymbol,
-	 * 2: attributes,
-	 * 3: attributeVals,
-	 * 4: isCollectRoyaltyFee,
-	 * 5: royaltyFee,
-	 * ]
-	 */
-	"auto_new_collection" (
-		nftName: ArgumentsTypes[31],
-		nftSymbol: ArgumentsTypes[31],
-		attributes: ArgumentsTypes[38],
-		attributeVals: ArgumentsTypes[38],
-		isCollectRoyaltyFee: ArgumentsTypes[18],
-		royaltyFee: ArgumentsTypes[5],
+	* autoNewCollection
+	*
+	* @param { string } nftName,
+	* @param { string } nftSymbol,
+	* @param { Array<string> } attributes,
+	* @param { Array<string> } attributeVals,
+	* @param { boolean } isCollectRoyaltyFee,
+	* @param { (number | string | BN) } royaltyFee,
+	* @returns { void }
+	*/
+	"autoNewCollection" (
+		nftName: string,
+		nftSymbol: string,
+		attributes: Array<string>,
+		attributeVals: Array<string>,
+		isCollectRoyaltyFee: boolean,
+		royaltyFee: (number | string | BN),
 		__options: GasLimitAndRequiredValue,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "autoNewCollection", [nftName, nftSymbol, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "autoNewCollection", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [nftName, nftSymbol, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: attributes,
-	 * 2: attributeVals,
-	 * 3: isCollectRoyaltyFee,
-	 * 4: royaltyFee,
-	 * ]
-	 */
-	"add_new_collection" (
-		nftContractAddress: ArgumentsTypes[0],
-		attributes: ArgumentsTypes[38],
-		attributeVals: ArgumentsTypes[38],
-		isCollectRoyaltyFee: ArgumentsTypes[18],
-		royaltyFee: ArgumentsTypes[5],
+	* addNewCollection
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { Array<string> } attributes,
+	* @param { Array<string> } attributeVals,
+	* @param { boolean } isCollectRoyaltyFee,
+	* @param { (number | string | BN) } royaltyFee,
+	* @returns { void }
+	*/
+	"addNewCollection" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		attributes: Array<string>,
+		attributeVals: Array<string>,
+		isCollectRoyaltyFee: boolean,
+		royaltyFee: (number | string | BN),
 		__options: GasLimitAndRequiredValue,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addNewCollection", [nftContractAddress, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "addNewCollection", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [nftContractAddress, attributes, attributeVals, isCollectRoyaltyFee, royaltyFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: newOwner,
-	 * ]
-	 */
-	"update_collection_owner" (
-		contractAddress: ArgumentsTypes[0],
-		newOwner: ArgumentsTypes[0],
+	* updateCollectionOwner
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { void }
+	*/
+	"updateCollectionOwner" (
+		contractAddress: ArgumentTypes.AccountId,
+		newOwner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateCollectionOwner", [contractAddress, newOwner], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateCollectionOwner", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, newOwner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: nftContractAddress,
-	 * ]
-	 */
-	"update_nft_contract_address" (
-		contractAddress: ArgumentsTypes[0],
-		nftContractAddress: ArgumentsTypes[0],
+	* updateNftContractAddress
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { void }
+	*/
+	"updateNftContractAddress" (
+		contractAddress: ArgumentTypes.AccountId,
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateNftContractAddress", [contractAddress, nftContractAddress], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateNftContractAddress", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, nftContractAddress], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributes,
-	 * 2: values,
-	 * ]
-	 */
-	"set_multiple_attributes" (
-		contractAddress: ArgumentsTypes[0],
-		attributes: ArgumentsTypes[38],
-		values: ArgumentsTypes[38],
+	* setMultipleAttributes
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { Array<string> } attributes,
+	* @param { Array<string> } values,
+	* @returns { void }
+	*/
+	"setMultipleAttributes" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributes: Array<string>,
+		values: Array<string>,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "setMultipleAttributes", [contractAddress, attributes, values], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "setMultipleAttributes", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, attributes, values], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributes,
-	 * ]
-	 */
-	"get_attributes" (
-		contractAddress: ArgumentsTypes[0],
-		attributes: ArgumentsTypes[38],
+	* getAttributes
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { Array<string> } attributes,
+	* @returns { Result<Array<string>, ReturnTypes.LangError> }
+	*/
+	"getAttributes" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributes: Array<string>,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["38"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAttributes", [contractAddress, attributes], __options);
+	): Promise< QueryReturnType< Result<Array<string>, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAttributes", [contractAddress, attributes], __options, (result) => { return handleReturnType(result, getTypeDescription(22, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributeKey,
-	 * ]
-	 */
-	"get_attribute" (
-		contractAddress: ArgumentsTypes[0],
-		attributeKey: ArgumentsTypes[31],
+	* getAttribute
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { string } attributeKey,
+	* @returns { Result<string, ReturnTypes.LangError> }
+	*/
+	"getAttribute" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributeKey: string,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["31"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAttribute", [contractAddress, attributeKey], __options);
+	): Promise< QueryReturnType< Result<string, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAttribute", [contractAddress, attributeKey], __options, (result) => { return handleReturnType(result, getTypeDescription(23, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributeKey,
-	 * ]
-	 */
-	"has_attribute" (
-		contractAddress: ArgumentsTypes[0],
-		attributeKey: ArgumentsTypes[31],
+	* hasAttribute
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { string } attributeKey,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"hasAttribute" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributeKey: string,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["18"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "hasAttribute", [contractAddress, attributeKey], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "hasAttribute", [contractAddress, attributeKey], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: attributeKey,
-	 * ]
-	 */
-	"get_collection_attribute_index" (
-		contractAddress: ArgumentsTypes[0],
-		attributeKey: ArgumentsTypes[31],
+	* getCollectionAttributeIndex
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { string } attributeKey,
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionAttributeIndex" (
+		contractAddress: ArgumentTypes.AccountId,
+		attributeKey: string,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["39"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionAttributeIndex", [contractAddress, attributeKey], __options);
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionAttributeIndex", [contractAddress, attributeKey], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * ]
-	 */
-	"get_collection_attribute_count" (
-		contractAddress: ArgumentsTypes[0],
+	* getCollectionAttributeCount
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @returns { Result<number | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionAttributeCount" (
+		contractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["39"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionAttributeCount", [contractAddress], __options);
+	): Promise< QueryReturnType< Result<number | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionAttributeCount", [contractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(25, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: contractType,
-	 * ]
-	 */
-	"update_contract_type" (
-		contractAddress: ArgumentsTypes[0],
-		contractType: ArgumentsTypes[17],
+	* updateContractType
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { ArgumentTypes.CollectionType } contractType,
+	* @returns { void }
+	*/
+	"updateContractType" (
+		contractAddress: ArgumentTypes.AccountId,
+		contractType: ArgumentTypes.CollectionType,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateContractType", [contractAddress, contractType], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateContractType", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, contractType], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: isCollectRoyaltyFee,
-	 * ]
-	 */
-	"update_is_collect_royalty_fee" (
-		contractAddress: ArgumentsTypes[0],
-		isCollectRoyaltyFee: ArgumentsTypes[18],
+	* updateIsCollectRoyaltyFee
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { boolean } isCollectRoyaltyFee,
+	* @returns { void }
+	*/
+	"updateIsCollectRoyaltyFee" (
+		contractAddress: ArgumentTypes.AccountId,
+		isCollectRoyaltyFee: boolean,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateIsCollectRoyaltyFee", [contractAddress, isCollectRoyaltyFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateIsCollectRoyaltyFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, isCollectRoyaltyFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: newFee,
-	 * ]
-	 */
-	"update_royalty_fee" (
-		contractAddress: ArgumentsTypes[0],
-		newFee: ArgumentsTypes[5],
+	* updateRoyaltyFee
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { (number | string | BN) } newFee,
+	* @returns { void }
+	*/
+	"updateRoyaltyFee" (
+		contractAddress: ArgumentTypes.AccountId,
+		newFee: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateRoyaltyFee", [contractAddress, newFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateRoyaltyFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, newFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: showOnChainMetadata,
-	 * ]
-	 */
-	"update_show_on_chain_metadata" (
-		contractAddress: ArgumentsTypes[0],
-		showOnChainMetadata: ArgumentsTypes[18],
+	* updateShowOnChainMetadata
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { boolean } showOnChainMetadata,
+	* @returns { void }
+	*/
+	"updateShowOnChainMetadata" (
+		contractAddress: ArgumentTypes.AccountId,
+		showOnChainMetadata: boolean,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateShowOnChainMetadata", [contractAddress, showOnChainMetadata], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateShowOnChainMetadata", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, showOnChainMetadata], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: contractAddress,
-	 * 1: isActive,
-	 * ]
-	 */
-	"update_is_active" (
-		contractAddress: ArgumentsTypes[0],
-		isActive: ArgumentsTypes[18],
+	* updateIsActive
+	*
+	* @param { ArgumentTypes.AccountId } contractAddress,
+	* @param { boolean } isActive,
+	* @returns { void }
+	*/
+	"updateIsActive" (
+		contractAddress: ArgumentTypes.AccountId,
+		isActive: boolean,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateIsActive", [contractAddress, isActive], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateIsActive", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [contractAddress, isActive], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: simpleModeAddingFee,
-	 * ]
-	 */
-	"update_simple_mode_adding_fee" (
-		simpleModeAddingFee: ArgumentsTypes[14],
+	* updateSimpleModeAddingFee
+	*
+	* @param { (string | number | BN) } simpleModeAddingFee,
+	* @returns { void }
+	*/
+	"updateSimpleModeAddingFee" (
+		simpleModeAddingFee: (string | number | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateSimpleModeAddingFee", [simpleModeAddingFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateSimpleModeAddingFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [simpleModeAddingFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: standardNftHash,
-	 * ]
-	 */
-	"update_standard_nft_hash" (
-		standardNftHash: ArgumentsTypes[12],
+	* updateStandardNftHash
+	*
+	* @param { ArgumentTypes.Hash } standardNftHash,
+	* @returns { void }
+	*/
+	"updateStandardNftHash" (
+		standardNftHash: ArgumentTypes.Hash,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateStandardNftHash", [standardNftHash], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateStandardNftHash", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [standardNftHash], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: advanceModeAddingFee,
-	 * ]
-	 */
-	"update_advance_mode_adding_fee" (
-		advanceModeAddingFee: ArgumentsTypes[14],
+	* updateAdvanceModeAddingFee
+	*
+	* @param { (string | number | BN) } advanceModeAddingFee,
+	* @returns { void }
+	*/
+	"updateAdvanceModeAddingFee" (
+		advanceModeAddingFee: (string | number | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateAdvanceModeAddingFee", [advanceModeAddingFee], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateAdvanceModeAddingFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [advanceModeAddingFee], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: maxRoyaltyFeeRate,
-	 * ]
-	 */
-	"update_max_royalty_fee_rate" (
-		maxRoyaltyFeeRate: ArgumentsTypes[5],
+	* updateMaxRoyaltyFeeRate
+	*
+	* @param { (number | string | BN) } maxRoyaltyFeeRate,
+	* @returns { void }
+	*/
+	"updateMaxRoyaltyFeeRate" (
+		maxRoyaltyFeeRate: (number | string | BN),
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateMaxRoyaltyFeeRate", [maxRoyaltyFeeRate], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "updateMaxRoyaltyFeeRate", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [maxRoyaltyFeeRate], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"get_collection_by_address" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getCollectionByAddress
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.Collection | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionByAddress" (
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["40"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionByAddress", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Collection | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionByAddress", [nftContractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(28, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: ownerAddress,
-	 * ]
-	 */
-	"get_collections_by_owner" (
-		ownerAddress: ArgumentsTypes[0],
+	* getCollectionsByOwner
+	*
+	* @param { ArgumentTypes.AccountId } ownerAddress,
+	* @returns { Result<Array<ReturnTypes.AccountId> | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionsByOwner" (
+		ownerAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["41"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionsByOwner", [ownerAddress], __options);
-	}
-
-	/** */
-	"get_standard_nft_hash" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["12"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getStandardNftHash", [], __options);
+	): Promise< QueryReturnType< Result<Array<ReturnTypes.AccountId> | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionsByOwner", [ownerAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(31, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: id,
-	 * ]
-	 */
-	"get_contract_by_id" (
-		id: ArgumentsTypes[13],
+	* getStandardNftHash
+	*
+	* @returns { Result<ReturnTypes.Hash, ReturnTypes.LangError> }
+	*/
+	"getStandardNftHash" (
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["42"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getContractById", [id], __options);
-	}
-
-	/** */
-	"get_collection_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getCollectionCount", [], __options);
-	}
-
-	/** */
-	"get_active_collection_count" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["13"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getActiveCollectionCount", [], __options);
-	}
-
-	/** */
-	"get_simple_mode_adding_fee" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["14"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getSimpleModeAddingFee", [], __options);
-	}
-
-	/** */
-	"get_advance_mode_adding_fee" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["14"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getAdvanceModeAddingFee", [], __options);
-	}
-
-	/** */
-	"get_max_royalty_fee_rate" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "getMaxRoyaltyFeeRate", [], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.Hash, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getStandardNftHash", [], __options, (result) => { return handleReturnType(result, getTypeDescription(33, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * ]
-	 */
-	"AccessControl::get_role_admin" (
-		role: ArgumentsTypes[5],
+	* getContractById
+	*
+	* @param { (number | string | BN) } id,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"getContractById" (
+		id: (number | string | BN),
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getContractById", [id], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::grant_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* getCollectionCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getCollectionCount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getCollectionCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(36, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getActiveCollectionCount
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getActiveCollectionCount" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getActiveCollectionCount", [], __options, (result) => { return handleReturnType(result, getTypeDescription(36, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getSimpleModeAddingFee
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"getSimpleModeAddingFee" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getSimpleModeAddingFee", [], __options, (result) => { return handleReturnType(result, getTypeDescription(37, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getAdvanceModeAddingFee
+	*
+	* @returns { Result<ReturnNumber, ReturnTypes.LangError> }
+	*/
+	"getAdvanceModeAddingFee" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnNumber, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getAdvanceModeAddingFee", [], __options, (result) => { return handleReturnType(result, getTypeDescription(37, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getMaxRoyaltyFeeRate
+	*
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getMaxRoyaltyFeeRate" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "getMaxRoyaltyFeeRate", [], __options, (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* getRoleAdmin
+	*
+	* @param { (number | string | BN) } role,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getRoleAdmin" (
+		role: (number | string | BN),
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::getRoleAdmin", [role], __options, (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* grantRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"grantRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::grantRole", [role, account], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::grantRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::renounce_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* renounceRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"renounceRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::renounceRole", [role, account], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::renounceRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: address,
-	 * ]
-	 */
-	"AccessControl::has_role" (
-		role: ArgumentsTypes[5],
-		address: ArgumentsTypes[0],
+	* hasRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } address,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"hasRole" (
+		role: (number | string | BN),
+		address: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["18"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "accessControl::hasRole", [role, address], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: role,
-	 * 1: account,
-	 * ]
-	 */
-	"AccessControl::revoke_role" (
-		role: ArgumentsTypes[5],
-		account: ArgumentsTypes[0],
+	* revokeRole
+	*
+	* @param { (number | string | BN) } role,
+	* @param { ArgumentTypes.AccountId } account,
+	* @returns { void }
+	*/
+	"revokeRole" (
+		role: (number | string | BN),
+		account: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::revokeRole", [role, account], __options);
-	}
-
-	/** */
-	"Ownable::owner" (
-		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["0"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "accessControl::revokeRole", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [role, account], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: newOwner,
-	 * ]
-	 */
-	"Ownable::transfer_ownership" (
-		newOwner: ArgumentsTypes[0],
+	* owner
+	*
+	* @returns { Result<ReturnTypes.AccountId, ReturnTypes.LangError> }
+	*/
+	"owner" (
+		__options: GasLimit,
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "ownable::owner", [], __options, (result) => { return handleReturnType(result, getTypeDescription(41, 'artzero_collection_manager')); });
+	}
+
+	/**
+	* renounceOwnership
+	*
+	* @returns { void }
+	*/
+	"renounceOwnership" (
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", [newOwner], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [], __options);
 	}
 
-	/** */
-	"Ownable::renounce_ownership" (
+	/**
+	* transferOwnership
+	*
+	* @param { ArgumentTypes.AccountId } newOwner,
+	* @returns { void }
+	*/
+	"transferOwnership" (
+		newOwner: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::renounceOwnership", [], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "ownable::transferOwnership", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [newOwner], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::get_collection_owner" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getContractType
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.CollectionType, ReturnTypes.LangError> }
+	*/
+	"getContractType" (
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["42"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getCollectionOwner", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.CollectionType, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getContractType", [nftContractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(44, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::is_active" (
-		nftContractAddress: ArgumentsTypes[0],
+	* isActive
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<boolean, ReturnTypes.LangError> }
+	*/
+	"isActive" (
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["18"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::isActive", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<boolean, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::isActive", [nftContractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(24, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::get_royalty_fee" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getCollectionOwner
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> }
+	*/
+	"getCollectionOwner" (
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["5"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getRoyaltyFee", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<ReturnTypes.AccountId | null, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getCollectionOwner", [nftContractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(34, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * ]
-	 */
-	"ArtZeroCollectionTrait::get_contract_type" (
-		nftContractAddress: ArgumentsTypes[0],
+	* getRoyaltyFee
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @returns { Result<number, ReturnTypes.LangError> }
+	*/
+	"getRoyaltyFee" (
+		nftContractAddress: ArgumentTypes.AccountId,
 		__options: GasLimit,
-	): Promise< QueryReturnType< OkishReturns["17"] > >{
-		return queryJSON( this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getContractType", [nftContractAddress], __options);
+	): Promise< QueryReturnType< Result<number, ReturnTypes.LangError> > >{
+		return queryOkJSON( this.__apiPromise, this.__nativeContract, this.__callerAddress, "artZeroCollectionTrait::getRoyaltyFee", [nftContractAddress], __options, (result) => { return handleReturnType(result, getTypeDescription(38, 'artzero_collection_manager')); });
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: value,
-	 * 1: receiver,
-	 * ]
-	 */
-	"AdminTrait::withdraw_fee" (
-		value: ArgumentsTypes[14],
-		receiver: ArgumentsTypes[0],
-		__options: GasLimit,
-	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", [value, receiver], __options);
-	}
-
-	/**
-	 * @arg: args: [
-	 * 0: nftContractAddress,
-	 * 1: tokenId,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_nft" (
-		nftContractAddress: ArgumentsTypes[0],
-		tokenId: ArgumentsTypes[45],
-		receiver: ArgumentsTypes[0],
+	* tranferPsp22
+	*
+	* @param { ArgumentTypes.AccountId } psp22ContractAddress,
+	* @param { (string | number | BN) } amount,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferPsp22" (
+		psp22ContractAddress: ArgumentTypes.AccountId,
+		amount: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", [nftContractAddress, tokenId, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [psp22ContractAddress, amount, receiver], __options);
 	}
 
 	/**
-	 * @arg: args: [
-	 * 0: psp22ContractAddress,
-	 * 1: amount,
-	 * 2: receiver,
-	 * ]
-	 */
-	"AdminTrait::tranfer_psp22" (
-		psp22ContractAddress: ArgumentsTypes[0],
-		amount: ArgumentsTypes[14],
-		receiver: ArgumentsTypes[0],
+	* tranferNft
+	*
+	* @param { ArgumentTypes.AccountId } nftContractAddress,
+	* @param { ArgumentTypes.Id } tokenId,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"tranferNft" (
+		nftContractAddress: ArgumentTypes.AccountId,
+		tokenId: ArgumentTypes.Id,
+		receiver: ArgumentTypes.AccountId,
 		__options: GasLimit,
 	){
-		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferPsp22", [psp22ContractAddress, amount, receiver], __options);
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::tranferNft", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [nftContractAddress, tokenId, receiver], __options);
+	}
+
+	/**
+	* withdrawFee
+	*
+	* @param { (string | number | BN) } value,
+	* @param { ArgumentTypes.AccountId } receiver,
+	* @returns { void }
+	*/
+	"withdrawFee" (
+		value: (string | number | BN),
+		receiver: ArgumentTypes.AccountId,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "adminTrait::withdrawFee", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [value, receiver], __options);
+	}
+
+	/**
+	* setCode
+	*
+	* @param { Array<(number | string | BN)> } codeHash,
+	* @returns { void }
+	*/
+	"setCode" (
+		codeHash: Array<(number | string | BN)>,
+		__options: GasLimit,
+	){
+		return txSignAndSend( this.__apiPromise, this.__nativeContract, this.__keyringPair, "upgradableTrait::setCode", (events: EventRecord) => {
+			return decodeEvents(events, this.__nativeContract, "artzero_collection_manager");
+		}, [codeHash], __options);
 	}
 
 }
