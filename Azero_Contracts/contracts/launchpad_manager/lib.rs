@@ -155,12 +155,7 @@ pub mod artzero_launchpad_psp34 {
                 .code_hash(self.manager.standard_nft_hash)
                 .salt_bytes(self.manager.project_count.to_le_bytes())
                 .instantiate()
-                .unwrap_or_else(|error| {
-                    panic!(
-                        "failed at instantiating the NFT contract: {:?}",
-                        error
-                    )
-                });
+                .unwrap_or_else(|error| panic!("failed at instantiating the NFT contract: {error:?}"));
             let contract_account:AccountId = contract.to_account_id();
             self.manager.project_count = self.manager.project_count.checked_add(1).unwrap();
             self.manager.projects_by_id.insert(&self.manager.project_count, &contract_account);
