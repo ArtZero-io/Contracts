@@ -553,7 +553,7 @@ pub mod artzero_marketplace_psp34 {
             // Send AZERO to collection owner as Royalty Fee
             let collection_owner =
                 ArtZeroCollectionRef::get_collection_owner(&self.manager.collection_contract_address, nft_contract_address);
-            if collection_owner == None{
+            if collection_owner.is_none(){
                 return Err(Error::InvalidCollectionOwner)
             }
             if royalty_fee > 0 {
@@ -938,7 +938,7 @@ pub mod artzero_marketplace_psp34 {
                             &self.manager.collection_contract_address,
                             nft_contract_address,
                         );
-                        if collection_owner == None{
+                        if collection_owner.is_none() {
                             return Err(Error::InvalidCollectionOwner)
                         }
                         if royalty_fee > 0 {
