@@ -87,6 +87,6 @@ export function setGasLimit(api: ApiPromise, refTimeNum: any, proofSizeNum: any)
   }) as WeightV2;
 }
 
-export function delay(sec: number) {
-  return new Promise((res) => setTimeout(res, sec));
+export function delay(milisec: number) {
+  return new Promise((res) => setTimeout(res, milisec));
 }
