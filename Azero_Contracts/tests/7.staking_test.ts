@@ -120,33 +120,33 @@ describe('Staking test', () => {
         await setup();
     });
     
-    // it('When staking is locked, not allow staking NFT', async () => {   
-    //     // Lock staking
-    //     await tx.updateIsLocked(true);
+    it('When staking is locked, not allow staking NFT', async () => {   
+        // Lock staking
+        await tx.updateIsLocked(true);
 
-    //     // Alice approves nft #1 
-    //     let tokenId = PSP34Args.IdBuilder.U64(1); // Nft id 1
-    //     await nftContract.withSigner(alice).tx.approve(
-    //         contract.address,
-    //         tokenId,
-    //         true
-    //     ); 
+        // Alice approves nft #1 
+        let tokenId = PSP34Args.IdBuilder.U64(1); // Nft id 1
+        await nftContract.withSigner(alice).tx.approve(
+            contract.address,
+            tokenId,
+            true
+        ); 
 
-    //     // Alice stakes nft #1
-    //     try {
-    //         await contract.withSigner(alice).tx.stake([1]);
-    //     } catch (error) {
-    //         // console.log("Staking contract is locked, cannot stake");
-    //     }
+        // Alice stakes nft #1
+        try {
+            await contract.withSigner(alice).tx.stake([1]);
+        } catch (error) {
+            // console.log("Staking contract is locked, cannot stake");
+        }
 
-    //     let stakingCount = (await query.getTotalStakedByAccount(alice.address)).value.ok;
-    //     // console.log("stakingCount =", stakingCount);
+        let stakingCount = (await query.getTotalStakedByAccount(alice.address)).value.ok;
+        // console.log("stakingCount =", stakingCount);
         
-    //     expect(stakingCount).to.equal(0);
+        expect(stakingCount).to.equal(0);
 
-    //     // Unlock staking
-    //     await tx.updateIsLocked(false);
-    // });
+        // Unlock staking
+        await tx.updateIsLocked(false);
+    });
 
     it('Can stake NFT', async () => {   
         // Step 1: Alice appoves and stakes nft #1
