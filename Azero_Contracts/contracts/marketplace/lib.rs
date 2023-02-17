@@ -553,7 +553,7 @@ pub mod artzero_marketplace_psp34 {
             // Send AZERO to collection owner as Royalty Fee
             let collection_owner =
                 ArtZeroCollectionRef::get_collection_owner(&self.manager.collection_contract_address, nft_contract_address);
-            if collection_owner == None{
+            if collection_owner.is_none(){
                 return Err(Error::InvalidCollectionOwner)
             }
             if royalty_fee > 0 {
@@ -682,8 +682,8 @@ pub mod artzero_marketplace_psp34 {
                 if length > 30 { // Only allow max 30 bids per token sale
                     return Err(Error::InvalidBidLength)
                 }
-                for index in 0..length {
-                    if bidders[index as usize].bidder == caller {
+                for item in bidders.iter().take(length) {
+                    if item.bidder == caller {
                         return Err(Error::BidAlreadyExist)
                     }
                 }
@@ -766,13 +766,12 @@ pub mod artzero_marketplace_psp34 {
                     .get(&(&nft_contract_address, &seller, &token_id))
                     .unwrap();
                 // Check if Bid for this caller already in the list
-                let length = bidders.len();
                 let mut index_bid: i32 = -1;
                 let mut bid_value = 0;
-                for index in 0..length {
-                    if bidders[index as usize].bidder == caller {
+                for (index, item) in bidders.iter().enumerate() {
+                    if item.bidder == caller {
                         index_bid = index as i32;
-                        bid_value = bidders[index as usize].bid_value;
+                        bid_value = item.bid_value;
                         break
                     }
                 }
@@ -938,7 +937,7 @@ pub mod artzero_marketplace_psp34 {
                             &self.manager.collection_contract_address,
                             nft_contract_address,
                         );
-                        if collection_owner == None{
+                        if collection_owner.is_none() {
                             return Err(Error::InvalidCollectionOwner)
                         }
                         if royalty_fee > 0 {
