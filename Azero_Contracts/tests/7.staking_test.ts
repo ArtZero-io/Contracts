@@ -307,8 +307,7 @@ describe('Staking test', () => {
         // Alice unstakes before unstaking time
         try {
             await contract.withSigner(alice).tx.unstake([1]);    
-        } catch (error) {
-            
+        } catch (error) {            
         }
         
         let totalPendingUnstaked = (await query.getTotalPendingUnstakedByAccount(alice.address)).value.ok;
@@ -325,7 +324,6 @@ describe('Staking test', () => {
         try {
             await contract.withSigner(alice).tx.unstake([1]);    
         } catch (error) {
-            console.log("step 3: error =", error);
         }
         
         let totalPendingUnstaked = (await query.getTotalPendingUnstakedByAccount(alice.address)).value.ok;

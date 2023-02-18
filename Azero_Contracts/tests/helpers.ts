@@ -1,4 +1,4 @@
-import {BN, BN_ONE } from '@polkadot/util';
+import {BN} from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { Keyring } from '@polkadot/keyring';
 import {ApiPromise, WsProvider} from "@polkadot/api";
