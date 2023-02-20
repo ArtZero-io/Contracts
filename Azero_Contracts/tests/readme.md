@@ -24,4 +24,14 @@ import Constructors from "./typed_contracts/constructors/psp34_nft";
 
 ## Test Files
 
+1.profile_test.ts  
+2.psp34_standard_test.ts  
+3.launchpad_manager_test.ts  
+4.collection_manager_test.ts  
+5.marketplace_test.ts  
+6.psp34_launchpad_standard_test.ts  
+7.staking_test.ts  
 
+## Notes
+
+The testing time may take **4-5 minutes** because some testcases such as unstaking PMP NFT or Psp34 launchpad standard public mint... needs to wait for changing phase or state. Please kindly wait until tests are completely run.
