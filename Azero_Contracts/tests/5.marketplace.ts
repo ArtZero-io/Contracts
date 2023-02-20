@@ -41,11 +41,13 @@ describe('Marketplace test', () => {
     let aliceNftContract: any;
     let aliceNftQuery: any;
     let aliceNftTx: any;
+    let aliceNftPrice: any;
 
     let bobNftContractAddress: any;
     let bobNftContract: any;
     let bobNftQuery: any;
     let bobNftTx: any;
+    let bobNftPrice: any;
     
     let stakingContractAddress: any;
     let stakingContract: any;
@@ -290,7 +292,7 @@ describe('Marketplace test', () => {
         await setup();
     });
 
-    it('Can list NFT in marketplace', async () => {   
+    it('Can list NFT', async () => {   
         let nftTokenId;
         let tokenId;
         let price;
@@ -306,11 +308,11 @@ describe('Marketplace test', () => {
         );
         
         // Alice lists token #1        
-        price = 10000000000000; // 10 TZERO;        
+        aliceNftPrice = 10000000000000; // 10 TZERO;        
         await contract.withSigner(alice).tx.list(
             aliceNftContractAddress, 
             tokenId, 
-            price
+            aliceNftPrice
         );
         
         let count = (await query.getSaleTokensIdsCount(
@@ -319,13 +321,140 @@ describe('Marketplace test', () => {
         )).value.ok!.rawNumber.toString();
         
         expect(count).to.equal("1");
+
+        // Bob approves for marketplace contract to transfer NFT token #1
+        nftTokenId = 1;
+        tokenId = PSP34Args.IdBuilder.U64(nftTokenId); // Nft id 1
         
-        // let rTokenId = await query.getForSaleTokenId(
-        //     aliceNftContractAddress,
-        //     alice.address,
-        //     new BN(1)
-        // );
+        await bobNftTx.approve(
+            contractAddress,
+            tokenId,
+            true
+        );
         
-        // console.log("rTokenId = ", rTokenId);
+        // Bob lists token #1        
+        bobNftPrice = 5000000000000; // 5 TZERO;        
+        await contract.withSigner(bob).tx.list(
+            bobNftContractAddress, 
+            tokenId, 
+            bobNftPrice
+        );
+        
+        count = (await query.getSaleTokensIdsCount(
+            bobNftContractAddress,
+            bob.address
+        )).value.ok!.rawNumber.toString();
+        
+        expect(count).to.equal("1");
+    });
+
+    it('Can unlist NFT', async () => {   
+        let nftTokenId;
+        let tokenId;
+        
+        nftTokenId = 1;
+        tokenId = PSP34Args.IdBuilder.U64(nftTokenId); // Nft id 1
+               
+        // Bob unlists token #1            
+        await contract.withSigner(bob).tx.unlist(
+            bobNftContractAddress, 
+            tokenId
+        );
+        
+        let count = (await query.getSaleTokensIdsCount(
+            bobNftContractAddress,
+            bob.address
+        )).value.ok!.rawNumber.toString();
+        
+        expect(count).to.equal("0");
+    });
+
+    it('Can buy NFT', async () => {   
+        // Bob buys NFT listed by Alice
+        let nftTokenId;
+        let tokenId;
+        
+        nftTokenId = 1;
+        tokenId = PSP34Args.IdBuilder.U64(nftTokenId); // Nft id 1
+          
+        await contract.withSigner(bob).tx.buy(
+            aliceNftContractAddress,
+            tokenId,
+            {value: aliceNftPrice}
+        );
+
+        let count = (await query.getSaleTokensIdsCount(
+            aliceNftContractAddress,
+            alice.address
+        )).value.ok!.rawNumber.toString();
+        
+        expect(count).to.equal("0");
+    });
+
+    it('Can bid, remove, accept bid', async () => {  
+        // Step 1: Alice mints and list Nft id 2
+        // Alice mints #2
+        await aliceNftTx.mint(); 
+                
+        // Alice approves for marketplace contract to transfer NFT token #2
+        let nftTokenId;
+        let tokenId;
+          
+        nftTokenId = 2;
+        tokenId = PSP34Args.IdBuilder.U64(nftTokenId); // Nft id 2
+
+        await aliceNftTx.approve(
+            contractAddress,
+            tokenId,
+            true
+        );
+
+        // Alice lists token #2        
+        aliceNftPrice = 10000000000000; // 10 TZERO;        
+        await contract.withSigner(alice).tx.list(
+            aliceNftContractAddress, 
+            tokenId, 
+            aliceNftPrice
+        );
+        // console.log("Alice lists token #2");    
+        // Step 2: Bob and Charlie bid Alice's NFT
+
+        let bobBidValue = "4000000000000";
+        await contract.withSigner(bob).tx.bid(
+            aliceNftContractAddress, 
+            tokenId,
+            {value: bobBidValue}
+        );
+        // console.log("Bob bids token #2");     
+
+        let charlie = defaultSigner;
+        let charlieBidValue = "5000000000000";
+        await contract.withSigner(charlie).tx.bid(
+            aliceNftContractAddress, 
+            tokenId,
+            {value: charlieBidValue}
+        );
+        // console.log("Charlie bids token #2");
+
+        await contract.withSigner(charlie).tx.removeBid(
+            aliceNftContractAddress, 
+            tokenId
+        );
+        // console.log("Charlie removes bid token #2");  
+        
+        // Step 3: Alice accepts bid from Bob (index 0) 
+        await contract.withSigner(alice).tx.acceptBid(
+            aliceNftContractAddress, 
+            tokenId,
+            0
+        );
+        // console.log("Alice accepts bid from Bob");  
+
+        let count = (await query.getSaleTokensIdsCount(
+            aliceNftContractAddress,
+            alice.address
+        )).value.ok!.rawNumber.toString();
+        
+        expect(count).to.equal("0");
     });
 });
