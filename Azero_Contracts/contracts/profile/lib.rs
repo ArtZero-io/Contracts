@@ -83,11 +83,10 @@ pub mod profile_manager {
         pub fn get_attributes(&self, account: AccountId, attributes: Vec<String>) -> Vec<String> {
             let length = attributes.len();
             let mut ret = Vec::<String>::new();
-            for i in 0..length {
-                let attribute = attributes[i].clone();
-                let value = self.manager.attributes.get(&(account, attribute.into_bytes()));
-                if value.is_some() {
-                    ret.push(String::from_utf8(value.unwrap()).unwrap());
+            for item in attributes.iter().take(length) {
+                let attribute = item.clone();
+                if let Some(value) = self.manager.attributes.get(&(account, attribute.into_bytes())) {
+                    ret.push(String::from_utf8(value).unwrap());
                 } else {
                     ret.push(String::from(""));
                 }
