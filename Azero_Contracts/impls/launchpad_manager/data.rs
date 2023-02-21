@@ -23,7 +23,6 @@ use ink::storage::traits::StorageLayout;
     PartialOrd,
     Eq,
     PartialEq,
-    Default,
     scale::Encode,
     scale::Decode,
 )]
@@ -38,7 +37,7 @@ pub struct Project {
 
 pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
-#[derive(Default)]
+#[derive(Debug)]
 #[openbrush::upgradeable_storage(STORAGE_KEY)]
 pub struct Manager {
     pub standard_nft_hash: Hash,

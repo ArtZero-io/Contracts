@@ -40,34 +40,47 @@ impl<T: Storage<data::Data> + Storage<ownable::Data>> AdminTrait for T
 
     #[modifiers(only_owner)]
     default fn tranfer_nft(&mut self, nft_contract_address: AccountId, token_id: Id, receiver: AccountId) -> Result<(), Error> {
-        if Psp34Ref::transfer_builder(
+        let builder = Psp34Ref::transfer_builder(
             &nft_contract_address,
             receiver,
             token_id.clone(),
             Vec::<u8>::new()
         )
-        .call_flags(CallFlags::default().set_allow_reentry(true))
-        .fire()
-        .is_err(){
-            return Err(Error::WithdrawNFTError)
-        }
+        .call_flags(CallFlags::default().set_allow_reentry(true));
 
-        Ok(())
+        let result = match builder.try_invoke() {
+            Ok(Ok(Ok(_))) => Ok(()),
+            Ok(Ok(Err(e))) => Err(e.into()),
+            Ok(Err(ink::LangError::CouldNotReadInput)) => Ok(()),
+            Err(ink::env::Error::NotCallable) => Ok(()),
+            _ => {
+                Err(Error::CannotTransfer)
+            }
+        };
+
+        result
     }
 
     #[modifiers(only_owner)]
     default fn tranfer_psp22(&mut self, psp22_contract_address: AccountId, amount: Balance, receiver: AccountId) -> Result<(), Error>{
-        if Psp22Ref::transfer_builder(
+        let builder = Psp22Ref::transfer_builder(
             &psp22_contract_address,
             receiver,
             amount,
             Vec::<u8>::new()
         )
-        .call_flags(CallFlags::default().set_allow_reentry(true))
-        .fire()
-        .is_err(){
-            return Err(Error::WithdrawPSP22Error);
-        }
-        Ok(())
+        .call_flags(CallFlags::default().set_allow_reentry(true));
+
+        let result = match builder.try_invoke() {
+            Ok(Ok(Ok(_))) => Ok(()),
+            Ok(Ok(Err(e))) => Err(e.into()),
+            Ok(Err(ink::LangError::CouldNotReadInput)) => Ok(()),
+            Err(ink::env::Error::NotCallable) => Ok(()),
+            _ => {
+                Err(Error::CannotTransfer)
+            }
+        };
+
+        result
     }
 }
