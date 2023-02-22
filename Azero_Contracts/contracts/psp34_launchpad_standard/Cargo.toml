@@ -5,21 +5,19 @@ authors = ["ArtZero <admin@artzero.io>"]
 edition = "2021"
 
 [dependencies]
-ink = { git = "https://github.com/paritytech/ink", rev = "4655a8b4413cb50cbc38d1b7c173ad426ab06cde", default-features = false }
-
+ink = { version = "~4.0.0", default-features = false }
 scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
 scale-info = { version = "2.3", default-features = false, features = ["derive"], optional = true }
 
 # These dependencies
-openbrush = { git = "https://github.com/727-Ventures/openbrush-contracts", tag = "3.0.0-beta" , default-features = false, features = ["psp34", "ownable", "access_control"]}
+openbrush = { tag = "3.0.0", git = "https://github.com/727-Ventures/openbrush-contracts", default-features = false, features = ["psp34", "ownable", "access_control"] }
 artzero_project = { path = "../..", default-features = false }
 
 [lib]
 name = "launchpad_psp34_nft_standard"
 path = "lib.rs"
 crate-type = [
-    "cdylib",
-    "rlib"
+    "cdylib"
 ]
 
 [features]
@@ -27,11 +25,9 @@ default = ["std"]
 std = [
     "ink/std",
     "scale/std",
-    "scale-info",
     "scale-info/std",
-    # These dependencies
-    "artzero_project/std",
     "openbrush/std",
+    "artzero_project/std"
 ]
 ink-as-dependency = []
 

@@ -32,7 +32,8 @@ pub mod launchpad_psp34_nft_standard {
         },
         traits::{
             Storage,
-            DefaultEnv
+            DefaultEnv,
+            ZERO_ADDRESS
         },
         modifiers,
     };
@@ -96,7 +97,7 @@ pub mod launchpad_psp34_nft_standard {
 
     pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
-    #[derive(Default)]
+    #[derive(Debug)]
     #[openbrush::upgradeable_storage(STORAGE_KEY)]
     pub struct Manager {
         pub total_supply: u64,
@@ -115,6 +116,29 @@ pub mod launchpad_psp34_nft_standard {
         pub owner_claimed_amount: u64,
         pub _reserved: Option<()>,
     }
+
+    impl Default for Manager {
+        fn default() -> Self {
+            Self {
+                total_supply: Default::default(),
+                last_phase_id: Default::default(),
+                whitelist_count: Default::default(),
+                phase_account_public_claimed_amount: Default::default(),
+                phase_whitelists_link: Default::default(),
+                phases: Default::default(),
+                phase_account_link: Default::default(),
+                limit_phase_count: Default::default(),
+                launchpad_contract_address: ZERO_ADDRESS.into(),
+                project_info: Default::default(),
+                public_minted_count: Default::default(),
+                active_phase_count: Default::default(),
+                available_token_amount: Default::default(),
+                owner_claimed_amount: Default::default(),
+                _reserved: Default::default(),
+            }
+        }
+    }
+    
 
     pub struct PhaseAccountPublicClaimedAmountKeys;
 
