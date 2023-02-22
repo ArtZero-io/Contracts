@@ -17,8 +17,7 @@ artzero_project = { path = "../..", default-features = false }
 name = "psp34_nft"
 path = "lib.rs"
 crate-type = [
-    "cdylib",
-    "rlib"
+    "cdylib"
 ]
 
 [features]
@@ -26,11 +25,9 @@ default = ["std"]
 std = [
     "ink/std",
     "scale/std",
-    "scale-info",
     "scale-info/std",
-    # These dependencies
-    "artzero_project/std",
     "openbrush/std",
+    "artzero_project/std"
 ]
 ink-as-dependency = []
 
