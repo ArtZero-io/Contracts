@@ -408,15 +408,25 @@ pub mod artzero_staking_nft {
                 }
                 self.manager.staking_list.insert(caller, &item);
                 // Step 3 - Transfer Token from Caller to Staking Contract
-                if PSP34Ref::transfer_builder(
+                let builder = PSP34Ref::transfer_builder(
                     &self.manager.nft_contract_address,
                     self.env().account_id(),
                     Id::U64(item),
                     Vec::<u8>::new(),
                 )
-                .call_flags(CallFlags::default().set_allow_reentry(true))
-                .fire()
-                .is_ok() {
+                .call_flags(CallFlags::default().set_allow_reentry(true));
+
+                let result = match builder.try_invoke() {
+                    Ok(Ok(Ok(_))) => Ok(()),
+                    Ok(Ok(Err(e))) => Err(e.into()),
+                    Ok(Err(ink::LangError::CouldNotReadInput)) => Ok(()),
+                    Err(ink::env::Error::NotCallable) => Ok(()),
+                    _ => {
+                        Err(Error::CannotTransfer)
+                    }
+                };
+
+                if result.is_ok() {
                     if self.manager.is_claimed.get(&caller).is_none() {
                         self.manager.is_claimed.insert(&caller, &false);
                     }
@@ -424,11 +434,7 @@ pub mod artzero_staking_nft {
                         staker: Some(caller),
                         token_id: item,
                     });
-
-                } else {
-                    return Err(Error::CannotTransfer)
                 }
-
             }
             if !self.manager.staked_accounts.contains_value(0, &caller) {
                 self.manager.staked_accounts.insert(0, &caller);

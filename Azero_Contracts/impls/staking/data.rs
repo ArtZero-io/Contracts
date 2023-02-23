@@ -8,7 +8,8 @@ use openbrush::{
     },
     traits::{
         AccountId,
-        Balance
+        Balance,
+        ZERO_ADDRESS
     },
 };
 
@@ -31,6 +32,27 @@ pub struct Manager {
     pub reward_started: bool,
     pub is_claimed: Mapping<AccountId, bool>,
     pub _reserved: Option<()>,
+}
+
+impl Default for Manager {
+    fn default() -> Self {
+        Self {
+            is_locked: Default::default(),
+            admin_address: ZERO_ADDRESS.into(),
+            staked_accounts: Default::default(),
+            staking_list: Default::default(),
+            pending_unstaking_list: Default::default(),
+            nft_contract_address: ZERO_ADDRESS.into(),
+            total_staked: Default::default(),
+            limit_unstake_time: Default::default(),
+            request_unstaking_time: Default::default(),
+            reward_pool: Default::default(),
+            claimable_reward: Default::default(),
+            reward_started: Default::default(),
+            is_claimed: Default::default(),
+            _reserved: Default::default(),
+        }
+    }
 }
 
 pub struct RequestUnstakingTimeKey;
