@@ -75,7 +75,7 @@ pub mod artzero_marketplace_psp34 {
 
     pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
 
-    #[derive(Default)]
+    #[derive(Debug)]
     #[openbrush::upgradeable_storage(STORAGE_KEY)]
     struct Manager {
         collection_contract_address: AccountId,
@@ -120,6 +120,31 @@ pub mod artzero_marketplace_psp34 {
 
     impl<'a> TypeGuard<'a> for BiddersKeys {
         type Type = &'a (&'a AccountId, &'a AccountId, &'a Id);
+    }
+
+    impl Default for Manager {
+        fn default() -> Self {
+            Self {
+                collection_contract_address: ZERO_ADDRESS.into(),
+                staking_contract_address: ZERO_ADDRESS.into(),
+                platform_fee: Default::default(),                                  // 1% = 100
+                market_list: Default::default(), /* NFT for sale in the marketplace, (NFT Contract Address, Token ID) */
+                sale_tokens_ids: Default::default(),                 //(NFT Contract Address, Seller Address)
+                sale_tokens_ids_last_index: Default::default(),
+                hold_amount_bidders: Default::default(),
+                hold_bidders: Default::default(),
+                bidders: Default::default(), /* Contract Address, Seller Address, token ID) */
+                listed_token_number_by_collection_address: Default::default(), /* Number Listed Token (Collection Contract Address) */
+                total_volume: Default::default(),
+                volume_by_collection: Default::default(),
+                volume_by_user: Default::default(),
+                total_profit: Default::default(),
+                current_profit: Default::default(),
+                staking_discount_criteria: Default::default(),
+                staking_discount_rate: Default::default(),
+                _reserved: Default::default(),
+            }
+        }
     }
 
     #[derive(Default, Storage)]
@@ -308,24 +333,32 @@ pub mod artzero_marketplace_psp34 {
                 self.update_listed_token_by_collection_address(&nft_contract_address, &true);
             }
             // Transfer Token from Caller to Marketplace Contract
-            if Psp34Ref::transfer_builder(
+            let builder = Psp34Ref::transfer_builder(
                     &nft_contract_address,
                     self.env().account_id(),
                     token_id.clone(),
                     Vec::<u8>::new()
                 )
-                .call_flags(CallFlags::default().set_allow_reentry(true))
-                .fire()
-                .is_err(){
-                    return Err(Error::CannotTransfer)
+                .call_flags(CallFlags::default().set_allow_reentry(true));
+            let result = match builder.try_invoke() {
+                Ok(Ok(Ok(_))) => Ok(()),
+                Ok(Ok(Err(e))) => Err(e.into()),
+                Ok(Err(ink::LangError::CouldNotReadInput)) => Ok(()),
+                Err(ink::env::Error::NotCallable) => Ok(()),
+                _ => {
+                    Err(Error::CannotTransfer)
                 }
-            // Emit NewListEvent event for tracking purposes
-            self.env().emit_event(NewListEvent {
-                trader: Some(caller),
-                nft_contract_address: Some(nft_contract_address),
-                token_id: token_id.clone(),
-                price,
-            });
+            };
+            if result.is_ok() {
+                // Emit NewListEvent event for tracking purposes
+                self.env().emit_event(NewListEvent {
+                    trader: Some(caller),
+                    nft_contract_address: Some(nft_contract_address),
+                    token_id: token_id.clone(),
+                    price,
+                });
+            }
+        
             Ok(())
         }
 
