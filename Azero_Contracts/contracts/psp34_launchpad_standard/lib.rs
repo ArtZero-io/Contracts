@@ -349,6 +349,31 @@ pub mod launchpad_psp34_nft_standard {
             Ok(())
         }
 
+        /// Add multi whitelists - Only Admin Role can change
+        #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
+        pub fn add_multi_whitelists(
+            &mut self,
+            phase_id: u8,
+            accounts: Vec<AccountId>,
+            whitelist_amounts: Vec<u64>,
+            whitelist_prices: Vec<Balance>
+        ) -> Result<(), Error> {
+            if self.manager.phases.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist);
+            }
+            if !accounts.is_empty() &&
+                accounts.len() == whitelist_amounts.len() && 
+                accounts.len() == whitelist_prices.len() {
+                for i in 0..accounts.len() {
+                    self.add_whitelist(accounts[i].clone(), phase_id, whitelist_amounts[i].clone(), whitelist_prices[i].clone());
+                }
+                Ok(())
+            } else {
+                return Err(Error::InvalidInput);
+            }
+        }
+
         /// Add new whitelist - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
