@@ -6,7 +6,6 @@
 #![allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod artzero_collection_manager {
-    use ink::ToAccountId;
     use ink::prelude::{
         string::{
             String,
@@ -33,7 +32,8 @@ pub mod artzero_collection_manager {
     };
     use psp34_nft::psp34_nft::Psp34NftRef;
     use artzero_project::traits::psp34_standard::*;
-
+    use ink::ToAccountId;
+    
     #[derive(Default, Storage)]
     #[ink(storage)]
     pub struct ArtZeroCollectionManager {
@@ -145,8 +145,7 @@ pub mod artzero_collection_manager {
                 .endowment(0)
                 .code_hash(self.manager.standard_nft_hash)
                 .salt_bytes(self.manager.collection_count.to_le_bytes())
-                .instantiate()
-                .unwrap_or_else(|error| panic!("failed at instantiating the NFT contract: {error:?}"));
+                .instantiate();
             let contract_account: AccountId = contract.to_account_id();
 
             self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();

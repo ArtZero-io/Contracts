@@ -52,3 +52,21 @@ pub struct Manager {
     pub public_max_minting_amount: u64,
     pub _reserved: Option<()>,
 }
+
+impl Default for Manager {
+    fn default() -> Self {
+        Self {
+            standard_nft_hash: Default::default(),
+            project_count: Default::default(),
+            projects: Default::default(),
+            projects_by_id: Default::default(),
+            projects_by_owner: Default::default(),
+            active_project_count: Default::default(),
+            max_phases_per_project: Default::default(),
+            project_adding_fee: Default::default(),
+            project_mint_fee_rate: Default::default(),
+            public_max_minting_amount: Default::default(),
+            _reserved: Default::default(),
+        }
+    }
+}

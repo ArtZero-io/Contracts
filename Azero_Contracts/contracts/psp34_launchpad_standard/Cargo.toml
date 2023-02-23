@@ -17,7 +17,8 @@ artzero_project = { path = "../..", default-features = false }
 name = "launchpad_psp34_nft_standard"
 path = "lib.rs"
 crate-type = [
-    "cdylib"
+    "cdylib",
+    "rlib"
 ]
 
 [features]

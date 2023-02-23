@@ -17,7 +17,8 @@ artzero_project = { path = "../..", default-features = false }
 name = "psp34_nft"
 path = "lib.rs"
 crate-type = [
-    "cdylib"
+    "cdylib",
+    "rlib"
 ]
 
 [features]
