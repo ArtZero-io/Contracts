@@ -102,7 +102,7 @@ pub mod launchpad_psp34_nft_standard {
     pub struct Manager {
         pub total_supply: u64,
         pub last_phase_id: u8,
-        pub whitelist_count: u64,
+        pub whitelist_count: u32,
         pub phase_account_public_claimed_amount: Mapping<(AccountId, u8), u64, PhaseAccountPublicClaimedAmountKeys>,
         pub phase_whitelists_link: Mapping<(AccountId, u8), Whitelist, PhaseWhitelistsLinkKeys>,
         pub phases: Mapping<u8, Phase>,
@@ -362,16 +362,59 @@ pub mod launchpad_psp34_nft_standard {
             if self.manager.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
+            
             if !accounts.is_empty() &&
                 accounts.len() == whitelist_amounts.len() && 
                 accounts.len() == whitelist_prices.len() {
-                for i in 0..accounts.len() {
-                    self.add_whitelist(accounts[i].clone(), phase_id, whitelist_amounts[i].clone(), whitelist_prices[i].clone());
+                let whitelist_count = accounts.len();
+                let mut phase = self.manager.phases.get(&phase_id).unwrap();
+                for i in 0..whitelist_count {
+                    let whitelist_account = accounts[i].clone();
+                    let whitelist_amount = whitelist_amounts[i].clone();
+                    let whitelist_price = whitelist_prices[i].clone();
+                    let whitelist = Whitelist {
+                        whitelist_amount,
+                        claimed_amount: 0,
+                        minting_fee: whitelist_price
+                    };
+                    self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(whitelist_amount).unwrap();
+                    self.manager.phase_account_link.insert(phase_id, &whitelist_account);
+                    self.manager.phase_whitelists_link.insert(&(&whitelist_account, &phase_id), &whitelist);
+                    phase.total_amount = phase.total_amount.checked_add(whitelist_amount).unwrap();
+                    phase.whitelist_amount = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
                 }
+                self.manager.phases.insert(&phase_id, &phase);
+                self.manager.whitelist_count = self.manager.whitelist_count.checked_add(whitelist_count as u32).unwrap();
                 Ok(())
             } else {
                 return Err(Error::InvalidInput);
             }
+        }
+
+        /// Add new whitelist - Only Admin Role can change
+        #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
+        pub fn clear_whitelist_phase
+        (
+            &mut self,
+            phase_id: u8,
+            accounts: Vec<AccountId>,
+        ) -> Result<(), Error> {
+            if self.manager.phases.get(&phase_id).is_none() {
+                return Err(Error::PhaseNotExist);
+            }
+            if !accounts.is_empty() {
+                for i in 0..accounts.len() {
+                    let remove_account = accounts[i].clone();
+                    self.manager.phase_whitelists_link.remove(&(&remove_account, &phase_id));
+                    self.manager.phase_account_link.remove_value(phase_id, &remove_account);
+                }
+                self.manager.whitelist_count = self.manager.whitelist_count.checked_sub(accounts.len() as u32).unwrap();
+                Ok(())
+            } else {
+                return Err(Error::InvalidInput);
+            }
+
         }
 
         /// Add new whitelist - Only Admin Role can change
@@ -851,7 +894,7 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         pub fn get_whitelist_count(
             &self
-        ) -> u64 {
+        ) -> u32 {
             self.manager.whitelist_count
         }
 
