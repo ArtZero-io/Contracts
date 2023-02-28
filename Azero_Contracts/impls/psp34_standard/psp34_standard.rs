@@ -154,11 +154,9 @@ fn add_attribute_name<T: Storage<Manager>>(
     let mut exist: bool = false;
     for index in 0..instance.data::<Manager>().attribute_count {
         let attribute_name = instance.data::<Manager>().attribute_names.get(&(index + 1));
-        if attribute_name.is_some() {
-            if attribute_name.unwrap() == *attribute_input {
-                exist = true;
-                break
-            }
+        if attribute_name.is_some() && attribute_name.unwrap() == *attribute_input {
+            exist = true;
+            break
         }
     }
     if !exist {
