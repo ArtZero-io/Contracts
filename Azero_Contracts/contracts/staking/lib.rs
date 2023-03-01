@@ -260,9 +260,7 @@ pub mod artzero_staking_nft {
                 return Err(Error::Custom(String::from("Invalid Reward Pool")))
             }
             // Calculate how much reward to pay for staker
-            let reward =
-                (self.manager.reward_pool * staked_amount) / (self.manager.total_staked as u128);
-
+            let reward = self.manager.reward_pool.checked_mul(staked_amount).unwrap().checked_div(self.manager.total_staked as u128).unwrap();
             if self.manager.claimable_reward >= reward {
                 // Send the reward to the staker
                 self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
@@ -549,8 +547,7 @@ pub mod artzero_staking_nft {
                     return Err(Error::InvalidTime)
                 }
                 let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
-
-                if request_unstake_time + (self.manager.limit_unstake_time * 60000) > current_time {
+                if request_unstake_time.checked_add(self.manager.limit_unstake_time.checked_mul(60000).unwrap()).unwrap() > current_time {
                     return Err(Error::Custom(String::from("Not Enough Time Request Unstake")))
                 }
                 // Step 3 - transfer token to caller
