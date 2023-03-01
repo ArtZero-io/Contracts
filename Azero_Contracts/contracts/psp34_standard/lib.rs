@@ -71,6 +71,7 @@ pub mod psp34_nft {
             let allowance = self.allowance(account,caller,Some(id.clone()));
 
             if caller == account || allowance {
+                self.manager.locked_tokens.remove(&id);
                 self._burn_from(account, id)
             } else{
                 Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
