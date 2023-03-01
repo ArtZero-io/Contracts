@@ -72,6 +72,7 @@ pub mod psp34_nft {
 
             if caller == account || allowance {
                 self.manager.locked_tokens.remove(&id);
+                self.manager.locked_token_count = self.manager.locked_token_count.checked_sub(1).unwrap();
                 self._burn_from(account, id)
             } else{
                 Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
