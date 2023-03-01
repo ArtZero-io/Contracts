@@ -394,27 +394,37 @@ pub mod launchpad_psp34_nft_standard {
         /// Add new whitelist - Only Admin Role can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn clear_whitelist_phase
-        (
+        pub fn clear_whitelist_phase(
             &mut self,
             phase_id: u8,
             accounts: Vec<AccountId>,
         ) -> Result<(), Error> {
             if self.manager.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
-            }
-            if !accounts.is_empty() {
-                for i in 0..accounts.len() {
-                    let remove_account = accounts[i].clone();
-                    self.manager.phase_whitelists_link.remove(&(&remove_account, &phase_id));
-                    self.manager.phase_account_link.remove_value(phase_id, &remove_account);
-                }
-                self.manager.whitelist_count = self.manager.whitelist_count.checked_sub(accounts.len() as u32).unwrap();
-                Ok(())
             } else {
-                return Err(Error::InvalidInput);
+                let phase = self.manager.phases.get(&phase_id).unwrap();
+                let current_time = self.env().block_timestamp();
+                if current_time > phase.end_time {
+                    if !accounts.is_empty() {
+                        for i in 0..accounts.len() {
+                            let remove_account = accounts[i].clone();
+                            if self.manager.phase_whitelists_link.get(&(&remove_account, &phase_id)).is_some() &&  
+                            self.manager.phase_account_link.get_index(phase_id, &remove_account).is_some() {
+                                self.manager.phase_whitelists_link.remove(&(&remove_account, &phase_id));
+                                self.manager.phase_account_link.remove_value(phase_id, &remove_account);
+                            } else {
+                                return Err(Error::InvalidInput);
+                            }
+                        }
+                        self.manager.whitelist_count = self.manager.whitelist_count.checked_sub(accounts.len() as u32).unwrap();
+                        Ok(())
+                    } else {
+                        return Err(Error::InvalidInput);
+                    }
+                } else {
+                    return Err(Error::InvalidInput);
+                }
             }
-
         }
 
         /// Add new whitelist - Only Admin Role can change
@@ -427,9 +437,6 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
-            if !(0..=self.manager.total_supply).contains(&whitelist_amount) {
-                return Err(Error::InvalidInput);
-            }
             if self.manager.phases.get(&phase_id).is_none() {
                 return Err(Error::PhaseNotExist);
             }
