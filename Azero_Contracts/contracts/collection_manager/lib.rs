@@ -155,9 +155,6 @@ pub mod artzero_collection_manager {
             self.manager
                 .collections_by_id
                 .insert(&self.manager.collection_count, &contract_account);
-            self.manager
-                .id_by_collections
-                .insert(&contract_account, &self.manager.collection_count);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if let Some(mut collections) = collections_by_owner {
                 collections.push(contract_account);
@@ -228,9 +225,6 @@ pub mod artzero_collection_manager {
             self.manager
                 .collections_by_id
                 .insert(&self.manager.collection_count, &nft_contract_address);
-            self.manager
-                .id_by_collections
-                .insert(&nft_contract_address, &self.manager.collection_count);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if let Some(mut collections) = collections_by_owner {
                 collections.push(nft_contract_address);
@@ -302,23 +296,6 @@ pub mod artzero_collection_manager {
             } else {
                 return Err(Error::Custom(String::from("Collections by owner not exist")))
             }
-            Ok(())
-        }
-
-        /// Update NFT Contract Address of a collection - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn update_nft_contract_address(
-            &mut self,
-            contract_address: AccountId,
-            nft_contract_address: AccountId,
-        ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
-            }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.nft_contract_address = nft_contract_address;
-            self.manager.collections.insert(&contract_address, &collection);
             Ok(())
         }
 
@@ -554,12 +531,6 @@ pub mod artzero_collection_manager {
         pub fn get_contract_by_id(&self, id: u64) -> Option<AccountId> {
             self.manager.collections_by_id.get(&id)
         }
-
-         /// Get Collection Id by Contract Address
-         #[ink(message)]
-         pub fn get_id_by_contract(&self, contract_account: AccountId) -> Option<u64> {
-             self.manager.id_by_collections.get(&contract_account)
-         }
 
         /// Get Collection Count
         #[ink(message)]

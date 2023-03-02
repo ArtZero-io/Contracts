@@ -43,7 +43,6 @@ pub struct Manager {
     pub advance_mode_adding_fee: Balance,
     pub collections: Mapping<AccountId, Collection>, // save collection by contract address
     pub collections_by_id: Mapping<u64, AccountId>,
-    pub id_by_collections: Mapping<AccountId, u64>,  // save contract address by id
     pub collections_by_owner: Mapping<AccountId, Vec<AccountId>>, // save contract address by owner ID
     pub max_royalty_fee_rate: u32,
     pub active_collection_count: u64,
