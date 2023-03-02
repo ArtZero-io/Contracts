@@ -1283,7 +1283,7 @@ pub mod artzero_marketplace_psp34 {
             let length = self.manager.staking_discount_rate.len();
             for index in 0..length {
                 if staked_amount >= self.manager.staking_discount_criteria[index] as u64 {
-                    return (*input_fee.checked_mul(10000.checked_sub(self.manager.staking_discount_rate[index] as u128).unwrap())).unwrap().checked_div(10000).unwrap()
+                    return (*input_fee * (10000_u128.checked_sub(self.manager.staking_discount_rate[index] as u128).unwrap())).checked_div(10000).unwrap()
                 }
             }
             *input_fee
