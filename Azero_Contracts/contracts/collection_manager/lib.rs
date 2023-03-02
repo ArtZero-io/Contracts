@@ -155,6 +155,9 @@ pub mod artzero_collection_manager {
             self.manager
                 .collections_by_id
                 .insert(&self.manager.collection_count, &contract_account);
+            self.manager
+                .id_by_collections
+                .insert(&contract_account, &self.manager.collection_count);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if let Some(mut collections) = collections_by_owner {
                 collections.push(contract_account);
@@ -225,6 +228,9 @@ pub mod artzero_collection_manager {
             self.manager
                 .collections_by_id
                 .insert(&self.manager.collection_count, &nft_contract_address);
+            self.manager
+                .id_by_collections
+                .insert(&nft_contract_address, &self.manager.collection_count);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
             if let Some(mut collections) = collections_by_owner {
                 collections.push(nft_contract_address);
@@ -274,8 +280,28 @@ pub mod artzero_collection_manager {
                 return Err(Error::Custom(String::from("Collection not exist")))
             }
             let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.collection_owner = new_owner;
-            self.manager.collections.insert(&contract_address, &collection);
+            let older_owner = collection.collection_owner;
+            let collections_older_owner = self.manager.collections_by_owner.get(&older_owner);
+            if let Some(mut collections_older) = collections_older_owner {
+                // Remove collections_by_owner of older owner
+                let index = collections_older.iter().position(|x| *x == contract_address).unwrap();
+                collections_older.remove(index);
+                self.manager.collections_by_owner.insert(&older_owner, &collections_older);
+                // Update collections_by_owner
+                let collections_by_owner = self.manager.collections_by_owner.get(&new_owner);
+                if let Some(mut collections) = collections_by_owner {
+                    collections.push(contract_address);
+                    self.manager.collections_by_owner.insert(&new_owner, &collections);
+                } else {
+                    let collections = vec![contract_address];
+                    self.manager.collections_by_owner.insert(&new_owner, &collections);
+                }
+                // Update collections
+                collection.collection_owner = new_owner;
+                self.manager.collections.insert(&contract_address, &collection);
+            } else {
+                return Err(Error::Custom(String::from("Collections by owner not exist")))
+            }
             Ok(())
         }
 
@@ -528,6 +554,12 @@ pub mod artzero_collection_manager {
         pub fn get_contract_by_id(&self, id: u64) -> Option<AccountId> {
             self.manager.collections_by_id.get(&id)
         }
+
+         /// Get Collection Id by Contract Address
+         #[ink(message)]
+         pub fn get_id_by_contract(&self, contract_account: AccountId) -> Option<u64> {
+             self.manager.id_by_collections.get(&contract_account)
+         }
 
         /// Get Collection Count
         #[ink(message)]
