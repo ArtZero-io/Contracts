@@ -19,6 +19,7 @@ pub type Psp22Ref = dyn PSP22;
 
 #[openbrush::trait_definition]
 pub trait AdminTrait {
+    fn _emit_withdraw_fee(&self, _value: Balance, _receiver: AccountId);
     /// This function allows contract owner to withdraw contract balance to his account.
     #[ink(message)]
     fn withdraw_fee(&mut self, value: Balance, receiver: AccountId) -> Result<(), Error>;

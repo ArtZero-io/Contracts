@@ -16,6 +16,10 @@ pub mod launchpad_psp34_nft_standard {
         },
         vec::Vec,
     };
+    use ink::codegen::{
+        EmitEvent,
+        Env,
+    };
     use openbrush::{
         contracts::access_control::*,
         contracts::ownable::*,
@@ -170,6 +174,33 @@ pub mod launchpad_psp34_nft_standard {
         admin_data: artzero_project::impls::admin::data::Data,
     }
 
+    /// Event emitted when withdrawing fee
+    #[ink(event)]
+    pub struct WithdrawFeeEvent {
+        #[ink(topic)]
+        value: Balance,
+        #[ink(topic)]
+        receiver: AccountId
+    }
+
+    #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode)]
+    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
+    pub enum MintingMode {
+        Public         = 0,
+        Whitelist     = 1
+    }
+
+    /// Event emitted when minting
+    #[ink(event)]
+    pub struct MintingEvent {
+        mode: MintingMode,
+        minter: AccountId,
+        phase_id: u8,
+        mint_amount: u64,
+        minting_fee: Balance,
+        project_mint_fee: Balance
+    }
+
     const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
     impl Ownable for LaunchPadPsp34NftStandard {}
@@ -178,7 +209,15 @@ pub mod launchpad_psp34_nft_standard {
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
-    impl AdminTrait for LaunchPadPsp34NftStandard {}
+
+    impl AdminTrait for LaunchPadPsp34NftStandard {
+        fn _emit_withdraw_fee(&self, _value: Balance, _receiver: AccountId) {
+            self.env().emit_event(WithdrawFeeEvent {
+                value: _value, 
+                receiver: _receiver
+            });
+        }
+    }
 
     impl PSP34Burnable for LaunchPadPsp34NftStandard {
         #[ink(message)]
@@ -559,6 +598,14 @@ pub mod launchpad_psp34_nft_standard {
                 phase.public_claimed_amount = phase.public_claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 self.manager.phases.insert(&phase_id, &phase);
+                self.env().emit_event(MintingEvent {
+                    mode: MintingMode::Public,
+                    minter: caller,
+                    phase_id,
+                    mint_amount,
+                    minting_fee: self.env().transferred_value(),
+                    project_mint_fee
+                });
                 Ok(())
             } else {
                 Err(Error::PhaseExpired)
@@ -629,6 +676,14 @@ pub mod launchpad_psp34_nft_standard {
                 let mut phase = self.manager.phases.get(&phase_id).unwrap();
                 phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 self.manager.phases.insert(&phase_id, &phase);
+                self.env().emit_event(MintingEvent {
+                    mode: MintingMode::Whitelist,
+                    minter: caller,
+                    phase_id,
+                    mint_amount,
+                    minting_fee: self.env().transferred_value(),
+                    project_mint_fee
+                });
                 Ok(())
             } else {
                 Err(Error::PhaseExpired)

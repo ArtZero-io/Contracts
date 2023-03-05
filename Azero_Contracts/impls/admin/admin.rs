@@ -27,6 +27,8 @@ use crate::traits::psp34_standard::*;
 
 impl<T: Storage<data::Data> + Storage<ownable::Data>> AdminTrait for T
 {
+    default fn _emit_withdraw_fee(&self, _value: Balance, _receiver: AccountId) {}
+
     #[modifiers(only_owner)]
     default fn withdraw_fee(&mut self, value: Balance, receiver: AccountId) -> Result<(), Error> {
         if value > T::env().balance() {
@@ -35,6 +37,7 @@ impl<T: Storage<data::Data> + Storage<ownable::Data>> AdminTrait for T
         if T::env().transfer(receiver, value).is_err() {
             return Err(Error::WithdrawFeeError);
         }
+        self._emit_withdraw_fee(value, receiver);
         Ok(())
     }
 
