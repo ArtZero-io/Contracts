@@ -192,7 +192,7 @@ pub mod launchpad_psp34_nft_standard {
 
     /// Event emitted when minting
     #[ink(event)]
-    pub struct MintingEvent {
+    pub struct LaunchpadMintingEvent {
         mode: MintingMode,
         minter: AccountId,
         phase_id: u8,
@@ -598,7 +598,7 @@ pub mod launchpad_psp34_nft_standard {
                 phase.public_claimed_amount = phase.public_claimed_amount.checked_add(mint_amount).unwrap();
                 phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 self.manager.phases.insert(&phase_id, &phase);
-                self.env().emit_event(MintingEvent {
+                self.env().emit_event(LaunchpadMintingEvent {
                     mode: MintingMode::Public,
                     minter: caller,
                     phase_id,
@@ -676,7 +676,7 @@ pub mod launchpad_psp34_nft_standard {
                 let mut phase = self.manager.phases.get(&phase_id).unwrap();
                 phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
                 self.manager.phases.insert(&phase_id, &phase);
-                self.env().emit_event(MintingEvent {
+                self.env().emit_event(LaunchpadMintingEvent {
                     mode: MintingMode::Whitelist,
                     minter: caller,
                     phase_id,
