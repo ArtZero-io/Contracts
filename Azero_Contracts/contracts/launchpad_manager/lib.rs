@@ -346,7 +346,7 @@ pub mod artzero_launchpad_psp34 {
             &self,
             nft_contract_address: AccountId
         ) -> Option<Project> {
-            Some(self.manager.projects.get(&nft_contract_address))?
+            self.manager.projects.get(&nft_contract_address)
         }
 
         // Get project by id

@@ -50,6 +50,6 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
     }
 
     default fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId> {
-        return Some(Some(self.data::<Manager>().collections.get(&nft_contract_address).unwrap())?.collection_owner);
+        return Some(self.data::<Manager>().collections.get(&nft_contract_address)?.collection_owner);
     }
 }
