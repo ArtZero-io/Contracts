@@ -1120,7 +1120,11 @@ pub mod artzero_marketplace_psp34 {
                     if hold_amount > self.env().balance() {
                         return Err(Error::NotEnoughBalance);
                     }
-                    assert!(self.env().transfer(receiver, hold_amount).is_ok());
+                    
+                    if self.env().transfer(receiver, hold_amount).is_err() {
+                        return Err(Error::CannotTransfer)
+                    }
+                    
                     self.manager.hold_amount_bidders.remove(&receiver);
                     self.manager.hold_bidders.remove_value(1, &receiver);
                 }

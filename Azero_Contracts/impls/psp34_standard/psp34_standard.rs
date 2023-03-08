@@ -151,17 +151,13 @@ fn add_attribute_name<T: Storage<Manager>>(
     instance: &mut T,
     attribute_input: &Vec<u8>
 ) {
-    let mut exist: bool = false;
-    for index in 0..instance.data::<Manager>().attribute_count {
-        let attribute_name = instance.data::<Manager>().attribute_names.get(&(index + 1));
-        if attribute_name.is_some() && attribute_name.unwrap() == *attribute_input {
-            exist = true;
-            break
-        }
-    }
+    let attr_input: String = String::from_utf8((*attribute_input).clone()).unwrap();
+    let exist: bool = instance.data::<Manager>().is_attribute.get(&attr_input).is_some();
+
     if !exist {
         instance.data::<Manager>().attribute_count = instance.data::<Manager>().attribute_count.checked_add(1).unwrap();
         let data = &mut instance.data::<Manager>();
         data.attribute_names.insert(&data.attribute_count, &attribute_input);
+        data.is_attribute.insert(&attr_input, &true);
     }
 }
