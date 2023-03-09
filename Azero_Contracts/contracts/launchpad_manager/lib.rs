@@ -32,6 +32,7 @@ pub mod artzero_launchpad_psp34 {
         }
     };
     use launchpad_psp34_nft_standard::launchpad_psp34_nft_standard::LaunchPadPsp34NftStandardRef;
+    use ink::{codegen::EmitEvent, reflect::ContractEventBase};
 
     #[derive(Default, Storage)]
     #[ink(storage)]
@@ -61,6 +62,8 @@ pub mod artzero_launchpad_psp34 {
         project_id: u64,
         nft_contract_address: Option<AccountId>
     }
+
+    pub type Event = <ArtZeroLaunchPadPSP34 as ContractEventBase>::Type;
 
     impl ArtZeroLaunchPadPSP34 {
         #[ink(constructor)]
@@ -116,6 +119,10 @@ pub mod artzero_launchpad_psp34 {
         }
 
         /* EXECUTE FUNCTION */
+
+        fn emit_event<EE: EmitEvent<Self>>(emitter: EE, event: Event) {
+            emitter.emit_event(event);
+        }
 
         /// Add new project
         #[ink(message)]
@@ -175,10 +182,10 @@ pub mod artzero_launchpad_psp34 {
                 end_time
             };
             self.manager.projects.insert(&contract_account, &new_project);
-            self.env().emit_event(AddNewProjectEvent {
+            Self::emit_event(self.env(), Event::AddNewProjectEvent(AddNewProjectEvent {
                 project_id: self.manager.project_count,
                 nft_contract_address: Some(contract_account),
-            });
+            }));
             Ok(())
         }
 
