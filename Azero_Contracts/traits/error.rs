@@ -63,6 +63,7 @@ pub enum Error {
     InvalidTime,
     RewardStarted,
     RewardNotStarted,
+    RewardNotAdded,
     ClaimMustBeFalse,
     OwnableError(OwnableError),
     AccessControlError(AccessControlError),

@@ -58,9 +58,13 @@ where
     /// Lock nft - Only owner token
     #[modifiers(only_token_owner(self.owner_of(token_id.clone()).unwrap()))]
     default fn lock(&mut self, token_id: Id) -> Result<(), Error> {
-        self.data::<Manager>().locked_token_count = self.data::<Manager>().locked_token_count.checked_add(1).unwrap();
-        self.data::<Manager>().locked_tokens.insert(&token_id, &true);
-        Ok(())
+        if let Some(locked_token_count) = self.data::<Manager>().locked_token_count.checked_add(1) {
+            self.data::<Manager>().locked_token_count = locked_token_count;
+            self.data::<Manager>().locked_tokens.insert(&token_id, &true);
+            return Ok(());
+        } else {
+            return Err(Error::Custom(String::from("Cannot increase locked token count")));
+        }
     }
 
     /// Check token is locked or not
@@ -97,8 +101,9 @@ where
             return Err(Error::Custom(String::from("Token is locked")))
         }
         for (attribute, value) in &metadata {
-            add_attribute_name(self, &attribute.clone().into_bytes());
-            self._set_attribute(token_id.clone(), attribute.clone().into_bytes(), value.clone().into_bytes());
+            if let Ok(()) = add_attribute_name(self, &attribute.clone().into_bytes()) {
+                self._set_attribute(token_id.clone(), attribute.clone().into_bytes(), value.clone().into_bytes());
+            }    
         }
         Ok(())
     }
@@ -110,8 +115,13 @@ where
         for i in 0..length {
             let attribute = attributes[i].clone();
             let value = self.get_attribute(token_id.clone(), attribute.into_bytes());
-            if value.is_some() {
-                ret.push(String::from_utf8(value.unwrap()).unwrap());
+            
+            if let Some(value_in_bytes) = value {
+                if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+                    ret.push(value_in_string);
+                } else {
+                    ret.push(String::from(""));    
+                }                   
             } else {
                 ret.push(String::from(""));
             }
@@ -126,17 +136,29 @@ where
     /// Get Attribute Name
     default fn get_attribute_name(&self, index: u32) -> String {
         let attribute = self.data::<Manager>().attribute_names.get(&index);
-        if attribute.is_some() {
-            String::from_utf8(attribute.unwrap()).unwrap()
+
+        if let Some(value_in_bytes) = attribute {
+            if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+                return value_in_string;
+            } else {
+                return String::from("");    
+            }                   
         } else {
-            String::from("")
+            return String::from(""); 
         }
     }
 
     /// Get URI from token ID
     default fn token_uri(&self, token_id: u64) -> String {
         let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
-        let mut token_uri = String::from_utf8(value.unwrap()).unwrap();
+        let mut token_uri = String::from("");
+
+        if let Some(value_in_bytes) = value {
+            if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+                token_uri = value_in_string;
+            }                 
+        }
+
         token_uri = token_uri + &token_id.to_string() + &String::from(".json");
         token_uri
     }
@@ -150,14 +172,24 @@ where
 fn add_attribute_name<T: Storage<Manager>>(
     instance: &mut T,
     attribute_input: &Vec<u8>
-) {
-    let attr_input: String = String::from_utf8((*attribute_input).clone()).unwrap();
-    let exist: bool = instance.data::<Manager>().is_attribute.get(&attr_input).is_some();
+) -> Result<(), Error> {
+    if let Ok(attr_input) = String::from_utf8((*attribute_input).clone()) {
+        let exist: bool = instance.data::<Manager>().is_attribute.get(&attr_input).is_some();
 
-    if !exist {
-        instance.data::<Manager>().attribute_count = instance.data::<Manager>().attribute_count.checked_add(1).unwrap();
-        let data = &mut instance.data::<Manager>();
-        data.attribute_names.insert(&data.attribute_count, &attribute_input);
-        data.is_attribute.insert(&attr_input, &true);
+        if !exist {
+            if let Some(attribute_count) = instance.data::<Manager>().attribute_count.checked_add(1) {
+                instance.data::<Manager>().attribute_count = attribute_count;
+                let data = &mut instance.data::<Manager>();
+                data.attribute_names.insert(&data.attribute_count, &attribute_input);
+                data.is_attribute.insert(&attr_input, &true);
+                return Ok(());
+            } else {
+                return Err(Error::Custom(String::from("Fail to increase attribute count"))); 
+            }
+        } else {
+            return Err(Error::Custom(String::from("Attribute input exists"))); 
+        } 
+    } else {
+        return Err(Error::Custom(String::from("Attribute input error")));
     }
 }

@@ -63,19 +63,27 @@ pub mod psp34_nft {
         #[ink(message)]
         fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error> {
             let caller = Self::env().caller();
-            let token_owner = self.owner_of(id.clone()).unwrap();
-            if token_owner != account {
-                return Err(PSP34Error::Custom(String::from("not token owner").into_bytes()))
-            }
 
-            let allowance = self.allowance(account,caller,Some(id.clone()));
+            if let Some(token_owner) = self.owner_of(id.clone()) {
+                if token_owner != account {
+                    return Err(PSP34Error::Custom(String::from("not token owner").into_bytes()));
+                }
 
-            if caller == account || allowance {
-                self.manager.locked_tokens.remove(&id);
-                self.manager.locked_token_count = self.manager.locked_token_count.checked_sub(1).unwrap();
-                self._burn_from(account, id)
-            } else{
-                Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
+                let allowance = self.allowance(account,caller,Some(id.clone()));
+
+                if caller == account || allowance {
+                    self.manager.locked_tokens.remove(&id);
+                    if let Some(locked_token_count) = self.manager.locked_token_count.checked_sub(1) {
+                        self.manager.locked_token_count = locked_token_count;
+                        self._burn_from(account, id)
+                    } else {
+                        return Err(PSP34Error::Custom(String::from("Locked token count error").into_bytes()));
+                    }
+                } else {
+                    return Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()));
+                }
+            } else {
+                return Err(PSP34Error::Custom(String::from("No token owner found").into_bytes()));
             }
         }
     }
@@ -95,11 +103,15 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         pub fn mint(&mut self) -> Result<(), Error> {
             let caller = self.env().caller();
-            self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
-            if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
-                return Err(Error::Custom(String::from("Cannot mint")))
+            if let Some(last_token_id) = self.manager.last_token_id.checked_add(1) {
+                self.manager.last_token_id = last_token_id;
+                if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
+                    return Err(Error::Custom(String::from("Cannot mint")));
+                }
+                return Ok(());
+            } else {
+                return Err(Error::Custom(String::from("Cannot increase last token id")));
             }
-            Ok(())
         }
 
         /// This function let NFT Contract Owner to mint a new NFT with NFT Traits/Attributes
@@ -107,14 +119,18 @@ pub mod psp34_nft {
         #[modifiers(only_owner)]
         pub fn mint_with_attributes(&mut self, metadata: Vec<(String, String)>) -> Result<(), Error> {
             let caller = self.env().caller();
-            self.manager.last_token_id = self.manager.last_token_id.checked_add(1).unwrap();
-            if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
-                return Err(Error::Custom(String::from("Cannot mint")))
+            if let Some(last_token_id) = self.manager.last_token_id.checked_add(1) {
+                self.manager.last_token_id = last_token_id;
+                if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
+                    return Err(Error::Custom(String::from("Cannot mint")));
+                }
+                if self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata).is_err(){
+                    return Err(Error::Custom(String::from("Cannot set attributes")));
+                }
+                return Ok(());
+            } else {
+                return Err(Error::Custom(String::from("Cannot increase last token id")));
             }
-            if self.set_multiple_attributes(Id::U64(self.manager.last_token_id), metadata).is_err(){
-                return Err(Error::Custom(String::from("Cannot set attributes")))
-            }
-            Ok(())
         }
     }
 }

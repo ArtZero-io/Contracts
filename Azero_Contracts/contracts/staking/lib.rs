@@ -208,12 +208,17 @@ pub mod artzero_staking_nft {
             if self.manager.reward_started { // only when reward distribution is not started
                 return Err(Error::RewardStarted)
             }
-            self.manager.reward_pool = self.manager.reward_pool.checked_add(reward).unwrap();
-            self.env().emit_event(AddReward {
-                reward_amount: reward,
-                total_staked_amount: self.manager.total_staked,
-            });
-            Ok(())
+
+            if let Some(reward_pool) = self.manager.reward_pool.checked_add(reward) {
+                self.manager.reward_pool = reward_pool;
+                self.env().emit_event(AddReward {
+                    reward_amount: reward,
+                    total_staked_amount: self.manager.total_staked,
+                });
+                Ok(())
+            } else {
+                return Err(Error::RewardNotAdded);
+            }
         }
 
         /// Set Account so it can claim the reward. Must run by backend every month before add_reward
@@ -235,64 +240,77 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let is_claimed = self.manager.is_claimed.get(&caller);
             // Check if the claim exist and must be FALSE
-            if is_claimed.is_none(){
-                return Err(Error::ClaimMustBeFalse)
-            }
-            if is_claimed.unwrap() {
-                return Err(Error::ClaimMustBeFalse)
-            }
-            self.manager.is_claimed.insert(&caller, &true); // Can only claim once
+            if let Some(claimed) = is_claimed {
+                if claimed {
+                    return Err(Error::ClaimMustBeFalse) 
+                } else {
+                    self.manager.is_claimed.insert(&caller, &true); // Can only claim once
 
-            // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
-            if self.manager.total_staked == 0 {
-                return Err(Error::Custom(String::from("Invalid Total Stake")))
-            }
-            if !self.manager.reward_started { // Only allow when reward distribution is started
-                return Err(Error::RewardNotStarted)
-            }
-            // How many NFT the user staker, it must be greater than ZERO
-            let staked_amount = self.manager.staking_list.count(caller);
-            if staked_amount == 0{
-                return Err(Error::Custom(String::from("Invalid User Stake")))
-            }
-            // Check if Reward Pool has balance to pay for stakers
-            if self.manager.reward_pool == 0{
-                return Err(Error::Custom(String::from("Invalid Reward Pool")))
-            }
-            // Calculate how much reward to pay for staker
-            let reward = self.manager.reward_pool.checked_mul(staked_amount).unwrap().checked_div(self.manager.total_staked as u128).unwrap();
-            if self.manager.claimable_reward >= reward {
-                // Send the reward to the staker
-                self.manager.claimable_reward = self.manager.claimable_reward.checked_sub(reward).unwrap();
-                if reward > self.env().balance() {
-                    return Err(Error::NotEnoughBalance)
+                    // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
+                    if self.manager.total_staked == 0 {
+                        return Err(Error::Custom(String::from("Invalid Total Stake")))
+                    }
+                    if !self.manager.reward_started { // Only allow when reward distribution is started
+                        return Err(Error::RewardNotStarted)
+                    }
+                    // How many NFT the user staker, it must be greater than ZERO
+                    let staked_amount = self.manager.staking_list.count(caller);
+                    if staked_amount == 0{
+                        return Err(Error::Custom(String::from("Invalid User Stake")))
+                    }
+                    // Check if Reward Pool has balance to pay for stakers
+                    if self.manager.reward_pool == 0{
+                        return Err(Error::Custom(String::from("Invalid Reward Pool")))
+                    }
+                    // Calculate how much reward to pay for staker
+                    if let Some(checked_mul_value) = self.manager.reward_pool.checked_mul(staked_amount) {
+                        if let Some(reward) = checked_mul_value.checked_div(self.manager.total_staked as u128) {
+                            if self.manager.claimable_reward >= reward {
+                                // Send the reward to the staker
+                                if let Some(claimable_reward) = self.manager.claimable_reward.checked_sub(reward) {
+                                    self.manager.claimable_reward = claimable_reward;
+                                    if reward > self.env().balance() {
+                                        return Err(Error::NotEnoughBalance)
+                                    }
+                                    if self.env().transfer(caller, reward).is_err(){
+                                        return Err(Error::CannotTransfer)
+                                    }
+                                    // Emit ClaimReward event to the network
+                                    self.env().emit_event(ClaimReward {
+                                        staker: Some(caller),
+                                        reward_amount: reward,
+                                        staked_amount: staked_amount as u64,
+                                    });
+                                } else {
+                                    return Err(Error::Custom(String::from("Fail to decrease claimable reward")));
+                                }                        
+                            } else {
+                                if self.manager.claimable_reward > self.env().balance() {
+                                    return Err(Error::NotEnoughBalance)
+                                }
+                                // If there is not enough fund to pay, transfer everything in the pool to staker
+                                if self.env().transfer(caller, self.manager.claimable_reward).is_err() {
+                                    return Err(Error::CannotTransfer)
+                                }
+                                self.env().emit_event(ClaimReward {
+                                    staker: Some(caller),
+                                    reward_amount: self.manager.claimable_reward,
+                                    staked_amount: staked_amount as u64,
+                                });
+                                self.manager.claimable_reward = 0;
+                            }
+        
+                            Ok(())
+                        } else {
+                            return Err(Error::Custom(String::from("Fail to calculate reward")));
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Fail to calculate reward")));
+                    }
                 }
-                if self.env().transfer(caller, reward).is_err(){
-                    return Err(Error::CannotTransfer)
-                }
-                // Emit ClaimReward event to the network
-                self.env().emit_event(ClaimReward {
-                    staker: Some(caller),
-                    reward_amount: reward,
-                    staked_amount: staked_amount as u64,
-                });
             } else {
-                if self.manager.claimable_reward > self.env().balance() {
-                    return Err(Error::NotEnoughBalance)
-                }
-                // If there is not enough fund to pay, transfer everything in the pool to staker
-                if self.env().transfer(caller, self.manager.claimable_reward).is_err() {
-                    return Err(Error::CannotTransfer)
-                }
-                self.env().emit_event(ClaimReward {
-                    staker: Some(caller),
-                    reward_amount: self.manager.claimable_reward,
-                    staked_amount: staked_amount as u64,
-                });
-                self.manager.claimable_reward = 0;
-            }
-
-            Ok(())
+                return Err(Error::ClaimMustBeFalse);
+            }                
         }
 
         // GETTERS
@@ -386,59 +404,65 @@ pub mod artzero_staking_nft {
             let caller = self.env().caller();
             let leng = token_ids.len();
 
-            self.manager.total_staked = self.manager.total_staked.checked_add(leng as u64).unwrap();
-            for &item in token_ids.iter() {
-                // Step 1 - Check if the token is belong to caller
-                let token_owner =
-                    Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)).unwrap();
-                if caller != token_owner {
-                    return Err(Error::NotTokenOwner)
+            if let Some(total_staked) = self.manager.total_staked.checked_add(leng as u64) {
+                self.manager.total_staked = total_staked;
+                for &item in token_ids.iter() {
+                    // Step 1 - Check if the token is belong to caller
+                    if let Some(token_owner) = Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)) {
+                        if caller != token_owner {
+                            return Err(Error::NotTokenOwner)
+                        }
+                        // Step 2 - Check if this contract has been approved
+                        let allowance = Psp34Ref::allowance(
+                            &self.manager.nft_contract_address,
+                            caller,
+                            self.env().account_id(),
+                            Some(Id::U64(item)),
+                        );
+                        if !allowance {
+                            return Err(Error::NotApproved)
+                        }
+                        self.manager.staking_list.insert(caller, &item);
+                        // Step 3 - Transfer Token from Caller to Staking Contract
+                        let builder = PSP34Ref::transfer_builder(
+                            &self.manager.nft_contract_address,
+                            self.env().account_id(),
+                            Id::U64(item),
+                            Vec::<u8>::new(),
+                        )
+                        .call_flags(CallFlags::default().set_allow_reentry(true));
+        
+                        let result = match builder.try_invoke() {
+                            Ok(Ok(Ok(_))) => Ok(()),
+                            Ok(Ok(Err(e))) => Err(e.into()),
+                            Ok(Err(ink::LangError::CouldNotReadInput)) => Ok(()),
+                            Err(ink::env::Error::NotCallable) => Ok(()),
+                            _ => {
+                                Err(Error::CannotTransfer)
+                            }
+                        };
+        
+                        if result.is_ok() {
+                            if self.manager.is_claimed.get(&caller).is_none() {
+                                self.manager.is_claimed.insert(&caller, &false);
+                            }
+                            self.env().emit_event(NewStakeEvent {
+                                staker: Some(caller),
+                                token_id: item,
+                            });
+                        }
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot find token owner")));
+                    }                    
                 }
-                // Step 2 - Check if this contract has been approved
-                let allowance = Psp34Ref::allowance(
-                    &self.manager.nft_contract_address,
-                    caller,
-                    self.env().account_id(),
-                    Some(Id::U64(item)),
-                );
-                if !allowance {
-                    return Err(Error::NotApproved)
+                if !self.manager.staked_accounts.contains_value(0, &caller) {
+                    self.manager.staked_accounts.insert(0, &caller);
                 }
-                self.manager.staking_list.insert(caller, &item);
-                // Step 3 - Transfer Token from Caller to Staking Contract
-                let builder = PSP34Ref::transfer_builder(
-                    &self.manager.nft_contract_address,
-                    self.env().account_id(),
-                    Id::U64(item),
-                    Vec::<u8>::new(),
-                )
-                .call_flags(CallFlags::default().set_allow_reentry(true));
-
-                let result = match builder.try_invoke() {
-                    Ok(Ok(Ok(_))) => Ok(()),
-                    Ok(Ok(Err(e))) => Err(e.into()),
-                    Ok(Err(ink::LangError::CouldNotReadInput)) => Ok(()),
-                    Err(ink::env::Error::NotCallable) => Ok(()),
-                    _ => {
-                        Err(Error::CannotTransfer)
-                    }
-                };
-
-                if result.is_ok() {
-                    if self.manager.is_claimed.get(&caller).is_none() {
-                        self.manager.is_claimed.insert(&caller, &false);
-                    }
-                    self.env().emit_event(NewStakeEvent {
-                        staker: Some(caller),
-                        token_id: item,
-                    });
-                }
+    
+                Ok(())
+            } else {
+                return Err(Error::Custom(String::from("Fail to increase total staked")));
             }
-            if !self.manager.staked_accounts.contains_value(0, &caller) {
-                self.manager.staked_accounts.insert(0, &caller);
-            }
-
-            Ok(())
         }
 
         /// Request Unstake multiple NFTs
@@ -450,25 +474,27 @@ pub mod artzero_staking_nft {
 
             for &item in token_ids.iter() {
                 // Step 1 - Check owner token is Contract Staking
-                let token_owner =
-                    Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)).unwrap();
-                if self.env().account_id() != token_owner {
-                    return Err(Error::InvalidCaller)
-                }
-                // Setp 2 - Check staker
-                if !self.manager.staking_list.contains_value(caller, &item) {
-                    return Err(Error::InvalidInput)
-                }
-                // Step 3 - Remove token on staking_list
-                self.manager.staking_list.remove_value(caller, &item);
-                // Step 4 - Add token to pending unstaking list
-                let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
-                self.manager.request_unstaking_time.insert(&(&caller, &item), &current_time);
-                self.manager.pending_unstaking_list.insert(caller, &item);
-                self.env().emit_event(RequestUnstakeEvent {
-                    staker: Some(caller),
-                    token_id: item,
-                });
+                if let Some(token_owner) = Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)) {
+                    if self.env().account_id() != token_owner {
+                        return Err(Error::InvalidCaller)
+                    }
+                    // Setp 2 - Check staker
+                    if !self.manager.staking_list.contains_value(caller, &item) {
+                        return Err(Error::InvalidInput)
+                    }
+                    // Step 3 - Remove token on staking_list
+                    self.manager.staking_list.remove_value(caller, &item);
+                    // Step 4 - Add token to pending unstaking list
+                    let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
+                    self.manager.request_unstaking_time.insert(&(&caller, &item), &current_time);
+                    self.manager.pending_unstaking_list.insert(caller, &item);
+                    self.env().emit_event(RequestUnstakeEvent {
+                        staker: Some(caller),
+                        token_id: item,
+                    });
+                } else {
+                    return Err(Error::Custom(String::from("Cannot find token owner")));
+                }               
             }
 
             if self.manager.staking_list.count(caller) == 0 {
@@ -479,8 +505,12 @@ pub mod artzero_staking_nft {
                 self.manager.staked_accounts.insert(1, &caller);
             }
 
-            self.manager.total_staked = self.manager.total_staked.checked_sub(leng as u64).unwrap();
-            Ok(())
+            if let Some(total_staked) = self.manager.total_staked.checked_sub(leng as u64) {
+                self.manager.total_staked = total_staked;
+                Ok(())
+            } else {
+                return Err(Error::Custom(String::from("Fail to decrease total staked")));
+            }
         }
 
         /// Cancel Request
@@ -495,25 +525,27 @@ pub mod artzero_staking_nft {
             }
             for &item in token_ids.iter() {
                 // Step 1 - Check owner token is Contract Staking
-                let token_owner =
-                    Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)).unwrap();
-                if self.env().account_id() != token_owner {
-                    return Err(Error::TokenOwnerNotMatch)
-                }
-                // Setp 2 - Check staker
-                if !self.manager.pending_unstaking_list.contains_value(caller, &item) {
-                    return Err(Error::InvalidInput)
-                }
-                // Step 3 - Add token on staking_list
-                self.manager
-                    .staking_list
-                    .insert(caller, &item);
-                // Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
-                self.manager.pending_unstaking_list.remove_value(caller, &item);
-                self.env().emit_event(CancelRequestUnstakeEvent {
-                    staker: Some(caller),
-                    token_id: item,
-                });
+                if let Some(token_owner) = Psp34Ref::owner_of(&self.manager.nft_contract_address, Id::U64(item)) {
+                    if self.env().account_id() != token_owner {
+                        return Err(Error::TokenOwnerNotMatch)
+                    }
+                    // Step 2 - Check staker
+                    if !self.manager.pending_unstaking_list.contains_value(caller, &item) {
+                        return Err(Error::InvalidInput)
+                    }
+                    // Step 3 - Add token on staking_list
+                    self.manager
+                        .staking_list
+                        .insert(caller, &item);
+                    // Step 4 - Remove from pending_unstaking_list_token_index and change pending_unstaking_list to 0
+                    self.manager.pending_unstaking_list.remove_value(caller, &item);
+                    self.env().emit_event(CancelRequestUnstakeEvent {
+                        staker: Some(caller),
+                        token_id: item,
+                    });
+                } else {
+                    return Err(Error::Custom(String::from("Cannot find token owner")));
+                }                
             }
 
             if self.manager.pending_unstaking_list.count(caller) == 0 {
@@ -524,8 +556,12 @@ pub mod artzero_staking_nft {
                 self.manager.staked_accounts.insert(0, &caller);
             }
 
-            self.manager.total_staked = self.manager.total_staked.checked_add(leng as u64).unwrap();
-            Ok(())
+            if let Some(total_staked) = self.manager.total_staked.checked_add(leng as u64) {
+                self.manager.total_staked = total_staked;
+                Ok(())
+            } else {
+                return Err(Error::Custom(String::from("Fail to increase total staked")));
+            }
         }
 
         /// unStake multiple NFTs
@@ -538,7 +574,7 @@ pub mod artzero_staking_nft {
                 return Err(Error::InvalidInput)
             }
             for &item in token_ids.iter() {
-                // Setp 2 - Check request unstaked and time request unstaked
+                // Step 2 - Check request unstaked and time request unstaked
                 if !self.manager.pending_unstaking_list.contains_value(caller, &item) {
                     return Err(Error::InvalidInput)
                 }
@@ -547,29 +583,38 @@ pub mod artzero_staking_nft {
                     return Err(Error::InvalidTime)
                 }
                 let current_time = <ArtZeroStakingNFT as DefaultEnv>::env().block_timestamp();
-                if request_unstake_time.checked_add(self.manager.limit_unstake_time.checked_mul(60000).unwrap()).unwrap() > current_time {
-                    return Err(Error::Custom(String::from("Not Enough Time Request Unstake")))
-                }
-                // Step 3 - transfer token to caller
-                if Psp34Ref::transfer(
-                    &self.manager.nft_contract_address,
-                    caller,
-                    Id::U64(item),
-                    Vec::<u8>::new()
-                )
-                .is_err(){
-                    return Err(Error::CannotTransfer)
-                }
-                // Step 4 - Remove from pending_unstaking_list and change request_unstaking_time to 0
-                self.manager.pending_unstaking_list.remove_value(caller, &item);
-                self.manager.request_unstaking_time.insert(&(&caller, &item), &0);
-                if self.manager.pending_unstaking_list.count(caller) == 0 {
-                    self.manager.staked_accounts.remove_value(1, &caller);
-                }
-                self.env().emit_event(UnstakeEvent {
-                    staker: Some(caller),
-                    token_id: item,
-                });
+                
+                if let Some(checked_mul_value) = self.manager.limit_unstake_time.checked_mul(60000) {
+                    if let Some (unstake_time) = request_unstake_time.checked_add(checked_mul_value) {
+                        if unstake_time > current_time {
+                            return Err(Error::Custom(String::from("Not Enough Time Request Unstake")))
+                        }
+                        // Step 3 - transfer token to caller
+                        if Psp34Ref::transfer(
+                            &self.manager.nft_contract_address,
+                            caller,
+                            Id::U64(item),
+                            Vec::<u8>::new()
+                        )
+                        .is_err(){
+                            return Err(Error::CannotTransfer)
+                        }
+                        // Step 4 - Remove from pending_unstaking_list and change request_unstaking_time to 0
+                        self.manager.pending_unstaking_list.remove_value(caller, &item);
+                        self.manager.request_unstaking_time.insert(&(&caller, &item), &0);
+                        if self.manager.pending_unstaking_list.count(caller) == 0 {
+                            self.manager.staked_accounts.remove_value(1, &caller);
+                        }
+                        self.env().emit_event(UnstakeEvent {
+                            staker: Some(caller),
+                            token_id: item,
+                        });
+                    } else {
+                        return Err(Error::Custom(String::from("Fail to calculate time request unstake")));
+                    }                    
+                } else {
+                    return Err(Error::Custom(String::from("Fail to calculate time request unstake")));
+                }                
             }
             Ok(())
         }
