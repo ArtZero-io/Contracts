@@ -66,10 +66,12 @@ pub enum Error {
     RewardNotStarted,
     RewardNotAdded,
     ClaimMustBeFalse,
+    HoldAmountBidderNotExist,
     OwnableError(OwnableError),
     AccessControlError(AccessControlError),
     PSP22Error(PSP22Error),
     PSP34Error(PSP34Error),
+    CheckedOperations
 }
 
 #[derive(Debug, PartialEq, Eq, scale::Encode, scale::Decode)]

@@ -143,9 +143,18 @@ pub mod artzero_collection_manager {
                 .salt_bytes(self.manager.collection_count.to_le_bytes())
                 .instantiate();
             let contract_account: AccountId = contract.to_account_id();
-
-            self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
-            self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
+            
+            if let Some(collection_count) = self.manager.collection_count.checked_add(1) {
+                self.manager.collection_count = collection_count;
+            } else {
+                return Err(Error::CheckedOperations)
+            }
+            
+            if let Some(active_collection_count) = self.manager.active_collection_count.checked_add(1) {
+                self.manager.active_collection_count = active_collection_count;
+            } else {
+                return Err(Error::CheckedOperations)
+            }
 
             // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
@@ -216,7 +225,12 @@ pub mod artzero_collection_manager {
             if royalty_fee > self.manager.max_royalty_fee_rate {
                 return Err(Error::InvalidInput)
             }
-            self.manager.collection_count = self.manager.collection_count.checked_add(1).unwrap();
+            
+            if let Some(collection_count) = self.manager.collection_count.checked_add(1) {
+                self.manager.collection_count = collection_count;
+            } else {
+                return Err(Error::CheckedOperations)
+            }
             // Add collection contract to collections_by_owner for Front-end use purpose
             self.manager
                 .collections_by_id
@@ -465,9 +479,18 @@ pub mod artzero_collection_manager {
                 }
                 collection.is_active = is_active;
                 if is_active {
-                    self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
+                    if let Some(active_collection_count) = self.manager.active_collection_count.checked_add(1) {
+                        self.manager.active_collection_count = active_collection_count;
+                    } else {
+                        return Err(Error::CheckedOperations)
+                    }
                 } else {
-                    self.manager.active_collection_count = self.manager.active_collection_count.checked_sub(1).unwrap();
+                    if let Some(active_collection_count) = self.manager.active_collection_count.checked_sub(1) {
+                        self.manager.active_collection_count = active_collection_count;
+                    } else {
+                        return Err(Error::CheckedOperations)
+                    }
+                    
                 }
                 self.manager.collections.insert(&contract_address, &collection);
                 Ok(())

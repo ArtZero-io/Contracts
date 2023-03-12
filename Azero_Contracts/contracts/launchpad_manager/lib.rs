@@ -163,7 +163,11 @@ pub mod artzero_launchpad_psp34 {
                 .salt_bytes(self.manager.project_count.to_le_bytes())
                 .instantiate();
             let contract_account:AccountId = contract.to_account_id();
-            self.manager.project_count = self.manager.project_count.checked_add(1).unwrap();
+            if let Some(project_count) = self.manager.project_count.checked_add(1) {
+                self.manager.project_count = project_count;
+            } else {
+                return Err(Error::CheckedOperations);
+            }
             self.manager.projects_by_id.insert(&self.manager.project_count, &contract_account);
             let projects_by_owner = self.manager.projects_by_owner.get(&project_owner);
             if let Some(mut projects) = projects_by_owner {
@@ -279,9 +283,17 @@ pub mod artzero_launchpad_psp34 {
                 }
                 project.is_active = is_active;
                 if is_active {
-                    self.manager.active_project_count = self.manager.active_project_count.checked_add(1).unwrap();
+                    if let Some(active_project_count) = self.manager.active_project_count.checked_add(1) {
+                        self.manager.active_project_count = active_project_count;
+                    } else {
+                        return Err(Error::CheckedOperations);
+                    }
                 } else {
-                    self.manager.active_project_count = self.manager.active_project_count.checked_sub(1).unwrap();
+                    if let Some(active_project_count) = self.manager.active_project_count.checked_sub(1) {
+                        self.manager.active_project_count = active_project_count;
+                    } else {
+                        return Err(Error::CheckedOperations);
+                    }
                 }
                 self.manager.projects.insert(&contract_address, &project);
                 Ok(())
