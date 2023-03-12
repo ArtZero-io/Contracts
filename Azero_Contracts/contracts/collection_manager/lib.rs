@@ -131,13 +131,9 @@ pub mod artzero_collection_manager {
             royalty_fee: u32,
         ) -> Result<(), Error> {
             let collection_owner = self.env().caller();
-            // Check if caller sends correct adding fee to the contract
-            if self.manager.simple_mode_adding_fee != self.env().transferred_value(){
+            // Check if caller sends correct adding fee to the contract and royalty fee is less than maximal value
+            if self.manager.simple_mode_adding_fee != self.env().transferred_value() || royalty_fee > self.manager.max_royalty_fee_rate {
                 return Err(Error::InvalidFee)
-            }
-            // Check if royalty fee is less than maximal value
-            if royalty_fee > self.manager.max_royalty_fee_rate{
-                return Err(Error::InvalidInput)
             }
 
             // Create PSP34 Standard Contract using cross call to psp34_standard contract
@@ -270,33 +266,36 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             new_owner: AccountId,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
-            }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            let older_owner = collection.collection_owner;
-            let collections_older_owner = self.manager.collections_by_owner.get(&older_owner);
-            if let Some(mut collections_older) = collections_older_owner {
-                // Remove collections_by_owner of older owner
-                let index = collections_older.iter().position(|x| *x == contract_address).unwrap();
-                collections_older.remove(index);
-                self.manager.collections_by_owner.insert(&older_owner, &collections_older);
-                // Update collections_by_owner
-                let collections_by_owner = self.manager.collections_by_owner.get(&new_owner);
-                if let Some(mut collections) = collections_by_owner {
-                    collections.push(contract_address);
-                    self.manager.collections_by_owner.insert(&new_owner, &collections);
+            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
+                let older_owner = collection.collection_owner;
+                let collections_older_owner = self.manager.collections_by_owner.get(&older_owner);
+                if let Some(mut collections_older) = collections_older_owner {
+                    if let Some(index) = collections_older.iter().position(|x| *x == contract_address) {
+                        // Remove collections_by_owner of older owner
+                        collections_older.remove(index);
+                        self.manager.collections_by_owner.insert(&older_owner, &collections_older);
+                        // Update collections_by_owner
+                        let collections_by_owner = self.manager.collections_by_owner.get(&new_owner);
+                        if let Some(mut collections) = collections_by_owner {
+                            collections.push(contract_address);
+                            self.manager.collections_by_owner.insert(&new_owner, &collections);
+                        } else {
+                            let collections = vec![contract_address];
+                            self.manager.collections_by_owner.insert(&new_owner, &collections);
+                        }
+                        // Update collections
+                        collection.collection_owner = new_owner;
+                        self.manager.collections.insert(&contract_address, &collection);
+                        Ok(())
+                    } else {
+                        return Err(Error::Custom(String::from("This collection by owner not exist")))
+                    }
                 } else {
-                    let collections = vec![contract_address];
-                    self.manager.collections_by_owner.insert(&new_owner, &collections);
+                    return Err(Error::Custom(String::from("This owner not exist")))
                 }
-                // Update collections
-                collection.collection_owner = new_owner;
-                self.manager.collections.insert(&contract_address, &collection);
             } else {
-                return Err(Error::Custom(String::from("Collections by owner not exist")))
+                return Err(Error::CollectionNotExist)
             }
-            Ok(())
         }
 
         /// Set attributes for the collections
@@ -307,30 +306,34 @@ pub mod artzero_collection_manager {
             attributes: Vec<String>,
             values: Vec<String>,
         ) -> Result<(), Error> {
-            if attributes.len() != values.len(){
+            if attributes.len() != values.len() {
                 return Err(Error::InvalidInput)
             }
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
-            }
-            let collection = self.manager.collections.get(&contract_address).unwrap();
-            if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
-                let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or_default();
-                for i in 0..attributes.len() {
-                    let attribute = attributes[i].clone();
-                    let value = values[i].clone();
-                    if self.has_attribute(contract_address, attribute.clone()) {
-                        let index = self.get_collection_attribute_index(contract_address, attribute.clone()).unwrap();
-                        collection_attributes[index as usize] = (attribute.into(), value.into());
-                    } else {
-                        collection_attributes.push((attribute.into(), value.into()));
+            if let Some(collection) = self.manager.collections.get(&contract_address) {
+                if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
+                    let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or_default();
+                    for i in 0..attributes.len() {
+                        let attribute = attributes[i].clone();
+                        let value = values[i].clone();
+                        if self.has_attribute(contract_address, attribute.clone()) {
+                            if let Some(index) = self.get_collection_attribute_index(contract_address, attribute.clone()) {
+                                collection_attributes[index as usize] = (attribute.into(), value.into());
+                            } else {
+                                collection_attributes.push((attribute.into(), value.into()));
+                            }
+                        } else {
+                            collection_attributes.push((attribute.into(), value.into()));
+                        }
                     }
+                    self.manager.attributes.insert(&contract_address, &collection_attributes);
+                    Ok(())
+                } else {
+                    Err(Error::CollectionOwnerAndAdmin)
                 }
-                self.manager.attributes.insert(&contract_address, &collection_attributes);
-                Ok(())
             } else {
-                Err(Error::CollectionOwnerAndAdmin)
+                return Err(Error::CollectionNotExist)
             }
+            
         }
 
         // Get attributes of an NFT Collection
@@ -346,16 +349,16 @@ pub mod artzero_collection_manager {
         // Find an attribute of an NFT Collection by key
         #[ink(message)]
         pub fn get_attribute(&self, contract_address: AccountId, attribute_key: String) -> String {
-            if self.manager.attributes.get(&contract_address).is_none() {
-                return String::from("");
-            }
-            let collection_attributes = self.manager.attributes.get(&contract_address).unwrap();
-            for item in collection_attributes.iter().take(collection_attributes.len()) {
-                if item.0 == attribute_key.clone().into_bytes() {
-                    return String::from_utf8(item.1.clone()).unwrap();
+            if let Some(collection_attributes) = self.manager.attributes.get(&contract_address) {
+                for item in collection_attributes.iter().take(collection_attributes.len()) {
+                    if item.0 == attribute_key.clone().into_bytes() {
+                        return String::from_utf8(item.1.clone()).unwrap();
+                    }
                 }
+                String::from("")
+            } else {
+                String::from("")
             }
-            String::from("")
         }
 
         /// Check collection has an attribute
@@ -386,13 +389,13 @@ pub mod artzero_collection_manager {
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
         pub fn update_contract_type(&mut self, contract_address: AccountId, contract_type: CollectionType) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
+            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
+                collection.contract_type = contract_type;
+                self.manager.collections.insert(&contract_address, &collection);
+                Ok(())
+            } else {
+                return Err(Error::CollectionNotExist)
             }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.contract_type = contract_type;
-            self.manager.collections.insert(&contract_address, &collection);
-            Ok(())
         }
 
         /// Update Is Royalty Fee - Only Admin Role can change
@@ -403,13 +406,13 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             is_collect_royalty_fee: bool,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
+            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
+                collection.is_collect_royalty_fee = is_collect_royalty_fee;
+                self.manager.collections.insert(&contract_address, &collection);
+                Ok(())
+            } else {
+                return Err(Error::CollectionNotExist)
             }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.is_collect_royalty_fee = is_collect_royalty_fee;
-            self.manager.collections.insert(&contract_address, &collection);
-            Ok(())
         }
 
         /// Update royalty fee of an NFT Collection - Only Admin Role can change
@@ -419,13 +422,13 @@ pub mod artzero_collection_manager {
             if new_fee > self.manager.max_royalty_fee_rate{
                 return Err(Error::InvalidFee)
             }
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
+            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
+                collection.royalty_fee = new_fee;
+                self.manager.collections.insert(&contract_address, &collection);
+                Ok(())
+            } else {
+                return Err(Error::CollectionNotExist)
             }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            collection.royalty_fee = new_fee;
-            self.manager.collections.insert(&contract_address, &collection);
-            Ok(())
         }
 
         /// Update show_on_chain_metadata - admin and collection owner can change
@@ -435,38 +438,43 @@ pub mod artzero_collection_manager {
             contract_address: AccountId,
             show_on_chain_metadata: bool,
         ) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
-            }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if self.env().caller() == collection.collection_owner || self.has_role(ADMINER, self.env().caller()) {
-                collection.show_on_chain_metadata = show_on_chain_metadata;
-                self.manager.collections.insert(&contract_address, &collection);
-                Ok(())
+            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
+                if self.env().caller() == collection.collection_owner || self.has_role(ADMINER, self.env().caller()) {
+                    collection.show_on_chain_metadata = show_on_chain_metadata;
+                    self.manager.collections.insert(&contract_address, &collection);
+                    Ok(())
+                } else {
+                    Err(Error::OnlyAdmin)
+                }
             } else {
-                Err(Error::OnlyAdmin)
+                return Err(Error::CollectionNotExist)
             }
         }
 
         /// Update Active Status When its active, collection will be shown on the UI and will be tradable - only Admin can change
         #[ink(message)]
         #[modifiers(only_role(ADMINER))]
-        pub fn update_is_active(&mut self, contract_address: AccountId, is_active: bool) -> Result<(), Error> {
-            if self.manager.collections.get(&contract_address).is_none(){
-                return Err(Error::Custom(String::from("Collection not exist")))
-            }
-            let mut collection = self.manager.collections.get(&contract_address).unwrap();
-            if is_active == collection.is_active{
-                return Err(Error::InvalidInput)
-            }
-            collection.is_active = is_active;
-            if is_active {
-                self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
+        pub fn update_is_active(
+            &mut self, 
+            contract_address: AccountId, 
+            is_active: bool
+        ) -> Result<(), Error> {
+            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
+                if is_active == collection.is_active{
+                    return Err(Error::InvalidInput)
+                }
+                collection.is_active = is_active;
+                if is_active {
+                    self.manager.active_collection_count = self.manager.active_collection_count.checked_add(1).unwrap();
+                } else {
+                    self.manager.active_collection_count = self.manager.active_collection_count.checked_sub(1).unwrap();
+                }
+                self.manager.collections.insert(&contract_address, &collection);
+                Ok(())
             } else {
-                self.manager.active_collection_count = self.manager.active_collection_count.checked_sub(1).unwrap();
+                return Err(Error::CollectionNotExist)
             }
-            self.manager.collections.insert(&contract_address, &collection);
-            Ok(())
+            
         }
 
         /// Update Simple Mode Adding Collection Fee - only Owner

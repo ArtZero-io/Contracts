@@ -40,6 +40,7 @@ pub enum Error {
     InvalidPhaseCount,
     CollectionOwnerAndAdmin,
     CollectionNotActive,
+    CollectionNotExist,
     InvalidInput,
     InvalidType,
     ClaimedAll,

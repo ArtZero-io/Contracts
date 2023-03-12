@@ -191,29 +191,27 @@ pub mod artzero_launchpad_psp34 {
 
         /// Edit a project Start Time and End Time - Only Admin Role can change
         #[ink(message)]
+        #[modifiers(only_role(ADMINER))]
         pub fn edit_project(
             &mut self,
             contract_address: AccountId,
             start_time: Timestamp,
             end_time: Timestamp
         ) -> Result<(), Error> {
-            if self.manager.projects.get(&contract_address).is_none() {
-                return Err(Error::ProjectNotExist);
-            }
             if start_time >= end_time {
                 return Err(Error::InvalidTime);
             }
-            let mut project = self.manager.projects.get(&contract_address).unwrap();
-            if !self.has_role(ADMINER, self.env().caller()) {
-                return Err(Error::OnlyAdmin);
+            if let Some(mut project) = self.manager.projects.get(&contract_address) {
+                if project.end_time <= <ArtZeroLaunchPadPSP34 as DefaultEnv>::env().block_timestamp() {
+                    return Err(Error::InvalidTime);
+                }
+                project.end_time = end_time;
+                project.start_time = start_time;
+                self.manager.projects.insert(&contract_address, &project);
+                Ok(())
+            } else {
+                return Err(Error::ProjectNotExist);
             }
-            if project.end_time <= <ArtZeroLaunchPadPSP34 as DefaultEnv>::env().block_timestamp() {
-                return Err(Error::InvalidTime);
-            }
-            project.end_time = end_time;
-            project.start_time = start_time;
-            self.manager.projects.insert(&contract_address, &project);
-            Ok(())
         }
 
         /* END EXECUTE FUNCTION*/
@@ -275,22 +273,21 @@ pub mod artzero_launchpad_psp34 {
             is_active: bool,
             contract_address: AccountId
         ) -> Result<(), Error>  {
-            if self.manager.projects.get(&contract_address).is_none(){
-                return Err(Error::InvalidInput);
-            }
-            let mut project = self.manager.projects.get(&contract_address).unwrap();
-            if is_active == project.is_active{
-                return Err(Error::InvalidInput);
-            }
-            project.is_active = is_active;
-
-            if is_active {
-                self.manager.active_project_count = self.manager.active_project_count.checked_add(1).unwrap();
+            if let (Some mut project) = self.manager.projects.get(&contract_address) {
+                if is_active == project.is_active{
+                    return Err(Error::InvalidInput);
+                }
+                project.is_active = is_active;
+                if is_active {
+                    self.manager.active_project_count = self.manager.active_project_count.checked_add(1).unwrap();
+                } else {
+                    self.manager.active_project_count = self.manager.active_project_count.checked_sub(1).unwrap();
+                }
+                self.manager.projects.insert(&contract_address, &project);
+                Ok(())
             } else {
-                self.manager.active_project_count = self.manager.active_project_count.checked_sub(1).unwrap();
+                return Err(Error::ProjectNotExist);
             }
-            self.manager.projects.insert(&contract_address, &project);
-            Ok(())
         }
 
         /* END SETTERS */
