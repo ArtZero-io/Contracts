@@ -10,18 +10,25 @@ pub use self::psp34_nft::{
 #[allow(clippy::too_many_arguments)]
 #[openbrush::contract]
 pub mod psp34_nft {
-    use ink::prelude::{
-        string::{
-            String,
+    use ink::{
+            codegen::{Env, EmitEvent},
+            reflect::ContractEventBase,
+            prelude::{
+            string::{
+                String,
+            },
+            vec::Vec,
         },
-        vec::Vec,
     };
     use openbrush::{
         contracts::ownable::*,
-        contracts::psp34::extensions::{
-            enumerable::*,
-            metadata::*,
-            burnable::*,
+        contracts::psp34::{
+            extensions::{
+                enumerable::*,
+                metadata::*,
+                burnable::*,
+            },
+            Internal,
         },
         traits::{
             Storage,
@@ -36,6 +43,27 @@ pub mod psp34_nft {
             error::Error,
         }
     };
+
+    /// - Specify transfer event.
+    #[ink(event)]
+    pub struct Transfer {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        id: Id,
+    }
+
+    /// - Specify approval event.
+    #[ink(event)]
+    pub struct Approval {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        id: Id,
+        approved: bool,
+    }
 
     #[derive(Default, Storage)]
     #[ink(storage)]
@@ -58,6 +86,47 @@ pub mod psp34_nft {
     impl PSP34Enumerable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
     impl AdminTrait for Psp34Nft {}
+    /// - Needed for Openbrush internal event emission implementations.
+    pub type Event = <Psp34Nft as ContractEventBase>::Type;
+
+    impl Internal for Psp34Nft {
+
+        /// - Impliment Transfer emit event because Openbrush doesn't.
+        fn _emit_transfer_event(
+            &self,
+            _from: Option<AccountId>,
+            _to: Option<AccountId>,
+            _id: Id,
+        ) {
+            Psp34Nft::emit_event(
+                self.env(),
+                Event::Transfer(Transfer {
+                    from: _from,
+                    to: _to,
+                    id: _id,
+                }),
+            );
+        }
+
+        /// - Impliment Approval emit event because Openbrush doesn't.
+        fn _emit_approval_event(
+            &self,
+            _from: AccountId,
+            _to: AccountId,
+            _id: Option<Id>,
+            _approved: bool,
+        ) {
+            Psp34Nft::emit_event(
+                self.env(),
+                Event::Approval(Approval {
+                    from: Some(_from),
+                    to: Some(_to),
+                    id: _id.unwrap(),
+                    approved: _approved,
+                }),
+            );
+        }
+    }
 
     impl PSP34Burnable for Psp34Nft {
         #[ink(message)]
@@ -81,6 +150,12 @@ pub mod psp34_nft {
     }
 
     impl Psp34Nft {
+
+        /// - Function for internal _emit_event implementations.
+        pub fn emit_event<EE: EmitEvent<Self>>(emitter: EE, event: Event) {
+            emitter.emit_event(event);
+        }
+
         #[ink(constructor)]
         pub fn new(contract_owner: AccountId, name: String, symbol: String) -> Self {
             let mut instance = Self::default();
@@ -117,4 +192,83 @@ pub mod psp34_nft {
             Ok(())
         }
     }
+
+    #[cfg(all(test, feature = "e2e-tests"))]
+    mod e2e_tests {
+
+        use super::*;
+        use crate::psp34_nft::PSP34Error::Custom;
+        use ink_e2e::{
+            build_message,
+        };
+        use openbrush::contracts::psp34::psp34_external::PSP34;
+
+        type E2EResult<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+        /// HAPPY TRANSFER
+        /// - Test if customized transfer function works correctly.
+        /// - When transfer, credentials are revoked.
+        /// - Test that register function works correctly.
+        /// - Test that transfer events are properly emitted.
+        /// - Test that get_credential() and get_collection() works..
+        #[ink_e2e::test]
+        async fn happye2e_mint_register_transfer(
+            mut client: ink_e2e::Client<C, E>,
+        ) -> E2EResult<()> {
+
+
+            let alice_account = ink_e2e::account_id(ink_e2e::AccountKeyring::Alice);
+            let bob_account = ink_e2e::account_id(ink_e2e::AccountKeyring::Bob);
+            let charlie_account = ink_e2e::account_id(ink_e2e::AccountKeyring::Charlie);
+
+            let constructor = Psp34NftRef::new(
+                alice_account.clone(),
+                "Interlock Network Universal Access NFT".to_string(),
+                "ILOCK-UANFT".to_string(),
+            );
+            let uanft_contract_acct_id = client
+                .instantiate("psp34_nft", &ink_e2e::alice(), constructor, 0, None)
+                .await.expect("instantiate failed").account_id;
+        
+            let mint_msg = build_message::<Psp34NftRef>(uanft_contract_acct_id.clone())
+                .call(|contract| contract.mint());
+            let mint_response = client
+                .call(&ink_e2e::alice(), mint_msg, 0, None).await.expect("mint fail");
+            
+            // filter for transfer mint event
+            let contract_emitted_transfer = mint_response
+                .events
+                .iter()
+                .find(|event| {
+                    event
+                        .as_ref()
+                        .expect("expected event")
+                        .event_metadata()
+                        .event()
+                        == "ContractEmitted" &&
+                        String::from_utf8_lossy(
+                            event.as_ref().expect("bad event").bytes()).to_string()
+                       .contains("Psp34Nft::Transfer")
+                })
+                .expect("Expect ContractEmitted event")
+                .unwrap();
+            println!("chirp");
+
+            // decode to the expected event type (skip field_context)
+            let transfer_event = contract_emitted_transfer.field_bytes();
+            let decoded_transfer =
+                <Transfer as scale::Decode>::decode(&mut &transfer_event[34..]).expect("invalid data");
+
+            // destructor decoded eapproval
+            let Transfer { from, to, id } = decoded_transfer;
+
+            // assert with the expected value
+            assert_eq!(from, None, "encountered invalid Transfer.to");
+            assert_eq!(to, Some(alice_account), "encountered invalid Transfer.from");
+            assert_eq!(id, Id::U64(1), "encountered invalid Transfer.id");  
+            
+            Ok(())
+        }
+    }
 }
+
