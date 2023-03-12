@@ -223,18 +223,22 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error> {
             let caller = Self::env().caller();
-            let token_owner = self.owner_of(id.clone()).unwrap();
-            if token_owner != account {
-                return Err(PSP34Error::Custom(String::from("not token owner").into_bytes()))
-            }
-
-            let allowance = self.allowance(account,caller,Some(id.clone()));
-
-            if caller == account || allowance {
-                self._burn_from(account, id)
-            } else{
-                Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
-            }
+            
+            if let Some(token_owner) = self.owner_of(id.clone()) {
+                if token_owner != account {
+                    return Err(PSP34Error::Custom(String::from("not token owner").into_bytes()))
+                }
+    
+                let allowance = self.allowance(account,caller,Some(id.clone()));
+    
+                if caller == account || allowance {
+                    self._burn_from(account, id)
+                } else{
+                    Err(PSP34Error::Custom(String::from("caller is not token owner or approved").into_bytes()))
+                }
+            } else {
+                return Err(PSP34Error::Custom(String::from("Cannot find token owner").into_bytes()));
+            }            
         }
     }
 
@@ -309,51 +313,68 @@ pub mod launchpad_psp34_nft_standard {
             if !self.has_role(ADMINER, self.env().caller()) && self.env().caller() != self.manager.launchpad_contract_address {
                 return Err(Error::InvalidCaller);
             }
-            if self.manager.active_phase_count.checked_add(1).unwrap() > self.manager.limit_phase_count {
-                return Err(Error::InvalidPhaseCount);
-            }
-            if !self.validate_phase_schedule(&start_time, &end_time){
-                return Err(Error::InvalidStartTimeAndEndTime);
-            }
-            let byte_phase_code = phase_code.into_bytes();
-            self.manager.last_phase_id = self.manager.last_phase_id.checked_add(1).unwrap();
-            self.manager.active_phase_count = self.manager.active_phase_count.checked_add(1).unwrap();
-            if is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(public_minting_amount).unwrap();
-            }
-            let phase = if is_public {
-                Phase {
-                    is_active: true,
-                    title: byte_phase_code,
-                    is_public,
-                    public_minting_fee,
-                    public_minting_amount,
-                    public_max_minting_amount,
-                    public_claimed_amount: 0,
-                    whitelist_amount: 0,
-                    claimed_amount: 0,
-                    total_amount: public_minting_amount,
-                    start_time,
-                    end_time
+            if let Some(active_phase_count) = self.manager.active_phase_count.checked_add(1) {
+                if active_phase_count > self.manager.limit_phase_count {
+                    return Err(Error::InvalidPhaseCount);
+                }
+                if !self.validate_phase_schedule(&start_time, &end_time){
+                    return Err(Error::InvalidStartTimeAndEndTime);
+                }
+                let byte_phase_code = phase_code.into_bytes();
+                if let Some(last_phase_id) = self.manager.last_phase_id.checked_add(1) {
+                    self.manager.last_phase_id = last_phase_id;
+
+                    if let Some(active_phase_count) = self.manager.active_phase_count.checked_add(1) {
+                        self.manager.active_phase_count = active_phase_count;
+                        if is_public {
+                            if let Some(available_token_amount) = self.manager.available_token_amount.checked_sub(public_minting_amount) {
+                                self.manager.available_token_amount = available_token_amount;
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot subtract available token amount")));
+                            }                            
+                        }
+                        let phase = if is_public {
+                            Phase {
+                                is_active: true,
+                                title: byte_phase_code,
+                                is_public,
+                                public_minting_fee,
+                                public_minting_amount,
+                                public_max_minting_amount,
+                                public_claimed_amount: 0,
+                                whitelist_amount: 0,
+                                claimed_amount: 0,
+                                total_amount: public_minting_amount,
+                                start_time,
+                                end_time
+                            }
+                        } else {
+                            Phase {
+                                is_active: true,
+                                title: byte_phase_code,
+                                is_public,
+                                public_minting_fee: 0,
+                                public_minting_amount: 0,
+                                public_max_minting_amount: 0,
+                                public_claimed_amount: 0,
+                                whitelist_amount: 0,
+                                claimed_amount: 0,
+                                total_amount: 0,
+                                start_time,
+                                end_time
+                            }
+                        };
+                        self.manager.phases.insert(&self.manager.last_phase_id, &phase);
+                        Ok(())
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add active phase count")));
+                    }                    
+                } else {
+                    return Err(Error::Custom(String::from("Cannot add last phase id")));
                 }
             } else {
-                Phase {
-                    is_active: true,
-                    title: byte_phase_code,
-                    is_public,
-                    public_minting_fee: 0,
-                    public_minting_amount: 0,
-                    public_max_minting_amount: 0,
-                    public_claimed_amount: 0,
-                    whitelist_amount: 0,
-                    claimed_amount: 0,
-                    total_amount: 0,
-                    start_time,
-                    end_time
-                }
-            };
-            self.manager.phases.insert(&self.manager.last_phase_id, &phase);
-            Ok(())
+                return Err(Error::Custom(String::from("Cannot add active phase count")));
+            }            
         }
 
         /// Update whitelist - Only Admin Role can change
@@ -366,26 +387,51 @@ pub mod launchpad_psp34_nft_standard {
             whitelist_amount: u64,
             whitelist_price: Balance
         ) -> Result<(), Error> {
-            if self.manager.phase_whitelists_link.get(&(&account, &phase_id)).is_none() {
+            if let Some(mut whitelist) = self.manager.phase_whitelists_link.get(&(&account, &phase_id)) {
+                if let Some(mut phase) = self.manager.phases.get(&phase_id) {
+                    let old_whitelist_amount = whitelist.whitelist_amount;
+                    
+                    if let Some(value_added_old_whitelist_amount) = self.manager.available_token_amount.checked_add(old_whitelist_amount) {
+                        if let Some(available_token_amount) = value_added_old_whitelist_amount.checked_sub(whitelist_amount) {
+                            self.manager.available_token_amount = available_token_amount;
+                            if !(whitelist.claimed_amount..=self.manager.total_supply).contains(&whitelist_amount) {
+                                return Err(Error::InvalidInput);
+                            }
+                            whitelist.whitelist_amount = whitelist_amount;
+                            whitelist.minting_fee = whitelist_price;
+                            self.manager.phase_whitelists_link.insert(&(&account, &phase_id), &whitelist);
+                            if let Some(value_subbed_old_whitelist_amount) = phase.whitelist_amount.checked_sub(old_whitelist_amount) {
+                                if let Some(wl_amount) = value_subbed_old_whitelist_amount.checked_add(whitelist_amount) {
+                                    phase.whitelist_amount = wl_amount;
+                                    if let Some(total_amount_subbed_old_whitelist_amount) = phase.total_amount.checked_sub(old_whitelist_amount) {
+                                        if let Some(total_amount) = total_amount_subbed_old_whitelist_amount.checked_add(whitelist_amount) {
+                                            phase.total_amount = total_amount;
+                                            self.manager.phases.insert(&phase_id, &phase);
+                                            Ok(())
+                                        } else {
+                                            return Err(Error::Custom(String::from("Cannot add to phase total amount"))); 
+                                        }                                
+                                    } else {
+                                        return Err(Error::Custom(String::from("Cannot subtract from phase total amount"))); 
+                                    }                                    
+                                } else {
+                                    return Err(Error::Custom(String::from("Cannot add to phase whitelist amount"))); 
+                                }                                
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot subtract from phase whitelist amount"))); 
+                            }                            
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot subtract from available token amount")));
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to available token amount"))); 
+                    }                    
+                } else {
+                    return Err(Error::PhaseNotExist);
+                }                
+            } else {
                 return Err(Error::WhitelistNotExist);
-            }
-            if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist);
-            }
-            let mut whitelist = self.manager.phase_whitelists_link.get(&(&account, &phase_id)).unwrap();
-            let old_whitelist_amount = whitelist.whitelist_amount;
-            self.manager.available_token_amount = self.manager.available_token_amount.checked_add(old_whitelist_amount).unwrap().checked_sub(whitelist_amount).unwrap();
-            if !(whitelist.claimed_amount..=self.manager.total_supply).contains(&whitelist_amount) {
-                return Err(Error::InvalidInput);
-            }
-            whitelist.whitelist_amount = whitelist_amount;
-            whitelist.minting_fee = whitelist_price;
-            self.manager.phase_whitelists_link.insert(&(&account, &phase_id), &whitelist);
-            let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            phase.whitelist_amount = phase.whitelist_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
-            phase.total_amount = phase.total_amount.checked_sub(old_whitelist_amount).unwrap().checked_add(whitelist_amount).unwrap();
-            self.manager.phases.insert(&phase_id, &phase);
-            Ok(())
+            }            
         }
 
         /// Add multi whitelists - Only Admin Role can change
@@ -397,34 +443,49 @@ pub mod launchpad_psp34_nft_standard {
             accounts: Vec<AccountId>,
             whitelist_amounts: Vec<u64>,
             whitelist_prices: Vec<Balance>
-        ) -> Result<(), Error> {
-            if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist);
-            }
-            
+        ) -> Result<(), Error> {           
             if !accounts.is_empty() &&
                 accounts.len() == whitelist_amounts.len() && 
                 accounts.len() == whitelist_prices.len() {
                 let whitelist_count = accounts.len();
-                let mut phase = self.manager.phases.get(&phase_id).unwrap();
-                for i in 0..whitelist_count {
-                    let whitelist_account = accounts[i].clone();
-                    let whitelist_amount = whitelist_amounts[i].clone();
-                    let whitelist_price = whitelist_prices[i].clone();
-                    let whitelist = Whitelist {
-                        whitelist_amount,
-                        claimed_amount: 0,
-                        minting_fee: whitelist_price
-                    };
-                    self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(whitelist_amount).unwrap();
-                    self.manager.phase_account_link.insert(phase_id, &whitelist_account);
-                    self.manager.phase_whitelists_link.insert(&(&whitelist_account, &phase_id), &whitelist);
-                    phase.total_amount = phase.total_amount.checked_add(whitelist_amount).unwrap();
-                    phase.whitelist_amount = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
-                }
-                self.manager.phases.insert(&phase_id, &phase);
-                self.manager.whitelist_count = self.manager.whitelist_count.checked_add(whitelist_count as u32).unwrap();
-                Ok(())
+                if let Some(mut phase) = self.manager.phases.get(&phase_id) {
+                    for i in 0..whitelist_count {
+                        let whitelist_account = accounts[i].clone();
+                        let whitelist_amount = whitelist_amounts[i].clone();
+                        let whitelist_price = whitelist_prices[i].clone();
+                        let whitelist = Whitelist {
+                            whitelist_amount,
+                            claimed_amount: 0,
+                            minting_fee: whitelist_price
+                        };
+                        if let Some(available_token_amount) = self.manager.available_token_amount.checked_sub(whitelist_amount) {
+                            self.manager.available_token_amount = available_token_amount;
+                            self.manager.phase_account_link.insert(phase_id, &whitelist_account);
+                            self.manager.phase_whitelists_link.insert(&(&whitelist_account, &phase_id), &whitelist);
+                            if let Some(total_amount) = phase.total_amount.checked_add(whitelist_amount) {
+                                phase.total_amount = total_amount;
+                                if let Some(wl_amount) = phase.whitelist_amount.checked_add(whitelist_amount) {
+                                    phase.whitelist_amount = wl_amount;
+                                } else {
+                                    return Err(Error::Custom(String::from("Cannot add to phase whitelist amount")));
+                                }                                
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot add to phase token amount")));
+                            }                            
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot subtract from available token amount"))); 
+                        }                        
+                    }
+                    self.manager.phases.insert(&phase_id, &phase);
+                    if let Some(wl_count) = self.manager.whitelist_count.checked_add(whitelist_count as u32) {
+                        self.manager.whitelist_count = wl_count;
+                        Ok(())
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to whitelist count")));
+                    }                    
+                } else {
+                    return Err(Error::PhaseNotExist);
+                }                
             } else {
                 return Err(Error::InvalidInput);
             }
@@ -438,10 +499,7 @@ pub mod launchpad_psp34_nft_standard {
             phase_id: u8,
             accounts: Vec<AccountId>,
         ) -> Result<(), Error> {
-            if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist);
-            } else {
-                let phase = self.manager.phases.get(&phase_id).unwrap();
+            if let Some(phase) = self.manager.phases.get(&phase_id) {
                 let current_time = self.env().block_timestamp();
                 if current_time > phase.end_time {
                     if !accounts.is_empty() {
@@ -455,15 +513,21 @@ pub mod launchpad_psp34_nft_standard {
                                 return Err(Error::InvalidInput);
                             }
                         }
-                        self.manager.whitelist_count = self.manager.whitelist_count.checked_sub(accounts.len() as u32).unwrap();
-                        Ok(())
+                        if let Some(whitelist_count) = self.manager.whitelist_count.checked_sub(accounts.len() as u32) {
+                            self.manager.whitelist_count = whitelist_count;
+                            Ok(())
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot subtract from whitelist count")));
+                        }                        
                     } else {
                         return Err(Error::InvalidInput);
                     }
                 } else {
                     return Err(Error::InvalidInput);
                 }
-            }
+            } else {
+                return Err(Error::PhaseNotExist);
+            }              
         }
 
         /// Add new whitelist - Only Admin Role can change
@@ -482,20 +546,39 @@ pub mod launchpad_psp34_nft_standard {
             if  self.manager.phase_whitelists_link.get(&(&account, &phase_id)).is_some() {
                 return Err(Error::InvalidInput);
             }
-            self.manager.whitelist_count = self.manager.whitelist_count.checked_add(1).unwrap();
-            let whitelist = Whitelist {
-                whitelist_amount,
-                claimed_amount: 0,
-                minting_fee: whitelist_price
-            };
-            self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(whitelist_amount).unwrap();
-            self.manager.phase_account_link.insert(phase_id, &account);
-            self.manager.phase_whitelists_link.insert(&(&account, &phase_id), &whitelist);
-            let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            phase.total_amount = phase.total_amount.checked_add(whitelist_amount).unwrap();
-            phase.whitelist_amount = phase.whitelist_amount.checked_add(whitelist_amount).unwrap();
-            self.manager.phases.insert(&phase_id, &phase);
-            Ok(())
+            if let Some(whitelist_count) = self.manager.whitelist_count.checked_add(1) {
+                self.manager.whitelist_count = whitelist_count;
+                let whitelist = Whitelist {
+                    whitelist_amount,
+                    claimed_amount: 0,
+                    minting_fee: whitelist_price
+                };
+                if let Some(available_token_amount) = self.manager.available_token_amount.checked_sub(whitelist_amount) {
+                    self.manager.available_token_amount = available_token_amount;
+                    self.manager.phase_account_link.insert(phase_id, &account);
+                    self.manager.phase_whitelists_link.insert(&(&account, &phase_id), &whitelist);
+                    if let Some(mut phase) = self.manager.phases.get(&phase_id) {
+                        if let Some(total_amount) = phase.total_amount.checked_add(whitelist_amount) {
+                            phase.total_amount = total_amount;
+                            if let Some(wl_amount) = phase.whitelist_amount.checked_add(whitelist_amount) {
+                                phase.whitelist_amount = wl_amount;
+                                self.manager.phases.insert(&phase_id, &phase);
+                                Ok(())
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot add to phase whitelist amount")));
+                            }                            
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot add to phase total amount")));
+                        }                        
+                    } else {
+                        return Err(Error::PhaseNotExist);
+                    }                    
+                } else {
+                    return Err(Error::Custom(String::from("Cannot subtract from available token amount")));
+                }                
+            } else {
+                return Err(Error::Custom(String::from("Cannot add to whitelist count")));
+            }            
         }
 
         ///Only Owner can mint new token
@@ -503,192 +586,297 @@ pub mod launchpad_psp34_nft_standard {
         #[modifiers(only_owner)]
         pub fn mint(&mut self, mint_amount: u64 ) -> Result<(), Error> {
             let caller = self.env().caller();
-            if self.manager_psp34_standard.last_token_id.checked_add(mint_amount).unwrap() > self.manager.total_supply {
-                return Err(Error::InvalidInput);
-            }
-            let current_time = self.env().block_timestamp();
-            let mut available_amount: u64 = 0;
-            for index in 0..self.manager.last_phase_id {
-                let phase = self.manager.phases.get(&(index+1)).unwrap();
-                if phase.is_active && current_time > phase.end_time {
-                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount).unwrap()).unwrap();
+            if let Some(last_token_id) = self.manager_psp34_standard.last_token_id.checked_add(mint_amount) {
+                if last_token_id > self.manager.total_supply {
+                    return Err(Error::InvalidInput);
                 }
-            }
-            if mint_amount > available_amount.checked_sub(self.manager.owner_claimed_amount).unwrap() {
-                return Err(Error::InvalidInput);
-            }
-            for _i in 0..mint_amount {
-                self.manager_psp34_standard.last_token_id = self.manager_psp34_standard.last_token_id.checked_add(1).unwrap();
-                if self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_err() {
-                    return Err(Error::CannotMint);
+                let current_time = self.env().block_timestamp();
+                let mut available_amount: u64 = 0;
+                for index in 0..self.manager.last_phase_id {
+                    if let Some(phase) = self.manager.phases.get(&(index+1)) {
+                        if phase.is_active && current_time > phase.end_time {
+                            if let Some(total_amount) = phase.total_amount.checked_sub(phase.claimed_amount) {
+                                if let Some (aval_amount) = available_amount.checked_add(total_amount) {
+                                    available_amount = aval_amount;
+                                } else {
+                                    return Err(Error::Custom(String::from("Cannot add to available amount")));
+                                }                                
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot subtract from phase total amount")));
+                            }                            
+                        }
+                    } else {
+                        return Err(Error::PhaseNotExist);        
+                    }                    
                 }
-            }
-            self.manager.owner_claimed_amount = self.manager.owner_claimed_amount.checked_add(mint_amount).unwrap();
-            Ok(())
+                if let Some(owner_claimed_amount) = available_amount.checked_sub(self.manager.owner_claimed_amount) {
+                    if mint_amount > owner_claimed_amount {
+                        return Err(Error::InvalidInput);
+                    }
+                    for _i in 0..mint_amount {
+                        if let Some(last_tkn_id) = self.manager_psp34_standard.last_token_id.checked_add(1) {
+                            self.manager_psp34_standard.last_token_id = last_tkn_id;
+                            if self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_err() {
+                                return Err(Error::CannotMint);
+                            }
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot add to last token id")));
+                        }                        
+                    }
+                    if let Some(owner_claimed_amnt) = self.manager.owner_claimed_amount.checked_add(mint_amount) {
+                        self.manager.owner_claimed_amount = owner_claimed_amnt;
+                        Ok(())
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to owner claimed amount")));
+                    }                    
+                } else {
+                    return Err(Error::Custom(String::from("Cannot subtract from owner claimed amount")));
+                }                
+            } else {
+                return Err(Error::Custom(String::from("Cannot add to last token id")));
+            }            
         }
 
         #[ink(message)]
         #[ink(payable)]
         pub fn public_mint(&mut self, phase_id: u8, mint_amount: u64) -> Result<(), Error> {
             let caller = self.env().caller();
-            if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist)
-            }
-            let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            if !phase.is_active {
-                return Err(Error::PhaseDeactivate);
-            }
-            if mint_amount > phase.public_max_minting_amount {
-                return Err(Error::InvalidInput);
-            }
-            let current_time = self.env().block_timestamp();
-            if (phase.start_time..=phase.end_time).contains(&current_time) {
-                if !phase.is_public {
-                    return Err(Error::NotPublicMint);
+            if let Some(mut phase) = self.manager.phases.get(&phase_id) {
+                if !phase.is_active {
+                    return Err(Error::PhaseDeactivate);
                 }
-                if self.manager_psp34_standard.last_token_id.checked_add(mint_amount).unwrap() > self.manager.total_supply {
+                if mint_amount > phase.public_max_minting_amount {
                     return Err(Error::InvalidInput);
                 }
-                if phase.public_claimed_amount.checked_add(mint_amount).unwrap() > phase.public_minting_amount {
-                    return Err(Error::InvalidInput);
-                }
-                if phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.total_amount {
-                    return Err(Error::InvalidInput);
-                }
-                if phase.public_minting_fee.checked_mul(mint_amount as u128).unwrap() != self.env().transferred_value() {
-                    return Err(Error::InvalidInput);
-                }
-                let project_mint_fee_rate = ArtZeroLaunchPadRef::get_project_mint_fee_rate(
-                    &self.manager.launchpad_contract_address
-                );
-                let project_mint_fee = phase.public_minting_fee
-                    .checked_mul(project_mint_fee_rate as u128)
-                    .unwrap()
-                    .checked_mul(mint_amount as u128)
-                    .unwrap()
-                    .checked_div(10000)
-                    .unwrap();
-                if project_mint_fee > 0 {
-                    if project_mint_fee > self.env().balance() {
-                        return Err(Error::NotEnoughBalance);
+                let current_time = self.env().block_timestamp();
+                if (phase.start_time..=phase.end_time).contains(&current_time) {
+                    if !phase.is_public {
+                        return Err(Error::NotPublicMint);
                     }
-                    if self
-                        .env()
-                        .transfer(self.manager.launchpad_contract_address, project_mint_fee)
-                        .is_err(){
-                            return Err(Error::CannotTransfer);
+                    if let Some(last_token_id) = self.manager_psp34_standard.last_token_id.checked_add(mint_amount) {
+                        if last_token_id > self.manager.total_supply {
+                            return Err(Error::InvalidInput);
                         }
-                }
-
-                for _i in 0..mint_amount {
-                    self.manager_psp34_standard.last_token_id = self.manager_psp34_standard.last_token_id.checked_add(1).unwrap();
-                    self.manager.public_minted_count = self.manager.public_minted_count.checked_add(1).unwrap();
-                    if self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_err() {
-                        return Err(Error::CannotMint);
-                    }
-                }
-
-                if self.manager.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).is_none() {
-                    self.manager.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &mint_amount);
+                        if let Some(public_claimed_amount) = phase.public_claimed_amount.checked_add(mint_amount) {
+                            if public_claimed_amount > phase.public_minting_amount {
+                                return Err(Error::InvalidInput);
+                            }
+                            if let Some(claimed_amount) = phase.claimed_amount.checked_add(mint_amount) {
+                                if claimed_amount > phase.total_amount {
+                                    return Err(Error::InvalidInput);
+                                }
+                                if let Some(public_minting_fee) = phase.public_minting_fee.checked_mul(mint_amount as u128) {
+                                    if public_minting_fee != self.env().transferred_value() {
+                                        return Err(Error::InvalidInput);
+                                    }
+                                    let project_mint_fee_rate = ArtZeroLaunchPadRef::get_project_mint_fee_rate(
+                                        &self.manager.launchpad_contract_address
+                                    );
+                                    if let Some(mul_project_mint_fee_rate) = phase.public_minting_fee.checked_mul(project_mint_fee_rate as u128) {
+                                        if let Some(mul_mint_amount) = mul_project_mint_fee_rate.checked_mul(mint_amount as u128) {
+                                            if let Some(project_mint_fee) = mul_mint_amount.checked_div(10000) {
+                                                if project_mint_fee > 0 {
+                                                    if project_mint_fee > self.env().balance() {
+                                                        return Err(Error::NotEnoughBalance);
+                                                    }
+                                                    if self
+                                                        .env()
+                                                        .transfer(self.manager.launchpad_contract_address, project_mint_fee)
+                                                        .is_err(){
+                                                            return Err(Error::CannotTransfer);
+                                                        }
+                                                }
+                                
+                                                for _i in 0..mint_amount {
+                                                    if let Some(last_tkn_id) = self.manager_psp34_standard.last_token_id.checked_add(1) {
+                                                        self.manager_psp34_standard.last_token_id = last_tkn_id;
+                                                        if let Some(public_minted_count) = self.manager.public_minted_count.checked_add(1) {
+                                                            self.manager.public_minted_count = public_minted_count;
+                                                            if self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_err() {
+                                                                return Err(Error::CannotMint);
+                                                            }
+                                                        } else {
+                                                            return Err(Error::Custom(String::from("Cannot add to public minted count"))); 
+                                                        }                                            
+                                                    } else {
+                                                        return Err(Error::Custom(String::from("Cannot add to last token id"))); 
+                                                    }                                        
+                                                }
+                                
+                                                if self.manager.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).is_none() {
+                                                    self.manager.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &mint_amount);
+                                                } else {
+                                                    if let Some(phase_account_public_old_claimed_amount) = self.manager.phase_account_public_claimed_amount.get(&(&caller, &phase_id)) {
+                                                        if let Some(public_claimed_amount_added_mint_amount) = phase_account_public_old_claimed_amount.checked_add(mint_amount) {
+                                                            self.manager.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &public_claimed_amount_added_mint_amount);
+                                                        } else {
+                                                            return Err(Error::Custom(String::from("Cannot add to phase account public old claimed amount"))); 
+                                                        }                                            
+                                                    } else {
+                                                        return Err(Error::Custom(String::from("Phase account public claimed amount does not exist"))); 
+                                                    }                            
+                                                }
+                                
+                                                if let Some(public_claimed_amnt) = phase.public_claimed_amount.checked_add(mint_amount) {
+                                                    phase.public_claimed_amount = public_claimed_amnt;
+                                                    if let Some(claimed_amnt) = phase.claimed_amount.checked_add(mint_amount) {
+                                                        phase.claimed_amount = claimed_amnt;
+                                                        self.manager.phases.insert(&phase_id, &phase);
+                                                        self.env().emit_event(LaunchpadMintingEvent {
+                                                            mode: MintingMode::Public,
+                                                            minter: caller,
+                                                            phase_id,
+                                                            mint_amount,
+                                                            minting_fee: self.env().transferred_value(),
+                                                            project_mint_fee
+                                                        });
+                                                        Ok(())
+                                                    } else {
+                                                        return Err(Error::Custom(String::from("Cannot add to phase claimed amount")));
+                                                    }                                        
+                                                } else {
+                                                    return Err(Error::Custom(String::from("Cannot add to phase public claimed amount"))); 
+                                                }
+                                            } else {
+                                                return Err(Error::Custom(String::from("Cannot div with 10000")));
+                                            }                         
+                                        } else {
+                                            return Err(Error::Custom(String::from("Cannot mul with mint amount")));
+                                        }                                        
+                                    } else {
+                                        return Err(Error::Custom(String::from("Cannot mul with project mint fee rate")));
+                                    }                                                                        
+                                } else {
+                                    return Err(Error::Custom(String::from("Cannot add to phase public minting fee"))); 
+                                }                                
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot add to phase claimed amount"))); 
+                            }                            
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot add to phase public claimed amount"))); 
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to last token id"))); 
+                    }                    
                 } else {
-                    let phase_account_public_old_claimed_amount = self.manager.phase_account_public_claimed_amount.get(&(&caller, &phase_id)).unwrap();
-                    self.manager.phase_account_public_claimed_amount.insert(&(&caller, &phase_id), &phase_account_public_old_claimed_amount.checked_add(mint_amount).unwrap());
+                    Err(Error::PhaseExpired)
                 }
-
-                phase.public_claimed_amount = phase.public_claimed_amount.checked_add(mint_amount).unwrap();
-                phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
-                self.manager.phases.insert(&phase_id, &phase);
-                self.env().emit_event(LaunchpadMintingEvent {
-                    mode: MintingMode::Public,
-                    minter: caller,
-                    phase_id,
-                    mint_amount,
-                    minting_fee: self.env().transferred_value(),
-                    project_mint_fee
-                });
-                Ok(())
             } else {
-                Err(Error::PhaseExpired)
-            }
+                return Err(Error::PhaseNotExist)
+            }            
         }
 
         /// Whitelisted User eates multiple
         #[ink(message)]
         #[ink(payable)]
         pub fn whitelist_mint(&mut self, phase_id: u8, mint_amount: u64) -> Result<(), Error> {
-            if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist);
-            }
-            let phase = self.manager.phases.get(&phase_id).unwrap();
-            if !phase.is_active {
-                return Err(Error::PhaseDeactivate);
-            }
-            let current_time = self.env().block_timestamp();
-            if (phase.start_time..=phase.end_time).contains(&current_time) {
-                if phase.claimed_amount.checked_add(mint_amount).unwrap() > phase.total_amount {
-                    return Err(Error::InvalidInput);
+            if let Some(phase) = self.manager.phases.get(&phase_id) {
+                if !phase.is_active {
+                    return Err(Error::PhaseDeactivate);
                 }
-                if self.manager_psp34_standard.last_token_id >= self.manager.total_supply {
-                    return Err(Error::MaxSupply);
-                }
-                let caller = self.env().caller();
-                if self.manager.phase_whitelists_link.get(&(&caller, &phase_id)).is_none(){
-                    return Err(Error::WhitelistNotExist);
-                }
-                let mut caller_info = self.manager.phase_whitelists_link.get(&(&caller, &phase_id)).unwrap();
-                if caller_info.whitelist_amount < caller_info.claimed_amount.checked_add(mint_amount).unwrap() {
-                    return Err(Error::InvalidInput);
-                }
-                if caller_info.minting_fee.checked_mul(mint_amount as u128).unwrap() != self.env().transferred_value() {
-                    return Err(Error::InvalidFee);
-                }
-                let project_mint_fee_rate = ArtZeroLaunchPadRef::get_project_mint_fee_rate(
-                    &self.manager.launchpad_contract_address
-                );
-                // Send minting fee to launchpad contract
-                let project_mint_fee = caller_info.minting_fee
-                    .checked_mul(project_mint_fee_rate as u128)
-                    .unwrap()
-                    .checked_mul(mint_amount as u128)
-                    .unwrap()
-                    .checked_div(10000)
-                    .unwrap();
-                if project_mint_fee > 0 {
-                    if project_mint_fee > self.env().balance() {
-                        return Err(Error::NotEnoughBalance);
-                    }
-                    if self
-                        .env()
-                        .transfer(self.manager.launchpad_contract_address, project_mint_fee)
-                        .is_err() {
-                            return Err(Error::CannotTransfer);
+                let current_time = self.env().block_timestamp();
+                if (phase.start_time..=phase.end_time).contains(&current_time) {
+                    if let Some(claimed_amount) = phase.claimed_amount.checked_add(mint_amount) {
+                        if claimed_amount > phase.total_amount {
+                            return Err(Error::InvalidInput);
                         }
+                        if self.manager_psp34_standard.last_token_id >= self.manager.total_supply {
+                            return Err(Error::MaxSupply);
+                        }
+                        let caller = self.env().caller();
+                        if self.manager.phase_whitelists_link.get(&(&caller, &phase_id)).is_none(){
+                            return Err(Error::WhitelistNotExist);
+                        }
+                        if let Some(mut caller_info) = self.manager.phase_whitelists_link.get(&(&caller, &phase_id)) {
+                            if let Some(caller_info_claimed_amount) = caller_info.claimed_amount.checked_add(mint_amount) {
+                                if caller_info.whitelist_amount < caller_info_claimed_amount {
+                                    return Err(Error::InvalidInput);
+                                }
+                                if let Some(minting_fee) = caller_info.minting_fee.checked_mul(mint_amount as u128) {
+                                    if minting_fee != self.env().transferred_value() {
+                                        return Err(Error::InvalidFee);
+                                    }
+                                    let project_mint_fee_rate = ArtZeroLaunchPadRef::get_project_mint_fee_rate(
+                                        &self.manager.launchpad_contract_address
+                                    );
+                                    // Send minting fee to launchpad contract
+                                    if let Some(mul_project_mint_fee_rate) = caller_info.minting_fee.checked_mul(project_mint_fee_rate as u128) {
+                                        if let Some(mul_mint_amount) = mul_project_mint_fee_rate.checked_mul(mint_amount as u128) {
+                                            if let Some(project_mint_fee) = mul_mint_amount.checked_div(10000) {
+                                                if project_mint_fee > 0 {
+                                                    if project_mint_fee > self.env().balance() {
+                                                        return Err(Error::NotEnoughBalance);
+                                                    }
+                                                    if self
+                                                        .env()
+                                                        .transfer(self.manager.launchpad_contract_address, project_mint_fee)
+                                                        .is_err() {
+                                                            return Err(Error::CannotTransfer);
+                                                        }
+                                                }
+                                                if let Some(caller_info_claimed_amount) = caller_info.claimed_amount.checked_add(mint_amount) {
+                                                    caller_info.claimed_amount = caller_info_claimed_amount;
+                                                    self.manager.phase_whitelists_link.insert(&(&caller, &phase_id), &caller_info);
+                                    
+                                                    for _i in 0..mint_amount {
+                                                        if let Some(last_token_id) = self.manager_psp34_standard.last_token_id.checked_add(1) {
+                                                            self.manager_psp34_standard.last_token_id = last_token_id;
+                                                            if self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_err() {
+                                                                return Err(Error::CannotMint);
+                                                            }
+                                                        } else {
+                                                            return Err(Error::Custom(String::from("Cannot add to last token id"))); 
+                                                        }                                            
+                                                    }
+                                                    if let Some(mut phs) = self.manager.phases.get(&phase_id) {
+                                                        if let Some(claimed_amnt) = phs.claimed_amount.checked_add(mint_amount) {
+                                                            phs.claimed_amount = claimed_amnt;
+                                                            self.manager.phases.insert(&phase_id, &phs);
+                                                            self.env().emit_event(LaunchpadMintingEvent {
+                                                                mode: MintingMode::Whitelist,
+                                                                minter: caller,
+                                                                phase_id,
+                                                                mint_amount,
+                                                                minting_fee: self.env().transferred_value(),
+                                                                project_mint_fee
+                                                            });
+                                                            Ok(())
+                                                        } else {
+                                                            return Err(Error::Custom(String::from("Cannot add to phase claimed amount"))); 
+                                                        }                                        
+                                                    } else {
+                                                        return Err(Error::PhaseNotExist); 
+                                                    } 
+                                                } else {
+                                                    return Err(Error::Custom(String::from("Cannot add to caller info claimed amount")));  
+                                                }
+                                            } else {
+                                                return Err(Error::Custom(String::from("Cannot div with 10000")));
+                                            }                                      
+                                        } else {
+                                            return Err(Error::Custom(String::from("Cannot mul with mint amount"))); 
+                                        }                                            
+                                    } else {
+                                        return Err(Error::Custom(String::from("Cannot mul with project mint fee rate"))); 
+                                    }                                                                                                     
+                                } else {
+                                    return Err(Error::Custom(String::from("Cannot mul with caller info minting fee"))); 
+                                }                                
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot add to caller info claimed amount"))); 
+                            }                            
+                        } else {
+                            return Err(Error::Custom(String::from("Caller info does not exist"))); 
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to phase claimed amount"))); 
+                    }                    
+                } else {
+                    Err(Error::PhaseExpired)
                 }
-                caller_info.claimed_amount = caller_info.claimed_amount.checked_add(mint_amount).unwrap();
-                self.manager.phase_whitelists_link.insert(&(&caller, &phase_id), &caller_info);
-
-                for _i in 0..mint_amount {
-                    self.manager_psp34_standard.last_token_id = self.manager_psp34_standard.last_token_id.checked_add(1).unwrap();
-                    if self._mint_to(caller, Id::U64(self.manager_psp34_standard.last_token_id)).is_err() {
-                        return Err(Error::CannotMint);
-                    }
-                }
-                let mut phase = self.manager.phases.get(&phase_id).unwrap();
-                phase.claimed_amount = phase.claimed_amount.checked_add(mint_amount).unwrap();
-                self.manager.phases.insert(&phase_id, &phase);
-                self.env().emit_event(LaunchpadMintingEvent {
-                    mode: MintingMode::Whitelist,
-                    minter: caller,
-                    phase_id,
-                    mint_amount,
-                    minting_fee: self.env().transferred_value(),
-                    project_mint_fee
-                });
-                Ok(())
             } else {
-                Err(Error::PhaseExpired)
-            }
-
+                return Err(Error::PhaseNotExist);
+            }          
         }
 
         /// Deactive Phase - Only Admin Role can change
@@ -698,20 +886,28 @@ pub mod launchpad_psp34_nft_standard {
             &mut self,
             phase_id: u8
         ) -> Result<(), Error> {
-            if self.manager.phases.get(&phase_id).is_none() {
+            if let Some(mut phase) = self.manager.phases.get(&phase_id) {
+                if phase.claimed_amount != 0 || self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() || !phase.is_active{
+                    return Err(Error::Custom(String::from("Cannot deactivate phase")))
+                }
+                phase.is_active = false;
+                if let Some(active_phase_count) = self.manager.active_phase_count.checked_sub(1) {
+                    self.manager.active_phase_count = active_phase_count;
+                    if phase.is_public {
+                        if let Some(available_token_amount) = self.manager.available_token_amount.checked_add(phase.public_minting_amount) {
+                            self.manager.available_token_amount = available_token_amount;
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot add to available token amount"))); 
+                        }                        
+                    }
+                    self.manager.phases.insert(&phase_id, &phase);
+                    Ok(())
+                } else {
+                    return Err(Error::Custom(String::from("Cannot subtract from active phase count"))); 
+                }                
+            } else {
                 return Err(Error::PhaseNotExist);
-            }
-            let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            if phase.claimed_amount != 0 || self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() || !phase.is_active{
-                return Err(Error::Custom(String::from("cannot deactivate phase")))
-            }
-            phase.is_active = false;
-            self.manager.active_phase_count = self.manager.active_phase_count.checked_sub(1).unwrap();
-            if phase.is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount).unwrap();
-            }
-            self.manager.phases.insert(&phase_id, &phase);
-            Ok(())
+            }            
         }
 
         /// Update phase schedule - Only Admin Role can change
@@ -738,48 +934,90 @@ pub mod launchpad_psp34_nft_standard {
                 return Err(Error::InvalidStartTimeAndEndTime);
             }
             for index in 0..self.manager.last_phase_id {
-                if index.checked_add(1).unwrap() != phase_id {
-                    let phase = self.manager.phases.get(&(index+1)).unwrap();
-                    if phase.is_active && (
-                        (phase.start_time..=phase.end_time).contains(&start_time) || (phase.start_time..=phase.end_time).contains(&end_time)
-                    ) {
-                        return Err(Error::InvalidInput);
+                if let Some(idx) = index.checked_add(1) {
+                    if idx != phase_id {
+                        if let Some(phs) = self.manager.phases.get(&(index+1)) {
+                            if phs.is_active && (
+                                (phs.start_time..=phs.end_time).contains(&start_time) || (phs.start_time..=phs.end_time).contains(&end_time)
+                            ) {
+                                return Err(Error::InvalidInput);
+                            }
+                        } else {
+                            return Err(Error::PhaseNotExist); 
+                        }                        
                     }
-                }
+                } else {
+                    return Err(Error::Custom(String::from("Cannot add to index"))); 
+                }                
             }
-            let mut phase = self.manager.phases.get(&phase_id).unwrap();
-            if !phase.is_active ||
+            if let Some(mut phase) = self.manager.phases.get(&phase_id) {
+                if !phase.is_active ||
                 phase.claimed_amount != 0 ||
                 self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() {
                     return Err(Error::Custom(String::from("cannot update phase")))
                 }
 
-            phase.title = phase_code.clone().into_bytes();
-            if phase.is_public && !is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount).unwrap();
-                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount).unwrap();
-            } else if !phase.is_public && is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_sub(public_minting_amount).unwrap();
-                phase.total_amount = phase.total_amount.checked_add(public_minting_amount).unwrap();
-            } else if phase.is_public && is_public {
-                self.manager.available_token_amount = self.manager.available_token_amount.checked_add(phase.public_minting_amount).unwrap().checked_sub(public_minting_amount).unwrap();
-                phase.total_amount = phase.total_amount.checked_sub(phase.public_minting_amount).unwrap().checked_add(public_minting_amount).unwrap();
-            }
-            phase.is_public = is_public;
-            phase.start_time = start_time;
-            phase.end_time = end_time;
+                phase.title = phase_code.clone().into_bytes();
+                if phase.is_public && !is_public {
+                    if let Some(available_token_amount) = self.manager.available_token_amount.checked_add(phase.public_minting_amount) {
+                        self.manager.available_token_amount = available_token_amount;
+                        if let Some(total_amount) = phase.total_amount.checked_sub(phase.public_minting_amount) {
+                            phase.total_amount = total_amount;
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot subtract from phase total amount")));
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to available token amount"))); 
+                    }                    
+                } else if !phase.is_public && is_public {
+                    if let Some(available_token_amount) = self.manager.available_token_amount.checked_sub(public_minting_amount) {
+                        self.manager.available_token_amount = available_token_amount;
+                        if let Some(total_amount) = phase.total_amount.checked_add(public_minting_amount) {
+                            phase.total_amount = total_amount;
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot add to phase total amount"))); 
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot subtract from available token amount")));
+                    }                    
+                } else if phase.is_public && is_public {
+                    if let Some(available_token_amount_added_public_minting_amount) = self.manager.available_token_amount.checked_add(phase.public_minting_amount) {
+                        if let Some(available_token_amount) = available_token_amount_added_public_minting_amount.checked_sub(public_minting_amount) {
+                            self.manager.available_token_amount = available_token_amount;
+                            if let Some(total_amount_subbed_public_minting_amount) = phase.total_amount.checked_sub(phase.public_minting_amount) {
+                                if let Some(total_amount) = total_amount_subbed_public_minting_amount.checked_add(public_minting_amount) {
+                                    phase.total_amount = total_amount;
+                                } else {
+                                    return Err(Error::Custom(String::from("Cannot add to phase total amount")));
+                                }                                
+                            } else {
+                                return Err(Error::Custom(String::from("Cannot subtract from phase total amount")));  
+                            }                            
+                        } else {
+                            return Err(Error::Custom(String::from("Cannot subtract from available token amount")));  
+                        }                        
+                    } else {
+                        return Err(Error::Custom(String::from("Cannot add to available token amount")));  
+                    }                    
+                }
+                phase.is_public = is_public;
+                phase.start_time = start_time;
+                phase.end_time = end_time;
 
-            if is_public {
-                phase.public_minting_fee = public_minting_fee;
-                phase.public_minting_amount = public_minting_amount;
-                phase.public_max_minting_amount = public_max_minting_amount;
+                if is_public {
+                    phase.public_minting_fee = public_minting_fee;
+                    phase.public_minting_amount = public_minting_amount;
+                    phase.public_max_minting_amount = public_max_minting_amount;
+                } else {
+                    phase.public_minting_fee = 0;
+                    phase.public_minting_amount = 0;
+                    phase.public_max_minting_amount = 0;
+                }
+                self.manager.phases.insert(&phase_id, &phase);
+                Ok(())
             } else {
-                phase.public_minting_fee = 0;
-                phase.public_minting_amount = 0;
-                phase.public_max_minting_amount = 0;
-            }
-            self.manager.phases.insert(&phase_id, &phase);
-            Ok(())
+                return Err(Error::PhaseNotExist);
+            }            
         }
 
         // Update schedule phases - Only Admin Role can change
@@ -840,12 +1078,13 @@ pub mod launchpad_psp34_nft_standard {
                 return false;
             }
             for index in 0..self.manager.last_phase_id {
-                let phase = self.manager.phases.get(&(index+1)).unwrap();
-                if phase.is_active && (
-                    (phase.start_time..=phase.end_time).contains(start_time) || (phase.start_time..=phase.end_time).contains(end_time)
-                ) {
-                    return false;
-                }
+                if let Some(phase) = self.manager.phases.get(&(index+1)) {
+                    if phase.is_active && (
+                        (phase.start_time..=phase.end_time).contains(start_time) || (phase.start_time..=phase.end_time).contains(end_time)
+                    ) {
+                        return false;
+                    }
+                }             
             }
             true
         }
@@ -866,10 +1105,15 @@ pub mod launchpad_psp34_nft_standard {
             let current_time = self.env().block_timestamp();
             let mut available_amount: u64 = 0;
             for index in 0..self.manager.last_phase_id {
-                let phase = self.manager.phases.get(&(index+1)).unwrap();
-                if phase.is_active && current_time > phase.end_time {
-                    available_amount = available_amount.checked_add(phase.total_amount.checked_sub(phase.claimed_amount).unwrap()).unwrap();
-                }
+                if let Some(phase) = self.manager.phases.get(&(index+1)) {
+                    if phase.is_active && current_time > phase.end_time {
+                        if let Some(total_amount) = phase.total_amount.checked_sub(phase.claimed_amount) {
+                            if let Some(avail_amount) = available_amount.checked_add(total_amount) {
+                                available_amount = avail_amount;
+                            }                            
+                        }                        
+                    }
+                }                
             }
             available_amount
         }
@@ -932,10 +1176,11 @@ pub mod launchpad_psp34_nft_standard {
         pub fn get_current_phase(&self) -> Option<u8> {
             let current_time = self.env().block_timestamp();
             for index in 0..self.manager.last_phase_id {
-                let phase = self.manager.phases.get(&(index+1)).unwrap();
-                if phase.is_active && (phase.start_time..=phase.end_time).contains(&current_time) {
-                    return Some(index + 1);
-                }
+                if let Some(phase) = self.manager.phases.get(&(index+1)) {
+                    if phase.is_active && (phase.start_time..=phase.end_time).contains(&current_time) {
+                        return Some(index + 1);
+                    }
+                }                
             }
             None
         }
@@ -944,10 +1189,11 @@ pub mod launchpad_psp34_nft_standard {
         #[ink(message)]
         pub fn is_in_schedule_phase(&self, time: Timestamp) -> Option<u8> {
             for index in 0..self.manager.last_phase_id {
-                let phase = self.manager.phases.get(&(index+1)).unwrap();
-                if phase.start_time <= time && phase.end_time >= time {
-                    return Some(index);
-                }
+                if let Some(phase) = self.manager.phases.get(&(index+1)) {
+                    if phase.start_time <= time && phase.end_time >= time {
+                        return Some(index);
+                    }
+                }                
             }
             None
         }
