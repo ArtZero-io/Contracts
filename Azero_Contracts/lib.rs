@@ -3,6 +3,7 @@
 #![allow(clippy::let_unit_value)]
 #![allow(clippy::inline_fn_without_body)]
 #![allow(clippy::too_many_arguments)]
+#[allow(clippy::module_inception)]
 
 pub mod impls;
 pub mod traits;
