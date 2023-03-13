@@ -161,8 +161,10 @@ pub mod artzero_collection_manager {
                 .collections_by_id
                 .insert(&self.manager.collection_count, &contract_account);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
+            let mut collection_id = 0;
             if let Some(mut collections) = collections_by_owner {
                 collections.push(contract_account);
+                collection_id = (collections.len() as u32) - 1;
                 self.manager.collections_by_owner.insert(&collection_owner, &collections);
             } else {
                 let collections = vec![contract_account];
@@ -171,6 +173,7 @@ pub mod artzero_collection_manager {
             // Add collection information to collections mapping
             let new_collection = Collection {
                 collection_owner,
+                collection_id,
                 nft_contract_address: contract_account,
                 contract_type: CollectionType::Psp34Auto,
                 is_collect_royalty_fee,
@@ -236,8 +239,10 @@ pub mod artzero_collection_manager {
                 .collections_by_id
                 .insert(&self.manager.collection_count, &nft_contract_address);
             let collections_by_owner = self.manager.collections_by_owner.get(&collection_owner);
+            let mut collection_id = 0;
             if let Some(mut collections) = collections_by_owner {
                 collections.push(nft_contract_address);
+                collection_id = (collections.len() as u32) - 1;
                 self.manager.collections_by_owner.insert(&collection_owner, &collections);
             } else {
                 let collections = vec![nft_contract_address];
@@ -246,6 +251,7 @@ pub mod artzero_collection_manager {
             // Add collection information to collections mapping
             let new_collection = Collection {
                 collection_owner,
+                collection_id,
                 nft_contract_address,
                 contract_type: CollectionType::Psp34Manual,
                 is_collect_royalty_fee,
@@ -284,26 +290,44 @@ pub mod artzero_collection_manager {
                 let older_owner = collection.collection_owner;
                 let collections_older_owner = self.manager.collections_by_owner.get(&older_owner);
                 if let Some(mut collections_older) = collections_older_owner {
-                    if let Some(index) = collections_older.iter().position(|x| *x == contract_address) {
-                        // Remove collections_by_owner of older owner
-                        collections_older.remove(index);
-                        self.manager.collections_by_owner.insert(&older_owner, &collections_older);
-                        // Update collections_by_owner
-                        let collections_by_owner = self.manager.collections_by_owner.get(&new_owner);
-                        if let Some(mut collections) = collections_by_owner {
-                            collections.push(contract_address);
-                            self.manager.collections_by_owner.insert(&new_owner, &collections);
+                    // Remove collections_by_owner of older owner
+                    let index = collection.collection_id as usize;
+                    let last_index = collections_older.len() - 1;
+                    
+                    if index != last_index {
+                        // Swap address at index pos to the last one
+                        let temp = collections_older[index];
+                        collections_older[index] = collections_older[last_index];
+                        collections_older[last_index] = temp;                        
+
+                        // Update collection id of the last collection  
+                        if let Some(mut updated_last_collection) = self.manager.collections.get(&collections_older[index]) {
+                            updated_last_collection.collection_id = index as u32;
+                            self.manager.collections.insert(&collections_older[index], &updated_last_collection);
                         } else {
-                            let collections = vec![contract_address];
-                            self.manager.collections_by_owner.insert(&new_owner, &collections);
+                            return Err(Error::Custom(String::from("The collection data of last index does not exist")))
                         }
-                        // Update collections
-                        collection.collection_owner = new_owner;
-                        self.manager.collections.insert(&contract_address, &collection);
-                        Ok(())
-                    } else {
-                        return Err(Error::Custom(String::from("This collection by owner not exist")))
                     }
+                    // Remove the last one after swapping check and update collections_by_owner
+                    collections_older.pop();
+                    self.manager.collections_by_owner.insert(&older_owner, &collections_older);
+                    
+                    // Update collections_by_owner
+                    let collections_by_owner = self.manager.collections_by_owner.get(&new_owner);
+                    let mut collection_id = 0;
+                    if let Some(mut collections) = collections_by_owner {
+                        collections.push(contract_address);
+                        collection_id = (collections.len() as u32) - 1;
+                        self.manager.collections_by_owner.insert(&new_owner, &collections);
+                    } else {
+                        let collections = vec![contract_address];
+                        self.manager.collections_by_owner.insert(&new_owner, &collections);
+                    }
+                    // Update collections
+                    collection.collection_owner = new_owner;
+                    collection.collection_id = collection_id;
+                    self.manager.collections.insert(&contract_address, &collection);
+                    Ok(())                    
                 } else {
                     return Err(Error::Custom(String::from("This owner not exist")))
                 }
