@@ -27,7 +27,7 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
         }
         let collection = self.data::<Manager>().collections.get(&nft_contract_address).unwrap();
         if !collection.is_collect_royalty_fee || !collection.is_active {
-            return 0
+            0
         } else {
             collection.royalty_fee
         }
@@ -38,7 +38,7 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
             return false
         }
         let collection = self.data::<Manager>().collections.get(&nft_contract_address).unwrap();
-        return collection.is_active
+        collection.is_active
     }
 
     default fn get_contract_type(&self, nft_contract_address: AccountId) -> CollectionType {
@@ -46,10 +46,10 @@ impl<T: Storage<Manager>> ArtZeroCollectionTrait for T {
             return CollectionType::Unknown
         }
         let collection = self.data::<Manager>().collections.get(&nft_contract_address).unwrap();
-        return collection.contract_type
+        collection.contract_type
     }
 
     default fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId> {
-        return Some(Some(self.data::<Manager>().collections.get(&nft_contract_address).unwrap())?.collection_owner);
+        Some(Some(self.data::<Manager>().collections.get(&nft_contract_address).unwrap())?.collection_owner)
     }
 }

@@ -1,4 +1,3 @@
-
 pub use crate::{
     impls::psp34_standard::{
         data,
@@ -68,7 +67,7 @@ where
         if self.data::<Manager>().locked_tokens.get(&token_id).is_some() {
             return true;
         }
-        return false;
+        false
     }
 
     /// Get Locked Token Count
@@ -107,11 +106,10 @@ where
     default fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
         let length = attributes.len();
         let mut ret = Vec::<String>::new();
-        for i in 0..length {
-            let attribute = attributes[i].clone();
-            let value = self.get_attribute(token_id.clone(), attribute.into_bytes());
-            if value.is_some() {
-                ret.push(String::from_utf8(value.unwrap()).unwrap());
+        for item in attributes.iter().take(length) {
+            let value = self.get_attribute(token_id.clone(), item.clone().into_bytes());
+            if let Some(value) = value {
+                ret.push(String::from_utf8(value).unwrap());
             } else {
                 ret.push(String::from(""));
             }
@@ -126,8 +124,8 @@ where
     /// Get Attribute Name
     default fn get_attribute_name(&self, index: u32) -> String {
         let attribute = self.data::<Manager>().attribute_names.get(&index);
-        if attribute.is_some() {
-            String::from_utf8(attribute.unwrap()).unwrap()
+        if let Some(attribute) = attribute {
+            String::from_utf8(attribute).unwrap()
         } else {
             String::from("")
         }
@@ -162,6 +160,6 @@ fn add_attribute_name<T: Storage<Manager>>(
     if !exist {
         instance.data::<Manager>().attribute_count = instance.data::<Manager>().attribute_count.checked_add(1).unwrap();
         let data = &mut instance.data::<Manager>();
-        data.attribute_names.insert(&data.attribute_count, &attribute_input);
+        data.attribute_names.insert(&data.attribute_count, attribute_input);
     }
 }

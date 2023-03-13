@@ -26,7 +26,7 @@ where
     F: FnOnce(&mut T) -> Result<R, E>,
     E: From<LockError>,
 {
-    if instance.data().is_locked == false {
+    if !instance.data().is_locked {
         return Err(From::from(LockError::NotLocked))
     }
     body(instance)
@@ -40,7 +40,7 @@ where
     F: FnOnce(&mut T) -> Result<R, E>,
     E: From<LockError>,
 {
-    if instance.data().is_locked == true {
+    if instance.data().is_locked {
         return Err(From::from(LockError::Locked))
     }
     body(instance)
