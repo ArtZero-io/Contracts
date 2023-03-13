@@ -19,10 +19,9 @@ impl<T: Storage<data::Data> + Storage<ownable::Data>> UpgradableTrait for T
 {
     #[modifiers(only_owner)]
     default fn set_code(&mut self, code_hash: [u8; 32]) -> Result<(), Error> {
-        ink::env::set_code_hash(&code_hash).unwrap_or_else(|err| {
+        ink::env::set_code_hash(&code_hash).unwrap_or_else(|_| {
             panic!(
-                "Failed to `set_code_hash` to {:?} due to {:?}",
-                code_hash, err
+                "Failed to `set_code_hash` has an error"
             )
         });
         ink::env::debug_println!("Switched code hash to {:?}.", code_hash);
