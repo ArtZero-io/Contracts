@@ -1,7 +1,15 @@
 use openbrush::{
     traits::{
-        AccountId,
+        AccountId
     }
+};
+use crate::traits::error::Error;
+use ink::prelude::{
+    string::{
+        String,
+    },
+    vec,
+    vec::Vec,
 };
 
 #[cfg(feature = "std")]
@@ -36,4 +44,19 @@ pub trait ArtZeroCollectionTrait {
     /// This function returns the Owner of a Collection
     #[ink(message)]
     fn get_collection_owner(&self, nft_contract_address: AccountId) -> Option<AccountId>;
+    /// This function updates Owner of Collecion - who receive royalty fee - Only Admin can change
+    #[ink(message)]
+    fn update_collection_owner(&mut self, contract_address: AccountId, new_owner: AccountId,) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn set_multiple_attributes(&mut self, contract_address: AccountId, attributes: Vec<String>, values: Vec<String>) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn has_attribute(&self, contract_address: AccountId, attribute_key: String) -> bool;
+
+    #[ink(message)]
+    fn get_collection_attribute_index(&self, contract_address: AccountId, attribute_key: String) -> Option<u64>;
 }
+
+
+

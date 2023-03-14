@@ -277,103 +277,6 @@ pub mod artzero_collection_manager {
             Ok(())
         }
 
-        // SETTERS
-        /// Update Owner of Collecion - who receive royalty fee - Only Admin can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn update_collection_owner(
-            &mut self,
-            contract_address: AccountId,
-            new_owner: AccountId,
-        ) -> Result<(), Error> {
-            if let Some(mut collection) = self.manager.collections.get(&contract_address) {
-                let older_owner = collection.collection_owner;
-                let collections_older_owner = self.manager.collections_by_owner.get(&older_owner);
-                if let Some(mut collections_older) = collections_older_owner {
-                    // Remove collections_by_owner of older owner
-                    let index = collection.collection_id as usize;
-                    let last_index = collections_older.len() - 1;
-                    
-                    if index != last_index {
-                        // Swap address at index pos to the last one
-                        let temp = collections_older[index];
-                        collections_older[index] = collections_older[last_index];
-                        collections_older[last_index] = temp;                        
-
-                        // Update collection id of the last collection  
-                        if let Some(mut updated_last_collection) = self.manager.collections.get(&collections_older[index]) {
-                            updated_last_collection.collection_id = index as u32;
-                            self.manager.collections.insert(&collections_older[index], &updated_last_collection);
-                        } else {
-                            return Err(Error::Custom(String::from("The collection data of last index does not exist")))
-                        }
-                    }
-                    // Remove the last one after swapping check and update collections_by_owner
-                    collections_older.pop();
-                    self.manager.collections_by_owner.insert(&older_owner, &collections_older);
-                    
-                    // Update collections_by_owner
-                    let collections_by_owner = self.manager.collections_by_owner.get(&new_owner);
-                    let mut collection_id = 0;
-                    if let Some(mut collections) = collections_by_owner {
-                        collections.push(contract_address);
-                        collection_id = (collections.len() as u32) - 1;
-                        self.manager.collections_by_owner.insert(&new_owner, &collections);
-                    } else {
-                        let collections = vec![contract_address];
-                        self.manager.collections_by_owner.insert(&new_owner, &collections);
-                    }
-                    // Update collections
-                    collection.collection_owner = new_owner;
-                    collection.collection_id = collection_id;
-                    self.manager.collections.insert(&contract_address, &collection);
-                    Ok(())                    
-                } else {
-                    return Err(Error::Custom(String::from("This owner not exist")))
-                }
-            } else {
-                return Err(Error::CollectionNotExist)
-            }
-        }
-
-        /// Set attributes for the collections
-        #[ink(message)]
-        pub fn set_multiple_attributes(
-            &mut self,
-            contract_address: AccountId,
-            attributes: Vec<String>,
-            values: Vec<String>,
-        ) -> Result<(), Error> {
-            if attributes.len() != values.len() {
-                return Err(Error::InvalidInput)
-            }
-            if let Some(collection) = self.manager.collections.get(&contract_address) {
-                if collection.collection_owner == self.env().caller() || self.has_role(ADMINER, self.env().caller()) {
-                    let mut collection_attributes = self.manager.attributes.get(&contract_address).unwrap_or_default();
-                    for i in 0..attributes.len() {
-                        let attribute = attributes[i].clone();
-                        let value = values[i].clone();
-                        if self.has_attribute(contract_address, attribute.clone()) {
-                            if let Some(index) = self.get_collection_attribute_index(contract_address, attribute.clone()) {
-                                collection_attributes[index as usize] = (attribute.into(), value.into());
-                            } else {
-                                collection_attributes.push((attribute.into(), value.into()));
-                            }
-                        } else {
-                            collection_attributes.push((attribute.into(), value.into()));
-                        }
-                    }
-                    self.manager.attributes.insert(&contract_address, &collection_attributes);
-                    Ok(())
-                } else {
-                    Err(Error::CollectionOwnerAndAdmin)
-                }
-            } else {
-                return Err(Error::CollectionNotExist)
-            }
-            
-        }
-
         // Get attributes of an NFT Collection
         #[ink(message)]
         pub fn get_attributes(&self, contract_address: AccountId, attributes: Vec<String>) -> Vec<String> {
@@ -397,21 +300,6 @@ pub mod artzero_collection_manager {
             } else {
                 String::from("")
             }
-        }
-
-        /// Check collection has an attribute
-        #[ink(message)]
-        pub fn has_attribute(&self, contract_address: AccountId, attribute_key: String) -> bool {
-            if self.manager.attributes.get(&contract_address).is_some() {
-                return self.manager.attributes.get(&contract_address).unwrap().iter().any(|attribute| attribute.0 == attribute_key.clone().into_bytes());
-            }
-            false
-        }
-
-        /// Get attribute index of collection
-        #[ink(message)]
-        pub fn get_collection_attribute_index(&self, contract_address: AccountId, attribute_key: String) -> Option<u64> {
-            return Some(self.manager.attributes.get(&contract_address).unwrap().iter().position(|attribute| attribute.0 == attribute_key.clone().into_bytes()).unwrap() as u64);
         }
 
         /// Count attributes of collection
