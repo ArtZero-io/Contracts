@@ -10,13 +10,13 @@ use ink::storage::traits::StorageLayout;
 #[derive(Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode)]
 #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
 pub enum CollectionType {
-    Unknown         = 0,
-    Psp34Manual     = 1,
-    Psp34Auto       = 2,
-    Psp1155Manual   = 3,
-    Psp1155Auto     = 4,
-    Reserved1       = 5,
-    Reserved2       = 6,
+    Unknown,
+    Psp34Manual,
+    Psp34Auto,
+    Psp1155Manual,
+    Psp1155Auto,
+    Reserved1,
+    Reserved2,
 }
 
 #[openbrush::wrapper]
