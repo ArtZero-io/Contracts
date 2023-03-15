@@ -3,6 +3,8 @@
   - [Deloy contracts](#deloy-contracts)
 - [Update addresses and abis for FE](#update-addresses-and-abis-for-fe)
 - [Update addresses and abis for BE](#update-addresses-and-abis-for-be)
+  - [Files for api](#files-for-api)
+  - [Files for jobs](#files-for-jobs)
 - [Create PMP project and update its address in staking contract and PMP abi in FE, BE](#create-pmp-project-and-update-its-address-in-staking-contract-and-pmp-abi-in-fe-be)
 
 # Contract deployment
@@ -96,7 +98,7 @@ cargo +nightly contract build --release
    - In contract UI, go to Add New Contract / Upload New Contract Code, choose deployment account for Account part and select artzero_staking_nft.contract file in Upload Contract Bundle part then click Next
    - In Upload and Instantiate Contract
      - **adminAddress**: input deloyment account
-     - **artzeroNftContract**: the contract for PMP NFT to stake. Just temporarily input any address, then we will update the real PMP address later in "Create PMP project and update its address in staking contract" part below. i.e. use psp34_launchpad_standard address above for this contract.
+     - **artzeroNftContract**: the contract for PMP NFT to stake. Just temporarily input any address, then we will update the real PMP address later in "Create PMP project and update its address ..." part below. i.e. use psp34_launchpad_standard address above for this contract.
      - **limitUnstakeTime**: Time wait for unstaking in minutes, i.e. 5
    - Click Next / Upload and Instantiate to upload the contract
    - Record contract address in the part "You instantiated this contract ... from" 
@@ -340,14 +342,15 @@ Use json files and contract addresses in the contract deployment part to create 
 
       export default artzero_nft;
      ```  
-   - It is noted that we temporarily input any address for CONTRACT_ADDRESS and will update the real PMP contract address later in the step "Create PMP project and updateits address ..." 
+   - It is noted that we temporarily input any address for CONTRACT_ADDRESS and will update the real PMP contract address later in the step "Create PMP project and update its address ..." 
    
 9. Copy all js files we've created to /src/utils/blockchain
    
 # Update addresses and abis for BE
 
-Files for BE are stored in /Api/src/contracts and nearly the same as js files for FE, we just do the small below changes.  
+Files for BE are stored in /Api/src/contracts for api and in /Contracts for jobs and nearly the same as js files for FE, we just do the small below changes.  
 
+## Files for api
 1. profile.ts
 
    - Copy profile.js from FE to a place and rename to profile.ts 
@@ -491,4 +494,124 @@ Files for BE are stored in /Api/src/contracts and nearly the same as js files fo
          ...
       };
      ```
+   - It is noted that we temporarily input any address for CONTRACT_ADDRESS and will update the real PMP contract address later in the step "Create PMP project and update its address ..."
+
+9. Copy all ts files we've created to Api/src/contracts of BE code
+
+## Files for jobs
+
+1. Copy ts files in the api part above to a place, change their extension to .js files.
+   
+2. With each .js file, open and modify as follows:
+
+   - Change "export const module_name" to "const module_name"  
+      i.e.
+      ```
+      export const collection_manager
+      ```
+      to 
+      ```
+      const collection_manager
+      ```
+   - At the end of file add module export with the template
+      ```
+      module.exports = {
+         module_name:module_name
+      };
+      ```
+
+      i.e.
+      ```
+      module.exports = {
+         collection_manager:collection_manager
+      };
+      ```  
+3. After all .js files are modified, copy them to /Contracts folder of BE code
+   
+4. Start api and jobs through pm2 for BE
+   ```
+   pm2 start az_bids_monitor.js
+   pm2 start az_cache_image.js
+   pm2 start az_cloudflare_sync_monitor.js
+   pm2 start az_collection_monitor.js
+   pm2 start az_events_collector.js
+   pm2 start az_nft_monitor.js
+   pm2 start az_project_monitor.js
+   pm2 start az_telegram_bot.js
+   cd Api
+   pm2 start npm --name=az_api_loopback -- run start
+   ```
+
 # Create PMP project and update its address in staking contract and PMP abi in FE, BE  
+
+Assuming that BE and FE are setup and run.
+
+This part is to use FE to create a launch project for PMP NFT and then use the launchpad_manager contract to get the psp34 launchpad standard contract address for PMP NFT.     
+
+Then we will fill the PMP contract address for artzero_nft.js and artzero-nft.js in BE, artzero-nft.js in FE and in the staking contract.
+
+It is noted that the deployment account is the original admin and we will use this account for FE to create the launch project for PMP NFT.  
+
+1. Start FE, in the homepage click Connect Wallet button and select support wallet, then make sure to choose the deployment contract
+   
+2. Go to Launchpad/Live projects, click Create Project
+   
+3. Select avatar image, featured image, header image, input at least required fields (are tagged with *), i.e.
+   - Project Info
+     - Project name: PRAYING MANTIS PREDATORS
+     - Start time - End time: 22/3/2023 12:00 AM - 31/3/2023 11:59 PM
+     - Project description: PRAYING MANTIS PREDATORS
+     - Enable Collect Royalty Fee
+     - Milestone name: Q1 - 2023
+     - Milestone description: Launching the Launchpad with PMP Public Sale & Marketplace
+     - PROJECT TEAM MEMBER
+       - Upload member image
+       - Name: Brian
+       - Title: Founder & CEO
+   - NFT INFO
+     - NFT Name: PMP
+     - NFT Symbol: PMP
+     - Total Supply: 10000 
+   - SALE PHASE INFORMATION
+     - Phase name: Phase 1
+     - Start time - End time: 23/3/2023 12:00 AM - 30/3/2023 11:59 PM
+     - Enable Allow public mint
+       - Public minting fee: 79 
+       - Total Mint Amount: 1000
+       - Max per mint: 5
+   - CONTACT INFO
+     - Email: your email
+   - Tick "Create new project you will pay...", "I agree to pay...", "I agree to ArtZero's Terms of Service" then click "Create Project" and approve for transactons to create PMP project   
+
+4. Go to contracts UI, select Launchpad psp34 contract 
+   - Caller: input deloyment account
+   - Message to Send: select getProjectById
+     - id: input 1
+   - The Outcome/ Return value will be the PMP contract address of the project we've created.
+   - Save this PMP contract address
+
+5. Update PMP contract address in straking contract 
+   - In contracts UI, select Staking contract
+     - Caller: input deloyment account
+     - Message to Send: select setArtzeroNftContract
+       - artzeroNftContract: input the PMP contract address we saved in the previous step
+     - Click Call contract, the PMP contract address will be updated for staking contract
+
+6. Update PMP contract address for artzero_nft.js and artzero-nft.js in BE, artzero-nft.js in FE
+   - BE
+     - Open Api/src/contracts/artzero_nft.ts and Contracts/artzero_nft.js 
+     - Replace the contract at CONTRACT_ADDRESS field by the PMP contract address, i.e.
+       ```
+       CONTRACT_ADDRESS: "5EmvscC7Nz293txpLow7NDYTi1k926wyr1XTmJyyGyUh7jb4", 
+       ```
+   - FE
+     - Open src/utils/blockchain/artzero-nft.js 
+     - Replace the contract at CONTRACT_ADDRESS field by the PMP contract address.
+
+7. Restart all service for BE
+   ```
+   pm2 restart all   
+   ```
+8. Restart FE
+        
+
