@@ -11,9 +11,12 @@ pub use crate::{
 use openbrush::{
     modifiers,
     contracts::access_control::*,
+    contracts::ownable::*,
     traits::{
         Storage,
-        AccountId
+        AccountId,
+        Balance,
+        Hash
     }
 };
 use ink::prelude::{
@@ -29,7 +32,8 @@ use crate::traits::error::Error;
 pub const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
 impl<T: Storage<Manager> + 
-    Storage<access_control::Data>
+    Storage<access_control::Data> + 
+    Storage<ownable::Data>
 > ArtZeroCollectionTrait for T 
 where T: access_control::AccessControl {
 
@@ -156,5 +160,210 @@ where T: access_control::AccessControl {
 
     default fn get_collection_attribute_index(&self, contract_address: AccountId, attribute_key: String) -> Option<u64> {
         return Some(self.data::<Manager>().attributes.get(&contract_address).unwrap().iter().position(|attribute| attribute.0 == attribute_key.clone().into_bytes()).unwrap() as u64);
+    }
+
+    default fn get_attributes(&self, contract_address: AccountId, attributes: Vec<String>) -> Vec<String> {
+        let mut ret = Vec::<String>::new();
+        for item in attributes.iter().take(attributes.len()) {
+            ret.push(self.get_attribute(contract_address, item.clone()));
+        }
+        ret
+    }
+
+    default fn get_attribute(&self, contract_address: AccountId, attribute_key: String) -> String {
+        if let Some(collection_attributes) = self.data::<Manager>().attributes.get(&contract_address) {
+            for item in collection_attributes.iter().take(collection_attributes.len()) {
+                if item.0 == attribute_key.clone().into_bytes() {
+                    return String::from_utf8(item.1.clone()).unwrap();
+                }
+            }
+            String::from("")
+        } else {
+            String::from("")
+        }
+    }
+
+    /// Count attributes of collection
+    default fn get_collection_attribute_count(&self, contract_address: AccountId) -> Option<u64> {
+        if self.data::<Manager>().attributes.get(&contract_address).is_none() {
+            return Some(0);
+        }
+        Some(self.data::<Manager>().attributes.get(&contract_address).unwrap().len() as u64)
+    }
+
+    /// Update Type Collection - Only Admin Role can change - 1: Manual 2: Auto
+    #[modifiers(only_role(ADMINER))]
+    default fn update_contract_type(&mut self, contract_address: AccountId, contract_type: CollectionType) -> Result<(), Error> {
+        if let Some(mut collection) = self.data::<Manager>().collections.get(&contract_address) {
+            collection.contract_type = contract_type;
+            self.data::<Manager>().collections.insert(&contract_address, &collection);
+            Ok(())
+        } else {
+            return Err(Error::CollectionNotExist)
+        }
+    }
+
+    /// Update Is Royalty Fee - Only Admin Role can change
+    #[modifiers(only_role(ADMINER))]
+    default fn update_is_collect_royalty_fee(
+        &mut self,
+        contract_address: AccountId,
+        is_collect_royalty_fee: bool,
+    ) -> Result<(), Error> {
+        if let Some(mut collection) = self.data::<Manager>().collections.get(&contract_address) {
+            collection.is_collect_royalty_fee = is_collect_royalty_fee;
+            self.data::<Manager>().collections.insert(&contract_address, &collection);
+            Ok(())
+        } else {
+            return Err(Error::CollectionNotExist)
+        }
+    }
+
+    /// Update royalty fee of an NFT Collection - Only Admin Role can change
+    #[modifiers(only_role(ADMINER))]
+    default fn update_royalty_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), Error> {
+        if new_fee > self.data::<Manager>().max_royalty_fee_rate{
+            return Err(Error::InvalidFee)
+        }
+        if let Some(mut collection) = self.data::<Manager>().collections.get(&contract_address) {
+            collection.royalty_fee = new_fee;
+            self.data::<Manager>().collections.insert(&contract_address, &collection);
+            Ok(())
+        } else {
+            return Err(Error::CollectionNotExist)
+        }
+    }
+
+    /// Update show_on_chain_metadata - admin and collection owner can change
+    default fn update_show_on_chain_metadata(
+        &mut self,
+        contract_address: AccountId,
+        show_on_chain_metadata: bool,
+    ) -> Result<(), Error> {
+        if let Some(mut collection) = self.data::<Manager>().collections.get(&contract_address) {
+            if T::env().caller() == collection.collection_owner || self.has_role(ADMINER, T::env().caller()) {
+                collection.show_on_chain_metadata = show_on_chain_metadata;
+                self.data::<Manager>().collections.insert(&contract_address, &collection);
+                Ok(())
+            } else {
+                Err(Error::OnlyAdmin)
+            }
+        } else {
+            return Err(Error::CollectionNotExist)
+        }
+    }
+
+    /// Update Active Status When its active, collection will be shown on the UI and will be tradable - only Admin can change
+    #[modifiers(only_role(ADMINER))]
+    default fn update_is_active(
+        &mut self, 
+        contract_address: AccountId, 
+        is_active: bool
+    ) -> Result<(), Error> {
+        if let Some(mut collection) = self.data::<Manager>().collections.get(&contract_address) {
+            if is_active == collection.is_active{
+                return Err(Error::InvalidInput)
+            }
+            collection.is_active = is_active;
+            if is_active {
+                if let Some(active_collection_count) = self.data::<Manager>().active_collection_count.checked_add(1) {
+                    self.data::<Manager>().active_collection_count = active_collection_count;
+                } else {
+                    return Err(Error::CheckedOperations)
+                }
+            } else {
+                if let Some(active_collection_count) = self.data::<Manager>().active_collection_count.checked_sub(1) {
+                    self.data::<Manager>().active_collection_count = active_collection_count;
+                } else {
+                    return Err(Error::CheckedOperations)
+                }
+                
+            }
+            self.data::<Manager>().collections.insert(&contract_address, &collection);
+            Ok(())
+        } else {
+            return Err(Error::CollectionNotExist)
+        }
+        
+    }
+
+    /// Update Simple Mode Adding Collection Fee - only Owner
+    #[modifiers(only_owner)]
+    default fn update_simple_mode_adding_fee(&mut self, simple_mode_adding_fee: Balance) -> Result<(), Error> {
+        if simple_mode_adding_fee == 0{
+            return Err(Error::InvalidFee);
+        }
+        self.data::<Manager>().simple_mode_adding_fee = simple_mode_adding_fee;
+        Ok(())
+    }
+
+    /// Update Standard NFT Hash - only Owner
+    #[modifiers(only_owner)]
+    default fn update_standard_nft_hash(&mut self, standard_nft_hash: Hash) -> Result<(), Error> {
+        self.data::<Manager>().standard_nft_hash = standard_nft_hash;
+        Ok(())
+    }
+
+    /// Update Advance Mode Adding Collection Fee - only Owner
+    #[modifiers(only_owner)]
+    default fn update_advance_mode_adding_fee(&mut self, advance_mode_adding_fee: Balance) -> Result<(), Error> {
+        if advance_mode_adding_fee == 0{
+            return Err(Error::InvalidFee);
+        }
+        self.data::<Manager>().advance_mode_adding_fee = advance_mode_adding_fee;
+        Ok(())
+    }
+
+    /// Update Max Royalty Fee Rate - only Owner
+    #[modifiers(only_owner)]
+    default fn update_max_royalty_fee_rate(&mut self, max_royalty_fee_rate: u32) -> Result<(), Error> {
+        self.data::<Manager>().max_royalty_fee_rate = max_royalty_fee_rate;
+        Ok(())
+    }
+
+    // GETTERS
+    /// Get Collection Information by Collection Address (NFT address)
+    default fn get_collection_by_address(&self, nft_contract_address: AccountId) -> Option<Collection> {
+        self.data::<Manager>().collections.get(&nft_contract_address)
+    }
+
+    /// Get All Collection Addresses by Owner Address
+    default fn get_collections_by_owner(&self, owner_address: AccountId) -> Option<Vec<AccountId>> {
+        self.data::<Manager>().collections_by_owner.get(&owner_address)
+    }
+
+    /// Get Standard Nft Hash
+    default fn get_standard_nft_hash(&self) -> Hash {
+        self.data::<Manager>().standard_nft_hash
+    }
+
+    /// Get Collection Contract by ID
+    default fn get_contract_by_id(&self, id: u64) -> Option<AccountId> {
+        self.data::<Manager>().collections_by_id.get(&id)
+    }
+
+    /// Get Collection Count
+    default fn get_collection_count(&self) -> u64 {
+        self.data::<Manager>().collection_count
+    }
+
+    /// Get Collection Count
+    default fn get_active_collection_count(&self) -> u64 {
+        self.data::<Manager>().active_collection_count
+    }
+
+    /// Get Simple Mode Adding Fee
+    default fn get_simple_mode_adding_fee(&self) -> Balance {
+        self.data::<Manager>().simple_mode_adding_fee
+    }
+
+    /// Get Advance Mode Adding Fee
+    default fn get_advance_mode_adding_fee(&self) -> Balance {
+        self.data::<Manager>().advance_mode_adding_fee
+    }
+
+    /// Get Royalty Max Fee
+    default fn get_max_royalty_fee_rate(&self) -> u32 {
+        self.data::<Manager>().max_royalty_fee_rate
     }
 }

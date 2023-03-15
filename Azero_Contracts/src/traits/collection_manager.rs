@@ -1,9 +1,12 @@
 use openbrush::{
     traits::{
-        AccountId
+        AccountId,
+        Balance,
+        Hash
     }
 };
 use crate::traits::error::Error;
+use crate::impls::collection_manager::Collection;
 use ink::prelude::{
     string::{
         String,
@@ -56,7 +59,67 @@ pub trait ArtZeroCollectionTrait {
 
     #[ink(message)]
     fn get_collection_attribute_index(&self, contract_address: AccountId, attribute_key: String) -> Option<u64>;
+
+    #[ink(message)]
+    fn get_attributes(&self, contract_address: AccountId, attributes: Vec<String>) -> Vec<String>;
+
+    #[ink(message)]
+    fn get_attribute(&self, contract_address: AccountId, attribute_key: String) -> String;
+
+    #[ink(message)]
+    fn get_collection_attribute_count(&self, contract_address: AccountId) -> Option<u64>;
+
+    #[ink(message)]
+    fn update_contract_type(&mut self, contract_address: AccountId, contract_type: CollectionType) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_is_collect_royalty_fee(&mut self, contract_address: AccountId,is_collect_royalty_fee: bool) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_royalty_fee(&mut self, contract_address: AccountId, new_fee: u32) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_show_on_chain_metadata(&mut self,contract_address: AccountId,show_on_chain_metadata: bool,) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_is_active(&mut self, contract_address: AccountId, is_active: bool) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_simple_mode_adding_fee(&mut self, simple_mode_adding_fee: Balance) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_standard_nft_hash(&mut self, standard_nft_hash: Hash) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_advance_mode_adding_fee(&mut self, advance_mode_adding_fee: Balance) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_max_royalty_fee_rate(&mut self, max_royalty_fee_rate: u32) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn get_collection_by_address(&self, nft_contract_address: AccountId) -> Option<Collection>;
+
+    #[ink(message)]
+    fn get_collections_by_owner(&self, owner_address: AccountId) -> Option<Vec<AccountId>>;
+
+    #[ink(message)]
+    fn get_standard_nft_hash(&self) -> Hash;
+
+    #[ink(message)]
+    fn get_contract_by_id(&self, id: u64) -> Option<AccountId>;
+
+    #[ink(message)]
+    fn get_collection_count(&self) -> u64;
+
+    #[ink(message)]
+    fn get_active_collection_count(&self) -> u64;
+
+    #[ink(message)]
+    fn get_simple_mode_adding_fee(&self) -> Balance;
+
+    #[ink(message)]
+    fn get_advance_mode_adding_fee(&self) -> Balance;
+
+    #[ink(message)]
+    fn get_max_royalty_fee_rate(&self) -> u32;
 }
-
-
-
