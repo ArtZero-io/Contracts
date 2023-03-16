@@ -39,113 +39,22 @@ pub mod artzero_marketplace_psp34 {
             staking::ArtZeroStakingRef,
             collection_manager::{
                 ArtZeroCollectionRef,
-                CollectionType,
+                CollectionType
             },
             psp34_standard::*,
             admin::*,
             upgradable::*,
-            error::Error,
+            error::Error
+        }
+    };
+    use artzero_project::{
+        impls::{
+            marketplace::*,
         }
     };
 
     #[cfg(feature = "std")]
     use ink::storage::traits::StorageLayout;
-
-    #[derive(
-        Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
-    pub struct ForSaleItem {
-        nft_owner: AccountId,
-        listed_date: u64,
-        price: Balance,
-        is_for_sale: bool,
-        royalty_fee_at_listing: u32
-    }
-
-    #[derive(
-        Clone, Debug, Ord, PartialOrd, Eq, PartialEq, scale::Encode, scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(scale_info::TypeInfo))]
-    pub struct BidInformation {
-        bidder: AccountId,
-        bid_date: u64,
-        bid_value: Balance,
-    }
-
-    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
-
-    #[derive(Debug)]
-    #[openbrush::upgradeable_storage(STORAGE_KEY)]
-    struct Manager {
-        collection_contract_address: AccountId,
-        staking_contract_address: AccountId,
-        platform_fee: u32,                                  // 1% = 100
-        market_list: Mapping<(AccountId, Id), ForSaleItem, MarketListKeys>, /* NFT for sale in the marketplace, (NFT Contract Address, Token ID) */
-        sale_tokens_ids: MultiMapping<(Option<AccountId>, Option<AccountId>), Id, SaleTokensIdsKey>,                 //(NFT Contract Address, Seller Address)
-        sale_tokens_ids_last_index: Mapping<(Option<AccountId>, Option<AccountId>), u128, SaleTokensIdsLastIndexKeys>,
-        hold_amount_bidders: Mapping<AccountId, Balance>,
-        hold_bidders: MultiMapping<u8, AccountId, ValueGuard<u8>>,
-        bidders: Mapping<(AccountId, AccountId, Id), Vec<BidInformation>, BiddersKeys>, /* Contract Address, Seller Address, token ID) */
-        listed_token_number_by_collection_address: Mapping<AccountId, u64>, /* Number Listed Token (Collection Contract Address) */
-        total_volume: Balance,
-        volume_by_collection: Mapping<AccountId, Balance>,
-        volume_by_user: Mapping<AccountId, Balance>,
-        total_profit: Balance,
-        current_profit: Balance,
-        staking_discount_criteria: Vec<u8>,
-        staking_discount_rate: Vec<u16>,
-        _reserved: Option<()>,
-    }
-
-    pub struct MarketListKeys;
-
-    impl<'a> TypeGuard<'a> for MarketListKeys {
-        type Type = &'a (&'a AccountId, &'a Id);
-    }
-
-    pub struct SaleTokensIdsKey;
-
-    impl<'a> TypeGuard<'a> for SaleTokensIdsKey {
-        type Type = &'a (&'a Option<&'a AccountId>, &'a Option<&'a AccountId>);
-    }
-
-    pub struct SaleTokensIdsLastIndexKeys;
-
-    impl<'a> TypeGuard<'a> for SaleTokensIdsLastIndexKeys {
-        type Type = &'a (&'a Option<&'a AccountId>, &'a Option<&'a AccountId>);
-    }
-
-    pub struct BiddersKeys;
-
-    impl<'a> TypeGuard<'a> for BiddersKeys {
-        type Type = &'a (&'a AccountId, &'a AccountId, &'a Id);
-    }
-
-    impl Default for Manager {
-        fn default() -> Self {
-            Self {
-                collection_contract_address: ZERO_ADDRESS.into(),
-                staking_contract_address: ZERO_ADDRESS.into(),
-                platform_fee: Default::default(),                                  // 1% = 100
-                market_list: Default::default(), /* NFT for sale in the marketplace, (NFT Contract Address, Token ID) */
-                sale_tokens_ids: Default::default(),                 //(NFT Contract Address, Seller Address)
-                sale_tokens_ids_last_index: Default::default(),
-                hold_amount_bidders: Default::default(),
-                hold_bidders: Default::default(),
-                bidders: Default::default(), /* Contract Address, Seller Address, token ID) */
-                listed_token_number_by_collection_address: Default::default(), /* Number Listed Token (Collection Contract Address) */
-                total_volume: Default::default(),
-                volume_by_collection: Default::default(),
-                volume_by_user: Default::default(),
-                total_profit: Default::default(),
-                current_profit: Default::default(),
-                staking_discount_criteria: Default::default(),
-                staking_discount_rate: Default::default(),
-                _reserved: Default::default(),
-            }
-        }
-    }
 
     #[derive(Default, Storage)]
     #[ink(storage)]
@@ -156,13 +65,15 @@ pub mod artzero_marketplace_psp34 {
         admin_data: artzero_project::impls::admin::data::Data,
         #[storage_field]
         upgradable_data: artzero_project::impls::upgradable::data::Data,
-        manager: Manager,
+        #[storage_field]
+        manager: artzero_project::impls::marketplace::data::Manager,
     }
 
     impl Ownable for ArtZeroMarketplacePSP34 {}
     impl AdminTrait for ArtZeroMarketplacePSP34 {}
     impl UpgradableTrait for ArtZeroMarketplacePSP34 {}
-
+    impl ArtZeroMarketplaceTrait for ArtZeroMarketplacePSP34 {}
+    
     #[ink(event)]
     pub struct NewListEvent {
         trader: Option<AccountId>,
@@ -1051,153 +962,6 @@ pub mod artzero_marketplace_psp34 {
                 Ok(())
             } else {
                 return Err(Error::HoldAmountBidderNotExist)
-            }
-        }
-
-        // GETTERS
-        /// Get market list information using NFT Collection and token ID
-        #[ink(message)]
-        pub fn get_nft_sale_info(&self, nft_contract_address: AccountId, token_id: Id) -> Option<ForSaleItem> {
-            self.manager.market_list.get(&(&nft_contract_address, &token_id))
-        }
-
-        /// Get platform fee
-        #[ink(message)]
-        pub fn get_platform_fee(&self) -> u32 {
-            self.manager.platform_fee
-        }
-
-        /// Get Staking Discount Criteria
-        #[ink(message)]
-        pub fn get_staking_discount_criteria(&self) -> Vec<u8> {
-            self.manager.staking_discount_criteria.clone()
-        }
-
-        /// Get Staking Discount Rates
-        #[ink(message)]
-        pub fn get_staking_discount_rate(&self) -> Vec<u16> {
-            self.manager.staking_discount_rate.clone()
-        }
-
-        /// Get listed token count by collection address
-        #[ink(message)]
-        pub fn get_listed_token_count_by_collection_address(&self, collection_contract_address: AccountId) -> u64 {
-            self
-                .manager
-                .listed_token_number_by_collection_address
-                .get(&collection_contract_address).unwrap_or(0)
-        }
-
-        /// Get all token ids currently for sale for a collection (nft_contract_address,user_account)
-        #[ink(message)]
-        pub fn get_for_sale_token_id(
-            &self,
-            nft_contract_address: AccountId,
-            user_account: AccountId,
-            index: u128,
-        ) -> Option<Id> {
-            self.manager
-                .sale_tokens_ids
-                .get_value(&(&Some(&nft_contract_address), &Some(&user_account)), &index)
-        }
-
-        /// Get get total sale token ids of user account in a contract
-        #[ink(message)]
-        pub fn get_sale_tokens_ids_count(&self, nft_contract_address: AccountId, user_account: AccountId) -> u128 {
-            self.manager.sale_tokens_ids.count(&(&Some(&nft_contract_address), &Some(&user_account)))
-
-        }
-
-        /// Get all token ids currently for sale by a collection (nft_contract_address,user_account)
-        #[ink(message)]
-        pub fn total_tokens_for_sale(&self, nft_contract_address: AccountId, user_account: AccountId) -> u128 {
-            self
-                .manager
-                .sale_tokens_ids_last_index
-                .get(&(&Some(&nft_contract_address), &Some(&user_account))).unwrap_or(0)
-
-        }
-
-        /// Get all bids from (NFT Contract Address, User Address, token ID)
-        #[ink(message)]
-        pub fn get_all_bids(
-            &self,
-            nft_contract_address: AccountId,
-            user_account: AccountId,
-            token_id: Id,
-        ) -> Option<Vec<BidInformation>> {
-            self.manager
-                .bidders
-                .get(&(&nft_contract_address, &user_account, &token_id))
-        }
-
-        /// Get collection contract address
-        #[ink(message)]
-        pub fn get_collection_contract_address(&self) -> AccountId {
-            self.manager.collection_contract_address
-        }
-        /// Get staking contract address
-        #[ink(message)]
-        pub fn get_staking_contract_address(&self) -> AccountId {
-            self.manager.staking_contract_address
-        }
-
-        /// Get total platform volume
-        #[ink(message)]
-        pub fn get_total_volume(&self) -> Balance {
-            self.manager.total_volume
-        }
-        /// Get total Collection volume
-        #[ink(message)]
-        pub fn get_volume_by_collection(&self, collection_contract_address: AccountId) -> Balance {
-            self.manager.volume_by_collection.get(&collection_contract_address).unwrap_or(0)
-        }
-
-        /// Get platform total Profit
-        #[ink(message)]
-        pub fn get_total_profit(&self) -> Balance {
-            self.manager.total_profit
-        }
-
-        /// Get platform current available profit
-        #[ink(message)]
-        pub fn get_current_profit(&self) -> Balance {
-            self.manager.current_profit
-        }
-
-        /// Get hold amount of bidder
-        #[ink(message)]
-        pub fn get_hold_amount_of_bidder(&self, bidder: AccountId) -> Option<Balance> {
-            self.manager.hold_amount_bidders.get(&bidder)
-        }
-
-        /// Get Hold Bidders by Index
-        #[ink(message)]
-        pub fn get_hold_bidders_by_index(&self, index: u64) -> Option<AccountId> {
-            self.manager.hold_bidders.get_value(1, &(index as u128))
-        }
-
-        /// Get Hold Bidder Count
-        #[ink(message)]
-        pub fn get_hold_bidder_count(&self) -> u64 {
-            self.manager.hold_bidders.count(1) as u64
-        }
-
-        /// Withdraw Profit - only Contract Owner.
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn withdraw_profit(&mut self, value: Balance, reciever: AccountId) -> Result<(), Error> {
-            if value > self.env().balance() || value > self.manager.current_profit {
-                return Err(Error::NotEnoughBalance)
-            }
-            if let Some(current_profit_tmp) = self.manager.current_profit.checked_sub(value) {
-                self.manager.current_profit = current_profit_tmp;
-                if self.env().transfer(reciever, value).is_err(){
-                    return Err(Error::CannotTransfer)
-                }
-                Ok(())
-            } else {
-                return Err(Error::CheckedOperations)
             }
         }
 

@@ -6,3 +6,4 @@ pub mod launchpad_manager;
 pub mod admin;
 pub mod upgradable;
 pub mod error;
+pub mod marketplace;
