@@ -47,113 +47,14 @@ pub mod launchpad_psp34_nft_standard {
             launchpad_manager::ArtZeroLaunchPadRef,
             admin::*,
             error::Error,
-        }
+            psp34_launchpad_standard::Psp34LaunchPadTraits
+        },
+        impls::psp34_launchpad_standard::*,
     };
+    use artzero_project::impls::psp34_launchpad_standard::ADMINER;
 
     #[cfg(feature = "std")]
     use ink::storage::traits::StorageLayout;
-
-    #[derive(
-        Copy,
-        Clone,
-        Debug,
-        Ord,
-        PartialOrd,
-        Eq,
-        PartialEq,
-        Default,
-        scale::Encode,
-        scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
-    pub struct Whitelist {
-        whitelist_amount: u64,
-        claimed_amount: u64,
-        minting_fee: Balance
-    }
-
-    #[derive(
-        Clone,
-        Debug,
-        Ord,
-        PartialOrd,
-        Eq,
-        PartialEq,
-        Default,
-        scale::Encode,
-        scale::Decode,
-    )]
-    #[cfg_attr(feature = "std", derive(StorageLayout, scale_info::TypeInfo))]
-    pub struct Phase {
-        is_active: bool,
-        title: Vec<u8>,
-        is_public: bool,
-        public_minting_fee: Balance,
-        public_minting_amount: u64,
-        public_max_minting_amount: u64,
-        public_claimed_amount: u64,
-        whitelist_amount: u64,
-        claimed_amount: u64,
-        total_amount: u64,
-        start_time: Timestamp,
-        end_time: Timestamp
-    }
-
-    pub const STORAGE_KEY: u32 = openbrush::storage_unique_key!(Manager);
-
-    #[derive(Debug)]
-    #[openbrush::upgradeable_storage(STORAGE_KEY)]
-    pub struct Manager {
-        pub total_supply: u64,
-        pub last_phase_id: u8,
-        pub whitelist_count: u32,
-        pub phase_account_public_claimed_amount: Mapping<(AccountId, u8), u64, PhaseAccountPublicClaimedAmountKeys>,
-        pub phase_whitelists_link: Mapping<(AccountId, u8), Whitelist, PhaseWhitelistsLinkKeys>,
-        pub phases: Mapping<u8, Phase>,
-        pub phase_account_link: MultiMapping<u8, AccountId, ValueGuard<u8>>,
-        pub limit_phase_count: u8,
-        pub launchpad_contract_address: AccountId,
-        pub project_info: Vec<u8>,
-        pub public_minted_count: u64,
-        pub active_phase_count: u8,
-        pub available_token_amount: u64,
-        pub owner_claimed_amount: u64,
-        pub _reserved: Option<()>,
-    }
-
-    impl Default for Manager {
-        fn default() -> Self {
-            Self {
-                total_supply: Default::default(),
-                last_phase_id: Default::default(),
-                whitelist_count: Default::default(),
-                phase_account_public_claimed_amount: Default::default(),
-                phase_whitelists_link: Default::default(),
-                phases: Default::default(),
-                phase_account_link: Default::default(),
-                limit_phase_count: Default::default(),
-                launchpad_contract_address: ZERO_ADDRESS.into(),
-                project_info: Default::default(),
-                public_minted_count: Default::default(),
-                active_phase_count: Default::default(),
-                available_token_amount: Default::default(),
-                owner_claimed_amount: Default::default(),
-                _reserved: Default::default(),
-            }
-        }
-    }
-
-    pub struct PhaseAccountPublicClaimedAmountKeys;
-
-    impl<'a> TypeGuard<'a> for PhaseAccountPublicClaimedAmountKeys {
-        type Type = &'a (&'a AccountId, &'a u8);
-    }
-
-    pub struct PhaseWhitelistsLinkKeys;
-
-    impl<'a> TypeGuard<'a> for PhaseWhitelistsLinkKeys {
-        type Type = &'a (&'a AccountId, &'a u8);
-    }
 
     #[derive(Default, Storage)]
     #[ink(storage)]
@@ -167,7 +68,7 @@ pub mod launchpad_psp34_nft_standard {
         #[storage_field]
         access: access_control::Data,
         #[storage_field]
-        manager: Manager,
+        manager: artzero_project::impls::psp34_launchpad_standard::data::Manager,
         #[storage_field]
         manager_psp34_standard: artzero_project::impls::psp34_standard::data::Manager,
         #[storage_field]
@@ -201,13 +102,12 @@ pub mod launchpad_psp34_nft_standard {
         project_mint_fee: Balance
     }
 
-    const ADMINER: RoleType = ink::selector_id!("ADMINER");
-
     impl Ownable for LaunchPadPsp34NftStandard {}
     impl PSP34 for LaunchPadPsp34NftStandard {}
     impl PSP34Metadata for LaunchPadPsp34NftStandard {}
     impl PSP34Enumerable for LaunchPadPsp34NftStandard {}
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
+    impl Psp34LaunchPadTraits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
 
     impl AdminTrait for LaunchPadPsp34NftStandard {
@@ -375,6 +275,21 @@ pub mod launchpad_psp34_nft_standard {
             } else {
                 return Err(Error::Custom(String::from("Cannot add active phase count")));
             }            
+        }
+
+        fn validate_phase_schedule(&self, start_time: &Timestamp, end_time: &Timestamp) -> bool {
+            if *start_time >= *end_time {
+                return false;
+            }
+            for index in 0..self.manager.last_phase_id {
+                let phase = self.manager.phases.get(&(index+1)).unwrap();
+                if phase.is_active && (
+                    (phase.start_time..=phase.end_time).contains(start_time) || (phase.start_time..=phase.end_time).contains(end_time)
+                ) {
+                    return false;
+                }
+            }
+            true
         }
 
         /// Update whitelist - Only Admin Role can change
@@ -879,373 +794,10 @@ pub mod launchpad_psp34_nft_standard {
             }          
         }
 
-        /// Deactive Phase - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn deactive_phase(
-            &mut self,
-            phase_id: u8
-        ) -> Result<(), Error> {
-            if let Some(mut phase) = self.manager.phases.get(&phase_id) {
-                if phase.claimed_amount != 0 || self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() || !phase.is_active{
-                    return Err(Error::Custom(String::from("Cannot deactivate phase")))
-                }
-                phase.is_active = false;
-                if let Some(active_phase_count) = self.manager.active_phase_count.checked_sub(1) {
-                    self.manager.active_phase_count = active_phase_count;
-                    if phase.is_public {
-                        if let Some(available_token_amount) = self.manager.available_token_amount.checked_add(phase.public_minting_amount) {
-                            self.manager.available_token_amount = available_token_amount;
-                        } else {
-                            return Err(Error::Custom(String::from("Cannot add to available token amount"))); 
-                        }                        
-                    }
-                    self.manager.phases.insert(&phase_id, &phase);
-                    Ok(())
-                } else {
-                    return Err(Error::Custom(String::from("Cannot subtract from active phase count"))); 
-                }                
-            } else {
-                return Err(Error::PhaseNotExist);
-            }            
-        }
-
-        /// Update phase schedule - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn update_schedule_phase(
-            &mut self,
-            phase_id: u8,
-            phase_code: String,
-            is_public: bool,
-            public_minting_fee: Balance,
-            public_minting_amount: u64,
-            public_max_minting_amount: u64,
-            start_time: Timestamp,
-            end_time: Timestamp
-        ) -> Result<(), Error> {
-            if self.manager.phases.get(&phase_id).is_none() {
-                return Err(Error::PhaseNotExist);
-            }
-            if public_max_minting_amount > ArtZeroLaunchPadRef::get_public_max_minting_amount(&self.manager.launchpad_contract_address) {
-                return Err(Error::InvalidInput);
-            }
-            if start_time >= end_time {
-                return Err(Error::InvalidStartTimeAndEndTime);
-            }
-            for index in 0..self.manager.last_phase_id {
-                if let Some(idx) = index.checked_add(1) {
-                    if idx != phase_id {
-                        if let Some(phs) = self.manager.phases.get(&(index+1)) {
-                            if phs.is_active && (
-                                (phs.start_time..=phs.end_time).contains(&start_time) || (phs.start_time..=phs.end_time).contains(&end_time)
-                            ) {
-                                return Err(Error::InvalidInput);
-                            }
-                        } else {
-                            return Err(Error::PhaseNotExist); 
-                        }                        
-                    }
-                } else {
-                    return Err(Error::Custom(String::from("Cannot add to index"))); 
-                }                
-            }
-            if let Some(mut phase) = self.manager.phases.get(&phase_id) {
-                if !phase.is_active ||
-                phase.claimed_amount != 0 ||
-                self.manager.phase_account_link.count(phase_id) != 0 || phase.start_time <= self.env().block_timestamp() {
-                    return Err(Error::Custom(String::from("cannot update phase")))
-                }
-
-                phase.title = phase_code.clone().into_bytes();
-                if phase.is_public && !is_public {
-                    if let Some(available_token_amount) = self.manager.available_token_amount.checked_add(phase.public_minting_amount) {
-                        self.manager.available_token_amount = available_token_amount;
-                        if let Some(total_amount) = phase.total_amount.checked_sub(phase.public_minting_amount) {
-                            phase.total_amount = total_amount;
-                        } else {
-                            return Err(Error::Custom(String::from("Cannot subtract from phase total amount")));
-                        }                        
-                    } else {
-                        return Err(Error::Custom(String::from("Cannot add to available token amount"))); 
-                    }                    
-                } else if !phase.is_public && is_public {
-                    if let Some(available_token_amount) = self.manager.available_token_amount.checked_sub(public_minting_amount) {
-                        self.manager.available_token_amount = available_token_amount;
-                        if let Some(total_amount) = phase.total_amount.checked_add(public_minting_amount) {
-                            phase.total_amount = total_amount;
-                        } else {
-                            return Err(Error::Custom(String::from("Cannot add to phase total amount"))); 
-                        }                        
-                    } else {
-                        return Err(Error::Custom(String::from("Cannot subtract from available token amount")));
-                    }                    
-                } else if phase.is_public && is_public {
-                    if let Some(available_token_amount_added_public_minting_amount) = self.manager.available_token_amount.checked_add(phase.public_minting_amount) {
-                        if let Some(available_token_amount) = available_token_amount_added_public_minting_amount.checked_sub(public_minting_amount) {
-                            self.manager.available_token_amount = available_token_amount;
-                            if let Some(total_amount_subbed_public_minting_amount) = phase.total_amount.checked_sub(phase.public_minting_amount) {
-                                if let Some(total_amount) = total_amount_subbed_public_minting_amount.checked_add(public_minting_amount) {
-                                    phase.total_amount = total_amount;
-                                } else {
-                                    return Err(Error::Custom(String::from("Cannot add to phase total amount")));
-                                }                                
-                            } else {
-                                return Err(Error::Custom(String::from("Cannot subtract from phase total amount")));  
-                            }                            
-                        } else {
-                            return Err(Error::Custom(String::from("Cannot subtract from available token amount")));  
-                        }                        
-                    } else {
-                        return Err(Error::Custom(String::from("Cannot add to available token amount")));  
-                    }                    
-                }
-                phase.is_public = is_public;
-                phase.start_time = start_time;
-                phase.end_time = end_time;
-
-                if is_public {
-                    phase.public_minting_fee = public_minting_fee;
-                    phase.public_minting_amount = public_minting_amount;
-                    phase.public_max_minting_amount = public_max_minting_amount;
-                } else {
-                    phase.public_minting_fee = 0;
-                    phase.public_minting_amount = 0;
-                    phase.public_max_minting_amount = 0;
-                }
-                self.manager.phases.insert(&phase_id, &phase);
-                Ok(())
-            } else {
-                return Err(Error::PhaseNotExist);
-            }            
-        }
-
-        // Update schedule phases - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn update_schedule_phases(
-            &mut self,
-            id_phases: Vec<u8>,
-            code_phases: Vec<String>,
-            is_public_phases: Vec<bool>,
-            public_minting_fee_phases: Vec<Balance>,
-            public_minting_amount_phases: Vec<u64>,
-            public_max_minting_amount_phases: Vec<u64>,
-            start_time_phases: Vec<Timestamp>,
-            end_time_phases: Vec<Timestamp>
-        ) -> Result<(), Error> {
-            if id_phases.len() != code_phases.len() ||
-                id_phases.len() != is_public_phases.len() ||
-                id_phases.len() != public_minting_fee_phases.len() ||
-                id_phases.len() != public_minting_amount_phases.len() ||
-                id_phases.len() != public_max_minting_amount_phases.len() ||
-                id_phases.len() != start_time_phases.len() ||
-                id_phases.len() != end_time_phases.len() {
-                return Err(Error::InvalidInput);
-            }
-            let phase_length = id_phases.len();
-            for index in 0..phase_length {
-                if self.update_schedule_phase(
-                    id_phases[index + 1],
-                    code_phases[index + 1].clone(),
-                    is_public_phases[index + 1],
-                    public_minting_fee_phases[index + 1],
-                    public_minting_amount_phases[index +1],
-                    public_max_minting_amount_phases[index + 1],
-                    start_time_phases[index + 1],
-                    end_time_phases[index + 1]
-                ).is_err(){
-                    return Err(Error::UpdatePhase);
-                }
-
-            }
-            Ok(())
-        }
-
-        /// Edit project information  - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn edit_project_information(
-            &mut self,
-            project_info: String
-        ) -> Result<(), AccessControlError> {
-            self.manager.project_info = project_info.into_bytes();
-            Ok(())
-        }
-
-        fn validate_phase_schedule(&self, start_time: &Timestamp, end_time: &Timestamp) -> bool {
-            if *start_time >= *end_time {
-                return false;
-            }
-            for index in 0..self.manager.last_phase_id {
-                if let Some(phase) = self.manager.phases.get(&(index+1)) {
-                    if phase.is_active && (
-                        (phase.start_time..=phase.end_time).contains(start_time) || (phase.start_time..=phase.end_time).contains(end_time)
-                    ) {
-                        return false;
-                    }
-                }             
-            }
-            true
-        }
-
-        /// Get owner claimed amount
-        #[ink(message)]
-        pub fn get_owner_claimed_amount(
-            &self
-        ) -> u64 {
-            self.manager.owner_claimed_amount
-        }
-
-        /// Get owner available amount
-        #[ink(message)]
-        pub fn get_owner_available_amount(
-            &self
-        ) -> u64 {
-            let current_time = self.env().block_timestamp();
-            let mut available_amount: u64 = 0;
-            for index in 0..self.manager.last_phase_id {
-                if let Some(phase) = self.manager.phases.get(&(index+1)) {
-                    if phase.is_active && current_time > phase.end_time {
-                        if let Some(total_amount) = phase.total_amount.checked_sub(phase.claimed_amount) {
-                            if let Some(avail_amount) = available_amount.checked_add(total_amount) {
-                                available_amount = avail_amount;
-                            }                            
-                        }                        
-                    }
-                }                
-            }
-            available_amount
-        }
-
-        /// Get limit phase count
-        #[ink(message)]
-        pub fn get_limit_phase_count(
-            &self
-        ) -> u8 {
-            self.manager.limit_phase_count
-        }
-
-        /// Get public minted count
-        #[ink(message)]
-        pub fn get_public_minted_count(
-            &self
-        ) -> u64 {
-            self.manager.public_minted_count
-        }
-
-        /// Get limit phase count
-        #[ink(message)]
-        pub fn get_project_info(
-            &self
-        ) -> Vec<u8> {
-            self.manager.project_info.clone()
-        }
-
-        /// Get Phase Schedule by Phase Id
-        #[ink(message)]
-        pub fn get_phase_schedule_by_id(
-            &self,
-            phase_id: u8
-        ) -> Option<Phase> {
-            self.manager.phases.get(&phase_id)
-        }
-
-        /// Get whitelist information by phase code
-        #[ink(message)]
-        pub fn get_whitelist_by_account_id(
-            &self,
-            account: AccountId,
-            phase_id: u8
-        ) -> Option<Whitelist> {
-            self.manager.phase_whitelists_link.get(&(&account, &phase_id))
-        }
-
-        /// Get phase Account Link
-        #[ink(message)]
-        pub fn get_phase_account_link(
-            &self,
-            phase_id: u8,
-            account_index: u64
-        ) -> Option<AccountId> {
-            self.manager.phase_account_link.get_value(phase_id, &(account_index as u128))
-        }
-
-        /// Get current phase
-        #[ink(message)]
-        pub fn get_current_phase(&self) -> Option<u8> {
-            let current_time = self.env().block_timestamp();
-            for index in 0..self.manager.last_phase_id {
-                if let Some(phase) = self.manager.phases.get(&(index+1)) {
-                    if phase.is_active && (phase.start_time..=phase.end_time).contains(&current_time) {
-                        return Some(index + 1);
-                    }
-                }                
-            }
-            None
-        }
-
-        /// Check time in a phase
-        #[ink(message)]
-        pub fn is_in_schedule_phase(&self, time: Timestamp) -> Option<u8> {
-            for index in 0..self.manager.last_phase_id {
-                if let Some(phase) = self.manager.phases.get(&(index+1)) {
-                    if phase.start_time <= time && phase.end_time >= time {
-                        return Some(index);
-                    }
-                }                
-            }
-            None
-        }
-
-        /// Get Whitelist Count
-        #[ink(message)]
-        pub fn get_whitelist_count(
-            &self
-        ) -> u32 {
-            self.manager.whitelist_count
-        }
-
-        ///Get phase Count
-        #[ink(message)]
-        pub fn get_last_phase_id(&self) -> u8 {
-            self.manager.last_phase_id
-        }
-
-        ///Get active phase count
-        #[ink(message)]
-        pub fn get_active_phase_count(&self) -> u8 {
-            self.manager.active_phase_count
-        }
-
         ///Get Token Count
         #[ink(message)]
         pub fn get_last_token_id(&self) -> u64 {
             self.manager_psp34_standard.last_token_id
-        }
-
-        ///Get Phase Account Public Claimed Amount
-        #[ink(message)]
-        pub fn get_phase_account_public_claimed_amount(&self, account_id: AccountId, phase_id: u8) -> Option<u64> {
-            Some(self.manager.phase_account_public_claimed_amount.get(&(&account_id, &phase_id)))?
-        }
-
-        ///Get Phase Account Last Index by Phase Id
-        #[ink(message)]
-        pub fn get_phase_account_last_index(&self, phase_id: u8) -> u64 {
-            self.manager.phase_account_link.count(phase_id) as u64
-        }
-
-        ///Get Total Supply
-        #[ink(message)]
-        pub fn get_total_supply(&self) -> u64 {
-            self.manager.total_supply
-        }
-
-        ///Get Available Token Amount
-        #[ink(message)]
-        pub fn get_available_token_amount(&self) -> u64 {
-            self.manager.available_token_amount
         }
     }
 
