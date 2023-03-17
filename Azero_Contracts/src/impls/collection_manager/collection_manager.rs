@@ -306,7 +306,7 @@ where
     }
 
     /// Update Simple Mode Adding Collection Fee - only Owner
-
+    #[modifiers(only_owner)]
     default fn update_simple_mode_adding_fee(&mut self, simple_mode_adding_fee: Balance) -> Result<(), Error> {
         if simple_mode_adding_fee == 0{
             return Err(Error::InvalidFee);
@@ -316,14 +316,14 @@ where
     }
 
     /// Update Standard NFT Hash - only Owner
-
+    #[modifiers(only_owner)]
     default fn update_standard_nft_hash(&mut self, standard_nft_hash: Hash) -> Result<(), Error> {
         self.data::<Manager>().standard_nft_hash = standard_nft_hash;
         Ok(())
     }
 
     /// Update Advance Mode Adding Collection Fee - only Owner
-
+    #[modifiers(only_owner)]
     default fn update_advance_mode_adding_fee(&mut self, advance_mode_adding_fee: Balance) -> Result<(), Error> {
         if advance_mode_adding_fee == 0{
             return Err(Error::InvalidFee);
@@ -333,7 +333,7 @@ where
     }
 
     /// Update Max Royalty Fee Rate - only Owner
-
+    #[modifiers(only_owner)]
     default fn update_max_royalty_fee_rate(&mut self, max_royalty_fee_rate: u32) -> Result<(), Error> {
         self.data::<Manager>().max_royalty_fee_rate = max_royalty_fee_rate;
         Ok(())
