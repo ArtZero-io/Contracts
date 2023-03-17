@@ -9,15 +9,20 @@ pub use crate::{
     traits::collection_manager::*,
 };
 use openbrush::{
+    modifier_definition,
     modifiers,
-    contracts::access_control::*,
+    storage::Mapping,
     contracts::ownable::*,
+    contracts::access_control::*,
     traits::{
-        Storage,
         AccountId,
+        Hash,
         Balance,
-        Hash
-    }
+        OccupiedStorage,
+        Storage,
+        Timestamp,
+        ZERO_ADDRESS,
+    },
 };
 use ink::prelude::{
     string::{
@@ -27,16 +32,29 @@ use ink::prelude::{
     vec::Vec,
 };
 use crate::traits::error::Error;
+use ink::{
+    storage::traits::{
+        AutoStorableHint,
+        ManualKey,
+        Storable,
+        StorableHint,
+    },
+};
 
 // ADMINER RoleType = 3739740293
 pub const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
-impl<T: Storage<Manager> + 
-    Storage<access_control::Data> + 
-    Storage<ownable::Data>
-> ArtZeroCollectionTrait for T 
-where T: access_control::AccessControl {
-
+impl<T, M> ArtZeroCollectionTrait for T
+where
+    M: access_control::members::MembersManager,
+    M: Storable
+        + StorableHint<ManualKey<{ access_control::STORAGE_KEY }>>
+        + AutoStorableHint<ManualKey<3218979580, ManualKey<{ access_control::STORAGE_KEY }>>, Type = M>,
+    T: Storage<Manager>,
+    T: Storage<access_control::Data<M>>,
+    T: OccupiedStorage<{ access_control::STORAGE_KEY }, WithData = access_control::Data<M>>,
+    T: Storage<ownable::Data>
+{
     default fn get_royalty_fee(&self, nft_contract_address: AccountId) -> u32 {
         if let Some(collection) = self.data::<Manager>().collections.get(&nft_contract_address) {
             if !collection.is_collect_royalty_fee || !collection.is_active {
@@ -288,7 +306,7 @@ where T: access_control::AccessControl {
     }
 
     /// Update Simple Mode Adding Collection Fee - only Owner
-    #[modifiers(only_owner)]
+
     default fn update_simple_mode_adding_fee(&mut self, simple_mode_adding_fee: Balance) -> Result<(), Error> {
         if simple_mode_adding_fee == 0{
             return Err(Error::InvalidFee);
@@ -298,14 +316,14 @@ where T: access_control::AccessControl {
     }
 
     /// Update Standard NFT Hash - only Owner
-    #[modifiers(only_owner)]
+
     default fn update_standard_nft_hash(&mut self, standard_nft_hash: Hash) -> Result<(), Error> {
         self.data::<Manager>().standard_nft_hash = standard_nft_hash;
         Ok(())
     }
 
     /// Update Advance Mode Adding Collection Fee - only Owner
-    #[modifiers(only_owner)]
+
     default fn update_advance_mode_adding_fee(&mut self, advance_mode_adding_fee: Balance) -> Result<(), Error> {
         if advance_mode_adding_fee == 0{
             return Err(Error::InvalidFee);
@@ -315,7 +333,7 @@ where T: access_control::AccessControl {
     }
 
     /// Update Max Royalty Fee Rate - only Owner
-    #[modifiers(only_owner)]
+
     default fn update_max_royalty_fee_rate(&mut self, max_royalty_fee_rate: u32) -> Result<(), Error> {
         self.data::<Manager>().max_royalty_fee_rate = max_royalty_fee_rate;
         Ok(())

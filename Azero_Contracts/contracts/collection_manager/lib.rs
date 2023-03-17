@@ -14,7 +14,13 @@ pub mod artzero_collection_manager {
         vec::Vec,
     };
     use openbrush::{
-        contracts::access_control::*,
+        contracts::{
+            access_control::{
+                extensions::enumerable,
+                members,
+            },
+        },
+        contracts::access_control::extensions::enumerable::*,
         contracts::ownable::*,
         modifiers,
         traits::{
@@ -40,7 +46,7 @@ pub mod artzero_collection_manager {
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
-        access: access_control::Data,
+        access_control: access_control::Data<enumerable::Members>,
         #[storage_field]
         manager: artzero_project::impls::collection_manager::data::Manager,
         #[storage_field]
@@ -59,6 +65,7 @@ pub mod artzero_collection_manager {
     }
 
     impl AccessControl for ArtZeroCollectionManager {}
+    impl AccessControlEnumerable for ArtZeroCollectionManager {}
     impl Ownable for ArtZeroCollectionManager {}
     impl ArtZeroCollectionTrait for ArtZeroCollectionManager {}
     impl AdminTrait for ArtZeroCollectionManager {}
