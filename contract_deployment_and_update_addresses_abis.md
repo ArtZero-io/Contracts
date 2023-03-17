@@ -25,7 +25,7 @@ cargo +nightly contract build --release
    
 ## Deloy contracts
 
-1. Some contracts are related to other contracts, use an account as a deloyment account (it will also be the admin account) to deploy contracts in the following order:  
+1. Some contracts are related to other contracts, **use an account as a deloyment account (it will also be the admin account)** to deploy contracts in the following order:  
     
    -  profile contract
    -  psp34_standard contract
@@ -554,9 +554,9 @@ This part is to use FE to create a launchpad project for PMP NFT and then use th
 
 Then we will update this PMP contract address for artzero_nft.js and artzero-nft.js in BE, artzero-nft.js in FE and in the staking contract.
 
-It is noted that the deployment account is the original admin and we will use this account for FE to create the launchpad project for PMP NFT.  
+It is noted that **the deployment account is the original admin** and we will use this account for FE to create the launchpad project for PMP NFT.  
 
-1. Start FE, in the homepage click Connect Wallet button and select support wallet, then make sure to choose the deployment account
+1. Start FE, in the homepage click Connect Wallet button and select supporting wallet, then make sure to choose the deployment account
    
 2. Go to Launchpad/Live projects, click Create Project
    
@@ -624,13 +624,13 @@ It is noted that the deployment account is the original admin and we will use th
 
 ## Update art location for PMP NFT
 
- The step we create PMP project above also creates the launchpad psp34 for PMP NFT but its data (images info and their metadata including image paths, their attributes... in JSON format) is off-chain (not stored directly in smart contract) and is often pushed to ipfs. We need to indicate for the system knows where its data is located by using FE. 
+ The step we create PMP project above also creates the launchpad psp34 for PMP NFT but its data (images info and their metadata including image paths, their attributes... in JSON format) is off-chain (not stored directly in smart contract) and is often pushed to ipfs. We need to indicate for the system knowing where its data is located by using FE. 
  
  For the purpose of testing, we uploaded the images info and metadata for PMP project into the ifps links: 
    - image info: ipfs://bafybeicuufb2745l5g5zm2fa32fydao76iur72lwaqrt7dmhzkdupmzxue/
    - metadata info: ipfs://bafybeibw7yco54n24gieazxya2zt3gfujvrv5twed4xheruv3izyuar2ry/ 
 
- Actually, if we have the metadata ipfs link then we will can extract the image path, thus, knowing the image info through this path as well. So the system needs to store the metadata info only.   
+ Actually, if we have the metadata ipfs link then we can extract the image path, thus, knowing the image info through this path as well. So the system needs to store the metadata info only.   
  
  Just follow below steps to add metadata ipfs link 
  
@@ -644,11 +644,11 @@ It is noted that the deployment account is the original admin and we will use th
 
 Loading data in ipfs is actually slow, especially, when we have a large number of NFTs. Thus, even we put the ipfs link to the system, we still cache their data to improve the performance to process or show them on both FE and BE side.
 
-For PMP NFT, we have 10000 NFT but for testing purpose, to save time, we just demo to cache data of the first 200 NFT by following the below steps and using our scripts.
+For PMP NFT, we have 10000 NFT but for testing purpose, to save time, we just demo to cache data of the first 200 NFTs by following the below steps and using our scripts.
 
 1. Preparation
    
-   - Link ipfs for images and their metadata as in part update art location for PMP NFT
+   - Link ipfs for images and their metadata as in part "Update art location for PMP NFT"
      - image info: ipfs://bafybeicuufb2745l5g5zm2fa32fydao76iur72lwaqrt7dmhzkdupmzxue/
      - metadata info: ipfs://bafybeibw7yco54n24gieazxya2zt3gfujvrv5twed4xheruv3izyuar2ry/
 
@@ -657,14 +657,14 @@ For PMP NFT, we have 10000 NFT but for testing purpose, to save time, we just de
      - jsons.zip: Metadata 
      - index.js: script to cache  
 
-2. Cache steps
+2. Cache
 
-We will perform the cache in the backend. The script will cache image links, metadata and add cached NFT token id to NftQueue in DB so that the BE will check and get their cached data (image link anf metadata) to update into DB. 
+We will perform the cache in the backend. The script will cache image links, metadata and add cached NFT token id to NftQueue in DB so that the BE will check and get their cached data (image link and metadata) to update into DB. 
 
-Assume we already have BE code, kindly follow below steps: 
+Assume that we already have BE code, kindly follow below steps: 
    
    - Create Cache folder which same level with the Api folder of the BE code. And then create PMP folder inside Cache folder.   
-   - Download PMP.zip and extract PMP.zip to Cache/PMP folder, we will have 3 files
+   - Download PMP.zip and extract it to Cache/PMP folder, we will have 3 files
      -  images.tar.gz
      -  jsons.zip
      -  index.js 
@@ -692,13 +692,13 @@ Assume we already have BE code, kindly follow below steps:
       ```
       added to NFT queue 10
       ```
-   -  Wait until all NFTs are processed (means thay the last token with id of total supply will be notified "added to NFT queue")
-   - Note: if in any case the script is stopped in the middle of the process, kindly check log to see the last token id has the issue and then we can reopen the script to reconfig the from parameter to this last-processed token id. The script will cache at this token id instead of running from the first token id.  
+   -  Wait until all NFTs are processed (means that the last token with id of total supply will be notified "added to NFT queue")
+   - **Note:** if in any case the script is stopped in the middle of the process, kindly check log to see the last token id has the issue and then we can reopen the script to reconfig the from parameter to this last-processed token id. The script will cache at this token id instead of running from the first token id.  
    - Press Ctrl-C to exit the process when it is done.
 
 3. Check PMP collection on FE
 
-In this step, we try to mint some NFT from PMP launchpad project and check PMP collection to see if it is displayed smoothly after caching.
+In this step, we try to mint some NFTs from PMP launchpad project and check PMP collection to see if it is displayed smoothly after caching.
 
 - Open FE and use delopyment account
 - Do steps to mint some PMP NFTs
