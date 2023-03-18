@@ -15,7 +15,13 @@ pub mod artzero_launchpad_psp34 {
         vec::Vec,
     };
     use openbrush::{
-        contracts::access_control::*,
+        contracts::{
+            access_control::{
+                extensions::enumerable,
+                members,
+            },
+        },
+        contracts::access_control::extensions::enumerable::*,
         contracts::ownable::*,
         modifiers,
         traits::{
@@ -40,7 +46,7 @@ pub mod artzero_launchpad_psp34 {
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
-        access: access_control::Data,
+        access_control: access_control::Data<enumerable::Members>,
         #[storage_field]
         manager: artzero_project::impls::launchpad_manager::data::Manager,
         #[storage_field]
@@ -54,6 +60,7 @@ pub mod artzero_launchpad_psp34 {
     impl AccessControl for ArtZeroLaunchPadPSP34 {}
     impl Ownable for ArtZeroLaunchPadPSP34 {}
     impl ArtZeroLaunchPadTrait for ArtZeroLaunchPadPSP34 {}
+    impl AccessControlEnumerable for ArtZeroLaunchPadPSP34 {}
     impl AdminTrait for ArtZeroLaunchPadPSP34 {}
     impl UpgradableTrait for ArtZeroLaunchPadPSP34 {}
     
@@ -192,31 +199,5 @@ pub mod artzero_launchpad_psp34 {
             }));
             Ok(())
         }
-
-        /// Edit a project Start Time and End Time - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn edit_project(
-            &mut self,
-            contract_address: AccountId,
-            start_time: Timestamp,
-            end_time: Timestamp
-        ) -> Result<(), Error> {
-            if start_time >= end_time {
-                return Err(Error::InvalidTime);
-            }
-            if let Some(mut project) = self.manager.projects.get(&contract_address) {
-                if project.end_time <= <ArtZeroLaunchPadPSP34 as DefaultEnv>::env().block_timestamp() {
-                    return Err(Error::InvalidTime);
-                }
-                project.end_time = end_time;
-                project.start_time = start_time;
-                self.manager.projects.insert(&contract_address, &project);
-                Ok(())
-            } else {
-                return Err(Error::ProjectNotExist);
-            }
-        }
     }
-
 }

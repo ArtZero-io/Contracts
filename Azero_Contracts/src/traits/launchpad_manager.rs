@@ -3,7 +3,8 @@ use openbrush::{
     traits::{
         AccountId,
         Balance,
-        Hash
+        Hash,
+        Timestamp
     }
 };
 use crate::traits::error::Error;
@@ -103,4 +104,12 @@ pub trait ArtZeroLaunchPadTrait {
     fn get_max_phases_per_project(
         &self
     ) -> u8;
+
+    #[ink(message)]
+    fn edit_project(
+        &mut self,
+        contract_address: AccountId,
+        start_time: Timestamp,
+        end_time: Timestamp
+    ) -> Result<(), Error>;
 }

@@ -17,7 +17,9 @@ use openbrush::{
         Storage,
         AccountId,
         Balance,
-        Hash
+        Hash,
+        OccupiedStorage,
+        Timestamp
     }
 };
 use ink::prelude::{
@@ -27,16 +29,31 @@ use ink::prelude::{
     vec,
     vec::Vec,
 };
+use ink::{
+    storage::traits::{
+        AutoStorableHint,
+        ManualKey,
+        Storable,
+        StorableHint,
+    },
+};
 use crate::traits::error::Error;
 
 // ADMINER RoleType = 3739740293
 pub const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
-impl<T: Storage<Manager> + 
-    Storage<access_control::Data> + 
-    Storage<ownable::Data>
-> ArtZeroLaunchPadTrait for T {
 
+impl<T, M> ArtZeroLaunchPadTrait for T
+where
+    M: access_control::members::MembersManager,
+    M: Storable
+        + StorableHint<ManualKey<{ access_control::STORAGE_KEY }>>
+        + AutoStorableHint<ManualKey<3218979580, ManualKey<{ access_control::STORAGE_KEY }>>, Type = M>,
+    T: Storage<Manager>,
+    T: Storage<access_control::Data<M>>,
+    T: OccupiedStorage<{ access_control::STORAGE_KEY }, WithData = access_control::Data<M>>,
+    T: Storage<ownable::Data>
+{
    /// Get project mint fee
     default fn get_project_mint_fee_rate(
         &self
@@ -174,5 +191,28 @@ impl<T: Storage<Manager> +
         &self
     ) -> u8 {
         self.data::<Manager>().max_phases_per_project
+    }
+
+    #[modifiers(only_role(ADMINER))]
+    default fn edit_project(
+        &mut self,
+        contract_address: AccountId,
+        start_time: Timestamp,
+        end_time: Timestamp
+    ) -> Result<(), Error> {
+        if start_time >= end_time {
+            return Err(Error::InvalidTime);
+        }
+        if let Some(mut project) = self.data::<Manager>().projects.get(&contract_address) {
+            if project.end_time <= T::env().block_timestamp() {
+                return Err(Error::InvalidTime);
+            }
+            project.end_time = end_time;
+            project.start_time = start_time;
+            self.data::<Manager>().projects.insert(&contract_address, &project);
+            Ok(())
+        } else {
+            return Err(Error::ProjectNotExist);
+        }
     }
 }
