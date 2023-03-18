@@ -21,12 +21,20 @@ pub mod launchpad_psp34_nft_standard {
         Env,
     };
     use openbrush::{
-        contracts::access_control::*,
+        contracts::{
+            access_control::{
+                extensions::enumerable,
+                members,
+            },
+        },
+        contracts::access_control::extensions::enumerable::*,
+        contracts::access_control::only_role,
         contracts::ownable::*,
         contracts::psp34::extensions::{
             enumerable::*,
             metadata::*,
             burnable::*,
+            enumerable::Balances
         },
         storage::{
             MultiMapping,
@@ -60,13 +68,13 @@ pub mod launchpad_psp34_nft_standard {
     #[ink(storage)]
     pub struct LaunchPadPsp34NftStandard{
         #[storage_field]
-        psp34: psp34::Data<enumerable::Balances>,
+        psp34: psp34::Data<Balances>,
         #[storage_field]
         metadata: metadata::Data,
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
-        access: access_control::Data,
+        access_control: access_control::Data<enumerable::Members>,
         #[storage_field]
         manager: artzero_project::impls::psp34_launchpad_standard::data::Manager,
         #[storage_field]
@@ -109,6 +117,7 @@ pub mod launchpad_psp34_nft_standard {
     impl Psp34Traits for LaunchPadPsp34NftStandard {}
     impl Psp34LaunchPadTraits for LaunchPadPsp34NftStandard {}
     impl AccessControl for LaunchPadPsp34NftStandard {}
+    impl AccessControlEnumerable for LaunchPadPsp34NftStandard {}
 
     impl AdminTrait for LaunchPadPsp34NftStandard {
         fn _emit_withdraw_fee(&self, _value: Balance, _receiver: AccountId) {

@@ -23,7 +23,8 @@ use openbrush::{
         DefaultEnv,
         ZERO_ADDRESS,
         Timestamp,
-        Balance
+        Balance,
+        OccupiedStorage
     },
 };
 use ink::prelude::{
@@ -33,23 +34,33 @@ use ink::prelude::{
     },
     vec::Vec,
 };
+use ink::{
+    storage::traits::{
+        AutoStorableHint,
+        ManualKey,
+        Storable,
+        StorableHint,
+    },
+};
 use crate::traits::error::Error;
 use crate::traits::launchpad_manager::ArtZeroLaunchPadRef;
 
 pub const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
-impl<
-    T: Storage<Manager> + 
-    Storage<access_control::Data> + 
-    Storage<ownable::Data>
-> Psp34LaunchPadTraits for T
+impl<T, M> Psp34LaunchPadTraits for T
 where
-    T: PSP34 + psp34::Internal +
-    access_control::AccessControl +
-    Storage<psp34::extensions::metadata::Data> +
-    Storage<psp34::Data<psp34::extensions::enumerable::Balances>> +
-    Storage<openbrush::contracts::ownable::Data> +
-    Storage<ownable::Data> + 
+    M: access_control::members::MembersManager,
+    M: Storable
+        + StorableHint<ManualKey<{ access_control::STORAGE_KEY }>>
+        + AutoStorableHint<ManualKey<3218979580, ManualKey<{ access_control::STORAGE_KEY }>>, Type = M>,
+    T: PSP34 + psp34::Internal,
+    T: Storage<psp34::extensions::metadata::Data>,
+    T: Storage<psp34::Data<psp34::extensions::enumerable::Balances>>,
+    T: Storage<openbrush::contracts::ownable::Data>,
+    T: Storage<ownable::Data>,
+    T: Storage<access_control::Data<M>>,
+    T: OccupiedStorage<{ access_control::STORAGE_KEY }, WithData = access_control::Data<M>>,
+    T: Storage<Manager> 
 {
     #[modifiers(only_role(ADMINER))]
     default fn deactive_phase(
