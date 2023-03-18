@@ -15,10 +15,18 @@ use openbrush::{
         Storage,
         AccountId,
         Balance,
-        Hash
+        Hash,
+        OccupiedStorage
     }
 };
-
+use ink::{
+    storage::traits::{
+        AutoStorableHint,
+        ManualKey,
+        Storable,
+        StorableHint,
+    },
+};
 use crate::traits::error::*;
 
 /// Throws if is_locked is false
@@ -52,7 +60,16 @@ where
 // ADMINER RoleType = 3739740293
 pub const ADMINER: RoleType = ink::selector_id!("ADMINER");
 
-impl<T: Storage<Manager>> ArtZeroStakingTrait for T {
+impl<T, M> ArtZeroStakingTrait for T
+where
+    M: access_control::members::MembersManager,
+    M: Storable
+        + StorableHint<ManualKey<{ access_control::STORAGE_KEY }>>
+        + AutoStorableHint<ManualKey<3218979580, ManualKey<{ access_control::STORAGE_KEY }>>, Type = M>,
+    T: Storage<Manager>,
+    T: Storage<access_control::Data<M>>,
+    T: OccupiedStorage<{ access_control::STORAGE_KEY }, WithData = access_control::Data<M>>
+{
     /// Get User NFT staked in the contract
     default fn get_total_staked_by_account(&self, account: AccountId) -> u64 {
         return self.data::<Manager>().staking_list.count(account) as u64;

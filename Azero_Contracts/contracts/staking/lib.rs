@@ -14,7 +14,11 @@ pub mod artzero_staking_nft {
     use openbrush::{
         contracts::{
             ownable::*,
-            access_control::*,
+            access_control::{
+                extensions::enumerable,
+                members,
+                only_role
+            },
             traits::psp34::{
                 extensions::{
                     burnable::*,
@@ -22,6 +26,7 @@ pub mod artzero_staking_nft {
                 *,
             },
         },
+        contracts::access_control::extensions::enumerable::*,
         traits::{
             Storage,
             DefaultEnv,
@@ -43,6 +48,7 @@ pub mod artzero_staking_nft {
     };
 
     impl AccessControl for ArtZeroStakingNFT {}
+    impl AccessControlEnumerable for ArtZeroStakingNFT {}
     impl Ownable for ArtZeroStakingNFT {}
     impl ArtZeroStakingTrait for ArtZeroStakingNFT {}
     impl AdminTrait for ArtZeroStakingNFT {}
@@ -54,7 +60,7 @@ pub mod artzero_staking_nft {
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
-        access: access_control::Data,
+        access_control: access_control::Data<enumerable::Members>,
         #[storage_field]
         manager: artzero_project::impls::staking::data::Manager,
         #[storage_field]
