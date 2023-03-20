@@ -39,6 +39,7 @@ pub mod artzero_collection_manager {
     use psp34_nft::psp34_nft::Psp34NftRef;
     use artzero_project::traits::psp34_standard::*;
     use ink::ToAccountId;
+    use ink::{codegen::EmitEvent, reflect::ContractEventBase};
     
     #[derive(Default, Storage)]
     #[ink(storage)]
@@ -63,6 +64,8 @@ pub mod artzero_collection_manager {
         is_active: bool,
         show_on_chain_metadata: bool,
     }
+
+    pub type Event = <ArtZeroCollectionManager as ContractEventBase>::Type;
 
     impl AccessControl for ArtZeroCollectionManager {}
     impl AccessControlEnumerable for ArtZeroCollectionManager {}
@@ -123,6 +126,10 @@ pub mod artzero_collection_manager {
             self._init_with_admin(self.env().caller());
             self.grant_role(ADMINER, admin_address).expect("Should grant the role");
             Ok(())
+        }
+
+        fn emit_event<EE: EmitEvent<Self>>(emitter: EE, event: Event) {
+            emitter.emit_event(event);
         }
 
         /// Simple New Collection Creation - Auto create NFT Contract - Collection_Owner is owner of NFT contract and receive royalty fee
@@ -196,13 +203,13 @@ pub mod artzero_collection_manager {
                 return Err(Error::Custom(String::from("Cannot set attributes")))
             };
             // Emit AddNewCollectionEvent event for tracking purposes
-            self.env().emit_event(AddNewCollectionEvent {
+            Self::emit_event(self.env(), Event::AddNewCollectionEvent(AddNewCollectionEvent {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(contract_account),
                 contract_type: CollectionType::Psp34Auto,
                 is_active: false,
                 show_on_chain_metadata: true,
-            });
+            }));
             Ok(())
         }
 
@@ -274,13 +281,13 @@ pub mod artzero_collection_manager {
                 return Err(Error::Custom(String::from("Cannot set attributes")))
             };
             // Emit AddNewCollectionEvent event for tracking purposes
-            self.env().emit_event(AddNewCollectionEvent {
+            Self::emit_event(self.env(), Event::AddNewCollectionEvent(AddNewCollectionEvent {
                 collection_owner: Some(collection_owner),
                 nft_contract_address: Some(nft_contract_address),
                 contract_type: CollectionType::Psp34Manual,
                 is_active: false,
                 show_on_chain_metadata: false,
-            });
+            }));
             Ok(())
         }
     }

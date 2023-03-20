@@ -22,11 +22,15 @@ pub mod psp34_nft {
     };
     use openbrush::{
         contracts::ownable::*,
-        contracts::psp34::extensions::{
-            enumerable::*,
-            metadata::*,
-            burnable::*,
+        contracts::psp34::{
+            extensions::{
+                enumerable::*,
+                metadata::*,
+                burnable::*,
+            },
+            Internal,
         },
+        
         traits::{
             Storage,
             DefaultEnv
@@ -56,6 +60,27 @@ pub mod psp34_nft {
         admin_data: artzero_project::impls::admin::data::Data,
     }
 
+    /// - Specify transfer event.
+    #[ink(event)]
+    pub struct Transfer {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        id: Id,
+    }
+
+    /// - Specify approval event.
+    #[ink(event)]
+    pub struct Approval {
+        #[ink(topic)]
+        from: Option<AccountId>,
+        #[ink(topic)]
+        to: Option<AccountId>,
+        id: Id,
+        approved: bool,
+    }
+
     pub type Event = <Psp34Nft as ContractEventBase>::Type;
 
     impl Ownable for Psp34Nft {}
@@ -64,6 +89,45 @@ pub mod psp34_nft {
     impl PSP34Enumerable for Psp34Nft {}
     impl Psp34Traits for Psp34Nft {}
     impl AdminTrait for Psp34Nft {}
+
+    impl Internal for Psp34Nft {
+
+        /// - Impliment Transfer emit event because Openbrush doesn't.
+        fn _emit_transfer_event(
+            &self,
+            _from: Option<AccountId>,
+            _to: Option<AccountId>,
+            _id: Id,
+        ) {
+            Psp34Nft::emit_event(
+                self.env(),
+                Event::Transfer(Transfer {
+                    from: _from,
+                    to: _to,
+                    id: _id,
+                }),
+            );
+        }
+
+        /// - Impliment Approval emit event because Openbrush doesn't.
+        fn _emit_approval_event(
+            &self,
+            _from: AccountId,
+            _to: AccountId,
+            _id: Option<Id>,
+            _approved: bool,
+        ) {
+            Psp34Nft::emit_event(
+                self.env(),
+                Event::Approval(Approval {
+                    from: Some(_from),
+                    to: Some(_to),
+                    id: _id.unwrap(),
+                    approved: _approved,
+                }),
+            );
+        }
+    }
 
     impl PSP34Burnable for Psp34Nft {
         #[ink(message)]
@@ -102,6 +166,10 @@ pub mod psp34_nft {
             instance._set_attribute(Id::U8(0), String::from("name").into_bytes(), name.into_bytes());
             instance._set_attribute(Id::U8(0), String::from("symbol").into_bytes(), symbol.into_bytes());
             instance
+        }
+
+        pub fn emit_event<EE: EmitEvent<Self>>(emitter: EE, event: Event) {
+            emitter.emit_event(event);
         }
 
         /// This function let NFT Contract Owner to mint a new NFT without providing NFT Traits/Attributes
