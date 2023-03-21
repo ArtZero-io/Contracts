@@ -112,4 +112,19 @@ pub trait ArtZeroMarketplaceTrait {
     /// Withdraw Profit - only Contract Owner.
     #[ink(message)]
     fn withdraw_profit(&mut self, value: Balance, reciever: AccountId) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn set_collection_contract_address(&mut self, collection_contract_address: AccountId) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn set_platform_fee(&mut self, platform_fee: u32) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn set_staking_contract_address(&mut self, staking_contract_address: AccountId) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn set_discount(&mut self, criteria: Vec<u8>, rates: Vec<u16>) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn receive_hold_amount(&mut self, receiver: AccountId) -> Result<(), Error>;
 }

@@ -163,4 +163,63 @@ impl<T: Storage<Manager> +
             return Err(Error::CheckedOperations)
         }
     }
+
+    /// Set new collection contract address - Only Owner
+    #[modifiers(only_owner)]
+    default fn set_collection_contract_address(&mut self, collection_contract_address: AccountId) -> Result<(), Error> {
+        self.data::<Manager>().collection_contract_address = collection_contract_address;
+        Ok(())
+    }
+
+    /// Set Platform fee - only owner
+    #[modifiers(only_owner)]
+    default fn set_platform_fee(&mut self, platform_fee: u32) -> Result<(), Error> {
+        if platform_fee >= 10000{ // must less than 100%
+            return Err(Error::InvalidFee)
+        }
+        self.data::<Manager>().platform_fee = platform_fee;
+        Ok(())
+    }
+
+    /// Set new staking contract address - Only Owner
+    #[modifiers(only_owner)]
+    default fn set_staking_contract_address(&mut self, staking_contract_address: AccountId) -> Result<(), Error> {
+        self.data::<Manager>().staking_contract_address = staking_contract_address;
+        Ok(())
+    }
+
+    /// Set criteria and discount rate - Only Owner 2 vectors same size
+    #[modifiers(only_owner)]
+    default fn set_discount(&mut self, criteria: Vec<u8>, rates: Vec<u16>) -> Result<(), Error> {
+        if criteria.len() != rates.len(){
+            return Err(Error::InvalidInput)
+        }
+        for &item in rates.iter() {
+            if item > 10000{
+                return Err(Error::InvalidInput)
+            }
+        }
+        self.data::<Manager>().staking_discount_criteria = criteria;
+        self.data::<Manager>().staking_discount_rate = rates;
+        Ok(())
+    }
+
+    /// Receive hold amount
+    default fn receive_hold_amount(&mut self, receiver: AccountId) -> Result<(), Error> {
+        if let Some(hold_amount) = self.data::<Manager>().hold_amount_bidders.get(&receiver) {
+            if hold_amount > 0 {
+                if hold_amount > T::env().balance() {
+                    return Err(Error::NotEnoughBalance);
+                }
+                if T::env().transfer(receiver, hold_amount).is_err() {
+                    return Err(Error::CannotTransfer)
+                }
+                self.data::<Manager>().hold_amount_bidders.remove(&receiver);
+                self.data::<Manager>().hold_bidders.remove_value(1, &receiver);
+            }
+            Ok(())
+        } else {
+            return Err(Error::HoldAmountBidderNotExist)
+        }
+    }
 }

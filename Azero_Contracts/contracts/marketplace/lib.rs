@@ -872,25 +872,6 @@ pub mod artzero_marketplace_psp34 {
             }
         }
 
-        /// Set new collection contract address - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_collection_contract_address(&mut self, collection_contract_address: AccountId) -> Result<(), Error> {
-            self.manager.collection_contract_address = collection_contract_address;
-            Ok(())
-        }
-
-        /// Set Platform fee - only owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_platform_fee(&mut self, platform_fee: u32) -> Result<(), Error> {
-            if platform_fee >= 10000{ // must less than 100%
-                return Err(Error::InvalidFee)
-            }
-            self.manager.platform_fee = platform_fee;
-            Ok(())
-        }
-
         // This function update the total count of NFT for sale by using NFT Collection address
         fn update_listed_token_by_collection_address(&mut self, nft_contract_address: &AccountId, mode: &bool) {
             let listed_token_count = self
@@ -919,52 +900,7 @@ pub mod artzero_marketplace_psp34 {
                 }
             }
         }
-
-        /// Set new staking contract address - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_staking_contract_address(&mut self, staking_contract_address: AccountId) -> Result<(), Error> {
-            self.manager.staking_contract_address = staking_contract_address;
-            Ok(())
-        }
-
-        /// Set criteria and discount rate - Only Owner 2 vectors same size
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_discount(&mut self, criteria: Vec<u8>, rates: Vec<u16>) -> Result<(), Error> {
-            if criteria.len() != rates.len(){
-                return Err(Error::InvalidInput)
-            }
-            for &item in rates.iter() {
-                if item > 10000{
-                    return Err(Error::InvalidInput)
-                }
-            }
-            self.manager.staking_discount_criteria = criteria;
-            self.manager.staking_discount_rate = rates;
-            Ok(())
-        }
-
-        /// Receive hold amount
-        #[ink(message)]
-        pub fn receive_hold_amount(&mut self, receiver: AccountId) -> Result<(), Error> {
-            if let Some(hold_amount) = self.manager.hold_amount_bidders.get(&receiver) {
-                if hold_amount > 0 {
-                    if hold_amount > self.env().balance() {
-                        return Err(Error::NotEnoughBalance);
-                    }
-                    if self.env().transfer(receiver, hold_amount).is_err() {
-                        return Err(Error::CannotTransfer)
-                    }
-                    self.manager.hold_amount_bidders.remove(&receiver);
-                    self.manager.hold_bidders.remove_value(1, &receiver);
-                }
-                Ok(())
-            } else {
-                return Err(Error::HoldAmountBidderNotExist)
-            }
-        }
-
+        
         // This function calculate the discount from the transaction fee based on number of PMP NFTs staked
         // By default the discounts are:
         // >= 1 NFT - 30% off
