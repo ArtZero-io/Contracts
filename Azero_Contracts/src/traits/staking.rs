@@ -8,6 +8,7 @@ use openbrush::{
         Hash
     }
 };
+use crate::traits::error::Error;
 
 #[openbrush::wrapper]
 pub type ArtZeroStakingRef = dyn ArtZeroStakingTrait;
@@ -65,4 +66,22 @@ pub trait ArtZeroStakingTrait {
 
     #[ink(message)]
     fn get_limit_unstake_time(&self) -> u64;
+
+    #[ink(message)]
+    fn set_artzero_nft_contract(&mut self, artzero_nft_contract: AccountId) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn set_limit_unstake_time(&mut self, limit_unstake_time: u64) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn update_is_locked(&mut self, is_locked: bool) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn start_reward_distribution(&mut self) -> Result<(), Error>;
+
+    #[ink(message)]
+    fn stop_reward_distribution(&mut self) -> Result<(), Error>;
 }

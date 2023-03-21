@@ -1,4 +1,3 @@
-
 pub use crate::{
     impls::staking::{
         data,
@@ -9,8 +8,10 @@ pub use crate::{
     traits::staking::*,
 };
 use openbrush::{
+    modifiers,
     modifier_definition,
     contracts::access_control::*,
+    contracts::ownable::*,
     traits::{
         Storage,
         AccountId,
@@ -68,7 +69,8 @@ where
         + AutoStorableHint<ManualKey<3218979580, ManualKey<{ access_control::STORAGE_KEY }>>, Type = M>,
     T: Storage<Manager>,
     T: Storage<access_control::Data<M>>,
-    T: OccupiedStorage<{ access_control::STORAGE_KEY }, WithData = access_control::Data<M>>
+    T: OccupiedStorage<{ access_control::STORAGE_KEY }, WithData = access_control::Data<M>>,
+    T: Storage<ownable::Data>
 {
     /// Get User NFT staked in the contract
     default fn get_total_staked_by_account(&self, account: AccountId) -> u64 {
@@ -138,5 +140,49 @@ where
     
     default fn get_limit_unstake_time(&self) -> u64 {
         self.data::<Manager>().limit_unstake_time
+    }
+
+    #[modifiers(only_owner)]
+    default fn set_artzero_nft_contract(&mut self, artzero_nft_contract: AccountId) -> Result<(), Error> {
+        self.data::<Manager>().nft_contract_address = artzero_nft_contract;
+        Ok(())
+    }
+
+    #[modifiers(only_owner)]
+    default fn set_limit_unstake_time(&mut self, limit_unstake_time: u64) -> Result<(), Error> {
+        self.data::<Manager>().limit_unstake_time = limit_unstake_time;
+        Ok(())
+    }
+
+    #[modifiers(only_owner)]
+    default fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
+        self.data::<Manager>().admin_address = admin_address;
+        Ok(())
+    }
+
+    #[modifiers(only_role(ADMINER))]
+    default fn update_is_locked(&mut self, is_locked: bool) -> Result<(), Error> {
+        if is_locked == self.data::<Manager>().is_locked {
+            return Err(Error::InvalidInput)
+        }
+        self.data::<Manager>().is_locked = is_locked;
+        Ok(())
+    }
+
+    #[modifiers(only_role(ADMINER))]
+    #[modifiers(only_locked)]
+    default fn start_reward_distribution(&mut self) -> Result<(), Error> {
+        self.data::<Manager>().claimable_reward = self.data::<Manager>().reward_pool;
+        self.data::<Manager>().reward_started = true;
+        Ok(())
+    }
+
+    #[modifiers(only_role(ADMINER))]
+    #[modifiers(only_locked)]
+    default fn stop_reward_distribution(&mut self) -> Result<(), Error> {
+        self.data::<Manager>().reward_pool = self.data::<Manager>().claimable_reward; // unclaimed Rewards send back to reward_pool
+        self.data::<Manager>().claimable_reward = 0;
+        self.data::<Manager>().reward_started = false;
+        Ok(())
     }
 }

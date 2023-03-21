@@ -149,59 +149,6 @@ pub mod artzero_staking_nft {
             Ok(())
         }
 
-        /// Set new NFT contract address - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_artzero_nft_contract(&mut self, artzero_nft_contract: AccountId) -> Result<(), Error> {
-            self.manager.nft_contract_address = artzero_nft_contract;
-            Ok(())
-        }
-
-        /// Set new Limit Unstake Time (Minutes) - Only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn set_limit_unstake_time(&mut self, limit_unstake_time: u64) -> Result<(), Error> {
-            self.manager.limit_unstake_time = limit_unstake_time;
-            Ok(())
-        }
-
-        /// Update Admin Address - only Owner
-        #[ink(message)]
-        #[modifiers(only_owner)]
-        pub fn update_admin_address(&mut self, admin_address: AccountId) -> Result<(), Error> {
-            self.manager.admin_address = admin_address;
-            Ok(())
-        }
-
-        /// Update is locked - Only Admin Role can change
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        pub fn update_is_locked(&mut self, is_locked: bool) -> Result<(), Error> {
-            if is_locked == self.manager.is_locked {
-                return Err(Error::InvalidInput)
-            }
-            self.manager.is_locked = is_locked;
-            Ok(())
-        }
-
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        #[modifiers(only_locked)]
-        pub fn start_reward_distribution(&mut self) -> Result<(), Error> {
-            self.manager.claimable_reward = self.manager.reward_pool;
-            self.manager.reward_started = true;
-            Ok(())
-        }
-
-        #[ink(message)]
-        #[modifiers(only_role(ADMINER))]
-        #[modifiers(only_locked)]
-        pub fn stop_reward_distribution(&mut self) -> Result<(), Error> {
-            self.manager.reward_pool = self.manager.claimable_reward; // unclaimed Rewards send back to reward_pool
-            self.manager.claimable_reward = 0;
-            self.manager.reward_started = false;
-            Ok(())
-        }
         /// Add reward to reward_pool
         #[ink(message)]
         #[ink(payable)]
