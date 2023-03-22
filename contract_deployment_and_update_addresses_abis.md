@@ -700,9 +700,9 @@ Assume that we already have BE code, kindly follow below steps:
 
 In this step, we try to mint some NFTs from PMP launchpad project and check PMP collection to see if it is displayed smoothly after caching.
 
-- Open FE and use delopyment account
+- Open FE and use deployment account
 - Do steps to mint some PMP NFTs
-  - Go to LAUNCHPAD
+  - Go to MY ACCOUNT / MY PROJECTS 
   - Select PRAYING MANTIS PREDATORS project
   - Go to a phase which has public mint, type the number of NFTs you want to mint and click PUBLIC MINT. I.e. In my case, in phase 1, i public mint 3 NFTs
 - Go to collection to check nft list  
