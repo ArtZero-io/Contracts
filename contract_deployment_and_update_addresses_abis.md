@@ -701,18 +701,8 @@ Assume that we already have BE code, kindly follow below steps:
 In this step, we try to mint some NFTs from PMP launchpad project and check PMP collection to see if it is displayed smoothly after caching.
 
 - Open FE and use deployment account
-- Do steps to mint some PMP NFTs
-   - Go to MY ACCOUNT / MY PROJECTS 
-   - Select PRAYING MANTIS PREDATORS project
-   - Go to a phase which has public mint, type the number of NFTs you want to mint and click PUBLIC MINT. I.e. In my case, in phase 1, i public mint 3 NFTs
-- Go to collection to check nft list  
-   - Go to MY ACCOUNT / MY COLLECTIONS
-   - Select PRAYING MANTIS PREDATORS collection
-   - Select tab ALL and check if NFTs can display their images. If they can this means images are cached succesfully
-   - Click to one of NFT and check if it can show its attributes. If can, the metada for this NFT is cached
-- Note: Follow below steps to show the PMP project in the launchpad
-   - Open FE and use deployment account
-   - Access to the admin page with the template:
+- Enable the PRAYING MANTIS PREDATORS project
+   - Access to the admin page with the template
       ```
       hostname:port/#/admin
       ```
@@ -721,6 +711,14 @@ In this step, we try to mint some NFTs from PMP launchpad project and check PMP 
       http://localhost:8001/#/admin
       ```
    - Select PROJECT MANAGEMENT tab
-   - Find the PMP project in the table and enable it by clicking the Enable button at the Action column 
-   - Wait to see the Status column changing from Inactive to Active and Action column changing from ENABLE to DISABLE
-   - Click to LAUNCHPAD part in the header, we can see the PMP showing up in the launchpad 
+   - Find the PRAYING MANTIS PREDATORS project in the table and enable it by clicking the Enable button at the Action column 
+   - Wait to see the Status column changing from Inactive to Active and Action column changing from ENABLE to DISABLE, which means that the PMP project is enable.
+- Do steps to mint some PMP NFTs
+   - Click to LAUNCHPAD part at the header, we can see the PMP showing up in the launchpad 
+   - In the launchpad, select PRAYING MANTIS PREDATORS project
+   - Go to a phase which has public mint, type the number of NFTs you want to mint and click PUBLIC MINT. I.e. In my case, in phase 1, i public mint 3 NFTs
+- Go to collection to check nft list  
+   - Go to MY ACCOUNT / MY COLLECTIONS
+   - Select PRAYING MANTIS PREDATORS collection
+   - Select tab ALL and check if NFTs can display their images. If they can this means images are cached succesfully
+   - Click to one of NFT and check if it can show its attributes. If can, the metada for this NFT is cached
