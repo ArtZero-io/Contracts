@@ -1,23 +1,16 @@
 use openbrush::{
     contracts::psp34::extensions::{
-        enumerable::*,
-        metadata::*
+        enumerable::*
     },
     traits::{
-        Storage,
         AccountId,
-        Balance,
-        Hash
+        Balance
     },
 };
 use crate::traits::error::Error;
 use crate::impls::marketplace::BidInformation;
 use crate::impls::marketplace::ForSaleItem;
 use ink::prelude::{
-    string::{
-        String,
-        ToString,
-    },
     vec::Vec,
 };
 

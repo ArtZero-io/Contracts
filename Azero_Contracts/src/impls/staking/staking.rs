@@ -16,7 +16,6 @@ use openbrush::{
         Storage,
         AccountId,
         Balance,
-        Hash,
         OccupiedStorage
     }
 };

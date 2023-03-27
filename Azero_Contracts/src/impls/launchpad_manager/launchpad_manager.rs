@@ -23,11 +23,7 @@ use openbrush::{
     }
 };
 use ink::prelude::{
-    string::{
-        String,
-    },
-    vec,
-    vec::Vec,
+    vec::Vec
 };
 use ink::{
     storage::traits::{

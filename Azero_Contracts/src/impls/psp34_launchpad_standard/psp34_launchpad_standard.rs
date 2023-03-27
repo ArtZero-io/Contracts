@@ -10,18 +10,14 @@ pub use crate::{
 };
 use openbrush::{
     modifiers,
-    modifier_definition,
     contracts::ownable::*,
     contracts::access_control::*,
     contracts::psp34::extensions::{
         enumerable::*,
-        metadata::*,
     },
     traits::{
         AccountId,
         Storage,
-        DefaultEnv,
-        ZERO_ADDRESS,
         Timestamp,
         Balance,
         OccupiedStorage
@@ -29,8 +25,7 @@ use openbrush::{
 };
 use ink::prelude::{
     string::{
-        String,
-        ToString,
+        String
     },
     vec::Vec,
 };
@@ -367,26 +362,3 @@ where
         self.data::<Manager>().available_token_amount
     }
 }
-
-fn validate_phase_schedule<T: Storage<Manager>>(
-    instance: &mut T,
-    start_time: &Timestamp, 
-    end_time: &Timestamp
-) -> bool {
-
-    if *start_time >= *end_time {
-        return false;
-    }
-
-    for index in 0..instance.data::<Manager>().last_phase_id {
-        if let Some(phase) = instance.data::<Manager>().phases.get(&(index+1)) {
-            if phase.is_active && (
-                (phase.start_time..=phase.end_time).contains(start_time) || (phase.start_time..=phase.end_time).contains(end_time)
-            ) {
-                return false;
-            }
-        }             
-    }
-    true
-}
-

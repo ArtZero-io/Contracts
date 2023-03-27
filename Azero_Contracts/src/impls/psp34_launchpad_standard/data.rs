@@ -1,17 +1,9 @@
 use ink::prelude::{
-    vec::Vec,
-    string::String,
-};
-use openbrush::{
-    contracts::psp34::extensions::{
-        enumerable::*,
-    },
+    vec::Vec
 };
 use openbrush::{
     traits::{
         AccountId,
-        Storage,
-        DefaultEnv,
         ZERO_ADDRESS,
         Balance,
         Timestamp

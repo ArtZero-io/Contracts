@@ -12,10 +12,6 @@ use openbrush::{
     },
 };
 use ink::prelude::{
-    string::{
-        String,
-        ToString,
-    },
     vec::Vec,
 };
 use openbrush::{

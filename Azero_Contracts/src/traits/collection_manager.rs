@@ -11,7 +11,6 @@ use ink::prelude::{
     string::{
         String,
     },
-    vec,
     vec::Vec,
 };
 

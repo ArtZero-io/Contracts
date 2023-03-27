@@ -8,12 +8,7 @@ use openbrush::{
     }
 };
 use crate::traits::error::Error;
-use crate::impls::collection_manager::Collection;
 use ink::prelude::{
-    string::{
-        String,
-    },
-    vec,
     vec::Vec,
 };
 use crate::impls::launchpad_manager::Project;

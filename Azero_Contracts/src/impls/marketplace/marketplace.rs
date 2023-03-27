@@ -9,26 +9,19 @@ pub use crate::{
     traits::marketplace::*,
 };
 use openbrush::{
-    modifier_definition,
     modifiers,
     contracts::access_control::*,
     contracts::ownable::*,
     contracts::psp34::extensions::{
-        enumerable::*,
-        metadata::*,
+        enumerable::*
     },
     traits::{
         Storage,
         AccountId,
-        Balance,
-        Hash
+        Balance
     }
 };
 use ink::prelude::{
-    string::{
-        String,
-        ToString,
-    },
     vec::Vec,
 };
 use crate::traits::error::*;
