@@ -43,8 +43,9 @@ describe('Collection manager test', () => {
         advanceModeAddingFee = "5000000000000";
         maxRoyaltyFeeRate = 500;
        
-        // "refTime: 1556009780"
-        let gasLimit = setGasLimit(api, 3_200_000_000, 0);
+        // "refTime: 1179573339"
+        // "proofSize: 23552"
+        let gasLimit = setGasLimit(api, 3_200_000_000, 48_000);
         
         const contractFactory = new ConstructorsCollectionManager(api, defaultSigner);
         
@@ -99,7 +100,7 @@ describe('Collection manager test', () => {
         // Bob creates collection in advance mode
 
         // Step 1: Bob creates a nft
-        let gasLimit = setGasLimit(api, 1_600_000_000, 0);
+        let gasLimit = setGasLimit(api, 1_600_000_000, 40_000);
         
         let contractFactory = new ConstructorsPsp34Nft(api, bob);
         let nftName = "Advanced mode collection";

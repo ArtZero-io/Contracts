@@ -82,7 +82,8 @@ describe('Marketplace test', () => {
          * Step 1: Alice creates a Psp34 PMP NFT contract
          */
         // "refTime: 769080524"
-        let nftPmpContractGasLimit = setGasLimit(api, 1_600_000_000, 0);
+        // "proofSize: 19456"
+        let nftPmpContractGasLimit = setGasLimit(api, 1_600_000_000, 40_000);
         const nftPmpContractFactory = new ConstructorsPsp34Nft(api, alice);
         
         let nftPmpContractOwner = alice.address;
@@ -124,7 +125,9 @@ describe('Marketplace test', () => {
         /** 
          * Step 3: Create staking contract
          */ 
-        let stakingContractGasLimit = setGasLimit(api, 3_200_000_000, 0); 
+        // "refTime: 1607624171"
+        // "proofSize: 23552"
+        let stakingContractGasLimit = setGasLimit(api, 3_200_000_000, 48_000); 
         const stakingContractFactory = new ConstructorsStakingNft(api, defaultSigner);
         
         let stakingAdminAddress = defaultSigner.address;
@@ -154,8 +157,9 @@ describe('Marketplace test', () => {
         cmAdvanceModeAddingFee = "5000000000000";
         cmMaxRoyaltyFeeRate = 500;
 
-        // "refTime: 1556009780"
-        let cmContractGasLimit = setGasLimit(api, 3_200_000_000, 0);
+        // "refTime: 1179573339"
+        // "proofSize: 23552"
+        let cmContractGasLimit = setGasLimit(api, 3_200_000_000, 48_000);
         
         const cmContractFactory = new ConstructorsCollectionManager(api, defaultSigner);
         cmContractAddress = (
@@ -215,7 +219,9 @@ describe('Marketplace test', () => {
 
         // Bob creates collection in advance mode
         // Bob creates a nft
-        let bobNftgasLimit = setGasLimit(api, 1_600_000_000, 0);
+        // "refTime: 769080524"
+        // "proofSize: 19456"
+        let bobNftgasLimit = setGasLimit(api, 1_600_000_000, 40_000);
         
         let bobNftContractFactory = new ConstructorsPsp34Nft(api, bob);
         let bobNftName = "Advanced mode collection";
@@ -265,8 +271,9 @@ describe('Marketplace test', () => {
         /**
          * Step 6: Create marketplace contract
          */
-        // "refTime: 961948207"
-        let gasLimit = setGasLimit(api, 2_000_000_000, 0); 
+        // "refTime: 635007006"
+        // "proofSize: 17408"
+        let gasLimit = setGasLimit(api, 1_400_000_000, 36_000); 
         const contractFactory = new ConstructorsMarketplace(api, defaultSigner);
       
         platformFee = 500;

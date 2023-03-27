@@ -43,7 +43,8 @@ describe('Staking test', () => {
 
         // Step 1: Alice creates a Psp34 NFT contract
         // "refTime: 769080524"
-        let nftContractGasLimit = setGasLimit(api, 1_600_000_000, 0);
+        // "proofSize: 19456"
+        let nftContractGasLimit = setGasLimit(api, 1_600_000_000, 40_000);
         const nftContractFactory = new ConstructorsPsp34Nft(api, alice);
         
         let nftContractOwner = alice.address;
@@ -92,7 +93,8 @@ describe('Staking test', () => {
 
         // Step 3: Create staking contract 
         // "refTime: 1607624171"
-        let gasLimit = setGasLimit(api, 3_200_000_000, 0);
+        // "proofSize: 23552"
+        let gasLimit = setGasLimit(api, 3_200_000_000, 48_000);
         
         const contractFactory = new ConstructorsStakingNft(api, defaultSigner);
         

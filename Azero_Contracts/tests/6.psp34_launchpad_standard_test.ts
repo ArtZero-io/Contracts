@@ -60,7 +60,8 @@ describe('Psp34 launchpad standard test', () => {
         let lmPublicMaxMintingAmount = 2; 
 
         // "refTime: 1546286098"
-        let lmGasLimit = setGasLimit(api, 3_200_000_000, 0);
+        // "proofSize: 23552"
+        let lmGasLimit = setGasLimit(api, 3_200_000_000, 48_000);
         
         const lmContractFactory = new ConstructorsLaunchpadPsp34(api, defaultSigner);
         
@@ -99,7 +100,8 @@ describe('Psp34 launchpad standard test', () => {
         endTimePhases = [startTime + 2 * period - 500, startTime + 3 * period, startTime + 6 * period];
         
         // "refTime: 1797943620"
-        let gasLimit = setGasLimit(api, 3_600_000_000, 0);
+        // "proofSize: 26624"
+        let gasLimit = setGasLimit(api, 3_600_000_000, 54_000);
         
         const contractFactory = new ConstructorsLaunchpadPsp34NftStandard(api, defaultSigner);
         

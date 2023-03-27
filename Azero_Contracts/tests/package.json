@@ -5,6 +5,7 @@
   "dependencies": {
     "@727-ventures/typechain-polkadot": "^0.6.8",
     "@727-ventures/typechain-types": "^0.0.22",
+    "@babel/core": "^7.21.3",
     "@babel/register": "^7.18.9",
     "@polkadot/api": "^9.13.4",
     "@types/chai": "^4.3.4",

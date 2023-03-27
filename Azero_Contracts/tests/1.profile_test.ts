@@ -28,8 +28,9 @@ describe('Profile test', () => {
 
         await checkAccountsBalance(signers, api);
 
-        // "refTime: 374963835"
-        let gasLimit = setGasLimit(api, 800_000_000, 0);
+        // "refTime: 343936954"
+        // "proofSize: 17408"
+        let gasLimit = setGasLimit(api, 800_000_000, 36_000);
         
         const contractFactory = new ConstructorsProfileManager(api, defaultSigner);
         
@@ -51,7 +52,7 @@ describe('Profile test', () => {
         await setup();
     });
     
-    it('Can get set attributes', async () => {   
+     it('Can get set attributes', async () => {   
         // console.log("step 0");
 
         attrs = ["userName", "twitter", "facebook", "telegram"];
@@ -72,7 +73,7 @@ describe('Profile test', () => {
         // console.log("step 2 rValues =", rValues);
         
         expect(values.toString()).to.equal(rValues.toString());
-    });
+     });
 
     after(async () => {
         // console.log("End");      

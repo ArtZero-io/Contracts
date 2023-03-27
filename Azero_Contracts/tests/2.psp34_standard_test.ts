@@ -35,7 +35,8 @@ describe('Psp34 standard test', () => {
         await checkAccountsBalance(signers, api);
 
         // "refTime: 769080524"
-        let gasLimit = setGasLimit(api, 1_600_000_000, 0);
+        // "proofSize: 19456"
+        let gasLimit = setGasLimit(api, 1_600_000_000, 40_000);
         
         const contractFactory = new ConstructorsPsp34Nft(api, defaultSigner);
         

@@ -54,8 +54,9 @@ describe('Launchpad manager test', () => {
         projectMintFeeRate = 200;  // 2%
         publicMaxMintingAmount = 2; 
 
-        // "refTime: 1546286098"
-        let gasLimit = setGasLimit(api, 3_200_000_000, 0);
+        // "refTime: 1174764604"
+        // "proofSize: 23552"
+        let gasLimit = setGasLimit(api, 3_200_000_000, 48_000);
         
         const contractFactory = new ConstructorsLaunchpadPsp34(api, defaultSigner);
         
