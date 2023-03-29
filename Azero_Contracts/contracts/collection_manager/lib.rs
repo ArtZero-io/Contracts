@@ -16,8 +16,7 @@ pub mod artzero_collection_manager {
     use openbrush::{
         contracts::{
             access_control::{
-                extensions::enumerable,
-                members,
+                extensions::enumerable
             },
         },
         contracts::access_control::extensions::enumerable::*,

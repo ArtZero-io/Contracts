@@ -17,8 +17,7 @@ pub mod artzero_launchpad_psp34 {
     use openbrush::{
         contracts::{
             access_control::{
-                extensions::enumerable,
-                members,
+                extensions::enumerable
             },
         },
         contracts::access_control::extensions::enumerable::*,
