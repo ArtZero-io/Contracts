@@ -779,8 +779,6 @@ pub mod artzero_marketplace_psp34 {
                                                     } else {
                                                         return Err(Error::InvalidCollectionOwner)
                                                     }
-                                                } else {
-                                                    return Err(Error::NotEnoughBalance)
                                                 }
                                                 if let Some(price_mul_royalty_fee) = price.checked_sub(royalty_fee) {
                                                     if let Some(seller_fee) = price_mul_royalty_fee.checked_sub(platform_fee_after_discount) {
