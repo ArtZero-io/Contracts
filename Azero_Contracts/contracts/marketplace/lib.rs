@@ -16,6 +16,7 @@ pub mod artzero_marketplace_psp34 {
     };
     use openbrush::{
         contracts::{
+            psp34::*,
             ownable::*,
             traits::psp34::{
                 *,
@@ -73,6 +74,19 @@ pub mod artzero_marketplace_psp34 {
     impl AdminTrait for ArtZeroMarketplacePSP34 {}
     impl UpgradableTrait for ArtZeroMarketplacePSP34 {}
     impl ArtZeroMarketplaceTrait for ArtZeroMarketplacePSP34 {}
+    
+    impl PSP34Receiver for ArtZeroMarketplacePSP34{
+        #[ink(message)]
+        fn before_received(
+            &mut self,
+            operator: AccountId,
+            from: AccountId,
+            id: Id,
+            data: Vec<u8>,
+        ) -> Result<(), PSP34ReceiverError> {
+            Ok(())
+        }
+    }
     
     #[ink(event)]
     pub struct NewListEvent {
