@@ -1,0 +1,37 @@
+[package]
+name = "standard_contracts"
+version = "1.0.0"
+authors = ["ArtZero <admin@artzero.io>"]
+edition = "2021"
+
+[dependencies]
+ink = { version = "4.1.0", default-features = false}
+scale = { package = "parity-scale-codec", version = "3", default-features = false, features = ["derive"] }
+scale-info = { version = "2.3", default-features = false, features = ["derive"], optional = true }
+
+# These dependencies
+openbrush = { branch="feature/stable-rust", git = "https://github.com/727-Ventures/openbrush-contracts", default-features = false, features = ["psp34", "upgradeable", "ownable", "access_control"] }
+
+[lib]
+name = "standard_contracts"
+path = "src/lib.rs"
+crate-type = [
+    "rlib",
+]
+
+[features]
+default = ["std"]
+std = [
+    "ink/std",
+    "scale/std",
+    "scale-info/std",
+    "openbrush/std"
+]
+ink-as-dependency = []
+
+[profile.dev]
+codegen-units = 16
+overflow-checks = false
+
+[profile.release]
+overflow-checks = false

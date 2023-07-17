@@ -50,13 +50,13 @@ where
     Storage<openbrush::contracts::ownable::Data>
 {
     /// Get Token Count
-    default fn get_last_token_id(&self) -> u64 {
+    fn get_last_token_id(&self) -> u64 {
         return self.data::<Manager>().last_token_id
     }
 
     /// Lock nft - Only owner token
     #[modifiers(only_token_owner(self.owner_of(token_id.clone()).unwrap()))]
-    default fn lock(&mut self, token_id: Id) -> Result<(), Error> {
+    fn lock(&mut self, token_id: Id) -> Result<(), Error> {
         if let Some(locked_token_count) = self.data::<Manager>().locked_token_count.checked_add(1) {
             self.data::<Manager>().locked_token_count = locked_token_count;
             self.data::<Manager>().locked_tokens.insert(&token_id, &true);
@@ -67,7 +67,7 @@ where
     }
 
     /// Check token is locked or not
-    default fn is_locked_nft(&self, token_id: Id) -> bool {
+    fn is_locked_nft(&self, token_id: Id) -> bool {
         if self.data::<Manager>().locked_tokens.get(&token_id).is_some() {
             return true;
         }
@@ -75,20 +75,20 @@ where
     }
 
     /// Get Locked Token Count
-    default fn get_locked_token_count(&self) -> u64 {
+    fn get_locked_token_count(&self) -> u64 {
         self.data::<Manager>().locked_token_count
     }
 
     /// Change baseURI
     #[modifiers(only_owner)]
-    default fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
+    fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
         self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
         Ok(())
     }
 
     /// Only Owner can set multiple attributes to a token
     #[modifiers(only_owner)]
-    default fn set_multiple_attributes(
+    fn set_multiple_attributes(
         &mut self,
         token_id: Id,
         metadata: Vec<(String, String)>
@@ -107,7 +107,7 @@ where
     }
 
     /// Get multiple  attributes
-    default fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
+    fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
         let length = attributes.len();
         let mut ret = Vec::<String>::new();
         for i in 0..length {
@@ -128,11 +128,11 @@ where
     }
 
     /// Get Attribute Count
-    default fn get_attribute_count(&self) -> u32 {
+    fn get_attribute_count(&self) -> u32 {
         self.data::<Manager>().attribute_count
     }
     /// Get Attribute Name
-    default fn get_attribute_name(&self, index: u32) -> String {
+    fn get_attribute_name(&self, index: u32) -> String {
         let attribute = self.data::<Manager>().attribute_names.get(&index);
 
         if let Some(value_in_bytes) = attribute {
@@ -147,7 +147,7 @@ where
     }
 
     /// Get URI from token ID
-    default fn token_uri(&self, token_id: u64) -> String {
+    fn token_uri(&self, token_id: u64) -> String {
         let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
         let mut token_uri = String::from("");
 
@@ -162,7 +162,7 @@ where
     }
 
     /// Get owner address
-    default fn get_owner(&self) -> AccountId {
+    fn get_owner(&self) -> AccountId {
         self.owner()
     }
 }
