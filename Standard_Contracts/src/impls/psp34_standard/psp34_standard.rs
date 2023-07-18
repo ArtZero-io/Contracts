@@ -42,12 +42,12 @@ where
     body(instance)
 }
 
-impl<T: Storage<Manager>> Psp34Traits for T
-where
-    T: PSP34 + psp34::Internal +
-    Storage<psp34::extensions::metadata::Data> +
-    Storage<psp34::Data<psp34::extensions::enumerable::Balances>> +
-    Storage<openbrush::contracts::ownable::Data>
+pub trait Psp34Traits: 
+    Storage<Manager> + 
+    PSP34 + psp34::Internal +
+    psp34::extensions::metadata::Internal +
+    psp34::extensions::metadata::PSP34MetadataImpl +
+    openbrush::contracts::ownable::OwnableImpl
 {
     /// Get Token Count
     fn get_last_token_id(&self) -> u64 {
@@ -82,7 +82,7 @@ where
     /// Change baseURI
     #[modifiers(only_owner)]
     fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
-        self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+        self._set_attribute(Id::U8(0), String::from("baseURI"), uri);
         Ok(())
     }
 
@@ -101,7 +101,7 @@ where
         }
         for (attribute, value) in &metadata {
             add_attribute_name(self, &attribute.clone().into_bytes());
-            self._set_attribute(token_id.clone(), attribute.clone().into_bytes(), value.clone().into_bytes());
+            self._set_attribute(token_id.clone(), attribute.clone(), value.clone());
         }
         Ok(())
     }
@@ -112,10 +112,10 @@ where
         let mut ret = Vec::<String>::new();
         for i in 0..length {
             let attribute = attributes[i].clone();
-            let value = self.get_attribute(token_id.clone(), attribute.into_bytes());
+            let value = self.get_attribute(token_id.clone(), attribute);
             
             if let Some(value_in_bytes) = value {
-                if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+                if let Ok(value_in_string) = String::from_utf8(value_in_bytes.into()) {
                     ret.push(value_in_string);
                 } else {
                     ret.push(String::from(""));    
@@ -148,11 +148,11 @@ where
 
     /// Get URI from token ID
     fn token_uri(&self, token_id: u64) -> String {
-        let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
+        let value = self.get_attribute(Id::U8(0), String::from("baseURI"));
         let mut token_uri = String::from("");
 
         if let Some(value_in_bytes) = value {
-            if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+            if let Ok(value_in_string) = String::from_utf8(value_in_bytes.into()) {
                 token_uri = value_in_string;
             }                 
         }
@@ -162,7 +162,7 @@ where
     }
 
     /// Get owner address
-    fn get_owner(&self) -> AccountId {
+    fn get_owner(&self) -> Option<AccountId> {
         self.owner()
     }
 }
