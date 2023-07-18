@@ -37,7 +37,7 @@ pub mod psp34_nft {
         },
         modifiers,
     };
-    use artzero_project::{
+    use standard_contracts::{
         traits::{
             psp34_standard::*,
             admin::*,
@@ -55,33 +55,10 @@ pub mod psp34_nft {
         #[storage_field]
         ownable: ownable::Data,
         #[storage_field]
-        manager: artzero_project::impls::psp34_standard::data::Manager,
+        manager: standard_contracts::impls::psp34_standard::data::Manager,
         #[storage_field]
-        admin_data: artzero_project::impls::admin::data::Data,
+        admin_data: standard_contracts::impls::admin::data::Data,
     }
-
-    /// - Specify transfer event.
-    #[ink(event)]
-    pub struct Transfer {
-        #[ink(topic)]
-        from: Option<AccountId>,
-        #[ink(topic)]
-        to: Option<AccountId>,
-        id: Id,
-    }
-
-    /// - Specify approval event.
-    #[ink(event)]
-    pub struct Approval {
-        #[ink(topic)]
-        from: Option<AccountId>,
-        #[ink(topic)]
-        to: Option<AccountId>,
-        id: Id,
-        approved: bool,
-    }
-
-    pub type Event = <Psp34Nft as ContractEventBase>::Type;
 
     impl PSP34Burnable for Psp34Nft {
         #[ink(message)]
