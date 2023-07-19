@@ -5,6 +5,9 @@ use ink::prelude::{
     },
 };
 use openbrush::{
+    contracts::traits::{
+        ownable::*,
+    },
     contracts::psp34::extensions::{
         enumerable::*,
         metadata::*
@@ -16,10 +19,10 @@ use openbrush::{
 use crate::traits::error::Error;
 
 #[openbrush::wrapper]
-pub type Psp34Ref = dyn Psp34Traits + PSP34 + PSP34Metadata;
+pub type Psp34Ref = dyn PSP34 + PSP34Metadata + Ownable;
 
 #[openbrush::trait_definition]
-pub trait Psp34Traits {
+pub trait Psp34Traits: PSP34 + PSP34Metadata + Ownable {
     /// This function sets the baseURI for the NFT contract. Only Contract Owner can perform this function. baseURI is the location of the metadata files if the NFT collection use external source to keep their NFT artwork. ArtZero uses IPFS by default, the baseURI can have format like this: ipfs://<hash_ID>/
     #[ink(message)]
     fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;
@@ -44,7 +47,7 @@ pub trait Psp34Traits {
     fn token_uri(&self, token_id: u64) -> String;
     /// This function return the owner of the NFT Contract
     #[ink(message)]
-    fn get_owner(&self) -> Option<AccountId> ;
+    fn get_owner(&self) -> AccountId ;
     /// This function return the latest token ID, everytime new NFT is mint, last_token_id is increased by 1 in mint function. Note: This is not the same as the total supply return by the psp34 function as NFT can be burnt.
     #[ink(message)]
     fn get_last_token_id(&self) -> u64;
