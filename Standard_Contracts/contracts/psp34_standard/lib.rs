@@ -4,7 +4,7 @@ pub use self::psp34_nft::{
     Psp34NftRef,
 };
 
-#[openbrush::implementation(PSP34, Ownable, PSP34Metadata)]
+#[openbrush::implementation(PSP34, Ownable, PSP34Metadata, PSP34Enumerable)]
 #[openbrush::contract]
 pub mod psp34_nft {
     use standard_contracts::traits::psp34_standard::*;
@@ -40,6 +40,8 @@ pub mod psp34_nft {
         metadata: metadata::Data,
         #[storage_field]
         manager: standard_contracts::impls::psp34_standard::data::Manager,
+        #[storage_field]
+        enumerable: enumerable::Data,
     }
 
     impl PSP34Burnable for Psp34Nft {
