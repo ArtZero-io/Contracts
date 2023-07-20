@@ -16,7 +16,7 @@ pub mod psp34_nft {
             String,
         },
     };
-    use ink::codegen::Env;
+    use openbrush::traits::DefaultEnv;
     use openbrush::{
         contracts::psp34::{
             extensions::{
@@ -46,14 +46,11 @@ pub mod psp34_nft {
         #[ink(message)]
         fn burn(&mut self, account: AccountId, id: Id) -> Result<(), PSP34Error> {
             let caller = Self::env().caller();
-
             if let Some(token_owner) = psp34::PSP34Impl::owner_of(self, id.clone()) {
                 if token_owner != account {
                     return Err(PSP34Error::Custom(String::from("not token owner")));
                 }
-
                 let allowance = psp34::PSP34Impl::allowance(self, account, caller, Some(id.clone()));
-
                 if caller == account || allowance {
                     self.manager.locked_tokens.remove(&id);
                     if let Some(locked_token_count) = self.manager.locked_token_count.checked_sub(1) {
