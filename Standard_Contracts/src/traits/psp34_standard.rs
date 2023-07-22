@@ -23,6 +23,8 @@ pub type Psp34Ref = dyn PSP34 + PSP34Metadata + Ownable;
 
 #[openbrush::trait_definition]
 pub trait Psp34Traits: PSP34 + PSP34Metadata + Ownable {
+    fn _emit_transfer_event(&self, _from: Option<AccountId>, _to: Option<AccountId>, _id: Id);
+    fn _emit_approval_event(&self, _from: AccountId, _to: AccountId, _id: Option<Id>, _approved: bool);
     /// This function sets the baseURI for the NFT contract. Only Contract Owner can perform this function. baseURI is the location of the metadata files if the NFT collection use external source to keep their NFT artwork. ArtZero uses IPFS by default, the baseURI can have format like this: ipfs://<hash_ID>/
     #[ink(message)]
     fn set_base_uri(&mut self, uri: String) -> Result<(), Error>;

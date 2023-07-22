@@ -105,7 +105,7 @@ pub trait Psp34TraitsImpl:
             return Err(Error::Custom(String::from("Token is locked")))
         }
         for (attribute, value) in &metadata {
-            add_attribute_name(self, &attribute.clone().into_bytes());
+            assert!(add_attribute_name(self, &attribute.clone().into_bytes()).is_ok());
             metadata::Internal::_set_attribute(self, token_id.clone(), attribute.clone(), value.clone());
         }
         Ok(())
