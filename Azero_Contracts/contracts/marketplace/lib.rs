@@ -191,7 +191,7 @@ pub mod artzero_marketplace_psp34 {
         // MARKETPLACE FUNCTIONS
         /// List the NFT onto the marketplace - FREE of charge
         #[ink(message)]
-        pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance) -> Result<(), Error> {
+        pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance, data: Vec<u8>) -> Result<(), Error> {
             if price == 0 {
                 return Err(Error::InvalidInput)
             }
@@ -261,7 +261,7 @@ pub mod artzero_marketplace_psp34 {
                         &nft_contract_address,
                         self.env().account_id(),
                         token_id.clone(),
-                        Vec::<u8>::new()
+                        data
                     )
                     .call_flags(CallFlags::default().set_allow_reentry(true));
                 let result = match builder.try_invoke() {
