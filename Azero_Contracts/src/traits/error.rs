@@ -57,6 +57,7 @@ pub enum Error {
     BidAlreadyExist,
     BidNotExist,
     NotInMarket,
+    IsForSale,
     NotForSale,
     NotInSaleList,
     InvalidBidLength,

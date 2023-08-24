@@ -235,6 +235,12 @@ pub mod artzero_marketplace_psp34 {
                     // When the NFT is bought, this Royalty Fee will be used
                     let royalty_fee_rate =
                         ArtZeroCollectionRef::get_royalty_fee(&self.manager.collection_contract_address, nft_contract_address);
+                    
+                    if let Some(sale_information) = self.manager.market_list.get(&(&nft_contract_address, &token_id.clone())) {
+                        if sale_information.is_for_sale {
+                            return Err(Error::IsForSale)
+                        }
+                    }
                     let new_sale = ForSaleItem {
                         nft_owner: token_owner,
                         listed_date: self.env().block_timestamp(),
@@ -247,6 +253,8 @@ pub mod artzero_marketplace_psp34 {
                         .market_list
                         .insert(&(&nft_contract_address, &token_id.clone()), &new_sale);
                     self.update_listed_token_by_collection_address(&nft_contract_address, &true);
+                    
+                    
                 }
                 // Transfer Token from Caller to Marketplace Contract
                 let builder = Psp34Ref::transfer_builder(
