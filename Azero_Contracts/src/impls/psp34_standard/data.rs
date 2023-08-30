@@ -26,5 +26,6 @@ pub struct Manager {
     pub is_attribute: Mapping<String, bool>,
     pub locked_tokens: Mapping<Id, bool>,
     pub locked_token_count: u64,
+    pub total_amount: u64,
     pub _reserved: Option<()>
 }
