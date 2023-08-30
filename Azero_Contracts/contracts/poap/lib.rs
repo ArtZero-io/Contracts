@@ -41,6 +41,7 @@ pub mod poap_nft {
         traits::{
             psp34_standard::*,
             admin::*,
+            upgradable::*,
             error::Error,
         }
     };
@@ -57,7 +58,9 @@ pub mod poap_nft {
         #[storage_field]
         manager: artzero_project::impls::psp34_standard::data::Manager,
         #[storage_field]
-        admin_data: artzero_project::impls::admin::data::Data
+        admin_data: artzero_project::impls::admin::data::Data,
+        #[storage_field]
+        upgradable_data: artzero_project::impls::upgradable::data::Data,
     }
 
     /// - Specify transfer event.
@@ -89,6 +92,7 @@ pub mod poap_nft {
     impl PSP34Enumerable for POAPNft {}
     impl Psp34Traits for POAPNft {}
     impl AdminTrait for POAPNft {}
+    impl UpgradableTrait for POAPNft {}
 
     impl Internal for POAPNft {
 
@@ -200,14 +204,13 @@ pub mod poap_nft {
         /// This function let NFT Contract Owner to mint a new NFT without providing NFT Traits/Attributes
         #[ink(message)]
         #[modifiers(only_owner)]
-        pub fn mint_with_amount(&mut self, acount: AccountId, amount: u64) -> Result<(), Error> {
-            let caller = self.env().caller();
+        pub fn mint_with_amount(&mut self, receiver: AccountId, amount: u64) -> Result<(), Error> {
             for i in 0..amount {
                 if let Some(last_token_id) = self.manager.last_token_id.checked_add(1) {
                     if last_token_id > self.manager.total_amount {
                         return Err(Error::Custom(String::from("Reached Total Supply")));
                     }
-                    if self._mint_to(caller, Id::U64(self.manager.last_token_id)).is_err(){
+                    if self._mint_to(receiver, Id::U64(self.manager.last_token_id)).is_err(){
                         return Err(Error::Custom(String::from("Cannot mint")));
                     }
                     self.manager.last_token_id = last_token_id;
