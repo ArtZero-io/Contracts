@@ -63,24 +63,24 @@ https://medium.com/@artzero_io/how-to-create-nft-contract-on-azero-to-work-with-
 ## Code Hashes and Contract Addresses for TestNet
 
 - Profile Hash Code and Contract
-**0xd9e66c2e777c1705ba62e2e6e60027cab28b383e9a5d9b7bf6ebcca0d4337c35**
-**5FUXaNYkcdvwYurXXxzU4cdLsVFViE2xEbNnUZLBoi41axUx**
+**0x0fae9732950d2e127019b1a433095d40f1b07dee55c1c5c69fd3a38b649c6d8a**
+**5DxuvUB5p4F4fB1GN3oFsaoUFuU2y1agcQ2PBY3NfiAFkXjR**
 - ArtZero NFT Staking Hash Code and Contract
-**0x0af3d8ee0d28afdc39f23128b634cbe61673e8a19c8ebb7c22817aade1c5d41d**
-**5DHfvGcjXoUb7e1am1cSxcZ4w9ErC3omNp6exk2AibMn75kt**
+**0x38ce87a8a2bc330b42a3bac4cfb22647c2c265a0408cae442f7a8f6e4a6ebc01**
+**5D9wPyetDqaUCsfLURuYwtT2JgP1Pqs8o1tFkw5VMqHbn9P7**
 - Marketplace Hash Code and Contract
-**0xeefdf4ee2b22e6e32895115a912015f5afc91bca34845d292f03fed0dd08c968**
-**5F8gyvsfuCqpvNywyRdUHy1EGvHG5GaUpVS64Tej6mAbwJ38**
+**0x3fa6ae3c0e8f9fb0381c4ea05eff8b0fd68812be93ba46988195e7b211905f76**
+**5Cbufyf2Qnh9dbchqMb25eL5cySWinvQqCwpkKYZRD43Pw35**
 - LaunchPad Manager Hash Code and Contract
-**0x0837d0b95b94e620dc19103852bd83c4bd86eb34e9a5b00fd27210d969965007**
-**5D4rYbyX36woCv4ECwrp71rKRmixhy94xdR34YtwgmvaCpo3**
+**0x060da68e80d2a5b90a928f02f8cd48f00eaad7fc9628554937a90a220a6bf847**
+**5FJwP3rWoHMnPqYaSPQa8AA4ssLgj9ciW3CauUVbeSchZaDe**
 - Collection Manager Hash Code and Contract
-**0xe2ad960fec296abb4a1e984b3e81f82f10e860cfc5d30320260a9921846b00bd**
-**5EeLsoPYu4QJnQR1YKqPgr5iEbfVhyVqdGMAAam7a8qyK4Ee**
+**0x3cc56938bd78552e9b720786ace3cf63bd59fffad6154d6708ace9cd9d48572b**
+**5FFqxQBrtnVMjSyXXqyoHzmUHHthTqX3rY9Kr7nx9bzE9cD5**
 - LaunchPad Standard Hash Code
-**0x34a8a19142dfc443a3be1291b5730d59bae45ad7d70134a5e0b371b6977c40db**
+**0x87de62029c759dae7f49e29f37b9e6c2ac8dfb7744fb663c5ba52d805e691e36**
 - NFT Standard Hash Code
-**0x24d21481b424ff012033c304de701f4016c5328788fbb62706d3477dea9b88a2**
+**0x2f64f82f62a48b477c86b73a8d70ad0f632682acd9fc49bbac87edf91e9dbde9**
 
 ## Code Hashes and Contract Addresses for MainNet
 
