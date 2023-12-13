@@ -16,6 +16,7 @@ pub mod artzero_marketplace_psp34 {
     };
     use openbrush::{
         contracts::{
+            psp34::*,
             ownable::*,
             traits::psp34::{
                 *,
@@ -73,6 +74,19 @@ pub mod artzero_marketplace_psp34 {
     impl AdminTrait for ArtZeroMarketplacePSP34 {}
     impl UpgradableTrait for ArtZeroMarketplacePSP34 {}
     impl ArtZeroMarketplaceTrait for ArtZeroMarketplacePSP34 {}
+    
+    impl PSP34Receiver for ArtZeroMarketplacePSP34{
+        #[ink(message)]
+        fn before_received(
+            &mut self,
+            operator: AccountId,
+            from: AccountId,
+            id: Id,
+            data: Vec<u8>,
+        ) -> Result<(), PSP34ReceiverError> {
+            Ok(())
+        }
+    }
     
     #[ink(event)]
     pub struct NewListEvent {
@@ -177,7 +191,7 @@ pub mod artzero_marketplace_psp34 {
         // MARKETPLACE FUNCTIONS
         /// List the NFT onto the marketplace - FREE of charge
         #[ink(message)]
-        pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance) -> Result<(), Error> {
+        pub fn list(&mut self, nft_contract_address: AccountId, token_id: Id, price: Balance, data: Vec<u8>) -> Result<(), Error> {
             if price == 0 {
                 return Err(Error::InvalidInput)
             }
@@ -221,6 +235,12 @@ pub mod artzero_marketplace_psp34 {
                     // When the NFT is bought, this Royalty Fee will be used
                     let royalty_fee_rate =
                         ArtZeroCollectionRef::get_royalty_fee(&self.manager.collection_contract_address, nft_contract_address);
+                    
+                    if let Some(sale_information) = self.manager.market_list.get(&(&nft_contract_address, &token_id.clone())) {
+                        if sale_information.is_for_sale {
+                            return Err(Error::IsForSale)
+                        }
+                    }
                     let new_sale = ForSaleItem {
                         nft_owner: token_owner,
                         listed_date: self.env().block_timestamp(),
@@ -233,13 +253,15 @@ pub mod artzero_marketplace_psp34 {
                         .market_list
                         .insert(&(&nft_contract_address, &token_id.clone()), &new_sale);
                     self.update_listed_token_by_collection_address(&nft_contract_address, &true);
+                    
+                    
                 }
                 // Transfer Token from Caller to Marketplace Contract
                 let builder = Psp34Ref::transfer_builder(
                         &nft_contract_address,
                         self.env().account_id(),
                         token_id.clone(),
-                        Vec::<u8>::new()
+                        data
                     )
                     .call_flags(CallFlags::default().set_allow_reentry(true));
                 let result = match builder.try_invoke() {
@@ -779,8 +801,6 @@ pub mod artzero_marketplace_psp34 {
                                                     } else {
                                                         return Err(Error::InvalidCollectionOwner)
                                                     }
-                                                } else {
-                                                    return Err(Error::NotEnoughBalance)
                                                 }
                                                 if let Some(price_mul_royalty_fee) = price.checked_sub(royalty_fee) {
                                                     if let Some(seller_fee) = price_mul_royalty_fee.checked_sub(platform_fee_after_discount) {

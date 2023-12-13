@@ -189,15 +189,14 @@ pub mod artzero_staking_nft {
         /// Claim Reward
         #[ink(message)]
         #[modifiers(only_locked)]
-        pub fn claim_reward(&mut self) -> Result<(), Error> {
-            let caller = self.env().caller();
-            let is_claimed = self.manager.is_claimed.get(&caller);
+        pub fn claim_reward(&mut self, receiver: AccountId) -> Result<(), Error> {
+            let is_claimed = self.manager.is_claimed.get(&receiver);
             // Check if the claim exist and must be FALSE
             if let Some(claimed) = is_claimed {
                 if claimed {
                     return Err(Error::ClaimMustBeFalse) 
                 } else {
-                    self.manager.is_claimed.insert(&caller, &true); // Can only claim once
+                    self.manager.is_claimed.insert(&receiver, &true); // Can only claim once
 
                     // Check if the total NFT staked is greater than 0 to avoid division by ZERO error
                     if self.manager.total_staked == 0 {
@@ -207,7 +206,7 @@ pub mod artzero_staking_nft {
                         return Err(Error::RewardNotStarted)
                     }
                     // How many NFT the user staker, it must be greater than ZERO
-                    let staked_amount = self.manager.staking_list.count(caller);
+                    let staked_amount = self.manager.staking_list.count(receiver);
                     if staked_amount == 0{
                         return Err(Error::Custom(String::from("Invalid User Stake")))
                     }
@@ -225,12 +224,12 @@ pub mod artzero_staking_nft {
                                     if reward > self.env().balance() {
                                         return Err(Error::NotEnoughBalance)
                                     }
-                                    if self.env().transfer(caller, reward).is_err(){
+                                    if self.env().transfer(receiver, reward).is_err(){
                                         return Err(Error::CannotTransfer)
                                     }
                                     // Emit ClaimReward event to the network
                                     self.env().emit_event(ClaimReward {
-                                        staker: Some(caller),
+                                        staker: Some(receiver),
                                         reward_amount: reward,
                                         staked_amount: staked_amount as u64,
                                     });
@@ -242,11 +241,11 @@ pub mod artzero_staking_nft {
                                     return Err(Error::NotEnoughBalance)
                                 }
                                 // If there is not enough fund to pay, transfer everything in the pool to staker
-                                if self.env().transfer(caller, self.manager.claimable_reward).is_err() {
+                                if self.env().transfer(receiver, self.manager.claimable_reward).is_err() {
                                     return Err(Error::CannotTransfer)
                                 }
                                 self.env().emit_event(ClaimReward {
-                                    staker: Some(caller),
+                                    staker: Some(receiver),
                                     reward_amount: self.manager.claimable_reward,
                                     staked_amount: staked_amount as u64,
                                 });

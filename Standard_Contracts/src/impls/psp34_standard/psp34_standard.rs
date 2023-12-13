@@ -42,21 +42,26 @@ where
     body(instance)
 }
 
-impl<T: Storage<Manager>> Psp34Traits for T
-where
-    T: PSP34 + psp34::Internal +
+pub trait Psp34TraitsImpl: 
+    Storage<Manager> + 
+    PSP34 + 
+    psp34::Internal +
+    psp34::extensions::metadata::Internal +
+    psp34::extensions::metadata::PSP34MetadataImpl +
+    ownable::Ownable +
     Storage<psp34::extensions::metadata::Data> +
-    Storage<psp34::Data<psp34::extensions::enumerable::Balances>> +
-    Storage<openbrush::contracts::ownable::Data>
+    Storage<psp34::Data> +
+    Storage<psp34::extensions::enumerable::Data> +
+    Storage<openbrush::contracts::ownable::Data> 
 {
     /// Get Token Count
-    default fn get_last_token_id(&self) -> u64 {
+    fn get_last_token_id(&self) -> u64 {
         return self.data::<Manager>().last_token_id
     }
 
     /// Lock nft - Only owner token
     #[modifiers(only_token_owner(self.owner_of(token_id.clone()).unwrap()))]
-    default fn lock(&mut self, token_id: Id) -> Result<(), Error> {
+    fn lock(&mut self, token_id: Id) -> Result<(), Error> {
         if let Some(locked_token_count) = self.data::<Manager>().locked_token_count.checked_add(1) {
             self.data::<Manager>().locked_token_count = locked_token_count;
             self.data::<Manager>().locked_tokens.insert(&token_id, &true);
@@ -67,7 +72,7 @@ where
     }
 
     /// Check token is locked or not
-    default fn is_locked_nft(&self, token_id: Id) -> bool {
+    fn is_locked_nft(&self, token_id: Id) -> bool {
         if self.data::<Manager>().locked_tokens.get(&token_id).is_some() {
             return true;
         }
@@ -75,20 +80,20 @@ where
     }
 
     /// Get Locked Token Count
-    default fn get_locked_token_count(&self) -> u64 {
+    fn get_locked_token_count(&self) -> u64 {
         self.data::<Manager>().locked_token_count
     }
 
     /// Change baseURI
     #[modifiers(only_owner)]
-    default fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
-        self._set_attribute(Id::U8(0), String::from("baseURI").into_bytes(), uri.into_bytes());
+    fn set_base_uri(&mut self, uri: String) -> Result<(), Error> {
+        metadata::Internal::_set_attribute(self, Id::U8(0), String::from("baseURI"), uri);
         Ok(())
     }
 
     /// Only Owner can set multiple attributes to a token
     #[modifiers(only_owner)]
-    default fn set_multiple_attributes(
+    fn set_multiple_attributes(
         &mut self,
         token_id: Id,
         metadata: Vec<(String, String)>
@@ -100,22 +105,22 @@ where
             return Err(Error::Custom(String::from("Token is locked")))
         }
         for (attribute, value) in &metadata {
-            add_attribute_name(self, &attribute.clone().into_bytes());
-            self._set_attribute(token_id.clone(), attribute.clone().into_bytes(), value.clone().into_bytes());
+            assert!(add_attribute_name(self, &attribute.clone().into_bytes()).is_ok());
+            metadata::Internal::_set_attribute(self, token_id.clone(), attribute.clone(), value.clone());
         }
         Ok(())
     }
 
     /// Get multiple  attributes
-    default fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
+    fn get_attributes(&self, token_id: Id, attributes: Vec<String>) -> Vec<String> {
         let length = attributes.len();
         let mut ret = Vec::<String>::new();
         for i in 0..length {
             let attribute = attributes[i].clone();
-            let value = self.get_attribute(token_id.clone(), attribute.into_bytes());
+            let value = metadata::PSP34MetadataImpl::get_attribute(self, token_id.clone(), attribute);
             
             if let Some(value_in_bytes) = value {
-                if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+                if let Ok(value_in_string) = String::from_utf8(value_in_bytes.into()) {
                     ret.push(value_in_string);
                 } else {
                     ret.push(String::from(""));    
@@ -128,11 +133,11 @@ where
     }
 
     /// Get Attribute Count
-    default fn get_attribute_count(&self) -> u32 {
+    fn get_attribute_count(&self) -> u32 {
         self.data::<Manager>().attribute_count
     }
     /// Get Attribute Name
-    default fn get_attribute_name(&self, index: u32) -> String {
+    fn get_attribute_name(&self, index: u32) -> String {
         let attribute = self.data::<Manager>().attribute_names.get(&index);
 
         if let Some(value_in_bytes) = attribute {
@@ -147,12 +152,12 @@ where
     }
 
     /// Get URI from token ID
-    default fn token_uri(&self, token_id: u64) -> String {
-        let value = self.get_attribute(Id::U8(0), String::from("baseURI").into_bytes());
+    fn token_uri(&self, token_id: u64) -> String {
+        let value = metadata::PSP34MetadataImpl::get_attribute(self, Id::U8(0), String::from("baseURI"));
         let mut token_uri = String::from("");
 
         if let Some(value_in_bytes) = value {
-            if let Ok(value_in_string) = String::from_utf8(value_in_bytes) {
+            if let Ok(value_in_string) = String::from_utf8(value_in_bytes.into()) {
                 token_uri = value_in_string;
             }                 
         }
@@ -162,8 +167,8 @@ where
     }
 
     /// Get owner address
-    default fn get_owner(&self) -> AccountId {
-        self.owner()
+    fn get_owner(&self) -> Option<AccountId> {
+        ownable::Ownable::owner(self)
     }
 }
 
